@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Nase zeigt nach rechts. #ff00ff = Markierungsfarbe -->
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e0e0e0"/>
+      <stop offset="1" stop-color="#616161"/>
+    </linearGradient>
+  </defs>
+  <!-- Ladeklammern -->
+  <rect x="24" y="30" width="56" height="14" rx="3" fill="#757575" stroke="#212121" stroke-width="2"/>
+  <rect x="24" y="84" width="56" height="14" rx="3" fill="#757575" stroke="#212121" stroke-width="2"/>
+  <g fill="#ffca28" stroke="#212121" stroke-width="1.5">
+    <rect x="30" y="44" width="20" height="40"/>
+    <rect x="52" y="44" width="20" height="40"/>
+  </g>
+  <path d="M30 44 L50 84 M50 44 L30 84 M52 44 L72 84 M72 44 L52 84" stroke="#212121" stroke-width="1.5" opacity="0.5"/>
+  <!-- Rumpf -->
+  <path d="M72 46 L98 48 C110 52 116 58 116 64 C116 70 110 76 98 80 L72 82 Z" fill="url(#hull)" stroke="#212121" stroke-width="2.5"/>
+  <rect x="72" y="58" width="12" height="12" fill="#ff00ff"/>
+  <path d="M96 56 C104 58 108 61 108 64 C108 67 104 70 96 72 Z" fill="#4fc3f7" stroke="#01579b" stroke-width="1.2"/>
+  <rect x="12" y="52" width="14" height="24" rx="2" fill="#424242"/>
+  <rect x="8" y="56" width="5" height="16" fill="#ffab40"/>
+  <circle cx="24" cy="37" r="2.5" fill="#ff5252"/><circle cx="24" cy="91" r="2.5" fill="#69f0ae"/>
+</svg>

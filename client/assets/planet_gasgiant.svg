@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="atmo" cx="50%" cy="50%" r="50%">
+      <stop offset="0.74" stop-color="#ffe0b2" stop-opacity="0.5"/>
+      <stop offset="0.86" stop-color="#ffb74d" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#ffb74d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bands" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f3d9a4"/>
+      <stop offset="0.18" stop-color="#d9a066"/>
+      <stop offset="0.3" stop-color="#f6e3bd"/>
+      <stop offset="0.42" stop-color="#c47a45"/>
+      <stop offset="0.52" stop-color="#ead1a0"/>
+      <stop offset="0.64" stop-color="#b8693a"/>
+      <stop offset="0.76" stop-color="#f0d6a8"/>
+      <stop offset="0.9" stop-color="#cf9361"/>
+      <stop offset="1" stop-color="#e8c896"/>
+    </linearGradient>
+    <radialGradient id="shade" cx="34%" cy="30%" r="80%">
+      <stop offset="0.45" stop-color="#000" stop-opacity="0"/>
+      <stop offset="0.85" stop-color="#120802" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#120802" stop-opacity="0.9"/>
+    </radialGradient>
+    <clipPath id="clip"><circle cx="128" cy="128" r="100"/></clipPath>
+  </defs>
+  <circle cx="128" cy="128" r="128" fill="url(#atmo)"/>
+  <circle cx="128" cy="128" r="100" fill="url(#bands)" transform="rotate(-12 128 128)"/>
+  <g clip-path="url(#clip)" transform="rotate(-12 128 128)">
+    <path d="M20 96 C60 90 90 102 130 96 C170 90 200 100 240 94" stroke="#a65c2e" stroke-width="3" fill="none" opacity="0.5"/>
+    <path d="M20 150 C60 156 100 144 140 152 C180 160 210 148 240 154" stroke="#fff3e0" stroke-width="4" fill="none" opacity="0.4"/>
+    <ellipse cx="160" cy="160" rx="22" ry="12" fill="#b5532a"/>
+    <ellipse cx="160" cy="160" rx="14" ry="7" fill="#d9774a"/>
+    <ellipse cx="80" cy="118" rx="10" ry="4" fill="#fff3e0" opacity="0.6"/>
+  </g>
+  <circle cx="128" cy="128" r="100" fill="url(#shade)"/>
+  <ellipse cx="92" cy="84" rx="34" ry="22" fill="#fff" opacity="0.08"/>
+</svg>

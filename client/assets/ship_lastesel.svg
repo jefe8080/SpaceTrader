@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Nase zeigt nach rechts. #ff00ff = Spielerfarbe -->
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eceff1"/>
+      <stop offset="1" stop-color="#607d8b"/>
+    </linearGradient>
+  </defs>
+  <rect x="14" y="58" width="96" height="12" fill="#546e7a" stroke="#263238" stroke-width="2"/>
+  <g stroke="#263238" stroke-width="2">
+    <rect x="22" y="30" width="22" height="28" fill="#ff8f00"/>
+    <rect x="46" y="30" width="22" height="28" fill="#ff00ff"/>
+    <rect x="70" y="30" width="22" height="28" fill="#43a047"/>
+    <rect x="22" y="70" width="22" height="28" fill="#ff00ff"/>
+    <rect x="46" y="70" width="22" height="28" fill="#1e88e5"/>
+    <rect x="70" y="70" width="22" height="28" fill="#ff8f00"/>
+  </g>
+  <g stroke="#000" stroke-opacity="0.3" stroke-width="1.5">
+    <path d="M28 30 V58 M34 30 V58 M40 30 V58 M52 30 V58 M58 30 V58 M64 30 V58 M76 30 V58 M82 30 V58 M88 30 V58"/>
+    <path d="M28 70 V98 M34 70 V98 M40 70 V98 M52 70 V98 M58 70 V98 M64 70 V98 M76 70 V98 M82 70 V98 M88 70 V98"/>
+  </g>
+  <path d="M96 48 L110 50 C118 54 122 60 122 64 C122 68 118 74 110 78 L96 80 Z" fill="url(#hull)" stroke="#263238" stroke-width="2.5"/>
+  <path d="M108 56 C114 58 118 61 118 64 C118 67 114 70 108 72 Z" fill="#4fc3f7" stroke="#01579b" stroke-width="1.2"/>
+  <rect x="4" y="46" width="12" height="14" rx="2" fill="#37474f"/>
+  <rect x="4" y="68" width="12" height="14" rx="2" fill="#37474f"/>
+  <rect x="1" y="49" width="4" height="8" fill="#ffab40"/>
+  <rect x="1" y="71" width="4" height="8" fill="#ffab40"/>
+</svg>

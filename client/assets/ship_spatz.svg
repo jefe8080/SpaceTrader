@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Nase zeigt nach rechts. #ff00ff = Spielerfarbe -->
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f5f7f8"/>
+      <stop offset="1" stop-color="#78909c"/>
+    </linearGradient>
+  </defs>
+  <path d="M40 30 L70 46 L60 58 L36 58 Z" fill="#607d8b" stroke="#263238" stroke-width="2"/>
+  <path d="M40 98 L70 82 L60 70 L36 70 Z" fill="#607d8b" stroke="#263238" stroke-width="2"/>
+  <path d="M40 30 L50 36 L42 58 L36 58 Z" fill="#ff00ff"/>
+  <path d="M40 98 L50 92 L42 70 L36 70 Z" fill="#ff00ff"/>
+  <path d="M22 50 C22 44 30 42 46 42 L84 46 C104 50 114 58 116 64 C114 70 104 78 84 82 L46 86 C30 86 22 84 22 78 Z" fill="url(#hull)" stroke="#263238" stroke-width="2.5"/>
+  <path d="M46 46 L56 46 L56 82 L46 82 Z" fill="#ff00ff" opacity="0.9"/>
+  <path d="M86 54 C98 56 106 60 108 64 C106 68 98 72 86 74 C90 66 90 62 86 54Z" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
+  <rect x="14" y="52" width="10" height="24" rx="2" fill="#37474f"/>
+  <rect x="10" y="56" width="5" height="16" fill="#ffab40"/>
+</svg>

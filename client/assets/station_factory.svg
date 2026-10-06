@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- #ff00ff wird zur Laufzeit durch die Akzentfarbe der Station ersetzt -->
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#cfd8dc"/>
+      <stop offset="1" stop-color="#546e7a"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1a3a7a"/>
+      <stop offset="1" stop-color="#2f6fd1"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ff00ff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ff00ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="128" r="60" fill="url(#glow)"/>
+  <!-- Solarflügel -->
+  <g stroke="#90a4ae" stroke-width="1">
+    <rect x="18" y="104" width="54" height="48" fill="url(#panel)"/>
+    <rect x="184" y="104" width="54" height="48" fill="url(#panel)"/>
+    <path d="M18 116 H72 M18 128 H72 M18 140 H72 M36 104 V152 M54 104 V152" stroke="#90caf9" stroke-opacity="0.5"/>
+    <path d="M184 116 H238 M184 128 H238 M184 140 H238 M202 104 V152 M220 104 V152" stroke="#90caf9" stroke-opacity="0.5"/>
+  </g>
+  <!-- Arme -->
+  <g fill="#78909c">
+    <rect x="72" y="122" width="112" height="12"/>
+    <rect x="122" y="40" width="12" height="176"/>
+  </g>
+  <!-- Module -->
+  <g fill="url(#hull)" stroke="#37474f" stroke-width="2">
+    <rect x="104" y="28" width="48" height="36" rx="6"/>
+    <rect x="104" y="192" width="48" height="36" rx="6"/>
+    <circle cx="128" cy="128" r="38"/>
+  </g>
+  <!-- Schornsteine / Silos -->
+  <g fill="#455a64" stroke="#263238" stroke-width="1.5">
+    <circle cx="116" cy="46" r="7"/><circle cx="140" cy="46" r="7"/>
+    <circle cx="116" cy="210" r="7"/><circle cx="140" cy="210" r="7"/>
+  </g>
+  <g fill="#ff00ff">
+    <circle cx="116" cy="46" r="3"/><circle cx="140" cy="46" r="3"/>
+    <circle cx="116" cy="210" r="3"/><circle cx="140" cy="210" r="3"/>
+  </g>
+  <!-- Kern mit Akzentring -->
+  <circle cx="128" cy="128" r="26" fill="#37474f"/>
+  <circle cx="128" cy="128" r="22" fill="none" stroke="#ff00ff" stroke-width="5"/>
+  <circle cx="128" cy="128" r="10" fill="#ff00ff"/>
+  <circle cx="125" cy="125" r="4" fill="#fff" opacity="0.7"/>
+  <!-- Positionslichter -->
+  <g fill="#fff">
+    <circle cx="18" cy="104" r="2.5"/><circle cx="238" cy="152" r="2.5"/>
+  </g>
+</svg>
