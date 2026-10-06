@@ -1,4 +1,4 @@
-import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, ZONE_TYPES, TAG_FACTOR, GOODS, LOCATION, distancePremium, canBuyFrom, canSellTo,
+import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, ZONE_TYPES, TAG_FACTOR, GOODS, LOCATION, distancePremium, premiumFactor, canSellTo,
   FACTIONS, FACTION, MODULES, STORAGE, SHIP_TYPES } from '../shared/config.js';
 import { hexCenter, hexKey, hexNeighbors } from '../shared/hex.js';
 import { createMarket } from './markets.js';
@@ -257,12 +257,11 @@ export function applyLocationMods(entities, r) {
         let best = Infinity;
         for (const p of producers[g] || []) if (p !== e) best = Math.min(best, Math.hypot(p.x - e.x, p.y - e.y));
         const minutes = best === Infinity ? null : best / LOCATION.REF_SPEED / 60;
-        s.mod *= 1 + distancePremium(minutes);
+        s.mod *= 1 + distancePremium(minutes) * premiumFactor(GOODS[g].tier);
       }
       s.mod = Math.round(s.mod * 1000) / 1000;
     }
   }
-  void canBuyFrom;
 }
 
 function weightedPlain(r, table) {
@@ -420,7 +419,7 @@ function startSystem(sys, r, hub) {
     return e;
   };
   const yard = add('origin_yard', 'station', 'shipyard', 'Werft Ursprung', 1300, 400, 64);
-  yard.market.goods.plates.stock = 6;
+  yard.market.goods.plates.stock = 8;
   yard.market.goods.shipfuel.stock = 5;
   yard.market.forSale = [{ type: 'spatz', price: 2500 }];
   yard.market.nextBuild = 0;

@@ -9,6 +9,8 @@ test('Preisformel: Basispreis × Standort-Modifier × Füllstandskurve ± Spread
   const g = 'ore', base = GOODS[g].base;
   assert.equal(unitPrice(g, 0, 100), base * PRICE.MAX_FACTOR);
   assert.ok(Math.abs(unitPrice(g, 100, 100) - base * PRICE.MIN_FACTOR) < 1e-9);
+  // höhere Stufen: engere Spanne
+  assert.ok(Math.abs(unitPrice('robots', 0, 100) / unitPrice('robots', 100, 100) - 1.3 / 0.7) < 1e-9);
   assert.ok(unitPrice(g, 30, 100) > unitPrice(g, 60, 100));
   assert.ok(Math.abs(unitPrice(g, 50, 100, 1.25) - unitPrice(g, 50, 100) * 1.25) < 1e-9, 'Modifier wirkt linear');
   const slot = { stock: 50, cap: 100, mod: 1.1 };

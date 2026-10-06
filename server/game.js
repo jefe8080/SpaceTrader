@@ -15,7 +15,8 @@ const ALL_TABLES = ['players', 'ships', 'sectors', 'entities', 'markets', 'route
 
 export class Game {
   /** dbFile: Pfad zur SQLite-Datei oder ':memory:' */
-  constructor(dbFile, { seed } = {}) {
+  constructor(dbFile, { seed, verbose = false } = {}) {
+    this.verbose = verbose;
     this.store = new Store(dbFile);
     this.time = 0;
     this.players = new Map();
@@ -83,7 +84,7 @@ export class Game {
     }
     this.shipStats = groupRows(st.loadAll('ship_stats'), 'ship');
     this.routeStats = groupRows(st.loadAll('route_stats'), 'route');
-    console.log(`Spielstand geladen: ${this.players.size} Spieler, ${this.world.entities.size} Objekte, ${this.ships.size} Schiffe`);
+    if (this.verbose) console.log(`Spielstand geladen: ${this.players.size} Spieler, ${this.world.entities.size} Objekte, ${this.ships.size} Schiffe`);
     return true;
   }
 
@@ -419,7 +420,7 @@ export class Game {
 
   /** Neue Objekte in bereits aufgedeckten Zellen an die betroffenen Spieler melden */
   onSectorCreated(sector, entities) {
-    console.log(`Sektor ${sector.name} (${sector.key}) erzeugt: ${sector.systems.length} Systeme, ${entities.length} Objekte`);
+    if (this.verbose) console.log(`Sektor ${sector.name} (${sector.key}) erzeugt: ${sector.systems.length} Systeme, ${entities.length} Objekte`);
     for (const p of this.players.values()) {
       const vis = entities.filter((e) => this.isKnown(p, e));
       if (vis.length) this.emit('reveal', p, { entities: vis });
@@ -445,7 +446,7 @@ export class Game {
       }
       for (const e of this.world.entities.values()) {
         tickMarket(e, this.econAcc, this.time, this);
-        if (e.market?.strategy === 'factory') this.checkSupply(e);
+        if (e.market && SUPPLIED.has(e.market.strategy)) this.checkSupply(e);
       }
       this.econAcc = 0;
     }
@@ -681,6 +682,9 @@ export class Game {
     return s ? slotPrice(good, s) : null;
   }
 }
+
+/** Strategien, die bei fehlenden Zutaten NPC-Versorger losschicken */
+const SUPPLIED = new Set(['factory', 'extractor', 'shipyard']);
 
 const newKnown = () => ({ system: new Set(), sector: new Set(), zone: new Set(), wh: new Set(), recipe: new Set(), ship: new Set(), module: new Set() });
 

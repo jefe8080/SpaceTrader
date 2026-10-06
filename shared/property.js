@@ -1,6 +1,6 @@
 // Besitz von Planeten und Stationen: Gouverneurslizenz, Kaufpreise, Upgrades, Fixpreis-Verbrauch. Zahlen sind Annahmen.
 import { GOODS, STATION_TYPES, RECIPES, PLANET_TYPES } from './goods.js';
-import { PRICE } from './price.js';
+import { curveMax, curveMin } from './price.js';
 
 export const GOVERNOR_LICENSES = [
   null,
@@ -77,7 +77,7 @@ export function extraOptions(e) {
 // ---------- Fixpreis-Verbrauch ----------
 export const FIXED = { MIN: 0.3, MAX: 0.7, DEFAULT: 0.5 };
 /** Preisfenster eines Planeten für eine Ware: leeres Lager = pmax, volles = pmin */
-export const priceWindow = (good, mod = 1) => ({ pmin: GOODS[good].base * mod * PRICE.MIN_FACTOR, pmax: GOODS[good].base * mod * PRICE.MAX_FACTOR });
+export const priceWindow = (good, mod = 1) => ({ pmin: GOODS[good].base * mod * curveMin(GOODS[good].tier), pmax: GOODS[good].base * mod * curveMax(GOODS[good].tier) });
 export const fixedPrice = (pmin, pmax, s) => pmin + s * (pmax - pmin);
 /** Erlös pro Stunde: s = 0,3 bringt doppelt so viel wie s = 0,7 */
 export const fixedRevenuePerHour = (Rref, s) => Rref * 2 ** ((FIXED.MAX - s) / 0.4);

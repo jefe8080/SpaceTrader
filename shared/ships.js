@@ -61,10 +61,11 @@ for (const [id, d] of Object.entries(FACTION_SHIPS)) {
 // Baumaterial: Anteile am Materialwert je Klasse, Menge so, dass Material + Marge ≈ Referenzpreis
 export const YARD_MARGIN = 0.25;
 const MATERIAL_MIX = {
-  S: { plates: 0.4, electronics: 0.25, engines: 0.2, shipfuel: 0.15 },
-  M: { plates: 0.3, hullparts: 0.25, electronics: 0.2, engines: 0.25 },
-  L: { hullparts: 0.25, shipparts: 0.35, reactorcores: 0.2, engines: 0.2 },
-  XL: { shipparts: 0.4, reactorcores: 0.25, hullparts: 0.15, aicores: 0.2 },
+  // Kalibrierung (Phase 7): S/M aus häufigen Waren, damit NPC-Werften sie auch ohne Fernhandel bauen
+  S: { plates: 0.45, electronics: 0.2, ingots: 0.2, shipfuel: 0.15 },
+  M: { plates: 0.4, electronics: 0.25, wires: 0.15, hullparts: 0.2 },
+  L: { hullparts: 0.3, shipparts: 0.3, reactorcores: 0.15, engines: 0.25 },
+  XL: { shipparts: 0.4, reactorcores: 0.25, engines: 0.15, aicores: 0.2 },
   F: { shipparts: 0.4, reactorcores: 0.3, aicores: 0.3 },
 };
 export function buildMaterials(type) {
@@ -80,6 +81,7 @@ for (const t of Object.keys(SHIP_TYPES)) SHIP_TYPES[t].build = buildMaterials(t)
 /** Bauliste der NPC-Werften (häufigere Einträge = öfter im Angebot) */
 export const SHIPYARD = {
   MAX_FOR_SALE: 3,
+  SKIP_AFTER: 900, // Sekunden Wartezeit auf Material für den nächsten Typ der Bauliste
   BUILD_TIME: { S: 40, M: 90, L: 240, XL: 600, F: 600 },
   ORDER: {
     shipyard: ['spatz', 'maulwurf', 'lastesel', 'spatz', 'kolibri', 'grubenhund', 'bussard', 'maulwurf', 'pelikan'],

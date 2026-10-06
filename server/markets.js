@@ -23,7 +23,7 @@ function addTraders(goods, r, [min, max], slow = 1) {
     const g = pool.splice(Math.floor(r() * pool.length), 1)[0];
     // teure Waren in kleineren Mengen
     const cap = (TRADER.CAP[0] + r() * (TRADER.CAP[1] - TRADER.CAP[0])) * Math.min(1, 60 / GOODS[g].base + 0.15) * slow;
-    goods[g] = slot('trade', 0, Math.max(20, cap), Math.max(20, cap) * (0.3 + 0.4 * r()));
+    goods[g] = slot('trade', 0, Math.max(20, cap), Math.max(20, cap) * (0.2 + 0.3 * r()));
   }
 }
 
@@ -65,8 +65,9 @@ export function createMarket(kind, type, r, scale = 1, { slow = 1, traders = tru
     const need = {};
     for (const t of order) for (const [g, n] of Object.entries(SHIP_TYPES[t].build)) need[g] = Math.max(need[g] || 0, n);
     for (const g of new Set([...def.buys, ...Object.keys(need)])) {
-      const cap = Math.max(STORAGE.SHIPYARD * (GOODS[g].base < 200 ? 1 : 0.2), Math.round((need[g] || 0) * 1.6));
-      goods[g] = slot('consume', 0, cap, cap * 0.05 * r());
+      // Werftlager knapp über dem größten Bauauftrag, damit Anlieferungen den Preis spürbar senken
+      const cap = Math.max(GOODS[g].base < 100 ? 300 : 60, Math.round((need[g] || 0) * 1.2));
+      goods[g] = slot('consume', 0, cap, cap * (0.15 + 0.25 * r()));
     }
     const mods = [];
     if (type === 'bigyard') {
@@ -230,6 +231,19 @@ export const STRATEGIES = {
    * Verkaufspreis = Materialkosten (Basispreis × Standort-Modifier) plus Marge.
    */
   shipyard: {
+    /** Fehlendes Material für den nächsten Bau (NPC-Werften schicken Versorger) */
+    missingInput(m) {
+      if (m.owner || m.building || m.forSale.length >= SHIPYARD.MAX_FOR_SALE) return null;
+      const order = SHIPYARD.ORDER[m.yard || 'shipyard'];
+      const req = SHIP_TYPES[order[(m.nextBuild || 0) % order.length]].build;
+      let best = null, bestRatio = Infinity;
+      for (const [g, n] of Object.entries(req)) {
+        const have = m.goods[g]?.stock || 0;
+        if (have >= n) continue;
+        if (have / n < bestRatio) { bestRatio = have / n; best = g; }
+      }
+      return best;
+    },
     tick(e, m, dt, now) {
       if (m.owner) {
         // Spielerwerft: baut nur auf Befehl, fertige Schiffe kommen in den Werftbestand
@@ -254,11 +268,15 @@ export const STRATEGIES = {
       }
       if (m.forSale.length >= SHIPYARD.MAX_FOR_SALE) return;
       const order = SHIPYARD.ORDER[m.yard || 'shipyard'];
-      // Reihum: der nächste Typ, für den Material vorhanden ist
-      for (let k = 0; k < order.length; k++) {
+      // Reihum: Die Werft wartet bis SKIP_AFTER Sekunden auf Material für den nächsten Typ, danach darf ein
+      // anderer baubarer Typ vorgezogen werden. So kommen auch größere Schiffe ins Angebot.
+      m.waitSince ??= now;
+      const patient = now - m.waitSince < SHIPYARD.SKIP_AFTER;
+      for (let k = 0; k < (patient ? 1 : order.length); k++) {
         const type = order[(m.nextBuild + k) % order.length];
         const req = SHIP_TYPES[type].build;
         if (!Object.entries(req).every(([g, n]) => (m.goods[g]?.stock || 0) >= n)) continue;
+        m.waitSince = null;
         let cost = 0;
         for (const [g, n] of Object.entries(req)) {
           m.goods[g].stock -= n;

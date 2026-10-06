@@ -1,13 +1,15 @@
 {
   "name": "space-trader",
   "version": "1.0.0",
-  "description": "Multiplayer-Weltraum-Handelsspiel",
+  "description": "Multiplayer-Weltraum-Handelsspiel mit Sektoren, tiefer Wirtschaft und Besitz",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
     "test": "node --test tests/*.test.js",
-    "reset": "node scripts/reset.js"
+    "reset": "node scripts/reset.js",
+    "sim": "node sim/simulate.js",
+    "sprites": "node scripts/gen-ship-sprites.js"
   },
   "keywords": [],
   "author": "",

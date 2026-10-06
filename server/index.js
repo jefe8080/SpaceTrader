@@ -17,7 +17,7 @@ app.use('/shared', express.static(path.join(root, 'shared')));
 
 const server = http.createServer(app);
 const io = new Server(server);
-const game = new Game(DB_FILE);
+const game = new Game(DB_FILE, { verbose: true });
 const net = new Net(io, game);
 
 let last = Date.now();

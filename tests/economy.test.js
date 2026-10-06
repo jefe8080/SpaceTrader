@@ -47,7 +47,7 @@ test('Standort-Modifier: Zufall, Glättung im System, Prämie nur für angekauft
   applyLocationMods([near, mine, far], r);
   const lo = 1 - LOCATION.RANDOM, hi = 1 + LOCATION.RANDOM;
   assert.ok(near.market.goods.ore.mod >= lo && near.market.goods.ore.mod <= hi, 'naher Abnehmer ohne Prämie');
-  assert.ok(far.market.goods.ore.mod >= lo * 1.6 - 1e-3 && far.market.goods.ore.mod <= hi * 1.6 + 1e-3, `ferner Abnehmer +60 %: ${far.market.goods.ore.mod}`);
+  assert.ok(far.market.goods.ore.mod >= lo * 1.6 - 1e-3 && far.market.goods.ore.mod <= hi * 1.6 + 1e-3, `ferner Abnehmer +60 % (Rohstoff, Stufe 0): ${far.market.goods.ore.mod}`);
   for (const e of [near, mine, far]) {
     for (const [g, s] of Object.entries(e.market.goods)) if (!canSellTo(s)) assert.ok(s.mod >= lo - 1e-3 && s.mod <= hi + 1e-3, `${g}: Produzent ohne Prämie`);
   }

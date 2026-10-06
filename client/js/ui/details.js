@@ -1,4 +1,4 @@
-import { GOODS, SHIP_TYPES, STATION_TYPES, PLANET_TYPES, BELT_TYPES, SHIPYARD, SUPPLY, NPC_OWNER, recipeText, canBuyFrom, canSellTo } from '/shared/config.js';
+import { GOODS, SHIP_TYPES, STATION_TYPES, PLANET_TYPES, BELT_TYPES, SUPPLY, recipeText, canBuyFrom, canSellTo } from '/shared/config.js';
 import { state, myShips, fmt, fmtK, esc, playerColor, playerName, selectedShips, fleetOrder } from '../state.js';
 import { socket, cmd } from '../net.js';
 import { typeName, entitySprite, shipSprite, goodTag, playerPrice, cargoUsed, statusText, queueText, shipSymbol, hasWarn, flightSecs, fmtDuration, systemName, sectorName } from '../util.js';
@@ -414,4 +414,3 @@ det.addEventListener('mouseover', (ev) => {
   if (ro) ro.textContent = t ? t.dataset.tip : ro.dataset.default;
 });
 
-void NPC_OWNER;

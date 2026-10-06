@@ -196,7 +196,7 @@ Object.assign(STATION_TYPES, {
   hotel:    { name: 'Orbitalhotel', sprite: 'station_ring', accent: '#26a69a', weight: 6,
               consume: { tourists: 0.4, food: 0.3, luxury: 0.06 } },
   shipyard: { name: 'Werft', sprite: 'station_shipyard', accent: '#ffa726', weight: 0, radius: 64,
-              buys: ['plates', 'electronics', 'engines', 'hullparts', 'shipfuel'] },
+              buys: ['plates', 'electronics', 'ingots', 'wires', 'hullparts', 'shipfuel'] },
   bigyard:  { name: 'Große Werft', sprite: 'station_bigyard', accent: '#ff7043', weight: 0, radius: 110,
               buys: ['plates', 'shipparts', 'reactorcores', 'hullparts', 'engines', 'aicores'] },
   hub:      { name: 'Handels-Hub', sprite: 'station_hub', accent: '#4dd0e1', weight: 0, radius: 150 },

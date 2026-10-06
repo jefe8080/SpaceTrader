@@ -53,7 +53,7 @@ export const STATS = { BUCKET_SECS: 300, BUCKETS: 36 };
 
 // Automatische Versorgung leerer Stationen
 export const SUPPLY = {
-  RANGE: 30000,       // Suchradius für Bezugsquellen (gleicher Sektor)
+  RANGE: 90000,       // Suchradius für Bezugsquellen (gleicher Sektor)
   MIN_SOURCE_STOCK: 10,
   COOLDOWN: 20,       // Sekunden nach einer Lieferung
   RETRY_NO_SOURCE: 120,
@@ -67,14 +67,15 @@ export { SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, 
   upgradeCost, moduleCapacity, moduleMiningRate, shipStats, holdOf, holdUsage, freeFor, sellValue, countModules, buildMaterials } from './ships.js';
 
 // Preis = Basispreis × Standort-Modifier × Füllstandskurve(stock/cap) ± Spread
-import { PRICE } from './price.js';
-export { PRICE };
+import { PRICE, curveMax, curveMin } from './price.js';
+export { PRICE, curveMax, curveMin };
 export { GOVERNOR_LICENSES, UNLOCK_NAMES, PROP_UPGRADES, FIXED, CUSTOMS_MAX, RECYCLE_SHARE, propertyKind, minGovernorFor, propertyBasePrice,
   propertyPrice, propUpgradeCost, extraOptions, priceWindow, fixedPrice, fixedRevenuePerHour, fixedConsumptionPerHour, fixedRref } from './property.js';
 
 export function unitPrice(good, stock, cap, mod = 1) {
   const r = Math.max(0, Math.min(1, stock / cap));
-  return GOODS[good].base * mod * PRICE.MAX_FACTOR * Math.pow(PRICE.MIN_FACTOR / PRICE.MAX_FACTOR, r);
+  const t = GOODS[good].tier, hi = curveMax(t);
+  return GOODS[good].base * mod * hi * Math.pow(curveMin(t) / hi, r);
 }
 /** Rollen: produce = Markt verkauft, consume = Markt kauft, trade = Händler (beides, nur Puffer-Lager) */
 export const canBuyFrom = (slot) => slot.role === 'produce' || slot.role === 'trade';
@@ -98,6 +99,8 @@ export const LOCATION = {
   PREMIUM: [[2, 0], [5, 0.25], [10, 0.6], [16, 1.0]],
   PREMIUM_MAX: 1.0,
 };
+/** Prämie für hohe Stufen gedämpft (Kalibrierung): Stufe 5 erhält die Hälfte */
+export const premiumFactor = (tier) => 1 - 0.1 * tier;
 export function distancePremium(minutes) {
   const P = LOCATION.PREMIUM;
   if (minutes === null || minutes === undefined || !Number.isFinite(minutes)) return LOCATION.PREMIUM_MAX;

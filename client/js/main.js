@@ -2,8 +2,6 @@ import { state, selectedShips } from './state.js';
 import { socket } from './net.js';
 import { loadAssets } from './assets.js';
 import { initRenderer, render, screenToWorld, pickAt, viewMode, ZOOM_PRESETS, ZOOM_MIN, ZOOM_MAX } from './render.js';
-import { hexCenter, parseHexKey } from '/shared/hex.js';
-import { WORLD } from '/shared/config.js';
 import * as ui from './ui/index.js';
 
 await loadAssets();
@@ -261,7 +259,6 @@ document.getElementById('btnHome').onclick = () => {
   state.follow = null;
   if (home) flyCamera(home.x, home.y, 0.12);
 };
-void hexCenter; void parseHexKey; void WORLD;
 
 // ---------------- Hauptschleife ----------------
 let last = performance.now();
