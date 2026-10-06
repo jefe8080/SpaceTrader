@@ -1,6 +1,7 @@
 # Space Trader
 
-Multiplayer-Handelsspiel im unendlichen Weltraum (Vorbild: Merchant of the Skies).
+Multiplayer-Handels- und Aufbauspiel in einer unendlichen Galaxie aus Sektoren um Schwarze Löcher.
+Umsetzung des PRD [docs/PRD.md](docs/PRD.md) (Erweiterung "Galaxie").
 
 ## Start
 
@@ -10,50 +11,105 @@ npm install
 npm start
 ```
 
-Dann http://localhost:3000 öffnen. Für Entwicklung mit automatischem Neustart: `npm run dev`.
-Der Spielstand liegt in `data/save.json` (alle 30 s und beim Beenden mit Strg+C gespeichert). Löschen = neue Welt.
+Dann http://localhost:3000 öffnen. Entwicklung mit automatischem Neustart: `npm run dev`.
+
+| Befehl | Zweck |
+|---|---|
+| `npm test` | Unit-Tests (node:test) |
+| `npm run sim -- --hours 8 --bots 3` | Headless-Simulation mit Handelsbots zur Kalibrierung |
+| `npm run reset` | Weltreset: löscht `data/spacetrader.db` (Server vorher beenden) |
+| `npm run sprites` | Schiffsgrafiken neu erzeugen |
+
+Der Spielstand liegt in `data/spacetrader.db` (SQLite, alle 15 s und beim Beenden mit Strg+C gespeichert).
+Ändert sich die Weltgenerierung inkompatibel (`WORLD_GEN_VERSION` in `server/game.js`), wird die Welt neu erzeugt.
+
+**Sicherheit:** Es gibt keine Authentifizierung. Wer einen Spielernamen kennt, übernimmt das Konto.
+Nur im Freundeskreis betreiben. Vor einem öffentlichen Betrieb sind Authentifizierung und HTTPS zwingend.
+
+## Steuerung
+
+| Eingabe | Wirkung |
+|---|---|
+| Linksklick | Schiff oder Objekt auswählen; in Sektor- und Galaxieansicht: hineinzoomen |
+| Strg/Shift+Klick (Flottenliste) | Mehrfachauswahl |
+| Doppelklick | Schiff auswählen und Kamera folgen lassen |
+| Rechtsklick | Befehl an alle gewählten Schiffe, ersetzt die Queue |
+| Shift+Rechtsklick | Befehl an die Queue anhängen |
+| 1 / 2 / 3 | Zoom: System, Sektor, Galaxie |
+| R, F, A, B | Routenübersicht, Favoriten, Almanach, Besitz |
+| Leertaste, Esc | Kamera folgen, Fenster schließen bzw. Auswahl aufheben |
 
 ## Aufbau
 
 | Pfad | Inhalt |
 |---|---|
-| `shared/config.js` | Waren, Planeten-, Stations-, Schiffstypen, Preisformel. Von Server und Client genutzt, hier wird balanciert. |
-| `server/world.js` | Prozedurale Welt in Chunks (3000 Einheiten), erst bei Entdeckung generiert. Fester Startbereich um (0,0). |
-| `server/economy.js` | Produktion, Verbrauch, Stationsrezepte, Werftbau. |
-| `server/ships.js` | Flug, Andocken, Abbau, Routenausführung. |
-| `server/game.js` | Spieler, Nebel des Krieges, Handel, Befehle, Persistenz. |
-| `server/index.js` | Express + Socket.IO, Ticks (10 Hz Simulation, 5 Hz Schiffsstatus, 0,5 Hz Märkte). |
-| `client/js/*` | Canvas-Renderer, UI-Panels, Routen-Editor. Kein Build-Schritt. |
-| `client/assets/*.svg` | Grafiken. `#ff00ff` wird zur Laufzeit durch Spieler- bzw. Stationsfarbe ersetzt. |
+| `shared/config.js` | Zentrale Konstanten, Preisformel, Standort-Modifier, Treibstoff; re-exportiert die Kataloge |
+| `shared/goods.js` | 60 Waren, 40 Rezepte, Planeten-, Stations- und Asteroidentypen; Stufen und Basispreise werden berechnet |
+| `shared/ships.js` | Schiffskatalog, Klassen, Upgrades, Module, Pilotenlizenz, abgeleitete Schiffswerte |
+| `shared/factions.js` | 6 Fraktions-Archetypen und Fraktionsschiffe |
+| `shared/property.js` | Gouverneurslizenz, Besitzpreise, Besitz-Upgrades, Fixpreis-Verbrauch |
+| `shared/hex.js`, `shared/nav.js` | Hex-Raster, Navigation über Wurmlöcher (Dijkstra), Sondergebiete |
+| `server/db.js` | SQLite mit Migrationen (`user_version`) und Dirty-Tracking je Zeile |
+| `server/worldgen.js` | Deterministische Sektorgenerierung aus Seed und Hex-Koordinate |
+| `server/world.js` | Sektoren, räumlicher Index, Nachgenerierung |
+| `server/markets.js` | Märkte nach Rollen (produce/consume/trade) und Strategien (planet, factory, hub, shipyard ...) |
+| `server/ships.js` | Befehlsqueue, Flug, Navigation, Treibstoff, Abbau, Routen, NPC-Versorger |
+| `server/property.js` | Besitzerwirtschaft (Lager, Fremdhandel, Fixpreis-Verbrauch, Werften) |
+| `server/game.js` | Spielzustand, Simulation, Handel, Entdeckungen, Persistenz |
+| `server/net.js` | Socket.IO mit Subscription- und Delta-Modell |
+| `server/handlers/*` | Client-Befehle als Handler-Module mit Eingabevalidierung |
+| `client/js/render.js` | Canvas-Renderer mit System-, Sektor- und Galaxieansicht |
+| `client/js/ui/*` | Oberfläche: Flotte, Details, Routen, Favoriten, Almanach, Werft, Besitz |
+| `sim/simulate.js` | Headless-Simulation mit Bots |
+| `tests/*.test.js` | Tests für Preisformel, Modifier, Fixpreis, Kombo-Kapazität, Navigation, Generierung u.a. |
 
-## Produktionsketten
+## Spielregeln im Überblick
 
-| Station | Rezept |
-|---|---|
-| Schmelzwerk | 2 Erz → 1 Metall |
-| Wasserwerk | 2 Eis → 1 Wasser |
-| Raffinerie | 2 Gas → 1 Treibstoff |
-| Chemiewerk | 1 Gas + 1 Biomasse → 1 Kunststoff |
-| Chipfabrik | 2 Kristalle + 1 Seltene Erden → 1 Elektronik |
-| Legierungswerk | 2 Metall + 1 Seltene Erden → 1 Legierungen |
-| Pharmawerk | 2 Biomasse + 1 Wasser → 1 Medikamente |
-| Luxusmanufaktur | 1 Kristalle + 1 Wasser → 1 Luxusgüter |
-| Maschinenbau | 1 Legierungen + 1 Elektronik → 1 Maschinen |
-| Konsumgüterfabrik | 2 Kunststoff + 1 Elektronik → 1 Konsumgüter |
-| Robotikwerk | 1 Maschinen + 2 Elektronik → 1 Roboter |
+- **Welt:** Sektoren (Ø 150.000) im Hex-Raster, 90.000 Leerraum dazwischen. 8 bis 15 Sonnensysteme je Sektor,
+  ein Handels-Hub am Schwarzen Loch, eine große Werft, 3 bis 5 Werften, 0 bis 2 Wurmlöcher, 0 bis 3 Sondergebiete.
+  Ca. jeder dritte Sektor hat einen Fraktionscluster.
+- **Wirtschaft:** Preis = Basispreis × Standort-Modifier × Füllstandskurve ± 6 % Spread. Händler kaufen und verkaufen
+  dieselbe Ware. Ultraseltene Waren kauft nur der Hub (und Fraktionen als Schiffswährung).
+- **Schiffe:** S, M, L, XL und Fraktion. Pilotenlizenz 1 bis 6 am Hub. Upgrades (Tempo, Tank, Laderaum) und Module
+  (Passagierkabine, Geschirmte Kammer, Abbaugeräte).
+- **Besitz:** Gouverneurslizenz am Hub, Kauf vor Ort. Eigenes Lager, Erlöse aus Fremdhandel, Fixpreis-Verbrauch auf
+  Planeten, Zoll, offen/privat, Ausbau in vier Linien, eigene Werften mit Bau auf Befehl.
 
-Endprodukte (Medikamente, Luxus-, Konsumgüter, Maschinen, Roboter) werden von Planeten verbraucht, Metall, Legierungen, Elektronik, Maschinen und Treibstoff außerdem von Werften.
+## Annahmen und Entscheidungen (PRD Kapitel 15)
 
-## Versorgung und Statistik
+Alle Zahlen sind Kalibrierungsannahmen und zentral in `shared/*` änderbar.
 
-- Kann eine verarbeitende Station mangels eines Rohstoffs keinen Zyklus mehr starten, schickt sie einen eigenen Versorger
-  (50 Laderaum) zur nächsten Quelle im Umkreis von 4500 (Produzent mit Vorrat oder passendes Asteroidenfeld). Ohne Quelle: neuer Versuch nach 120 s.
-- Jeder Markt führt eine Statistik in 5-Minuten-Blöcken über 3 Stunden Spielzeit: produziert, verbraucht, von Schiffen angeliefert und abgeholt.
+- **Maßstab und Nebel (15.4):** Nebelzellen 1.000 Einheiten, Sensorreichweite 2.500, Fernortung von Sonnensystemen
+  bis 50.000. Ein Nachbarsektor wird erzeugt, sobald ein Schiff dessen Mittelpunkt näher als
+  `HEX_SPACING − SECTOR_RADIUS + 30.000` (= 195.000) kommt, also 30.000 vor dem eigenen Sektorrand.
+- **Startsystem:** Langsam-Modifier 25 % auf Raten und Lager. Start-Credits 5.000, ein Spatz für 2.500 im Angebot.
+- **Treibstoff:** Tank für ca. 8 h Flug. Bei S/M kostet eine Füllung grob 2 bis 5 % des Schiffspreises, bei L/XL
+  unter 2 %, sonst wären Tankstellenlager unrealistisch groß.
+- **Upgrades:** +8 % Tempo, +25 % Tank, +12 % Laderaum je Stufe; Stufe 1 kostet 12 % des Schiffspreises, ×1,6 je Stufe.
+- **Module:** 30 Fracht je Modul, Kombo +5 Kapazität bzw. +10 % Abbau je weiterem Modul, Ausbau mit 50 % Erstattung.
+- **Werften:** Preis = Materialkosten (Basis × Standort-Modifier) + 25 % Marge. NPC-Werften warten bis 15 min auf
+  Material für den nächsten Typ der Bauliste und schicken NPC-Versorger für fehlendes Material.
+- **Besitz:** Kein Eigenverbrauch über 80 % bei Spielerbesitz. Fixpreis-Position standardmäßig 0,5, Spanne 0,3 bis 0,7.
+  Zoll bis 50 %. Waren für den Ausbau kommen aus den Laderäumen der angedockten eigenen Schiffe.
+  Die Linie "Zusatzproduktion" schaltet bei eigenen Werften die nächste Schiffsklasse frei.
+  Upgrades und Module kosten an eigenen Werften die Hälfte (Selbstkosten). Kein Zoll beim Schiffsverkauf aus Spielerwerften.
+- **Almanach:** Ein Rezept gilt als entdeckt, sobald ein Markt mit diesem Rezept in Sensorreichweite war.
+  Schiffe und Module, sobald sie in einem Angebot gesehen oder gekauft wurden.
+- **Preisspanne nach Stufe (Ergebnis der Simulation):** Füllstandskurve Stufe 0: ×1,8 bis ×0,45, Stufe 5: ×1,3 bis ×0,7;
+  Entfernungsprämie für hohe Stufen gedämpft (Stufe 5: halbe Prämie).
 
-## Spielregeln
+## Stand der Kalibrierung
 
-- Preise: `Basis × 1,8 × (0,45/1,8)^(Lager/Kapazität)`, plus 6 % Spread. Volles Lager = billig, leeres = teuer.
-- Planeten produzieren mit 60 bis 100 % Leistung, je nachdem wie viele ihrer Bedarfsgüter vorrätig sind.
-- Stationen verarbeiten genau ein Rezept. Ohne Nahrung halbe Geschwindigkeit.
-- Werften bauen reihum Schiffstypen, sobald genug Material angeliefert ist (max. 3 im Angebot).
-- Routen: beliebig viele Stopps mit Kaufen/Verkaufen/Abbauen, optional Menge und Preisgrenze.
+`npm run sim` mit 3 Bots über 12 h im Heimatsektor (Seed 42):
+
+- Frühe Phase (3 bis 5 Schiffe): je nach Lauf Ø 12 bis 30 k Cr/h, Ziel 20 bis 50 k Cr/h.
+- Erste M-Schiffe erscheinen nach ca. 10 bis 12 h, weil NPC-Werften auf Material warten.
+- Die mittlere Phase (10 bis 20 Schiffe) erreichen die Bots im Simulationszeitraum nicht; dafür müssten sie Sektoren
+  wechseln und Besitz aufbauen. Weitere Kalibrierung sollte mit echten Spielsitzungen erfolgen.
+- Etwa die Hälfte der Fabriken wartet mit vollem Lager auf Abnehmer. Das ist gewollt (Handelsgelegenheiten),
+  sollte aber im Spiel beobachtet werden.
+
+## Nicht im Umfang
+
+Chat, Authentifizierung, Stützpunkt, Fraktionsruf, Quests, Events, Kampf, Unterhaltskosten, Whitelist im Handelsmodus
+und automatisches Ausweichen um Sondergebiete (siehe PRD Kapitel 12).
