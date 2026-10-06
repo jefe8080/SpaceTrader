@@ -1,5 +1,5 @@
 import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, cellKey, cellOf, chunkOf } from '../shared/config.js';
-import { createMarket } from './economy.js';
+import { createMarket } from './markets.js';
 
 /** Deterministischer Zufallsgenerator (mulberry32) */
 export function rng(seed) {

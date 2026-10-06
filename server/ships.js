@@ -1,5 +1,5 @@
 import { SHIP_TYPES, BELT_TYPES, WORLD } from '../shared/config.js';
-import { stat } from './economy.js';
+import { stat } from './markets.js';
 
 export const cargoUsed = (ship) => Object.values(ship.cargo).reduce((a, b) => a + b, 0);
 export const cargoFree = (ship) => SHIP_TYPES[ship.type].cargo - cargoUsed(ship);

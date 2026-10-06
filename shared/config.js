@@ -1,7 +1,5 @@
 // Gemeinsame Spielregeln und Balancing - wird von Server UND Client importiert.
 
-export const SAVE_VERSION = 2; // bei inkompatiblen Änderungen erhöhen -> alter Spielstand wird archiviert
-
 export const WORLD = {
   CHUNK_SIZE: 3000,          // Kantenlänge eines Generierungs-Chunks (Welteinheiten)
   FOG_CELL: 500,             // Kantenlänge einer Nebel-Zelle
@@ -11,7 +9,7 @@ export const WORLD = {
   DOCK_OFFSET: 28,           // Abstand zur Oberfläche beim Andocken
 };
 
-export const NET = { TICK_MS: 100, STATE_MS: 200, MARKET_MS: 2000, SAVE_MS: 30000 };
+export const NET = { TICK_MS: 100, STATE_MS: 200, MARKET_MS: 1000, SAVE_MS: 15000, VIEW_MARGIN: 600 };
 
 // Lagergrößen: Kapazität = max(Minimum, Rate × Sekunden). Große Lager = träge Preise.
 export const STORAGE = {
@@ -69,6 +67,9 @@ export function unitPrice(good, stock, cap) {
   const r = Math.max(0, Math.min(1, stock / cap));
   return GOODS[good].base * PRICE.MAX_FACTOR * Math.pow(PRICE.MIN_FACTOR / PRICE.MAX_FACTOR, r);
 }
+/** Rollen: produce = Markt verkauft, consume = Markt kauft, trade = Händler (beides, nur Puffer-Lager) */
+export const canBuyFrom = (slot) => slot.role === 'produce' || slot.role === 'trade';
+export const canSellTo = (slot) => slot.role === 'consume' || slot.role === 'trade';
 /** Preis, den der Spieler pro Einheit zahlt */
 export const buyPrice = (good, stock, cap) => unitPrice(good, stock, cap) * (1 + PRICE.SPREAD);
 /** Preis, den der Spieler pro Einheit erhält */

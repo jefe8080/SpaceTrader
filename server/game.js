@@ -1,74 +1,127 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { WORLD, GOODS, SHIP_TYPES, STATION_TYPES, BELT_TYPES, PLAYER_COLORS, SHIP_NAMES, SAVE_VERSION, SUPPLY, NPC_OWNER, STATS,
-  cellKey, cellOf, buyPrice, sellPrice } from '../shared/config.js';
+import { WORLD, GOODS, BELT_TYPES, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
+  cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo } from '../shared/config.js';
 import { World } from './world.js';
-import { tickEntity, stat, missingInput } from './economy.js';
+import { tickMarket, stat, missingInput } from './markets.js';
 import { updateShip, cargoFree } from './ships.js';
+import { Store } from './db.js';
 
-const r1 = (v) => Math.round(v * 10) / 10;
+export const WORLD_GEN_VERSION = 1; // ändert sich die Generierung inkompatibel, wird die Welt neu erzeugt
 
 export class Game {
-  constructor(savePath) {
-    this.savePath = savePath;
+  /** dbFile: Pfad zur SQLite-Datei oder ':memory:' */
+  constructor(dbFile, { seed } = {}) {
+    this.store = new Store(dbFile);
     this.time = 0;
     this.players = new Map();
     this.ships = new Map();
-    this.sockets = new Map(); // playerId -> socket
-    this.known = new Map();   // playerId -> Set(entityId), nur für verbundene Spieler
-    this.counters = { player: 0, ship: 0 };
+    this.routes = new Map();
+    this.counters = { player: 0, ship: 0, route: 0 };
     this.econAcc = 0;
+    this.newDiscoveries = []; // [player, kind, key] seit dem letzten Speichern
+    this.listeners = { reveal: [], log: [] };
     if (!this.load()) {
-      this.world = new World((Math.random() * 2 ** 31) | 0);
+      this.world = new World(seed ?? ((Math.random() * 2 ** 31) | 0));
       this.world.ensureChunk(0, 0);
     }
   }
 
+  on(ev, fn) { this.listeners[ev].push(fn); }
+  emit(ev, ...a) { for (const fn of this.listeners[ev]) fn(...a); }
+
   // ---------- Persistenz ----------
   load() {
-    if (!fs.existsSync(this.savePath)) return false;
-    try {
-      const d = JSON.parse(fs.readFileSync(this.savePath, 'utf8'));
-      if (d.version !== SAVE_VERSION) {
-        const archive = this.savePath.replace(/\.json$/, `.v${d.version}-${Date.now()}.json`);
-        fs.renameSync(this.savePath, archive);
-        console.log(`Spielstand-Version ${d.version} ist veraltet, archiviert als ${path.basename(archive)}. Neue Welt wird erzeugt.`);
-        return false;
-      }
-      this.world = World.fromJSON(d.world);
-      this.time = d.time;
-      this.counters = d.counters;
-      for (const p of d.players) this.players.set(p.id, { ...p, revealed: new Set(p.revealed) });
-      for (const s of d.ships) this.ships.set(s.id, s);
-      console.log(`Spielstand geladen: ${this.players.size} Spieler, ${this.world.entities.size} Objekte`);
-      return true;
-    } catch (err) {
-      console.error('Spielstand defekt, starte neue Welt:', err.message);
-      fs.renameSync(this.savePath, this.savePath + '.broken-' + Date.now());
+    const st = this.store;
+    const gen = st.getMeta('worldGen');
+    if (gen === undefined) return false;
+    if (gen !== WORLD_GEN_VERSION) {
+      console.log(`Weltgenerierung ${gen} ist veraltet (aktuell ${WORLD_GEN_VERSION}). Neue Welt wird erzeugt.`);
+      st.transaction(() => {
+        for (const t of ['players', 'ships', 'sectors', 'entities', 'markets', 'routes', 'favorites', 'discoveries', 'ownership', 'market_stats', 'ship_stats', 'meta']) {
+          st.db.prepare(`DELETE FROM ${t}`).run();
+        }
+      });
+      for (const c of st.cache.values()) c.clear();
       return false;
     }
+    this.time = st.getMeta('time');
+    this.counters = { ...this.counters, ...st.getMeta('counters') };
+    this.world = new World(st.getMeta('seed'));
+    const markets = new Map(st.loadAll('markets').map((r) => [r.id, r.data]));
+    const stats = new Map();
+    for (const r of st.loadAll('market_stats')) {
+      if (!stats.has(r.entity)) stats.set(r.entity, []);
+      stats.get(r.entity).push({ b: r.bucket, ...r.data });
+    }
+    for (const r of st.loadAll('sectors')) this.world.chunks.add(r.id);
+    for (const r of st.loadAll('entities')) {
+      const e = r.data;
+      if (markets.has(e.id)) {
+        e.market = markets.get(e.id);
+        e.market.stats = (stats.get(e.id) || []).sort((a, b) => a.b - b.b);
+      }
+      this.world.addEntity(e);
+    }
+    for (const r of st.loadAll('players')) this.players.set(r.id, { ...r.data, revealed: new Set() });
+    for (const d of st.loadDiscoveries()) {
+      const p = this.players.get(d.player);
+      if (p && d.kind === 'cell') p.revealed.add(d.key);
+    }
+    for (const r of st.loadAll('ships')) this.ships.set(r.id, r.data);
+    for (const r of st.loadAll('routes')) this.routes.set(r.id, r.data);
+    console.log(`Spielstand geladen: ${this.players.size} Spieler, ${this.world.entities.size} Objekte, ${this.ships.size} Schiffe`);
+    return true;
   }
 
   save() {
-    const data = {
-      version: SAVE_VERSION,
-      time: this.time,
-      counters: this.counters,
-      world: this.world.toJSON(),
-      players: [...this.players.values()].map((p) => ({ ...p, revealed: [...p.revealed] })),
-      ships: [...this.ships.values()],
-    };
-    fs.mkdirSync(path.dirname(this.savePath), { recursive: true });
-    const tmp = this.savePath + '.tmp';
-    fs.writeFileSync(tmp, JSON.stringify(data));
-    fs.renameSync(tmp, this.savePath);
+    const st = this.store;
+    const t0 = Date.now();
+    let n = 0;
+    st.transaction(() => {
+      st.setMeta('worldGen', WORLD_GEN_VERSION);
+      st.setMeta('seed', this.world.seed);
+      st.setMeta('time', this.time);
+      st.setMeta('counters', this.counters);
+      n += st.sync('sectors', [...this.world.chunks].map((k) => ({ key: [k], data: {} })));
+      const ents = [], mkts = [], mstats = [];
+      for (const e of this.world.entities.values()) {
+        const { market, ...stat } = e;
+        ents.push({ key: [e.id], cols: [e.sector ?? ''], data: stat });
+        if (market) {
+          const { stats, ...m } = market;
+          mkts.push({ key: [e.id], data: m });
+          for (const b of stats || []) {
+            const { b: bucket, ...data } = b;
+            mstats.push({ key: [e.id, bucket], data });
+          }
+        }
+      }
+      n += st.sync('entities', ents);
+      n += st.sync('markets', mkts);
+      n += st.sync('market_stats', mstats, false);
+      st.trimStats('market_stats', Math.floor(this.time / STATS.BUCKET_SECS) - STATS.BUCKETS);
+      n += st.sync('players', [...this.players.values()].map((p) => {
+        const { revealed, ...data } = p;
+        return { key: [p.id], data };
+      }));
+      n += st.sync('ships', [...this.ships.values()].map((s) => ({ key: [s.id], cols: [s.owner], data: s })));
+      n += st.sync('routes', [...this.routes.values()].map((r) => ({ key: [r.id], cols: [r.owner], data: r })));
+      st.addDiscoveries(this.newDiscoveries);
+      n += this.newDiscoveries.length;
+      this.newDiscoveries = [];
+    });
+    return { rows: n, ms: Date.now() - t0 };
+  }
+
+  close() {
+    this.save();
+    this.store.close();
   }
 
   // ---------- Spieler ----------
-  playerList() {
+  playerList(online = new Set()) {
     return [...this.players.values()]
       .sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0))
-      .map((p) => ({ id: p.id, name: p.name, color: p.color, online: this.sockets.has(p.id) }));
+      .map((p) => ({ id: p.id, name: p.name, color: p.color, online: online.has(p.id) }));
   }
 
   findPlayerByName(name) {
@@ -101,40 +154,11 @@ export class Game {
     return ship;
   }
 
-  attach(player, socket) {
-    const old = this.sockets.get(player.id);
-    if (old && old !== socket) {
-      old.emit('kicked', 'Mit diesem Namen hat sich jemand anderes angemeldet.');
-      old.disconnect(true);
-    }
-    this.sockets.set(player.id, socket);
-    player.lastSeen = Date.now();
-    const known = new Set();
-    const entities = [];
-    for (const k of player.revealed) {
-      for (const id of this.world.entitiesInCell(k)) {
-        known.add(id);
-        entities.push(this.serializeEntity(this.world.entities.get(id)));
-      }
-    }
-    this.known.set(player.id, known);
-    socket.emit('welcome', {
-      you: { id: player.id, name: player.name, color: player.color },
-      cells: [...player.revealed],
-      entities,
-      players: this.playerList(),
-    });
-    this.sendStateTo(player);
-  }
-
-  detach(player, socket) {
-    if (this.sockets.get(player.id) !== socket) return;
-    this.sockets.delete(player.id);
-    this.known.delete(player.id);
-    player.lastSeen = Date.now();
-  }
-
   // ---------- Nebel des Krieges ----------
+  isKnown(player, e) {
+    return player.revealed.has(cellKey(...cellOf(e.x, e.y)));
+  }
+
   revealAround(p, x, y, r) {
     const C = WORLD.FOG_CELL;
     const newCells = [];
@@ -147,21 +171,13 @@ export class Game {
         this.world.ensureChunkAt(mx, my); // Welt wird erst generiert, wenn sie entdeckt wird
         p.revealed.add(k);
         newCells.push(k);
+        this.newDiscoveries.push([p.id, 'cell', k]);
       }
     }
     if (!newCells.length) return;
-    const sock = this.sockets.get(p.id);
-    const known = this.known.get(p.id);
-    if (!sock || !known) return;
     const entities = [];
-    for (const k of newCells) {
-      for (const id of this.world.entitiesInCell(k)) {
-        if (known.has(id)) continue;
-        known.add(id);
-        entities.push(this.serializeEntity(this.world.entities.get(id)));
-      }
-    }
-    sock.emit('reveal', { cells: newCells, entities });
+    for (const k of newCells) for (const id of this.world.entitiesInCell(k)) entities.push(this.world.entities.get(id));
+    this.emit('reveal', p, newCells, entities);
   }
 
   // ---------- Simulation ----------
@@ -179,8 +195,8 @@ export class Game {
     this.econAcc += dt;
     if (this.econAcc >= 1) {
       for (const e of this.world.entities.values()) {
-        tickEntity(e, this.econAcc, this.time);
-        if (e.kind === 'station' && STATION_TYPES[e.type].recipe) this.checkSupply(e);
+        tickMarket(e, this.econAcc, this.time, this);
+        if (e.market?.strategy === 'factory') this.checkSupply(e);
       }
       this.econAcc = 0;
     }
@@ -189,7 +205,7 @@ export class Game {
   shipLog(ship, msg) {
     ship.log.unshift({ t: Date.now(), msg });
     if (ship.log.length > 8) ship.log.length = 8;
-    this.sockets.get(ship.owner)?.emit('log', { ship: ship.name, msg });
+    this.emit('log', ship, msg);
   }
 
   /** limit: max. Einkaufspreis bzw. min. Verkaufspreis pro Einheit (0 = egal) */
@@ -200,7 +216,7 @@ export class Game {
     if (ship.dockedAt !== e.id) return { n: 0, reason: 'Schiff ist nicht angedockt.' };
     let n = 0, total = 0;
     if (dir === 'buy') {
-      if (slot.role !== 'produce') return { n: 0, reason: 'Hier wird diese Ware nicht verkauft.' };
+      if (!canBuyFrom(slot)) return { n: 0, reason: 'Hier wird diese Ware nicht verkauft.' };
       const max = Math.min(amount, cargoFree(ship), Math.floor(slot.stock));
       while (n < max) {
         const pr = buyPrice(good, slot.stock, slot.cap);
@@ -208,8 +224,8 @@ export class Game {
         p.credits -= pr; slot.stock -= 1; total += pr; n++;
       }
       if (n) ship.cargo[good] = (ship.cargo[good] || 0) + n;
-    } else if (dir === 'sell') {
-      if (slot.role !== 'consume') return { n: 0, reason: 'Hier wird diese Ware nicht angekauft.' };
+    } else {
+      if (!canSellTo(slot)) return { n: 0, reason: 'Hier wird diese Ware nicht angekauft.' };
       const have = ship.cargo[good] || 0;
       const max = Math.min(amount, have, Math.floor(slot.cap - slot.stock));
       while (n < max) {
@@ -231,7 +247,7 @@ export class Game {
     const sup = m.supply;
     if (sup?.shipId && this.ships.has(sup.shipId)) return;      // Versorger unterwegs
     if (sup?.until && this.time < sup.until) return;            // Abklingzeit
-    const good = missingInput(e);
+    const good = missingInput(m);
     if (!good) { m.supply = null; return; }
     const src = this.findSource(e, good);
     if (!src) {
@@ -254,7 +270,7 @@ export class Game {
         if (BELT_TYPES[s.type].good !== good) continue;
       } else {
         const sl = s.market?.goods[good];
-        if (!sl || sl.role !== 'produce' || sl.stock < SUPPLY.MIN_SOURCE_STOCK) continue;
+        if (!sl || !canBuyFrom(sl) || sl.stock < SUPPLY.MIN_SOURCE_STOCK) continue;
       }
       best = s;
       bestD = d;
@@ -296,165 +312,11 @@ export class Game {
 
   statsFor(player, entityId) {
     const e = this.world.entities.get(entityId);
-    if (!e?.market || !this.known.get(player.id)?.has(entityId)) return null;
+    if (!e?.market || !this.isKnown(player, e)) return null;
     const round = (o) => Object.fromEntries(Object.entries(o).map(([g, v]) => [g, Math.round(v * 10) / 10]));
     return {
       id: e.id, bucketSecs: STATS.BUCKET_SECS, buckets: STATS.BUCKETS, now: Math.floor(this.time / STATS.BUCKET_SECS),
       data: (e.market.stats || []).map((b) => ({ b: b.b, n: b.n, p: round(b.p), c: round(b.c), i: round(b.i), o: round(b.o) })),
     };
-  }
-
-  // ---------- Befehle vom Client ----------
-  command(player, cmd, msg) {
-    const ship = msg.shipId ? this.ships.get(msg.shipId) : null;
-    if (msg.shipId && (!ship || ship.owner !== player.id)) return 'Unbekanntes Schiff.';
-    const known = this.known.get(player.id) || new Set();
-    const target = msg.targetId ? this.world.entities.get(msg.targetId) : null;
-    if (msg.targetId && (!target || !known.has(target.id))) return 'Unbekanntes Ziel.';
-
-    switch (cmd) {
-      case 'move':
-        if (!Number.isFinite(msg.x) || !Number.isFinite(msg.y)) return 'Ungültige Koordinaten.';
-        ship.orders = { type: 'move', x: msg.x, y: msg.y };
-        return;
-      case 'goto':
-        ship.orders = { type: 'goto', targetId: target.id };
-        return;
-      case 'mine':
-        if (target.kind !== 'belt') return 'Nur in Asteroidenfeldern möglich.';
-        if (!SHIP_TYPES[ship.type].mining) return 'Dieses Schiff hat keine Bergbauausrüstung.';
-        ship.orders = { type: 'mine', targetId: target.id };
-        return;
-      case 'stop':
-        ship.orders = { type: 'idle' };
-        return;
-      case 'route': {
-        const stops = this.validateRoute(msg.stops, known);
-        if (typeof stops === 'string') return stops;
-        ship.orders = stops.length ? { type: 'route', stops, index: 0, phase: 'travel', actionIdx: 0 } : { type: 'idle' };
-        this.shipLog(ship, stops.length ? `Neue Route mit ${stops.length} Stopps` : 'Route gelöscht');
-        return;
-      }
-      case 'trade': {
-        if (!target) return 'Unbekanntes Ziel.';
-        if (ship.orders.type === 'route') return 'Schiff fährt eine Route. Erst stoppen.';
-        const amount = msg.amount === 'max' ? Infinity : Math.max(1, Math.floor(Number(msg.amount) || 1));
-        const res = this.trade(ship, target, msg.good, amount, msg.dir);
-        if (!res.n) return res.reason || (msg.dir === 'buy' ? 'Kauf nicht möglich (Credits, Laderaum oder Bestand).' : 'Verkauf nicht möglich (Lager voll?).');
-        return;
-      }
-      case 'jettison':
-        if (!ship.cargo[msg.good]) return;
-        this.shipLog(ship, `${ship.cargo[msg.good]} ${GOODS[msg.good].name} abgeworfen`);
-        delete ship.cargo[msg.good];
-        return;
-      case 'buyShip': {
-        if (!target || target.type !== 'shipyard') return 'Keine Werft.';
-        const docked = [...this.ships.values()].some((s) => s.owner === player.id && s.dockedAt === target.id);
-        if (!docked) return 'Eines deiner Schiffe muss an der Werft angedockt sein.';
-        const item = target.market.forSale[msg.index];
-        if (!item) return 'Schiff nicht mehr verfügbar.';
-        if (player.credits < item.price) return 'Nicht genug Credits.';
-        player.credits -= item.price;
-        target.market.forSale.splice(msg.index, 1);
-        const s = this.spawnShip(player, item.type, target);
-        this.shipLog(s, `Neues Schiff gekauft: ${SHIP_TYPES[item.type].name} bei ${target.name}`);
-        return;
-      }
-      case 'rename': {
-        const name = String(msg.name || '').trim().slice(0, 24);
-        if (name) ship.name = name;
-        return;
-      }
-      default:
-        return 'Unbekannter Befehl.';
-    }
-  }
-
-  validateRoute(stops, known) {
-    if (!Array.isArray(stops) || stops.length > 12) return 'Ungültige Route (max. 12 Stopps).';
-    const out = [];
-    for (const s of stops) {
-      const e = this.world.entities.get(s?.targetId);
-      if (!e || !known.has(e.id)) return 'Route enthält unbekanntes Ziel.';
-      if (!Array.isArray(s.actions) || s.actions.length > 8) return 'Zu viele Aktionen in einem Stopp.';
-      const actions = [];
-      for (const a of s.actions) {
-        if (a.op === 'mine') { if (e.kind === 'belt') actions.push({ op: 'mine' }); continue; }
-        if ((a.op === 'buy' || a.op === 'sell') && e.market?.goods[a.good]) {
-          actions.push({ op: a.op, good: a.good, amount: Math.max(0, Math.floor(Number(a.amount) || 0)),
-            limit: Math.max(0, Math.round((Number(a.limit) || 0) * 10) / 10) });
-        }
-      }
-      out.push({ targetId: e.id, actions });
-    }
-    return out;
-  }
-
-  // ---------- Serialisierung ----------
-  serializeEntity(e) {
-    return { id: e.id, kind: e.kind, type: e.type, name: e.name, x: Math.round(e.x), y: Math.round(e.y), radius: e.radius,
-      richness: e.richness, market: e.market ? this.serializeMarket(e.market, true) : null };
-  }
-
-  serializeMarket(m, full) {
-    const goods = {};
-    for (const [g, s] of Object.entries(m.goods)) {
-      goods[g] = full ? { role: s.role, rate: s.rate, cap: s.cap, stock: r1(s.stock) } : r1(s.stock);
-    }
-    const out = { goods, eff: r1(m.eff ?? 1) };
-    if (m.forSale) {
-      out.forSale = m.forSale;
-      out.building = m.building ? { type: m.building.type, remaining: Math.ceil(m.building.remaining) } : null;
-      out.nextBuild = m.nextBuild;
-    }
-    if (m.progress !== undefined) out.progress = r1(m.progress);
-    if (m.supply !== undefined) out.supply = m.supply && { state: m.supply.state, good: m.supply.good, sourceId: m.supply.sourceId, shipId: m.supply.shipId };
-    return out;
-  }
-
-  serializeShip(s, own) {
-    const o = { id: s.id, owner: s.owner, type: s.type, name: s.name, x: r1(s.x), y: r1(s.y), angle: Math.round(s.angle * 100) / 100,
-      vx: r1(s.vx), vy: r1(s.vy), state: s.state, dockedAt: s.dockedAt };
-    if (s.owner === NPC_OWNER && s.orders.type === 'supply') {
-      const { stationId, sourceId, good, phase } = s.orders;
-      o.task = { stationId, sourceId, good, phase };
-      o.cargo = s.cargo;
-    }
-    if (own) {
-      o.cargo = s.cargo;
-      const ord = s.orders;
-      o.orders = ord.type === 'route'
-        ? { type: 'route', stops: ord.stops, index: ord.index, phase: ord.phase }
-        : ord;
-      o.log = s.log;
-    }
-    return o;
-  }
-
-  sendStateTo(p) {
-    const sock = this.sockets.get(p.id);
-    if (!sock) return;
-    const ships = [];
-    for (const s of this.ships.values()) {
-      if (s.owner === p.id) ships.push(this.serializeShip(s, true));
-      else if (p.revealed.has(cellKey(...cellOf(s.x, s.y)))) ships.push(this.serializeShip(s, false));
-    }
-    sock.emit('state', { t: this.time, credits: Math.floor(p.credits), ships });
-  }
-
-  sendStates() {
-    for (const id of this.sockets.keys()) this.sendStateTo(this.players.get(id));
-  }
-
-  sendMarkets() {
-    for (const [pid, sock] of this.sockets) {
-      const upd = {};
-      for (const id of this.known.get(pid) || []) {
-        const e = this.world.entities.get(id);
-        if (e.market) upd[id] = this.serializeMarket(e.market, false);
-      }
-      sock.emit('markets', upd);
-    }
   }
 }

@@ -5,9 +5,11 @@ import express from 'express';
 import { Server } from 'socket.io';
 import { NET } from '../shared/config.js';
 import { Game } from './game.js';
+import { Net } from './net.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.env.PORT) || 3000;
+const DB_FILE = process.env.DB_FILE || path.join(root, 'data', 'spacetrader.db');
 
 const app = express();
 app.use(express.static(path.join(root, 'client')));
@@ -15,46 +17,8 @@ app.use('/shared', express.static(path.join(root, 'shared')));
 
 const server = http.createServer(app);
 const io = new Server(server);
-const game = new Game(path.join(root, 'data', 'save.json'));
-
-const broadcastPlayers = () => io.emit('players', game.playerList());
-
-io.on('connection', (socket) => {
-  let player = null;
-  socket.emit('players', game.playerList());
-
-  socket.on('login', (msg) => {
-    const name = String(msg?.name || '').trim().replace(/\s+/g, ' ');
-    if (name.length < 2 || name.length > 20) return socket.emit('loginError', 'Name muss 2 bis 20 Zeichen lang sein.');
-    player = game.findPlayerByName(name) || game.createPlayer(name);
-    game.attach(player, socket);
-    console.log(`Login: ${player.name}`);
-    broadcastPlayers();
-  });
-
-  socket.on('cmd', (msg) => {
-    if (!player || !msg || typeof msg.cmd !== 'string') return;
-    try {
-      const err = game.command(player, msg.cmd, msg);
-      if (err) socket.emit('errorMsg', err);
-    } catch (e) {
-      console.error('Befehl fehlgeschlagen', msg, e);
-      socket.emit('errorMsg', 'Interner Fehler beim Befehl.');
-    }
-  });
-
-  socket.on('stats', (msg) => {
-    if (!player) return;
-    const data = game.statsFor(player, msg?.entityId);
-    if (data) socket.emit('stats', data);
-  });
-
-  socket.on('disconnect', () => {
-    if (!player) return;
-    game.detach(player, socket);
-    broadcastPlayers();
-  });
-});
+const game = new Game(DB_FILE);
+const net = new Net(io, game);
 
 let last = Date.now();
 setInterval(() => {
@@ -62,13 +26,19 @@ setInterval(() => {
   game.tick(Math.min(0.5, (now - last) / 1000));
   last = now;
 }, NET.TICK_MS);
-setInterval(() => game.sendStates(), NET.STATE_MS);
-setInterval(() => game.sendMarkets(), NET.MARKET_MS);
-setInterval(() => game.save(), NET.SAVE_MS);
+setInterval(() => net.sendShips(), NET.STATE_MS);
+setInterval(() => net.sendMarkets(), NET.MARKET_MS);
+setInterval(() => {
+  const r = game.save();
+  if (r.ms > 200) console.log(`Gespeichert: ${r.rows} Zeilen in ${r.ms} ms`);
+}, NET.SAVE_MS);
 
+let stopping = false;
 const shutdown = () => {
+  if (stopping) return;
+  stopping = true;
   console.log('Speichere Spielstand ...');
-  game.save();
+  game.close();
   process.exit(0);
 };
 process.on('SIGINT', shutdown);

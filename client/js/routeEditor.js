@@ -127,9 +127,9 @@ card.addEventListener('click', (ev) => {
         if (id) addStop(id);
       };
       return;
-    case 'clear': cmd('route', { shipId: ed.shipId, stops: [] }); close(); return;
+    case 'clear': cmd('route', { ship: ed.shipId, stops: [] }); close(); return;
     case 'cancel': close(); return;
-    case 'save': cmd('route', { shipId: ed.shipId, stops: ed.stops }); close(); return;
+    case 'save': cmd('route', { ship: ed.shipId, stops: ed.stops }); close(); return;
   }
   render();
 });

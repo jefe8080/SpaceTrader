@@ -289,15 +289,26 @@ $('details').addEventListener('click', (ev) => {
   const d = b.dataset;
   switch (d.act) {
     case 'route': openRouteEditor(d.ship); break;
-    case 'stop': cmd('stop', { shipId: d.ship }); break;
+    case 'stop': cmd('stop', { ship: d.ship }); break;
     case 'follow': state.follow = d.ship; break;
-    case 'mine': cmd('mine', { shipId: d.ship, targetId: d.ent }); break;
-    case 'goto': cmd('goto', { shipId: d.ship, targetId: d.ent }); break;
-    case 'jettison': if (confirm(`${GOODS[d.good].name} wirklich abwerfen?`)) cmd('jettison', { shipId: d.ship, good: d.good }); break;
-    case 'trade': cmd('trade', { shipId: d.ship, targetId: d.ent, good: d.good, dir: d.dir, amount: d.amt }); break;
-    case 'buyShip': cmd('buyShip', { targetId: d.ent, index: Number(d.idx) }); break;
+    case 'mine': cmd('mine', { ship: d.ship, target: d.ent }); break;
+    case 'goto': cmd('goto', { ship: d.ship, target: d.ent }); break;
+    case 'jettison': if (confirm(`${GOODS[d.good].name} wirklich abwerfen?`)) cmd('jettison', { ship: d.ship, good: d.good }); break;
+    case 'trade': cmd('trade', { ship: d.ship, target: d.ent, good: d.good, dir: d.dir, amount: d.amt }); break;
+    case 'buyShip': cmd('buyShip', { target: d.ent, index: Number(d.idx) }); break;
   }
 });
+
+/** Markt-IDs, die offene Dialoge brauchen (Detailpanel, angedockte Schiffe) */
+export function dialogMarkets() {
+  const ids = new Set();
+  const sel = state.selected;
+  if (sel?.kind === 'entity') ids.add(sel.id);
+  if (sel?.kind === 'ship') { const s = state.ships.get(sel.id); if (s?.dockedAt) ids.add(s.dockedAt); }
+  for (const id of extraSubs) ids.add(id);
+  return ids;
+}
+export const extraSubs = new Set();
 
 // ---------------- Log, Toasts, Tooltip, Hinweise ----------------
 export function addLog(ship, msg) {

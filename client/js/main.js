@@ -27,23 +27,25 @@ socket.on('welcome', (d) => {
   state.cells = new Set(d.cells);
   state.entities = new Map(d.entities.map((e) => [e.id, e]));
   state.ships.clear();
+  lastSub = '';
   state.awaitCenter = first;
   ui.enterGame();
 });
-socket.on('state', (d) => {
+socket.on('ships', (d) => {
   state.credits = d.credits;
   const now = performance.now();
   const seen = new Set();
-  for (const s of d.ships) {
-    const prev = state.ships.get(s.id);
-    s.recv = now;
-    if (prev) { s.rx = prev.rx; s.ry = prev.ry; s.ra = prev.ra; }
-    state.ships.set(s.id, s);
-    seen.add(s.id);
+  for (const c of d.ships) {
+    let s = state.ships.get(c.id);
+    if (!s) { s = { id: c.id, cargo: {}, log: [], orders: { type: 'idle' } }; state.ships.set(c.id, s); }
+    Object.assign(s, { x: c.x, y: c.y, angle: c.a, vx: c.vx, vy: c.vy, state: c.st, dockedAt: c.dk, recv: now });
+    if (c.d) Object.assign(s, c.d);
+    if (c.owner) Object.assign(s, { owner: c.owner, type: c.type, name: c.name, task: c.task, cargo: c.cargo || s.cargo });
+    seen.add(c.id);
   }
   for (const id of state.ships.keys()) if (!seen.has(id)) state.ships.delete(id);
   if (state.awaitCenter) {
-    const own = d.ships.find((s) => s.owner === state.me.id);
+    const own = d.ships.find((s) => state.ships.get(s.id).owner === state.me.id);
     if (own) { cam.x = own.x; cam.y = own.y; ui.select({ kind: 'ship', id: own.id }); }
     state.awaitCenter = false;
   }
@@ -58,10 +60,8 @@ socket.on('markets', (upd) => {
   for (const [id, m] of Object.entries(upd)) {
     const e = state.entities.get(id);
     if (!e?.market) continue;
-    for (const [g, v] of Object.entries(m.goods)) if (e.market.goods[g]) e.market.goods[g].stock = v;
-    e.market.eff = m.eff;
-    if (m.forSale) Object.assign(e.market, { forSale: m.forSale, building: m.building, nextBuild: m.nextBuild });
-    if (m.progress !== undefined) e.market.progress = m.progress;
+    if (m.s) for (const [g, v] of Object.entries(m.s)) if (e.market.goods[g]) e.market.goods[g].stock = v;
+    if (m.x) Object.assign(e.market, m.x);
   }
   ui.onMarkets();
 });
@@ -71,6 +71,24 @@ socket.on('stats', (d) => {
   ui.onMarkets();
 });
 setInterval(ui.requestStats, 15000);
+
+let lastSub = '';
+function sendSubscriptions() {
+  if (!state.me) return;
+  const [x0, y0] = screenToWorld(0, 0);
+  const [x1, y1] = screenToWorld(innerWidth, innerHeight);
+  const ids = new Set();
+  for (const e of state.entities.values()) {
+    if (e.market && e.x > x0 - 300 && e.x < x1 + 300 && e.y > y0 - 300 && e.y < y1 + 300) ids.add(e.id);
+  }
+  for (const id of ui.dialogMarkets()) ids.add(id);
+  const markets = [...ids].slice(0, 400);
+  const key = markets.join(',') + '|' + [x0, y0, x1, y1].map((v) => Math.round(v / 200)).join(',');
+  if (key === lastSub) return;
+  lastSub = key;
+  socket.emit('sub', { view: { x0, y0, x1, y1 }, markets });
+}
+setInterval(sendSubscriptions, 250);
 socket.on('errorMsg', ui.toast);
 socket.on('kicked', (msg) => {
   state.me = null;
@@ -120,9 +138,9 @@ canvas.addEventListener('contextmenu', (e) => {
   if (hit?.kind === 'entity') {
     const ent = state.entities.get(hit.id);
     const mine = ent.kind === 'belt' && SHIP_TYPES[ship.type].mining;
-    cmd(mine ? 'mine' : 'goto', { shipId: ship.id, targetId: ent.id });
+    cmd(mine ? 'mine' : 'goto', { ship: ship.id, target: ent.id });
   } else {
-    cmd('move', { shipId: ship.id, x: wx, y: wy });
+    cmd('move', { ship: ship.id, x: wx, y: wy });
   }
 });
 canvas.addEventListener('wheel', (e) => {
