@@ -1,13 +1,19 @@
 import { GOODS, SHIP_TYPES, STATION_TYPES, PLANET_TYPES, BELT_TYPES, SHIPYARD, SUPPLY, NPC_OWNER, recipeText, canBuyFrom, canSellTo } from '/shared/config.js';
 import { state, myShips, fmt, fmtK, esc, playerColor, playerName, selectedShips, fleetOrder } from '../state.js';
 import { socket, cmd } from '../net.js';
-import { typeName, entitySprite, shipSprite, goodTag, playerPrice, cargoUsed, statusText, queueText, shipSymbol, hasWarn, flightSecs, fmtDuration } from '../util.js';
+import { typeName, entitySprite, shipSprite, goodTag, playerPrice, cargoUsed, statusText, queueText, shipSymbol, hasWarn, flightSecs, fmtDuration, systemName, sectorName } from '../util.js';
+import { ZONE_TYPES } from '/shared/config.js';
 import { $, setHtml, typing } from './dom.js';
 import { barChart, fmtNum, stockBar } from './charts.js';
 import { bus } from './bus.js';
 import { orderShips } from './orders.js';
 
 const entName = (id) => esc(state.entities.get(id)?.name || 'unbekannter Ort');
+/** Sektorname an einer Position (oder "Leerraum") */
+function sectorOfPoint(p) {
+  for (const s of state.sectors.values()) if (Math.hypot(s.bh.x - p.x, s.bh.y - p.y) < 80000) return 'Sektor ' + s.name;
+  return 'Leerraum';
+}
 
 export function renderDetails() {
   if (typing() && $('details').contains(document.activeElement)) return;
@@ -67,14 +73,18 @@ function shipDetails(s) {
   if (s.task) return h + npcTaskHtml(s);
   if (!own) return h + `<div class="muted">${def.desc}</div>`;
   const used = cargoUsed(s);
-  h += `<div class="status-line">${shipSymbol(s)} ${statusText(s)}</div>`;
+  h += `<div class="status-line">${shipSymbol(s)} ${s.transit ? 'Im Wurmloch …' : statusText(s)}</div>`;
+  if (s.zone?.length) h += `<div class="zone-line">${s.zone.map((z) => `<span style="color:${ZONE_TYPES[z].color}">◌ ${ZONE_TYPES[z].name}: ${ZONE_TYPES[z].desc}</span>`).join('<br>')}</div>`;
   if (hasWarn(s)) {
     h += `<div class="warnbox">${Object.values(s.warn).map((w) => `<div>⚠ ${esc(w)}</div>`).join('')}
       <button class="small" data-act="clearWarn" data-ship="${s.id}">Quittieren</button></div>`;
   }
+  const here = state.entities.get(s.dockedAt);
   h += `<div class="kv"><span>Laderaum</span><span>${used} / ${def.cargo}</span>
     <span>Geschwindigkeit</span><span>${def.speed}</span>
-    <span>Bergbau</span><span>${def.mining ? def.mining + ' / s' : '–'}</span></div>`;
+    <span>Bergbau</span><span>${def.mining ? def.mining + ' / s' : '–'}</span>
+    <span>Position</span><span>${here ? esc(systemName(here)) + ' · ' : ''}${esc(sectorOfPoint(s))}</span>
+    <span>Markerfarbe</span><span><input type="color" class="marker-color" data-ship="${s.id}" value="${s.marker || state.me.color}"></span></div>`;
 
   h += `<div class="section"><div class="btnrow">
     <button data-act="routeMenu" data-ship="${s.id}">↻ Route …</button>
@@ -183,7 +193,7 @@ export function marketTable(e, ship) {
 function entityDetails(e) {
   const fav = !!state.favorites[e.id];
   let h = `<div class="det-head"><img src="${entitySprite(e)}" alt=""><div style="flex:1">
-    <div class="title">${esc(e.name)}</div><div class="type">${typeName(e)}</div></div>
+    <div class="title">${esc(e.name)}</div><div class="type">${typeName(e)} · ${esc(systemName(e))} · ${esc(sectorName(e))}</div></div>
     <button class="star${fav ? ' on' : ''}" data-act="fav" data-ent="${e.id}" title="${fav ? 'Aus Favoriten entfernen' : 'Zu Favoriten (F)'}">${fav ? '★' : '☆'}</button></div>`;
   const m = e.market;
   if (e.kind === 'planet') {
@@ -200,6 +210,13 @@ function entityDetails(e) {
     } else if (e.type === 'shipyard') {
       h += `<div class="muted">Kauft Baumaterial und baut daraus Schiffe.</div>`;
     }
+  } else if (e.kind === 'wormhole') {
+    const w = state.wh.get(e.wh);
+    const exit = w && (w.a.id === e.id ? w.b : w.a);
+    const ex = exit && state.entities.get(exit.id);
+    h += `<div class="kv"><span>Ziel</span><span>${exit ? esc(ex ? ex.name + ' · ' + systemName(ex) + ' · ' + sectorName(ex) : 'bekannt (' + sectorOfPoint(exit) + ')') : 'unbekannt – erst durchfliegen'}</span>
+      <span>Durchflug</span><span>5 s, kostenlos, kein Treibstoff</span></div>
+      <div class="muted" style="margin-top:6px">Rechtsklick mit Schiff: hineinfliegen. Bekannte Verbindungen nutzt die Navigation automatisch.</div>`;
   } else if (e.kind === 'belt') {
     h += `<div class="kv"><span>Rohstoff</span><span>${goodTag(BELT_TYPES[e.type].good)}</span><span>Ergiebigkeit</span><span>${Math.round(e.richness * 100)} %</span></div>
       <div class="muted" style="margin-top:6px">Schiffe mit Bergbauausrüstung können hier abbauen (Rechtsklick).</div>`;
@@ -340,6 +357,7 @@ det.addEventListener('click', (ev) => {
 
 det.addEventListener('change', (ev) => {
   const el = ev.target;
+  if (el.classList.contains('marker-color')) cmd('shipSettings', { ship: el.dataset.ship, marker: el.value });
   if (el.classList.contains('fav-note')) cmd('favoriteNote', { target: el.dataset.ent, note: el.value.slice(0, 120) });
 });
 

@@ -1,13 +1,35 @@
 // Gemeinsame Spielregeln und Balancing - wird von Server UND Client importiert.
 
+// Maßstab: Speed 150 = 150 Einheiten/s. 1 Minute Flug = 9.000 Einheiten.
 export const WORLD = {
-  CHUNK_SIZE: 3000,          // Kantenlänge eines Generierungs-Chunks (Welteinheiten)
-  FOG_CELL: 500,             // Kantenlänge einer Nebel-Zelle
-  START_REVEAL_RADIUS: 2300, // Aufgedeckter Radius um den Startpunkt
-  SENSOR_RANGE: 1200,        // Sensorreichweite eines Schiffes
+  FOG_CELL: 1000,            // Kantenlänge einer Nebel-Zelle
+  SENSOR_RANGE: 2500,        // Sensorreichweite eines Schiffes
+  SYSTEM_DETECT: 50000,      // Fernortung: Sonnensysteme in diesem Umkreis werden bekannt
   START_CREDITS: 1500,
   DOCK_OFFSET: 28,           // Abstand zur Oberfläche beim Andocken
+  HEX_SPACING: 240000,       // Abstand der Sektormittelpunkte (Sektor 150.000 + Leerraum 90.000)
+  SECTOR_RADIUS: 75000,      // Radius des besiedelten Sektorbereichs
+  BH_OFFSET: 4000,           // max. Zufallsversatz des Schwarzen Lochs
+  SYSTEM_RADIUS: 4000,       // Sonnensystem ca. 1 Minute Flug im Durchmesser
+  SYSTEM_MIN_DIST: 27000,    // 3 Minuten Flug zwischen Systemen
+  SYSTEMS: [8, 15],
+  GEN_LOOKAHEAD: 30000,      // Nachbarsektor wird erzeugt, wenn ein Schiff so nah an den Sektorrand kommt
+  HUB_DIST: 5000,            // Hub-Abstand zum Schwarzen Loch
+  WORMHOLE_TRANSIT: 5,       // Sekunden
+  START_SLOW: 0.25,          // Langsam-Modifier des Startsystems (Produktion, Verbrauch, Lager)
 };
+
+// Sondergebiete: Ellipsen mit Wirkung innerhalb
+export const ZONE_TYPES = {
+  gravity:   { name: 'Gravitationsstörung', speed: 0.5, color: '#9575cd', desc: '−50 % Geschwindigkeit', weight: 25 },
+  ionstorm:  { name: 'Ionensturm', fuel: 2, color: '#4fc3f7', desc: '+100 % Treibstoffverbrauch', weight: 20 },
+  nebula:    { name: 'Dichter Nebel', sensor: 0.3, color: '#90a4ae', desc: 'Sensorreichweite −70 %', weight: 20 },
+  solarwind: { name: 'Sonnenwindkorridor', speed: 1.4, color: '#ffca28', desc: '+40 % Geschwindigkeit', weight: 20 },
+  plasma:    { name: 'Plasmawolke', mining: 'gas', color: '#f06292', desc: 'Abbau von Spezialressourcen', weight: 15 },
+};
+
+// Spezialisierungs-Tags: Rohstoffe, deren Vorkommen ein System häufiger hat (Wahrscheinlichkeit ×3)
+export const TAG_FACTOR = 3;
 
 export const NET = { TICK_MS: 100, STATE_MS: 200, MARKET_MS: 1000, SAVE_MS: 15000, VIEW_MARGIN: 600 };
 
@@ -20,6 +42,7 @@ export const STORAGE = {
   STATION_FOOD: 500,
   CONSUMER_STATION: { secs: 1500, min: 300 }, // Hotels
   SHIPYARD: 1500,
+  HUB: 3000,
 };
 
 // Statistik: 36 Blöcke à 5 Minuten = 3 Stunden Rückblick (Spielzeit)
@@ -27,7 +50,7 @@ export const STATS = { BUCKET_SECS: 300, BUCKETS: 36 };
 
 // Automatische Versorgung leerer Stationen
 export const SUPPLY = {
-  RANGE: 4500,        // Suchradius für Bezugsquellen
+  RANGE: 30000,       // Suchradius für Bezugsquellen (gleicher Sektor)
   MIN_SOURCE_STOCK: 10,
   COOLDOWN: 20,       // Sekunden nach einer Lieferung
   RETRY_NO_SOURCE: 120,
@@ -122,8 +145,12 @@ export const STATION_TYPES = {
                    recipe: { in: { machinery: 1, electronics: 2 }, out: { robots: 1 }, time: 8 } },
   hotel:         { name: 'Orbitalhotel',       sprite: 'station_ring',    accent: '#26a69a', weight: 10,
                    consume: { passengers: 0.4, food: 0.3, luxury: 0.06 } },
-  shipyard:      { name: 'Werft',              sprite: 'station_shipyard', accent: '#ffa726', weight: 5,
+  shipyard:      { name: 'Werft',              sprite: 'station_shipyard', accent: '#ffa726', weight: 0, radius: 64,
                    buys: ['metal', 'alloys', 'electronics', 'machinery', 'fuel'] },
+  bigyard:       { name: 'Große Werft',        sprite: 'station_bigyard', accent: '#ff7043', weight: 0, radius: 110,
+                   buys: ['metal', 'alloys', 'electronics', 'machinery', 'fuel', 'robots'] },
+  hub:           { name: 'Handels-Hub',        sprite: 'station_hub', accent: '#4dd0e1', weight: 0, radius: 150,
+                   trades: ['food', 'water', 'fuel', 'metal', 'electronics', 'medicine', 'luxury', 'machinery', 'consumer', 'robots'] },
 };
 
 export const BELT_TYPES = {
@@ -161,10 +188,6 @@ export const SHIP_NAMES = ['Albatros', 'Möwe', 'Kranich', 'Falke', 'Sturmvogel'
 
 export const cellKey = (cx, cy) => cx + ',' + cy;
 export const cellOf = (x, y) => [Math.floor(x / WORLD.FOG_CELL), Math.floor(y / WORLD.FOG_CELL)];
-export const chunkOf = (x, y) => {
-  const S = WORLD.CHUNK_SIZE;
-  return [Math.floor((x + S / 2) / S), Math.floor((y + S / 2) / S)];
-};
 
 /** Beschreibt, was eine Station verarbeitet, z.B. "2 Erz → 1 Metall" */
 export function recipeText(recipe) {

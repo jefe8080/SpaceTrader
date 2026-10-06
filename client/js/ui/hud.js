@@ -44,10 +44,17 @@ export function leaveGame(msg) {
 
 $('btnHelp').onclick = () => { $('help').hidden = false; };
 $('btnHelpClose').onclick = () => { $('help').hidden = true; };
-$('btnHome').onclick = () => { state.follow = null; state.camera.x = 0; state.camera.y = 0; };
+
 
 // ---------------- Topbar ----------------
+$('btnMarker').onclick = () => {
+  state.markerMode = state.markerMode === 'state' ? 'color' : 'state';
+  try { localStorage.setItem('st_marker', state.markerMode); } catch { /* egal */ }
+  renderTop();
+};
+
 export function renderTop() {
+  $('btnMarker').textContent = state.markerMode === 'state' ? '◆ Marker: Zustand' : '◆ Marker: Farbe';
   $('credits').textContent = fmt(state.credits) + ' Cr';
   $('shipCount').textContent = myShips().length;
   setHtml($('onlinePlayers'), state.players.filter((p) => p.online)

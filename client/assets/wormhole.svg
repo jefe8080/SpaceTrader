@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Wurmloch (nur für die Oberfläche, auf der Karte prozedural gezeichnet) -->
+  <defs>
+    <radialGradient id="g" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#0a001e"/>
+      <stop offset="0.35" stop-color="#7c3aed"/>
+      <stop offset="0.65" stop-color="#4fc3f7" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#4f78ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="64" cy="64" r="62" fill="url(#g)"/>
+  <g fill="none" stroke="#d1c4e9" stroke-width="3" stroke-linecap="round" opacity="0.85">
+    <path d="M64 64 C64 44 84 40 92 52 C100 66 88 88 64 90 C36 92 22 66 30 46"/>
+    <path d="M64 64 C64 84 44 88 36 76 C28 62 40 40 64 38 C92 36 106 62 98 82" opacity="0.6"/>
+  </g>
+  <circle cx="64" cy="64" r="9" fill="#05000f"/>
+</svg>

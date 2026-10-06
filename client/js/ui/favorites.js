@@ -1,7 +1,7 @@
 import { GOODS, canBuyFrom, canSellTo } from '/shared/config.js';
 import { state, esc, selectedShips } from '../state.js';
 import { cmd } from '../net.js';
-import { typeName, playerPrice, flightSecs, fmtDuration, entitySprite } from '../util.js';
+import { typeName, playerPrice, flightSecs, fmtDuration, entitySprite, systemName, sectorName } from '../util.js';
 import { $, registerModal, openModal, closeModal, isOpen, toast, setHtml } from './dom.js';
 import { orderShips, orderBuy } from './orders.js';
 import { openRouteEditor, addStopToRoute } from './routes.js';
@@ -12,9 +12,9 @@ const card = $('favCard');
 card.innerHTML = '<div id="favList"></div><div id="favBuy" class="inline-form" hidden></div>';
 const view = { sort: 'name', good: '', sector: '' };
 
-/** Sektor- und Systemname eines Objekts (ab Phase 2 aus der Welt) */
-export const sectorOf = (e) => e.sectorName || '–';
-export const systemOf = (e) => e.systemName || '–';
+/** Sektor- und Systemname eines Objekts */
+export const sectorOf = (e) => sectorName(e);
+export const systemOf = (e) => systemName(e);
 
 function priceLine(e) {
   const parts = [];

@@ -1,18 +1,24 @@
 import { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, buyPrice, sellPrice, canBuyFrom } from '/shared/config.js';
+import { planPath } from '/shared/nav.js';
 import { state, esc } from './state.js';
 import { spriteUrl } from './assets.js';
 
 export function typeName(e) {
   if (e.kind === 'planet') return PLANET_TYPES[e.type].name;
   if (e.kind === 'station') return STATION_TYPES[e.type].name;
+  if (e.kind === 'wormhole') return 'Wurmloch';
   return 'Asteroidenfeld · ' + GOODS[BELT_TYPES[e.type].good].name;
 }
 
 export function entitySprite(e) {
   if (e.kind === 'planet') return spriteUrl(PLANET_TYPES[e.type].sprite);
   if (e.kind === 'station') return spriteUrl(STATION_TYPES[e.type].sprite, STATION_TYPES[e.type].accent);
+  if (e.kind === 'wormhole') return '/assets/wormhole.svg';
   return spriteUrl(BELT_TYPES[e.type].sprite);
 }
+
+export const systemName = (e) => state.systems.get(e?.system)?.name || (e?.type === 'hub' ? 'Schwarzes Loch' : '–');
+export const sectorName = (e) => state.sectors.get(e?.sector)?.name || '–';
 
 export const shipSprite = (type, color) => spriteUrl(SHIP_TYPES[type].sprite, color);
 
@@ -30,8 +36,11 @@ export const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 export const cargoUsed = (s) => Object.values(s.cargo || {}).reduce((a, b) => a + b, 0);
 export const shipSpeed = (s) => SHIP_TYPES[s.type].speed;
 
-/** Geschätzte Flugzeit in Sekunden */
-export const flightSecs = (ship, e) => (ship && e ? dist(ship, e) / shipSpeed(ship) : null);
+/** Geschätzte Flugzeit in Sekunden: bekannte Wurmlöcher und Sondergebiete eingerechnet */
+export function flightSecs(ship, e) {
+  if (!ship || !e) return null;
+  return planPath(ship, e, [...state.wh.values()], shipSpeed(ship), [...state.zones.values()]).time;
+}
 export const fmtDuration = (secs) => {
   if (secs === null || secs === undefined) return '–';
   if (secs < 60) return `${Math.round(secs)} s`;

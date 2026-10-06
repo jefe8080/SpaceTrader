@@ -1,9 +1,7 @@
 // Lädt die SVG-Grafiken, ersetzt die Platzhalterfarbe #ff00ff und rastert sie in Canvas-Caches.
-const SPRITES = ['planet_agrar', 'planet_mining', 'planet_ice', 'planet_urban', 'planet_resort',
-  'planet_gasgiant', 'planet_jungle', 'planet_volcanic', 'asteroid_rare', 'ship_versorger',
-  'station_factory', 'station_ring', 'station_shipyard',
-  'ship_spatz', 'ship_lastesel', 'ship_maulwurf', 'ship_kolibri',
-  'asteroid_rock', 'asteroid_ice', 'asteroid_crystal'];
+import { PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES } from '/shared/config.js';
+
+const SPRITES = [...new Set([PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES].flatMap((t) => Object.values(t).map((d) => d.sprite)))];
 const PLACEHOLDER = /#ff00ff/gi;
 
 const sources = new Map(); // name -> SVG-Text

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Große Werft: zwei Baudocks mit Großschiffen, Kranbrücke. #ff00ff = Akzentfarbe -->
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0.3" stop-color="#ff00ff" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#ff00ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hull" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#cfd8dc"/>
+      <stop offset="1" stop-color="#455a64"/>
+    </linearGradient>
+    <linearGradient id="ship" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#607d8b"/>
+      <stop offset="1" stop-color="#eceff1"/>
+    </linearGradient>
+  </defs>
+  <circle cx="128" cy="128" r="126" fill="url(#glow)"/>
+  <!-- Rückgrat -->
+  <rect x="116" y="18" width="24" height="220" rx="6" fill="url(#hull)" stroke="#263238" stroke-width="3"/>
+  <g stroke="#37474f" stroke-width="2"><line x1="116" y1="60" x2="140" y2="60"/><line x1="116" y1="100" x2="140" y2="100"/><line x1="116" y1="156" x2="140" y2="156"/><line x1="116" y1="196" x2="140" y2="196"/></g>
+  <!-- Docks -->
+  <g fill="none" stroke="#78909c" stroke-width="7">
+    <rect x="22" y="40" width="88" height="176" rx="6"/>
+    <rect x="146" y="40" width="88" height="176" rx="6"/>
+  </g>
+  <g stroke="#546e7a" stroke-width="2.5" fill="none">
+    <path d="M22 84 H110 M22 128 H110 M22 172 H110 M146 84 H234 M146 128 H234 M146 172 H234"/>
+  </g>
+  <!-- Großschiffe im Bau -->
+  <path d="M66 54 C84 64 92 92 92 128 C92 170 84 196 66 204 C48 196 40 170 40 128 C40 92 48 64 66 54Z" fill="url(#ship)" stroke="#263238" stroke-width="2"/>
+  <path d="M66 54 C84 64 92 92 92 128 L40 128 C40 92 48 64 66 54Z" fill="none" stroke="#ff00ff" stroke-width="2" stroke-dasharray="5 4"/>
+  <path d="M190 70 C204 80 210 100 210 128 C210 160 204 180 190 188 C176 180 170 160 170 128 C170 100 176 80 190 70Z" fill="url(#ship)" stroke="#263238" stroke-width="2" opacity="0.85"/>
+  <g stroke="#37474f" stroke-width="1.5" opacity="0.7"><path d="M46 100 H86 M44 150 H88 M174 110 H206 M174 150 H206"/></g>
+  <!-- Kranbrücken -->
+  <g fill="#ffca28" stroke="#5d4037" stroke-width="1.5">
+    <rect x="18" y="112" width="96" height="8" rx="2"/>
+    <rect x="142" y="140" width="96" height="8" rx="2"/>
+  </g>
+  <g fill="#fff59d"><circle cx="66" cy="124" r="4"/><circle cx="190" cy="152" r="4"/></g>
+  <!-- Kommandomodul -->
+  <rect x="106" y="108" width="44" height="40" rx="8" fill="url(#hull)" stroke="#263238" stroke-width="2"/>
+  <rect x="116" y="118" width="24" height="20" rx="3" fill="#ff00ff"/>
+  <g fill="#ff00ff">
+    <circle cx="22" cy="40" r="5"/><circle cx="110" cy="40" r="5"/><circle cx="146" cy="40" r="5"/><circle cx="234" cy="40" r="5"/>
+    <circle cx="22" cy="216" r="5"/><circle cx="110" cy="216" r="5"/><circle cx="146" cy="216" r="5"/><circle cx="234" cy="216" r="5"/>
+  </g>
+</svg>

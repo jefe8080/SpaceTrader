@@ -1,5 +1,6 @@
 import { NET, NPC_OWNER, cellKey, cellOf } from '../shared/config.js';
 import { runCommand } from './handlers/index.js';
+import { sectorSummary } from './game.js';
 
 const r1 = (v) => Math.round(v * 10) / 10;
 const MAX_MARKET_SUBS = 400;
@@ -14,9 +15,12 @@ export class Net {
     this.io = io;
     this.game = game;
     this.sessions = new Map(); // playerId -> Session
-    game.on('reveal', (p, cells, entities) => {
+    game.on('reveal', (p, d) => {
       const s = this.sessions.get(p.id);
-      if (s) s.socket.emit('reveal', { cells, entities: entities.map((e) => serializeEntity(e)) });
+      if (!s) return;
+      const out = { ...d };
+      if (d.entities) out.entities = d.entities.map((e) => serializeEntity(e));
+      s.socket.emit('reveal', out);
     });
     game.on('log', (ship, msg) => this.sessions.get(ship.owner)?.socket.emit('log', { ship: ship.name, msg }));
     io.on('connection', (socket) => this.onConnection(socket));
@@ -97,10 +101,15 @@ export class Net {
     const p = s.player;
     const entities = [];
     for (const k of p.revealed) for (const id of this.game.world.entitiesInCell(k)) entities.push(serializeEntity(this.game.world.entities.get(id)));
+    const w = this.game.world;
     s.socket.emit('welcome', {
       you: { id: p.id, name: p.name, color: p.color },
       cells: [...p.revealed],
       entities,
+      sectors: [...p.known.sector].map((k) => w.sectors.get(k)).filter(Boolean).map(sectorSummary),
+      systems: [...p.known.system].map((id) => w.systems.get(id)).filter(Boolean),
+      zones: [...p.known.zone].map((id) => this.game.findZone(id)).filter(Boolean),
+      wh: [...p.known.wh].filter((id) => w.wormholes.has(id)).map((id) => this.game.wormholeInfo(id)),
       players: this.game.playerList(this.online()),
     });
     s.sentMe = null;
@@ -188,8 +197,13 @@ class Session {
 
 // ---------- Serialisierung ----------
 export function serializeEntity(e) {
-  return { id: e.id, kind: e.kind, type: e.type, name: e.name, x: Math.round(e.x), y: Math.round(e.y), radius: e.radius,
-    richness: e.richness, market: e.market ? serializeMarket(e.market) : null };
+  const o = { id: e.id, kind: e.kind, type: e.type, name: e.name, x: Math.round(e.x), y: Math.round(e.y), radius: e.radius,
+    sector: e.sector, system: e.system, market: e.market ? serializeMarket(e.market) : null };
+  if (e.richness) o.richness = e.richness;
+  if (e.noBuy) o.noBuy = true;
+  if (e.size) o.size = e.size;
+  if (e.wh) o.wh = e.wh;
+  return o;
 }
 
 /** Struktur des Marktes (Rollen, Kapazitäten) plus aktueller Zustand */
@@ -231,7 +245,7 @@ export function diffMarket(prev, cur) {
 }
 
 function compactShip(s) {
-  return { id: s.id, x: r1(s.x), y: r1(s.y), a: Math.round(s.angle * 100) / 100, vx: r1(s.vx), vy: r1(s.vy), st: s.state, dk: s.dockedAt };
+  return { id: s.id, x: Math.round(s.x), y: Math.round(s.y), a: Math.round(s.angle * 100) / 100, vx: r1(s.vx), vy: r1(s.vy), st: s.state, dk: s.dockedAt };
 }
 
 function foreignInfo(s) {
@@ -249,6 +263,8 @@ function shipDetail(s) {
   return {
     owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, log: s.log, group: s.group, ord: s.ord,
     queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},
+    nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,
+    transit: s.transit ? s.transit.exit : null, zone: s.zone || null, marker: s.marker || null,
   };
 }
 

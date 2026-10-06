@@ -6,35 +6,43 @@ import { PLANET_TYPES, STATION_TYPES, STATION_FOOD, SHIP_TYPES, SHIPYARD, STORAG
  * - Das Verhalten pro Tick steckt in einer Strategie (planet, factory, consumer, shipyard), nicht in Verzweigungen nach kind/type.
  */
 
-const capOf = (rate, { secs, min }) => Math.max(min, Math.round(rate * secs));
+const capOf = (rate, { secs, min }, slow = 1) => Math.max(Math.round(min * slow), Math.round(rate * secs));
 
 function slot(role, rate, cap, stock) {
   return { role, rate, cap, stock };
 }
 
-/** Erzeugt den Markt einer Station oder eines Planeten. `r` ist ein Zufallsgenerator (0..1). */
-export function createMarket(kind, type, r, scale = 1) {
+/**
+ * Erzeugt den Markt einer Station oder eines Planeten. `r` ist ein Zufallsgenerator (0..1).
+ * scale: Größenfaktor (Planeten), opts.slow: Langsam-Modifier (Raten und Lager, Startsystem)
+ */
+export function createMarket(kind, type, r, scale = 1, { slow = 1 } = {}) {
   const goods = {};
   const produce = (g, rate, cap) => { goods[g] = slot('produce', rate, cap, cap * (0.4 + 0.4 * r())); };
   const consume = (g, rate, cap) => { goods[g] = slot('consume', rate, cap, cap * (0.1 + 0.35 * r())); };
 
   if (kind === 'planet') {
     const def = PLANET_TYPES[type];
-    for (const [g, rate] of Object.entries(def.produce)) produce(g, rate * scale, capOf(rate * scale, STORAGE.PLANET_PRODUCE));
-    for (const [g, rate] of Object.entries(def.consume)) consume(g, rate * scale, capOf(rate * scale, STORAGE.PLANET_CONSUME));
+    for (const [g, rate] of Object.entries(def.produce)) produce(g, rate * scale, capOf(rate * scale, STORAGE.PLANET_PRODUCE, slow));
+    for (const [g, rate] of Object.entries(def.consume)) consume(g, rate * scale, capOf(rate * scale, STORAGE.PLANET_CONSUME, slow));
     return { strategy: 'planet', goods, eff: 1 };
   }
   const def = STATION_TYPES[type];
   if (def.recipe) {
     const { in: inp, out, time } = def.recipe;
-    for (const [g, n] of Object.entries(inp)) consume(g, n / time, n * STORAGE.STATION_INPUT_PER_UNIT);
-    for (const [g, n] of Object.entries(out)) produce(g, n / time, n * STORAGE.STATION_OUTPUT_PER_UNIT);
-    consume('food', STATION_FOOD, STORAGE.STATION_FOOD);
-    return { strategy: 'factory', recipe: type, goods, eff: 1, progress: 0, supply: null };
+    for (const [g, n] of Object.entries(inp)) consume(g, (n / time) * slow, Math.round(n * STORAGE.STATION_INPUT_PER_UNIT * slow));
+    for (const [g, n] of Object.entries(out)) produce(g, (n / time) * slow, Math.round(n * STORAGE.STATION_OUTPUT_PER_UNIT * slow));
+    consume('food', STATION_FOOD * slow, Math.round(STORAGE.STATION_FOOD * slow));
+    return { strategy: 'factory', recipe: type, goods, eff: 1, progress: 0, supply: null, speed: slow };
   }
   if (def.consume) {
-    for (const [g, rate] of Object.entries(def.consume)) consume(g, rate, capOf(rate, STORAGE.CONSUMER_STATION));
+    for (const [g, rate] of Object.entries(def.consume)) consume(g, rate * slow, capOf(rate * slow, STORAGE.CONSUMER_STATION, slow));
     return { strategy: 'consumer', goods, eff: 1 };
+  }
+  if (def.trades) {
+    // Hub: Händler mit großem Puffer-Lager
+    for (const g of def.trades) goods[g] = slot('trade', 0, STORAGE.HUB, STORAGE.HUB * (0.35 + 0.3 * r()));
+    return { strategy: 'hub', goods, eff: 1 };
   }
   for (const g of def.buys) goods[g] = slot('consume', 0, STORAGE.SHIPYARD, 20 * r());
   return { strategy: 'shipyard', goods, eff: 1, forSale: [], building: null, nextBuild: Math.floor(r() * SHIPYARD.BUILD_ORDER.length) };
@@ -93,14 +101,14 @@ export const STRATEGIES = {
     tick(e, m, dt, now) {
       const food = m.goods.food;
       let mult = 1;
-      if (food.stock > 0) consumeSlot(m, now, 'food', food, STATION_FOOD * dt);
+      if (food.stock > 0) consumeSlot(m, now, 'food', food, STATION_FOOD * (m.speed || 1) * dt);
       else mult = 0.5; // ohne Verpflegung halbe Geschwindigkeit
       const { in: inp, out, time } = STATION_TYPES[m.recipe].recipe;
       const canRun = Object.entries(inp).every(([g, n]) => m.goods[g].stock >= n)
         && Object.entries(out).every(([g, n]) => m.goods[g].stock + n <= m.goods[g].cap);
       m.eff = canRun ? mult : 0;
       if (!canRun) return;
-      m.progress += (dt * mult) / time;
+      m.progress += (dt * mult * (m.speed || 1)) / time;
       if (m.progress >= 1) {
         m.progress -= 1;
         for (const [g, n] of Object.entries(inp)) { m.goods[g].stock -= n; stat(m, now, 'c', g, n); }
@@ -126,6 +134,10 @@ export const STRATEGIES = {
       for (const [g, s] of Object.entries(m.goods)) consumeSlot(m, now, g, s, s.rate * dt);
       m.eff = Object.values(m.goods).every((s) => s.stock > 0) ? 1 : 0.5;
     },
+  },
+
+  hub: {
+    tick() {},
   },
 
   shipyard: {

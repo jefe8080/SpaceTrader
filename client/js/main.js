@@ -1,7 +1,9 @@
 import { state, selectedShips } from './state.js';
 import { socket } from './net.js';
 import { loadAssets } from './assets.js';
-import { initRenderer, render, screenToWorld, pickAt } from './render.js';
+import { initRenderer, render, screenToWorld, pickAt, viewMode, ZOOM_PRESETS, ZOOM_MIN, ZOOM_MAX } from './render.js';
+import { hexCenter, parseHexKey } from '/shared/hex.js';
+import { WORLD } from '/shared/config.js';
 import * as ui from './ui/index.js';
 
 await loadAssets();
@@ -25,6 +27,10 @@ socket.on('welcome', (d) => {
   state.players = d.players;
   state.cells = new Set(d.cells);
   state.entities = new Map(d.entities.map((e) => [e.id, e]));
+  state.sectors = new Map(d.sectors.map((s) => [s.key, s]));
+  state.systems = new Map(d.systems.map((s) => [s.id, s]));
+  state.zones = new Map(d.zones.map((z) => [z.id, z]));
+  state.wh = new Map(d.wh.map((w) => [w.id, w]));
   state.ships.clear();
   state.selection.clear();
   lastSub = '';
@@ -70,9 +76,14 @@ socket.on('shipStats', (d) => {
   state.shipStats.set(d.ship, d);
   ui.scheduleRender();
 });
-socket.on('reveal', ({ cells, entities }) => {
-  for (const c of cells) state.cells.add(c);
-  for (const e of entities) state.entities.set(e.id, e);
+socket.on('reveal', (d) => {
+  for (const c of d.cells || []) state.cells.add(c);
+  for (const e of d.entities || []) state.entities.set(e.id, e);
+  for (const s of d.sectors || []) state.sectors.set(s.key, s);
+  for (const s of d.systems || []) state.systems.set(s.id, s);
+  for (const z of d.zones || []) state.zones.set(z.id, z);
+  for (const w of d.wh || []) state.wh.set(w.id, w);
+  if (d.systems || d.sectors || d.wh) ui.scheduleRender(true);
 });
 socket.on('markets', (upd) => {
   for (const [id, m] of Object.entries(upd)) {
@@ -102,9 +113,11 @@ function sendSubscriptions() {
   const [x0, y0] = screenToWorld(0, 0);
   const [x1, y1] = screenToWorld(innerWidth, innerHeight);
   const ids = new Set(ui.dialogMarkets());
-  for (const e of state.entities.values()) {
-    if (ids.size >= 400) break;
-    if (e.market && e.x > x0 - 300 && e.x < x1 + 300 && e.y > y0 - 300 && e.y < y1 + 300) ids.add(e.id);
+  if (viewMode() === 'system') {
+    for (const e of state.entities.values()) {
+      if (ids.size >= 400) break;
+      if (e.market && e.x > x0 - 300 && e.x < x1 + 300 && e.y > y0 - 300 && e.y < y1 + 300) ids.add(e.id);
+    }
   }
   const markets = [...ids].slice(0, 400);
   const q = (v) => Math.round(v / Math.max(200, (x1 - x0) / 10));
@@ -125,6 +138,7 @@ addEventListener('mousemove', (e) => {
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     if (Math.hypot(dx, dy) > 4) drag.moved = true;
     if (drag.moved) {
+      camAnim = null;
       cam.x = drag.cx - dx / cam.zoom;
       cam.y = drag.cy - dy / cam.zoom;
       state.follow = null;
@@ -142,6 +156,19 @@ addEventListener('mouseup', (e) => {
   const hit = pickAt(e.clientX, e.clientY);
   if (state.pickMode) {
     if (hit?.kind === 'entity') state.pickMode(hit.id);
+    return;
+  }
+  // System bzw. Sektor anklicken: hineinzoomen
+  if (hit?.kind === 'system') {
+    const sy = state.systems.get(hit.id);
+    state.follow = null;
+    flyCamera(sy.x, sy.y, 0.09);
+    return;
+  }
+  if (hit?.kind === 'sector') {
+    const s = state.sectors.get(hit.id);
+    state.follow = null;
+    flyCamera(s.bh.x, s.bh.y, ZOOM_PRESETS[2]);
     return;
   }
   // Strg+Klick auf eigenes Schiff: Mehrfachauswahl
@@ -164,13 +191,17 @@ canvas.addEventListener('contextmenu', (e) => {
   const hit = pickAt(e.clientX, e.clientY);
   const [wx, wy] = screenToWorld(e.clientX, e.clientY);
   state.clickFx = { x: wx, y: wy, t: performance.now() };
-  const target = hit?.kind === 'entity' ? state.entities.get(hit.id) : { x: wx, y: wy };
+  let target = { x: wx, y: wy };
+  if (hit?.kind === 'entity') target = state.entities.get(hit.id);
+  else if (hit?.kind === 'system') { const sy = state.systems.get(hit.id); target = { x: sy.x + 1500, y: sy.y }; }
+  else if (hit?.kind === 'sector') { const s = state.sectors.get(hit.id); target = s.hubPos ? { x: s.hubPos.x + 400, y: s.hubPos.y } : { x: s.bh.x + 3000, y: s.bh.y }; }
   ui.orderShips(ships, target, e.shiftKey);
 });
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
   const [wx, wy] = screenToWorld(e.clientX, e.clientY);
-  cam.zoom = Math.min(2.5, Math.max(0.05, cam.zoom * Math.exp(-e.deltaY * 0.0015)));
+  camAnim = null;
+  cam.zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, cam.zoom * Math.exp(-e.deltaY * 0.0015)));
   if (!state.follow) {
     const [nx, ny] = screenToWorld(e.clientX, e.clientY);
     cam.x += wx - nx;
@@ -187,6 +218,9 @@ addEventListener('keydown', (e) => {
     state.follow = state.selected.id;
   } else if (e.ctrlKey || e.metaKey || e.altKey) {
     // keine Kürzel mit Modifikatoren
+  } else if (ZOOM_PRESETS[e.key]) {
+    // Schnellwahl der Zoomstufe, Mittelpunkt bleibt (bzw. folgt dem Schiff)
+    flyCamera(cam.x, cam.y, ZOOM_PRESETS[e.key]);
   } else if (e.key === 'r' || e.key === 'R') {
     ui.toggleModal('routesOverview');
   } else if (e.key === 'f' || e.key === 'F') {
@@ -194,11 +228,35 @@ addEventListener('keydown', (e) => {
   }
 });
 
+// ---------------- Kamera ----------------
+let camAnim = null;
+/** Sanfter Kameraflug (logarithmischer Zoom) */
+function flyCamera(x, y, zoom) {
+  camAnim = { x0: cam.x, y0: cam.y, z0: cam.zoom, x, y, z: zoom, t: 0 };
+}
+document.getElementById('btnHome').onclick = () => {
+  const home = [...state.systems.values()].find((s) => s.start);
+  state.follow = null;
+  if (home) flyCamera(home.x, home.y, 0.12);
+};
+void hexCenter; void parseHexKey; void WORLD;
+
 // ---------------- Hauptschleife ----------------
 let last = performance.now();
+let lastMode = null;
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000);
   last = now;
+  if (camAnim) {
+    camAnim.t = Math.min(1, camAnim.t + dt / 0.6);
+    const k = 1 - Math.pow(1 - camAnim.t, 3);
+    cam.zoom = Math.exp(Math.log(camAnim.z0) + (Math.log(camAnim.z) - Math.log(camAnim.z0)) * k);
+    if (!state.follow) {
+      cam.x = camAnim.x0 + (camAnim.x - camAnim.x0) * k;
+      cam.y = camAnim.y0 + (camAnim.y - camAnim.y0) * k;
+    }
+    if (camAnim.t >= 1) camAnim = null;
+  }
   if (!state.me) cam.x += dt * 25; // langsamer Flug im Login-Hintergrund
   if (state.follow) {
     const s = state.ships.get(state.follow);
@@ -209,6 +267,11 @@ function frame(now) {
     } else state.follow = null;
   }
   render(now, dt);
+  const mode = viewMode();
+  if (mode !== lastMode) {
+    lastMode = mode;
+    document.getElementById('zoomInfo').textContent = { system: 'Ansicht: System [1]', sector: 'Ansicht: Sektor [2]', galaxy: 'Ansicht: Galaxie [3]' }[mode];
+  }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

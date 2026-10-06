@@ -12,6 +12,11 @@ export const state = {
   shipStats: new Map(), // shipId -> { all, d24, h1 }
   players: [],
   cells: new Set(),     // aufgedeckte Nebel-Zellen
+  sectors: new Map(),   // "q,r" -> Sektor-Kurzinfo
+  systems: new Map(),   // bekannte Sonnensysteme
+  zones: new Map(),     // bekannte Sondergebiete
+  wh: new Map(),        // bekannte Wurmlochverbindungen { id, a, b }
+  markerMode: (() => { try { return localStorage.getItem('st_marker') || 'color'; } catch { return 'color'; } })(),
   entities: new Map(),  // id -> Entity inkl. Markt
   ships: new Map(),     // id -> Schiff (+ rx/ry/ra für Interpolation)
   selected: null,       // { kind: 'ship' | 'entity', id } – primäre Auswahl

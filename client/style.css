@@ -240,3 +240,15 @@ select.small { padding: 1px 4px; font-size: 12px; }
 .fav-prices { font-size: 12px; margin-top: 2px; }
 .fav-side { text-align: right; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
 .inline-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; padding: 8px; border: 1px solid var(--accent); border-radius: 8px; }
+
+/* ---------- Phase 2: Welt ---------- */
+.zone-line { font-size: 12px; margin-bottom: 6px; }
+.marker-color { width: 34px; height: 20px; padding: 0; border: 1px solid var(--panel-border); background: transparent; }
+.zone-info, .zoom-info { font-size: 11px; color: var(--muted); }
+#topbar { gap: 12px; }
+#topbar button { white-space: nowrap; }
+#topbar .stat .value { white-space: nowrap; }
+@media (max-width: 1250px) {
+  #topbar kbd, .zoom-info, #onlinePlayers { display: none; }
+  .logo { display: none; }
+}

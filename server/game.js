@@ -1,12 +1,14 @@
-import { WORLD, GOODS, BELT_TYPES, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
+import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
   cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, unitPrice } from '../shared/config.js';
 import { World } from './world.js';
+import { hexAt, hexKey } from '../shared/hex.js';
+import { planPath, zoneEffects } from '../shared/nav.js';
 import { tickMarket, stat, missingInput } from './markets.js';
 import { updateShip, cargoFree, setWarn } from './ships.js';
 import { Store } from './db.js';
 import { addToBuckets, bucketOf, summary, sumWindow, balance, SHIP_STATS } from './stats.js';
 
-export const WORLD_GEN_VERSION = 1; // ändert sich die Generierung inkompatibel, wird die Welt neu erzeugt
+export const WORLD_GEN_VERSION = 2; // ändert sich die Generierung inkompatibel, wird die Welt neu erzeugt
 const ALL_TABLES = ['players', 'ships', 'sectors', 'entities', 'markets', 'routes', 'favorites', 'discoveries', 'ownership',
   'market_stats', 'ship_stats', 'route_stats', 'meta'];
 
@@ -26,7 +28,7 @@ export class Game {
     this.listeners = { reveal: [], log: [], routes: [], player: [] };
     if (!this.load()) {
       this.world = new World(seed ?? ((Math.random() * 2 ** 31) | 0));
-      this.world.ensureChunk(0, 0);
+      this.world.ensureSector(0, 0);
     }
   }
 
@@ -49,7 +51,7 @@ export class Game {
     this.world = new World(st.getMeta('seed'));
     const markets = new Map(st.loadAll('markets').map((r) => [r.id, r.data]));
     const stats = groupRows(st.loadAll('market_stats'), 'entity');
-    for (const r of st.loadAll('sectors')) this.world.chunks.add(r.id);
+    for (const r of st.loadAll('sectors')) this.world.addSector(r.data);
     for (const r of st.loadAll('entities')) {
       const e = r.data;
       if (markets.has(e.id)) {
@@ -58,10 +60,12 @@ export class Game {
       }
       this.world.addEntity(e);
     }
-    for (const r of st.loadAll('players')) this.players.set(r.id, { ...r.data, revealed: new Set(), favorites: {} });
+    for (const r of st.loadAll('players')) this.players.set(r.id, { ...r.data, revealed: new Set(), favorites: {}, known: newKnown() });
     for (const d of st.loadDiscoveries()) {
       const p = this.players.get(d.player);
-      if (p && d.kind === 'cell') p.revealed.add(d.key);
+      if (!p) continue;
+      if (d.kind === 'cell') p.revealed.add(d.key);
+      else p.known[d.kind]?.add(d.key);
     }
     for (const r of st.loadAll('favorites')) {
       const p = this.players.get(r.player);
@@ -89,7 +93,7 @@ export class Game {
       st.setMeta('seed', this.world.seed);
       st.setMeta('time', this.time);
       st.setMeta('counters', this.counters);
-      n += st.sync('sectors', [...this.world.chunks].map((k) => ({ key: [k], data: {} })));
+      n += st.sync('sectors', [...this.world.sectors.values()].map((sec) => ({ key: [sec.key], data: sec })));
       const ents = [], mkts = [], mstats = [];
       for (const e of this.world.entities.values()) {
         const { market, ...stat } = e;
@@ -106,7 +110,7 @@ export class Game {
       st.trimStats('market_stats', Math.floor(this.time / STATS.BUCKET_SECS) - STATS.BUCKETS);
       const favs = [];
       n += st.sync('players', [...this.players.values()].map((p) => {
-        const { revealed, favorites, ...data } = p;
+        const { revealed, favorites, known, ...data } = p;
         for (const [ent, f] of Object.entries(favorites)) favs.push({ key: [p.id, ent], data: f });
         return { key: [p.id], data };
       }));
@@ -146,9 +150,17 @@ export class Game {
   createPlayer(name) {
     const id = 'p' + ++this.counters.player;
     const p = { id, name, color: PLAYER_COLORS[(this.counters.player - 1) % PLAYER_COLORS.length], credits: WORLD.START_CREDITS,
-      revealed: new Set(), favorites: {}, groups: [], stopLoss: 0, createdAt: Date.now(), lastSeen: Date.now() };
+      revealed: new Set(), favorites: {}, known: newKnown(), groups: [], stopLoss: 0, createdAt: Date.now(), lastSeen: Date.now() };
     this.players.set(id, p);
-    this.revealAround(p, 0, 0, WORLD.START_REVEAL_RADIUS);
+    // Startwissen: Startsystem aufgedeckt, alle Systeme und Sondergebiete des Startsektors bekannt
+    const home = this.world.sectors.get('0,0');
+    const startSys = home.systems.find((x) => x.start);
+    this.revealAround(p, startSys.x, startSys.y, WORLD.SYSTEM_RADIUS + 1500);
+    const hub = this.world.entities.get(home.hub);
+    this.revealAround(p, hub.x, hub.y, 2500);
+    this.discover(p, 'sector', home.key);
+    for (const sy of home.systems) this.discover(p, 'system', sy.id);
+    for (const z of home.zones) this.discover(p, 'zone', z.id);
     this.spawnShip(p, 'spatz', this.world.entities.get('origin_yard'));
     return p;
   }
@@ -212,10 +224,9 @@ export class Game {
     for (let cx = Math.floor((x - r) / C); cx <= Math.floor((x + r) / C); cx++) {
       for (let cy = Math.floor((y - r) / C); cy <= Math.floor((y + r) / C); cy++) {
         const mx = (cx + 0.5) * C, my = (cy + 0.5) * C;
-        if (Math.hypot(mx - x, my - y) > r) continue;
+        if (Math.hypot(mx - x, my - y) > r + C * 0.35) continue;
         const k = cellKey(cx, cy);
         if (p.revealed.has(k)) continue;
-        this.world.ensureChunkAt(mx, my); // Welt wird erst generiert, wenn sie entdeckt wird
         p.revealed.add(k);
         newCells.push(k);
         this.newDiscoveries.push([p.id, 'cell', k]);
@@ -223,8 +234,102 @@ export class Game {
     }
     if (!newCells.length) return;
     const entities = [];
-    for (const k of newCells) for (const id of this.world.entitiesInCell(k)) entities.push(this.world.entities.get(id));
-    this.emit('reveal', p, newCells, entities);
+    for (const k of newCells) {
+      for (const id of this.world.entitiesInCell(k)) {
+        const e = this.world.entities.get(id);
+        entities.push(e);
+        // Das andere Ende eines Wurmlochs ist schon bekannt: Verbindung gilt als aufgedeckt
+        if (e.kind === 'wormhole') {
+          const other = this.world.entities.get(e.pair);
+          if (other && this.isKnown(p, other)) this.discover(p, 'wh', e.wh);
+        }
+      }
+    }
+    this.emit('reveal', p, { cells: newCells, entities });
+  }
+
+  /** Entdeckung buchen (system, sector, zone, wh). Meldet Neues an den Client. */
+  discover(p, kind, key) {
+    if (p.known[kind].has(key)) return false;
+    p.known[kind].add(key);
+    this.newDiscoveries.push([p.id, kind, key]);
+    const out = {};
+    if (kind === 'system') out.systems = [this.world.systems.get(key)];
+    if (kind === 'sector') out.sectors = [sectorSummary(this.world.sectors.get(key))];
+    if (kind === 'zone') out.zones = [this.findZone(key)];
+    if (kind === 'wh') out.wh = [this.wormholeInfo(key)];
+    this.emit('reveal', p, out);
+    return true;
+  }
+
+  findZone(id) {
+    const [, q, r] = /^z(-?\d+)_(-?\d+)_/.exec(id) || [];
+    return this.world.sectors.get(hexKey(Number(q), Number(r)))?.zones.find((z) => z.id === id);
+  }
+
+  wormholeInfo(id) {
+    const w = this.world.wormholes.get(id);
+    const a = this.world.entities.get(w.a), b = this.world.entities.get(w.b);
+    return { id, a: { id: a.id, x: a.x, y: a.y }, b: { id: b.id, x: b.x, y: b.y } };
+  }
+
+  /** Bekannte Wurmlöcher eines Spielers mit beiden Enden (für die Navigation) */
+  knownWormholes(p) {
+    const out = [];
+    for (const id of p.known.wh) {
+      const w = this.world.wormholes.get(id);
+      if (!w) continue;
+      const a = this.world.entities.get(w.a), b = this.world.entities.get(w.b);
+      if (a && b) out.push({ id, a, b });
+    }
+    return out;
+  }
+
+  /** Wegplanung über bekannte Wurmlöcher. Legs: [{ x, y, wh? }], letzter Leg = Ziel. */
+  planLegs(ship, x, y) {
+    const p = this.players.get(ship.owner);
+    if (!p) return { time: 0, legs: [{ x, y }] };
+    const zones = [...this.world.zonesNear(ship.x, ship.y), ...this.world.zonesNear(x, y)];
+    return planPath(ship, { x, y }, this.knownWormholes(p), this.shipSpeed(ship), [...new Set(zones)]);
+  }
+
+  shipSpeed(ship) { return SHIP_TYPES[ship.type].speed; }
+
+  /** Sensorlauf eines Spielerschiffs: Nebel, Fernortung, Sondergebiete, Sektoren, Nachgenerierung */
+  scan(ship) {
+    const p = this.players.get(ship.owner);
+    if (!p) return;
+    for (const { sector, entities } of this.world.ensureAround(ship.x, ship.y)) this.onSectorCreated(sector, entities);
+    const fx = zoneEffects(this.world.zonesNear(ship.x, ship.y), ship.x, ship.y);
+    this.revealAround(p, ship.x, ship.y, WORLD.SENSOR_RANGE * fx.sensor);
+    const h = hexAt(ship.x, ship.y);
+    if (this.world.sectors.has(hexKey(h.q, h.r))) this.discover(p, 'sector', hexKey(h.q, h.r));
+    for (const sy of this.world.systemsNear(ship.x, ship.y)) {
+      if (p.known.system.has(sy.id)) continue;
+      if (Math.hypot(sy.x - ship.x, sy.y - ship.y) <= WORLD.SYSTEM_DETECT) {
+        this.discover(p, 'system', sy.id);
+        this.discover(p, 'sector', sy.sector);
+      }
+    }
+    for (const z of this.world.zonesNear(ship.x, ship.y)) {
+      if (!p.known.zone.has(z.id) && Math.hypot(z.x - ship.x, z.y - ship.y) <= WORLD.SYSTEM_DETECT * 0.6 + Math.max(z.rx, z.ry)) this.discover(p, 'zone', z.id);
+    }
+  }
+
+  /** Nach einem Wurmlochdurchflug ist die Verbindung bekannt */
+  onWormholeTransit(ship, whId, exit) {
+    const p = this.players.get(ship.owner);
+    if (p) this.discover(p, 'wh', whId);
+    this.shipLog(ship, `Wurmloch durchflogen, Austritt bei ${exit.name}`);
+  }
+
+  /** Neue Objekte in bereits aufgedeckten Zellen an die betroffenen Spieler melden */
+  onSectorCreated(sector, entities) {
+    console.log(`Sektor ${sector.name} (${sector.key}) erzeugt: ${sector.systems.length} Systeme, ${entities.length} Objekte`);
+    for (const p of this.players.values()) {
+      const vis = entities.filter((e) => this.isKnown(p, e));
+      if (vis.length) this.emit('reveal', p, { entities: vis });
+    }
   }
 
   // ---------- Simulation ----------
@@ -232,11 +337,10 @@ export class Game {
     this.time += dt;
     for (const s of this.ships.values()) {
       updateShip(s, dt, this);
-      if (s.revX === undefined || Math.hypot(s.x - s.revX, s.y - s.revY) > 120) {
+      if (s.owner !== NPC_OWNER && (s.revX === undefined || Math.hypot(s.x - s.revX, s.y - s.revY) > 300)) {
         s.revX = s.x;
         s.revY = s.y;
-        const p = this.players.get(s.owner);
-        if (p) this.revealAround(p, s.x, s.y, WORLD.SENSOR_RANGE);
+        this.scan(s);
       }
     }
     this.econAcc += dt;
@@ -330,8 +434,8 @@ export class Game {
   /** Nächstgelegene Quelle im Umkreis: Produzent mit Vorrat oder passendes Asteroidenfeld */
   findSource(e, good) {
     let best = null, bestD = Infinity;
-    for (const s of this.world.entities.values()) {
-      if (s === e) continue;
+    for (const s of this.world.sectorEntities(e.sector)) {
+      if (s === e || s.kind === 'wormhole') continue;
       const d = Math.hypot(s.x - e.x, s.y - e.y);
       if (d > SUPPLY.RANGE || d >= bestD) continue;
       if (s.kind === 'belt') {
@@ -394,6 +498,13 @@ export class Game {
     const s = e.market?.goods[good];
     return s ? unitPrice(good, s.stock, s.cap) : null;
   }
+}
+
+const newKnown = () => ({ system: new Set(), sector: new Set(), zone: new Set(), wh: new Set() });
+
+/** Sektor-Kurzinfo für den Client */
+export function sectorSummary(s) {
+  return { key: s.key, q: s.q, r: s.r, name: s.name, bh: s.bh, hub: s.hub, hubPos: s.hubPos, bigyard: s.bigyard };
 }
 
 function groupRows(rows, keyCol) {

@@ -1,5 +1,6 @@
 import { SHIP_TYPES, BELT_TYPES, WORLD, GOODS, unitPrice } from '../shared/config.js';
 import { stat } from './markets.js';
+import { zoneEffects } from '../shared/nav.js';
 
 export const cargoUsed = (ship) => Object.values(ship.cargo).reduce((a, b) => a + b, 0);
 export const cargoFree = (ship) => SHIP_TYPES[ship.type].cargo - cargoUsed(ship);
@@ -10,12 +11,14 @@ function approachPoint(ship, e) {
   let dx = ship.x - e.x, dy = ship.y - e.y;
   let d = Math.hypot(dx, dy);
   if (d < 1) { dx = 1; dy = 0; d = 1; }
-  const off = e.kind === 'belt' ? e.radius * 0.45 : e.radius + WORLD.DOCK_OFFSET;
+  const off = e.kind === 'belt' ? e.radius * 0.45 : e.kind === 'wormhole' ? 0 : e.radius + WORLD.DOCK_OFFSET;
   return { x: e.x + (dx / d) * off, y: e.y + (dy / d) * off };
 }
 
 function flyTo(ship, tx, ty, dt, game) {
-  const speed = SHIP_TYPES[ship.type].speed;
+  const fx = zoneEffects(game.world.zonesNear(ship.x, ship.y), ship.x, ship.y);
+  ship.zone = fx.zones ? fx.zones.map((z) => z.type) : null;
+  const speed = game.shipSpeed(ship) * fx.speed;
   const dx = tx - ship.x, dy = ty - ship.y;
   const d = Math.hypot(dx, dy);
   const step = speed * dt;
@@ -34,13 +37,57 @@ function flyTo(ship, tx, ty, dt, game) {
   return false;
 }
 
-/** Fliegt zum Objekt. true, sobald angedockt. Zählt die Ankunft als Flug. */
+// ---------- Navigation über Wurmlöcher ----------
+/**
+ * Folgt dem geplanten Weg bis vor den letzten Leg (Zwischenziele, Wurmlochdurchflüge).
+ * true, sobald nur noch der direkte Anflug aufs Ziel fehlt.
+ */
+function followNav(ship, key, tx, ty, dt, game) {
+  if (ship.transit) { runTransit(ship, game); return false; }
+  if (!ship.nav || ship.nav.key !== key) ship.nav = { key, legs: game.planLegs(ship, tx, ty).legs, i: 0 };
+  const nav = ship.nav;
+  while (nav.i < nav.legs.length - 1) {
+    const leg = nav.legs[nav.i];
+    ship.state = 'flying';
+    if (!flyTo(ship, leg.x, leg.y, dt, game)) return false;
+    nav.i++;
+    if (leg.wh) { startTransit(ship, leg.wh.id, leg.wh.side, game); return false; }
+  }
+  return true;
+}
+
+/** Durchflug: Eingang auf Seite `side`, Austritt am anderen Ende nach WORMHOLE_TRANSIT Sekunden */
+function startTransit(ship, whId, side, game) {
+  const w = game.world.wormholes.get(whId);
+  if (!w) return;
+  ship.transit = { wh: whId, exit: side === 'a' ? w.b : w.a, until: game.time + WORLD.WORMHOLE_TRANSIT };
+  ship.state = 'transit';
+  ship.dockedAt = null;
+}
+
+function runTransit(ship, game) {
+  ship.state = 'transit';
+  if (game.time < ship.transit.until) return;
+  const exit = game.world.entities.get(ship.transit.exit);
+  const wh = ship.transit.wh;
+  ship.transit = null;
+  if (!exit) return;
+  const a = Math.random() * Math.PI * 2;
+  ship.x = exit.x + Math.cos(a) * 260;
+  ship.y = exit.y + Math.sin(a) * 260;
+  ship.state = 'flying';
+  game.onWormholeTransit(ship, wh, exit);
+}
+
+/** Fliegt zum Objekt (ggf. über Wurmlöcher). true, sobald angedockt. Zählt die Ankunft als Flug. */
 function flyToEntity(ship, e, dt, game) {
   if (ship.dockedAt === e.id) return true;
+  if (!followNav(ship, 'e:' + e.id, e.x, e.y, dt, game)) return false;
   const p = approachPoint(ship, e);
   ship.state = 'flying';
   if (flyTo(ship, p.x, p.y, dt, game)) {
     ship.dockedAt = e.id;
+    ship.nav = null;
     game.recordShip(ship, 'f', 1);
     return true;
   }
@@ -141,13 +188,26 @@ function runActions(ship, e, actions, st, dt, game, opts) {
 /** Ausführung je Befehlstyp. Rückgabe: true = erledigt, false = läuft noch */
 const EXEC = {
   move(ship, c, dt, game) {
+    if (!followNav(ship, `p:${c.x},${c.y}`, c.x, c.y, dt, game)) return false;
     ship.state = 'flying';
-    return flyTo(ship, c.x, c.y, dt, game);
+    if (!flyTo(ship, c.x, c.y, dt, game)) return false;
+    ship.nav = null;
+    return true;
   },
   goto(ship, c, dt, game) {
     const e = game.world.entities.get(c.target);
     if (!e) return true;
+    if (c.viaWh) {
+      if (ship.transit) { runTransit(ship, game); return !ship.transit; }
+      return true;
+    }
     if (!flyToEntity(ship, e, dt, game)) return false;
+    if (e.kind === 'wormhole') {
+      // Wurmloch als Ziel: hindurchfliegen
+      c.viaWh = true;
+      startTransit(ship, e.wh, game.world.wormholes.get(e.wh)?.a === e.id ? 'a' : 'b', game);
+      return false;
+    }
     ship.state = 'docked';
     if (!c.arrived) { c.arrived = true; game.shipLog(ship, `Angekommen bei ${e.name}`); }
     return true;

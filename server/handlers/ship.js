@@ -71,6 +71,10 @@ export default {
     args: { ships: V.ownShips() },
     run(ctx, { ships }) { for (const s of ships) { s.queue = []; s.warn = {}; s.fails = {}; } },
   },
+  shipSettings: {
+    args: { ship: V.ownShip(), marker: V.opt(V.color(), null) },
+    run(ctx, { ship, marker }) { ship.marker = marker; },
+  },
   clearWarn: {
     args: { ship: V.ownShip() },
     run(ctx, { ship }) { ship.warn = {}; ship.fails = {}; },
