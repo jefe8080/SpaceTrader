@@ -1,5 +1,6 @@
 import { SHIP_TYPES, BELT_TYPES, WORLD, GOODS, FUEL, ZONE_TYPES, slotPrice, fuelBurn, shipStats, freeFor } from '../shared/config.js';
 import { stat } from './markets.js';
+import { sellToSupplier as sellToSupplierImpl } from './property.js';
 import { zoneEffects, inZone } from '../shared/nav.js';
 
 const inZoneAt = (z, p) => inZone(z, p.x, p.y);
@@ -357,7 +358,12 @@ function runSupply(ship, o, dt, game) {
     } else {
       const slot = src.market?.goods[o.good];
       const n = slot ? Math.min(freeFor(ship, o.good), Math.floor(slot.stock)) : 0;
-      if (n > 0) {
+      const prop = game.ownership.get(src.id);
+      if (n > 0 && prop) {
+        sellToSupplierImpl(game, src, prop, o.good, n);
+        ship.cargo[o.good] = (ship.cargo[o.good] || 0) + n;
+        stat(src.market, game.time, 'o', o.good, n);
+      } else if (n > 0) {
         slot.stock -= n;
         ship.cargo[o.good] = (ship.cargo[o.good] || 0) + n;
         stat(src.market, game.time, 'o', o.good, n);

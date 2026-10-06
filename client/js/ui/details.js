@@ -5,6 +5,7 @@ import { typeName, entitySprite, shipSprite, goodTag, playerPrice, cargoUsed, st
 import { ZONE_TYPES } from '/shared/config.js';
 import { openAlmanac } from './almanac.js';
 import { shipyardSection, hubSection, factionYardSection, outpostSection } from './shipyard.js';
+import { propertySection, governorSection, handlePropertyAction, handlePropertyChange } from './property.js';
 import { FACTIONS } from '/shared/factions.js';
 import { shipStats, holdUsage, countModules, MODULES as MODS, holdOf } from '/shared/ships.js';
 import { $, setHtml, typing } from './dom.js';
@@ -190,7 +191,10 @@ const ROLE_LABEL = { produce: 'verkauft', consume: 'kauft', trade: 'Händler' };
 export function marketTable(e, ship) {
   const onRoute = ship?.queue?.[0]?.t === 'route';
   const canTrade = ship && ship.dockedAt === e.id && !onRoute;
+  const mine = e.owner === state.me.id;
+  const customs = !mine && e.owner ? (e.market.customs || 0) : 0;
   const rows = Object.entries(e.market.goods).map(([g, sl]) => {
+    if (mine) return ownRow(e, g, sl, canTrade ? ship : null);
     const buy = canBuyFrom(sl), sell = canSellTo(sl);
     let act = '';
     if (canTrade) {
@@ -199,8 +203,8 @@ export function marketTable(e, ship) {
     }
     const barCol = sl.role === 'produce' ? '#81c784' : sl.role === 'trade' ? '#4fc3f7' : '#ffb74d';
     const prices = [];
-    if (buy) prices.push(`<span class="price-buy" title="Einkaufspreis für dich">K ${playerPrice(e, g, 'buy').toFixed(1)}</span>`);
-    if (sell) prices.push(`<span class="price-sell" title="Verkaufserlös für dich">V ${playerPrice(e, g, 'sell').toFixed(1)}</span>`);
+    if (buy) prices.push(`<span class="price-buy" title="Einkaufspreis für dich">K ${(playerPrice(e, g, 'buy') * (1 + customs)).toFixed(1)}</span>`);
+    if (sell) prices.push(`<span class="price-sell" title="Verkaufserlös für dich">V ${(playerPrice(e, g, 'sell') * (1 - customs)).toFixed(1)}</span>`);
     const modTxt = sl.mod && Math.abs(sl.mod - 1) > 0.005 ? `Standort-Modifier ×${sl.mod.toFixed(2)}` : 'Standort-Modifier ×1,00';
     return `<tr><td><span class="link-good" data-act="alm" data-good="${g}" title="Im Almanach zeigen">${goodTag(g)}</span> <span class="role role-${sl.role}" title="${modTxt}">${ROLE_LABEL[sl.role]}${sl.mod > 1.2 ? ' ▲' : sl.mod < 0.9 ? ' ▼' : ''}</span>${GOODS[g].cls !== 'normal' ? ` <span title="${GOODS[g].cls === 'hazard' ? 'Gefahrgut' : 'Passagiere'}">${GOODS[g].cls === 'hazard' ? '☢' : '👤'}</span>` : ''}</td>
       <td>${stockBar(sl.stock, sl.cap, barCol)} <span class="muted">${Math.floor(sl.stock)}/${sl.cap}</span></td>
@@ -208,9 +212,26 @@ export function marketTable(e, ship) {
       <td style="white-space:nowrap">${act}</td></tr>`;
   });
   let h = `<table class="market"><tr><th>Ware</th><th>Lager</th><th>Preis</th><th></th></tr>${rows.join('')}</table>`;
+  if (mine && canTrade) {
+    // Waren an Bord, die das Lager noch nicht führt, können nicht eingelagert werden
+  }
+  if (customs) h += `<div class="muted small-note">Zoll ${Math.round(customs * 100)} % ist in den Preisen enthalten.</div>`;
   if (ship && ship.dockedAt === e.id && onRoute) h += `<div class="muted small-note">Schiff fährt eine Route, manueller Handel erst nach Stopp.</div>`;
   else if (!ship) h += `<div class="muted small-note">Zum Handeln ein eigenes Schiff hier andocken.</div>`;
   return h;
+}
+
+/** Zeile im eigenen Lager: kostenlos laden und einlagern */
+function ownRow(e, g, sl, ship) {
+  let act = '';
+  if (ship) {
+    act = ['10', 'max'].map((a) => `<button class="small" data-act="trade" data-dir="buy" data-ship="${ship.id}" data-ent="${e.id}" data-good="${g}" data-amt="${a}" title="Laden (kostenlos)">${a === 'max' ? '⇧ Max' : '⇧' + a}</button>`).join(' ');
+    if (ship.cargo?.[g]) act += ' ' + ['10', 'max'].map((a) => `<button class="small" data-act="trade" data-dir="sell" data-ship="${ship.id}" data-ent="${e.id}" data-good="${g}" data-amt="${a}" title="Einlagern (kostenlos)">${a === 'max' ? '⇩ Alle' : '⇩' + a}</button>`).join(' ');
+  }
+  return `<tr><td>${goodTag(g)} <span class="role role-${sl.role}">${ROLE_LABEL[sl.role]}</span></td>
+    <td>${stockBar(sl.stock, sl.cap, '#81c784')} <span class="muted">${Math.floor(sl.stock)}/${sl.cap}</span></td>
+    <td><span class="muted" title="Marktpreis für Fremde">${playerPrice(e, g, canBuyFrom(sl) ? 'buy' : 'sell').toFixed(1)}</span></td>
+    <td style="white-space:nowrap">${act}</td></tr>`;
 }
 
 // ---------- Objekt ----------
@@ -267,7 +288,8 @@ function entityDetails(e) {
   }
   const myDocked = dockedHere.find((s) => state.selected?.kind === 'ship' && s.id === state.selected.id) || dockedHere[0];
   if (m?.strategy === 'shipyard') h += shipyardSection(e, myDocked);
-  if (e.type === 'hub') h += hubSection(e, myDocked);
+  if (e.type === 'hub') h += hubSection(e, myDocked) + governorSection(myDocked);
+  if (m) h += propertySection(e);
   if (m?.strategy === 'factionyard') h += factionYardSection(e, myDocked);
   if (e.type === 'outpost') h += outpostSection(e, myDocked);
   if (m) h += statsSection(e);
@@ -331,6 +353,7 @@ det.addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-act]');
   if (!b || b.disabled) return;
   const d = b.dataset;
+  if (handlePropertyAction(d)) return;
   switch (d.act) {
     case 'rename': {
       const s = state.ships.get(d.ship);
@@ -380,6 +403,7 @@ det.addEventListener('change', (ev) => {
   const el = ev.target;
   if (el.classList.contains('marker-color')) cmd('shipSettings', { ship: el.dataset.ship, marker: el.value });
   if (el.classList.contains('auto-refuel')) cmd('shipSettings', { ship: el.dataset.ship, autoRefuel: Number(el.value) });
+  handlePropertyChange(el);
   if (el.classList.contains('fav-note')) cmd('favoriteNote', { target: el.dataset.ent, note: el.value.slice(0, 120) });
 });
 

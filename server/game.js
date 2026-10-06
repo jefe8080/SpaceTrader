@@ -1,4 +1,4 @@
-import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, FUEL, shipStats, freeFor, holdOf, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
+import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, FUEL, GOVERNOR_LICENSES, shipStats, freeFor, holdOf, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
   cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, slotPrice } from '../shared/config.js';
 import { World } from './world.js';
 import { hexAt, hexKey } from '../shared/hex.js';
@@ -7,6 +7,7 @@ import { tickMarket, stat, missingInput } from './markets.js';
 import { updateShip, setWarn } from './ships.js';
 import { Store } from './db.js';
 import { addToBuckets, bucketOf, summary, sumWindow, balance, SHIP_STATS } from './stats.js';
+import { applyProperty, tickOwnedPlanet, strangerBlocked, payForDelivery, sellToSupplier, propBook } from './property.js';
 
 export const WORLD_GEN_VERSION = 2; // ändert sich die Generierung inkompatibel, wird die Welt neu erzeugt
 const ALL_TABLES = ['players', 'ships', 'sectors', 'entities', 'markets', 'routes', 'favorites', 'discoveries', 'ownership',
@@ -22,10 +23,11 @@ export class Game {
     this.routes = new Map();
     this.shipStats = new Map();  // Schiff-ID -> Ringpuffer
     this.routeStats = new Map(); // Routen-ID -> Ringpuffer
+    this.ownership = new Map();  // Entity-ID -> Besitz
     this.counters = { player: 0, ship: 0, route: 0, group: 0 };
     this.econAcc = 0;
     this.newDiscoveries = []; // [player, kind, key] seit dem letzten Speichern
-    this.listeners = { reveal: [], log: [], routes: [], player: [], notice: [] };
+    this.listeners = { reveal: [], log: [], routes: [], player: [], notice: [], entity: [] };
     if (!this.load()) {
       this.world = new World(seed ?? ((Math.random() * 2 ** 31) | 0));
       this.world.ensureSector(0, 0);
@@ -73,6 +75,12 @@ export class Game {
     }
     for (const r of st.loadAll('ships')) this.ships.set(r.id, r.data);
     for (const r of st.loadAll('routes')) this.routes.set(r.id, r.data);
+    for (const r of st.loadAll('ownership')) {
+      const e = this.world.entities.get(r.entity);
+      if (!e?.market) continue;
+      this.ownership.set(r.entity, r.data);
+      applyProperty(this, e, r.data);
+    }
     this.shipStats = groupRows(st.loadAll('ship_stats'), 'ship');
     this.routeStats = groupRows(st.loadAll('route_stats'), 'route');
     console.log(`Spielstand geladen: ${this.players.size} Spieler, ${this.world.entities.size} Objekte, ${this.ships.size} Schiffe`);
@@ -117,6 +125,7 @@ export class Game {
       n += st.sync('favorites', favs);
       n += st.sync('ships', [...this.ships.values()].map((s) => ({ key: [s.id], cols: [s.owner], data: s })));
       n += st.sync('routes', [...this.routes.values()].map((r) => ({ key: [r.id], cols: [r.owner], data: r })));
+      n += st.sync('ownership', [...this.ownership.values()].map((p) => ({ key: [p.entity], cols: [p.player], data: p })));
       n += st.sync('ship_stats', bucketRows(this.shipStats), false);
       n += st.sync('route_stats', bucketRows(this.routeStats), false);
       const minB = bucketOf(this.time) - SHIP_STATS.BUCKETS;
@@ -369,8 +378,37 @@ export class Game {
     }
   }
 
-  /** Gouverneurslizenz (Phase 6) */
-  buyGovernor() { return 'Die Gouverneurslizenz ist noch nicht verfügbar.'; }
+  /** Gouverneurslizenz: beim ersten Erwerb benennt der Spieler seine Fraktion */
+  buyGovernor(player, { name, color }) {
+    const next = GOVERNOR_LICENSES[(player.governor || 0) + 1];
+    if (!next) return 'Höchste Gouverneurslizenz erreicht.';
+    if (!player.faction) {
+      if (!name) return 'Beim ersten Erwerb braucht deine Fraktion einen Namen.';
+      const taken = [...this.players.values()].some((q) => q !== player && q.faction?.name.toLowerCase() === name.toLowerCase());
+      if (taken) return 'Diesen Fraktionsnamen gibt es schon.';
+    }
+    if (player.credits < next.cost) return 'Nicht genug Credits.';
+    player.credits -= next.cost;
+    player.governor = next.level;
+    if (!player.faction) player.faction = { name, color: color || player.color };
+    this.emit('notice', player, `Gouverneurslizenz ${next.level} erworben`);
+    return undefined;
+  }
+
+  /** Besitz übernehmen */
+  setOwner(e, player, prop) {
+    this.ownership.set(e.id, prop);
+    if (e.market.supply?.state === 'nosource') e.market.supply = null;
+    applyProperty(this, e, prop);
+    this.emit('entity', e);
+  }
+
+  /** Nach Änderungen am Besitz neu anwenden und melden */
+  refreshProperty(e) {
+    const prop = this.ownership.get(e.id);
+    if (prop) applyProperty(this, e, prop);
+    this.emit('entity', e);
+  }
 
   /** Nach einem Wurmlochdurchflug ist die Verbindung bekannt */
   onWormholeTransit(ship, whId, exit) {
@@ -401,6 +439,10 @@ export class Game {
     }
     this.econAcc += dt;
     if (this.econAcc >= 1) {
+      for (const prop of this.ownership.values()) {
+        const e = this.world.entities.get(prop.entity);
+        if (e?.kind === 'planet') tickOwnedPlanet(this, e, prop, this.econAcc);
+      }
       for (const e of this.world.entities.values()) {
         tickMarket(e, this.econAcc, this.time, this);
         if (e.market?.strategy === 'factory') this.checkSupply(e);
@@ -429,6 +471,13 @@ export class Game {
     const slot = e.market?.goods[good];
     if (!slot || !GOODS[good]) return { n: 0, reason: 'Ware wird hier nicht gehandelt' };
     if (ship.dockedAt !== e.id) return { n: 0, reason: 'Schiff ist nicht angedockt' };
+    const prop = this.ownership.get(e.id);
+    if (prop && prop.player === ship.owner) return this.ownerTransfer(ship, e, good, amount, dir);
+    if (prop) {
+      const blocked = strangerBlocked(prop);
+      if (blocked) return { n: 0, reason: blocked };
+      return this.tradeWithOwner(ship, e, prop, good, amount, dir, limit, opts);
+    }
     let n = 0, total = 0;
     if (dir === 'buy') {
       if (!canBuyFrom(slot)) return { n: 0, reason: 'Ware wird hier nicht verkauft' };
@@ -474,9 +523,78 @@ export class Game {
     return { n, total };
   }
 
+  /** Eigenes Lager: kostenlos laden und einlagern */
+  ownerTransfer(ship, e, good, amount, dir) {
+    const slot = e.market.goods[good];
+    let n;
+    if (dir === 'buy') {
+      n = Math.min(amount, freeFor(ship, good), Math.floor(slot.stock));
+      if (n <= 0) return { n: 0, reason: slot.stock < 1 ? 'kein Bestand' : 'Laderaum voll' };
+      slot.stock -= n;
+      ship.cargo[good] = (ship.cargo[good] || 0) + n;
+    } else {
+      const have = ship.cargo[good] || 0;
+      n = Math.min(amount, have, Math.floor(slot.cap - slot.stock));
+      if (n <= 0) return { n: 0, reason: have ? 'Lager voll' : 'nichts geladen' };
+      slot.stock += n;
+      ship.cargo[good] = have - n;
+      if (!ship.cargo[good]) delete ship.cargo[good];
+    }
+    stat(e.market, this.time, dir === 'buy' ? 'o' : 'i', good, n);
+    this.shipLog(ship, `${dir === 'buy' ? 'Geladen' : 'Eingelagert'}: ${n} ${GOODS[good].name} bei ${e.name}`);
+    return { n, total: 0 };
+  }
+
+  /**
+   * Handel eines Fremden mit Spielerbesitz: Käufe bringen dem Besitzer den Erlös, Verkäufe zahlt der Besitzer.
+   * Zoll: Aufschlag auf alle Geschäfte von Fremden. Bei leerem Konto oder aktivem Stop-Loss nimmt der Markt nichts an.
+   */
+  tradeWithOwner(ship, e, prop, good, amount, dir, limit, opts) {
+    const p = this.players.get(ship.owner);
+    const owner = this.players.get(prop.player);
+    const slot = e.market.goods[good];
+    const c = prop.customs || 0;
+    let n = 0, total = 0;
+    if (dir === 'buy') {
+      if (!canBuyFrom(slot)) return { n: 0, reason: 'Ware wird hier nicht verkauft' };
+      const floor = opts.auto ? this.stopLossFor(p, opts.route) : 0;
+      const max = Math.min(amount, freeFor(ship, good), Math.floor(slot.stock));
+      while (n < max) {
+        const pr = buyPrice(good, slot) * (1 + c);
+        if ((limit && pr > limit) || p.credits - pr < floor || p.credits < pr) break;
+        p.credits -= pr; owner.credits += pr; slot.stock -= 1; total += pr; n++;
+      }
+      if (n) { ship.cargo[good] = (ship.cargo[good] || 0) + n; this.recordShip(ship, 'buy', total, opts.route); propBook(this, prop, 'inc', total); }
+    } else {
+      if (!canSellTo(slot)) return { n: 0, reason: 'Ware wird hier nicht angekauft' };
+      const have = ship.cargo[good] || 0;
+      const max = Math.min(amount, have, Math.floor(slot.cap - slot.stock));
+      const floor = owner.stopLoss || 0;
+      while (n < max) {
+        const pr = sellPrice(good, slot) * (1 - c);
+        if (limit && pr < limit) break;
+        if (owner.credits - pr < floor || owner.credits < pr) break;
+        owner.credits -= pr; p.credits += pr; slot.stock += 1; total += pr; n++;
+      }
+      ship.cargo[good] = have - n;
+      if (!ship.cargo[good]) delete ship.cargo[good];
+      if (n) { this.recordShip(ship, 'inc', total, opts.route); propBook(this, prop, 'exp', total); }
+      if (!n && max > 0) return { n: 0, reason: 'Besitzer kann nicht zahlen (Konto oder Stop-Loss)' };
+    }
+    if (!n) return { n: 0, reason: dir === 'buy' ? 'nicht möglich' : 'Lager voll' };
+    stat(e.market, this.time, dir === 'buy' ? 'o' : 'i', good, n);
+    this.shipLog(ship, `${dir === 'buy' ? 'Gekauft' : 'Verkauft'}: ${n} ${GOODS[good].name} für ${Math.round(total)} Cr bei ${e.name}${c ? ` (Zoll ${Math.round(c * 100)} %)` : ''}`);
+    return { n, total };
+  }
+
+  /** Besitz-Eintrag eines Objekts (oder undefined) */
+  propertyOf(e) { return this.ownership.get(e.id); }
+
   // ---------- Automatische Versorgung ----------
   checkSupply(e) {
     const m = e.market;
+    const prop = this.ownership.get(e.id);
+    if (prop?.mode === 'private') return; // privat: keine NPC-Versorger
     const sup = m.supply;
     if (sup?.shipId && this.ships.has(sup.shipId)) return;      // Versorger unterwegs
     if (sup?.until && this.time < sup.until) return;            // Abklingzeit
@@ -504,6 +622,7 @@ export class Game {
       } else {
         const sl = s.market?.goods[good];
         if (!sl || !canBuyFrom(sl) || sl.stock < SUPPLY.MIN_SOURCE_STOCK) continue;
+        if (this.ownership.get(s.id)?.mode === 'private') continue;
       }
       best = s;
       bestD = d;
@@ -527,11 +646,13 @@ export class Game {
   finishSupply(ship, station) {
     const m = station.market;
     let delivered = 0;
+    const prop = this.ownership.get(station.id);
     for (const [g, n] of Object.entries(ship.cargo)) {
       const slot = m.goods[g];
       if (!slot) continue;
-      const k = Math.min(n, Math.floor(slot.cap - slot.stock));
-      slot.stock += k;
+      let k = Math.min(n, Math.floor(slot.cap - slot.stock));
+      if (prop) k = payForDelivery(this, station, prop, g, k); // Besitzer zahlt den Marktpreis
+      else slot.stock += k;
       delivered += k;
       stat(m, this.time, 'i', g, k);
     }

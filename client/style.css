@@ -290,3 +290,7 @@ select.small { padding: 1px 4px; font-size: 12px; }
 .alm-card img { width: 64px; height: 64px; flex: none; }
 .alm-card.unknown { min-height: 60px; align-items: center; justify-content: center; }
 .kv.small { font-size: 12px; margin-top: 4px; }
+
+/* ---------- Phase 6: Besitz ---------- */
+.own-prop { border-top-color: rgba(129, 199, 132, 0.4); }
+.own-prop input[type=range] { width: 110px; }

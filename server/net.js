@@ -1,6 +1,7 @@
 import { NET, NPC_OWNER, cellKey, cellOf } from '../shared/config.js';
 import { runCommand } from './handlers/index.js';
 import { sectorSummary } from './game.js';
+import { sumWindow } from './stats.js';
 
 const r1 = (v) => Math.round(v * 10) / 10;
 const MAX_MARKET_SUBS = 400;
@@ -24,6 +25,14 @@ export class Net {
     });
     game.on('log', (ship, msg) => this.sessions.get(ship.owner)?.socket.emit('log', { ship: ship.name, msg }));
     game.on('notice', (p, msg) => this.sessions.get(p.id)?.socket.emit('notice', msg));
+    // Geänderte Objekte (Besitzwechsel, Upgrades) an alle, die sie kennen
+    game.on('entity', (e) => {
+      for (const s of this.sessions.values()) {
+        if (!game.isKnown(s.player, e)) continue;
+        s.sentMarket.delete(e.id);
+        s.socket.emit('reveal', { entities: [serializeEntity(e)] });
+      }
+    });
     io.on('connection', (socket) => this.onConnection(socket));
   }
 
@@ -164,6 +173,13 @@ export class Net {
       for (const ship of this.game.ships.values()) if (ship.owner === s.player.id) ships[ship.id] = Math.round(this.game.shipBalance1h(ship));
       for (const r of this.game.routes.values()) if (r.owner === s.player.id) routes[r.id] = this.game.routeSummary(r);
       s.socket.emit('fleetStats', { ships, routes });
+      // Eigener Besitz mit Einstellungen und Salden
+      const props = [...this.game.ownership.values()].filter((p) => p.player === s.player.id).map((p) => {
+        const { stats, ...rest } = p;
+        const net = (secs) => { const w = sumWindow(stats, this.game.time, secs); return Math.round((w.inc || 0) - (w.exp || 0)); };
+        return { ...rest, h1: net(3600), d24: net(86400), inc24: Math.round(sumWindow(stats, this.game.time, 86400).inc || 0) };
+      });
+      s.socket.emit('props', props);
     }
   }
 
@@ -208,6 +224,7 @@ export function serializeEntity(e) {
   if (e.size) o.size = e.size;
   if (e.wh) o.wh = e.wh;
   if (e.faction) o.faction = e.faction;
+  if (e.market?.owner) Object.assign(o, { owner: e.market.owner, ownerName: e.ownerName, ownerColor: e.ownerColor });
   return o;
 }
 
@@ -221,6 +238,7 @@ export function serializeMarket(m) {
 function extraOf(m) {
   const out = { eff: r1(m.eff ?? 1) };
   if (m.modules) out.modules = m.modules;
+  if (m.owner) Object.assign(out, { owner: m.owner, yardSale: !!m.yardSale, mode: m.mode, customs: m.customs || 0 });
   if (m.forSale) {
     out.forSale = m.forSale;
     out.building = m.building ? { type: m.building.type, remaining: Math.ceil(m.building.remaining) } : null;
@@ -276,5 +294,5 @@ function shipDetail(s) {
 }
 
 function playerDetail(p) {
-  return { stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1 };
+  return { stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1, governor: p.governor || 0, faction: p.faction || null };
 }

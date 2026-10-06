@@ -67,7 +67,10 @@ export { SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, 
   upgradeCost, moduleCapacity, moduleMiningRate, shipStats, holdOf, holdUsage, freeFor, sellValue, countModules, buildMaterials } from './ships.js';
 
 // Preis = Basispreis × Standort-Modifier × Füllstandskurve(stock/cap) ± Spread
-export const PRICE = { MAX_FACTOR: 1.8, MIN_FACTOR: 0.45, SPREAD: 0.06 };
+import { PRICE } from './price.js';
+export { PRICE };
+export { GOVERNOR_LICENSES, UNLOCK_NAMES, PROP_UPGRADES, FIXED, CUSTOMS_MAX, RECYCLE_SHARE, propertyKind, minGovernorFor, propertyBasePrice,
+  propertyPrice, propUpgradeCost, extraOptions, priceWindow, fixedPrice, fixedRevenuePerHour, fixedConsumptionPerHour, fixedRref } from './property.js';
 
 export function unitPrice(good, stock, cap, mod = 1) {
   const r = Math.max(0, Math.min(1, stock / cap));

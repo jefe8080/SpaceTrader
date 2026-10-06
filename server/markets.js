@@ -1,4 +1,4 @@
-import { GOODS, PLANET_TYPES, STATION_TYPES, STATION_FOOD, SHIP_TYPES, SHIPYARD, STORAGE, STATS, TRADER, ULTRA, MODULES, YARD_MARGIN,
+import { GOODS, PLANET_TYPES, STATION_TYPES, RECIPES, STATION_FOOD, SHIP_TYPES, SHIPYARD, STORAGE, STATS, TRADER, ULTRA, MODULES, YARD_MARGIN,
   slotPrice, selfUse } from '../shared/config.js';
 
 /**
@@ -136,15 +136,21 @@ export const STRATEGIES = {
       // Versorgte Planeten produzieren mehr
       const sat = cons.length ? cons.filter(([, s]) => s.stock >= 1).length / cons.length : 1;
       m.eff = 0.6 + 0.4 * sat;
+      const boost = (m.boost || 1) * (m.yieldBoost || 1);
       for (const [g, s] of slots) {
-        if (s.role === 'produce') produceSlot(m, now, g, s, s.rate * m.eff * dt);
-        else if (s.role === 'consume') consumeSlot(m, now, g, s, s.rate * dt);
+        if (s.role === 'produce') produceSlot(m, now, g, s, s.rate * m.eff * boost * dt);
+        else if (s.role === 'consume' && !m.owner) consumeSlot(m, now, g, s, s.rate * dt); // Spielerbesitz: Fixpreis-Verbrauch
       }
     },
   },
 
   factory: {
     tick(e, m, dt, now) {
+      // Zusatzproduktion (Besitz-Upgrade): weitere Rezepte laufen parallel
+      for (const id of m.extraRecipes || []) {
+        m.xprog ||= {};
+        m.xprog[id] = runRecipe(m, RECIPES[id], (m.xprog[id] || 0), dt, now);
+      }
       const { in: inp, out, time } = STATION_TYPES[m.recipe].recipe;
       const food = m.goods.food;
       let mult = 1;
@@ -225,7 +231,18 @@ export const STRATEGIES = {
    */
   shipyard: {
     tick(e, m, dt, now) {
-      if (m.owner) return; // Spielerwerften bauen nur auf Befehl
+      if (m.owner) {
+        // Spielerwerft: baut nur auf Befehl, fertige Schiffe kommen in den Werftbestand
+        if (m.building) {
+          m.building.remaining -= dt;
+          if (m.building.remaining <= 0) {
+            m.forSale.push({ type: m.building.type, price: SHIP_TYPES[m.building.type].price, own: true });
+            m.building = null;
+            stat(m, now, 'n', null, 1);
+          }
+        }
+        return;
+      }
       if (m.building) {
         m.building.remaining -= dt;
         if (m.building.remaining <= 0) {
@@ -255,6 +272,19 @@ export const STRATEGIES = {
     },
   },
 };
+
+/** Einfacher Rezeptlauf ohne Verpflegung (für Zusatzrezepte). Liefert neuen Fortschritt. */
+function runRecipe(m, r, prog, dt, now) {
+  const ready = () => Object.entries(r.in).every(([g, n]) => m.goods[g]?.stock >= n) && Object.entries(r.out).every(([g, n]) => m.goods[g] && m.goods[g].stock + n <= m.goods[g].cap);
+  if (!ready()) return 0;
+  prog += (dt * (m.boost || 1)) / r.time;
+  while (prog >= 1 && ready()) {
+    prog -= 1;
+    for (const [g, n] of Object.entries(r.in)) { m.goods[g].stock -= n; stat(m, now, 'c', g, n); }
+    for (const [g, n] of Object.entries(r.out)) { const k = n * (m.yieldBoost || 1); m.goods[g].stock = Math.min(m.goods[g].cap, m.goods[g].stock + k); stat(m, now, 'p', g, k); }
+  }
+  return prog;
+}
 
 export function tickMarket(e, dt, now, game) {
   const m = e.market;

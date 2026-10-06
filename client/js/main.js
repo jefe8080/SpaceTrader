@@ -64,11 +64,15 @@ socket.on('ships', (d) => {
   ui.scheduleRender();
 });
 socket.on('me', (d) => {
-  Object.assign(state, { stopLoss: d.stopLoss, groups: d.groups, favorites: d.favorites, pilot: d.pilot });
+  Object.assign(state, { stopLoss: d.stopLoss, groups: d.groups, favorites: d.favorites, pilot: d.pilot, governor: d.governor, faction: d.faction });
   ui.scheduleRender(true);
 });
 socket.on('routes', (list) => {
   state.routes = new Map(list.map((r) => [r.id, r]));
+  ui.scheduleRender(true);
+});
+socket.on('props', (list) => {
+  state.props = new Map(list.map((p) => [p.entity, p]));
   ui.scheduleRender(true);
 });
 socket.on('fleetStats', (d) => {
@@ -82,6 +86,7 @@ socket.on('shipStats', (d) => {
 socket.on('reveal', (d) => {
   for (const c of d.cells || []) state.cells.add(c);
   for (const e of d.entities || []) state.entities.set(e.id, e);
+  if (d.entities?.length && !d.cells) ui.scheduleRender(true);
   for (const s of d.sectors || []) state.sectors.set(s.key, s);
   for (const s of d.systems || []) state.systems.set(s.id, s);
   for (const z of d.zones || []) state.zones.set(z.id, z);
@@ -240,6 +245,8 @@ addEventListener('keydown', (e) => {
     ui.toggleModal('favorites');
   } else if (e.key === 'a' || e.key === 'A') {
     ui.toggleModal('almanac');
+  } else if (e.key === 'b' || e.key === 'B') {
+    ui.toggleModal('propsModal');
   }
 });
 
