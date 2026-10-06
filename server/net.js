@@ -1,4 +1,4 @@
-import { NET, NPC_OWNER, SHIP_TYPES, cellKey, cellOf } from '../shared/config.js';
+import { NET, NPC_OWNER, cellKey, cellOf } from '../shared/config.js';
 import { runCommand } from './handlers/index.js';
 import { sectorSummary } from './game.js';
 
@@ -23,6 +23,7 @@ export class Net {
       s.socket.emit('reveal', out);
     });
     game.on('log', (ship, msg) => this.sessions.get(ship.owner)?.socket.emit('log', { ship: ship.name, msg }));
+    game.on('notice', (p, msg) => this.sessions.get(p.id)?.socket.emit('notice', msg));
     io.on('connection', (socket) => this.onConnection(socket));
   }
 
@@ -111,6 +112,8 @@ export class Net {
       zones: [...p.known.zone].map((id) => this.game.findZone(id)).filter(Boolean),
       wh: [...p.known.wh].filter((id) => w.wormholes.has(id)).map((id) => this.game.wormholeInfo(id)),
       recipes: [...p.known.recipe],
+      shipTypes: [...p.known.ship],
+      moduleTypes: [...p.known.module],
       players: this.game.playerList(this.online()),
     });
     s.sentMe = null;
@@ -216,6 +219,7 @@ export function serializeMarket(m) {
 
 function extraOf(m) {
   const out = { eff: r1(m.eff ?? 1) };
+  if (m.modules) out.modules = m.modules;
   if (m.forSale) {
     out.forSale = m.forSale;
     out.building = m.building ? { type: m.building.type, remaining: Math.ceil(m.building.remaining) } : null;
@@ -266,10 +270,10 @@ function shipDetail(s) {
     queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},
     nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,
     transit: s.transit ? s.transit.exit : null, zone: s.zone || null, marker: s.marker || null,
-    fuel: Math.round((s.fuel || 0) * 10) / 10, tank: SHIP_TYPES[s.type].tank, autoRefuel: s.autoRefuel ?? 0,
+    fuel: Math.round((s.fuel || 0) * 10) / 10, autoRefuel: s.autoRefuel ?? 0, upg: s.upg || {}, modules: s.modules || [], upgValue: s.upgValue || 0,
   };
 }
 
 function playerDetail(p) {
-  return { stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {} };
+  return { stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1 };
 }

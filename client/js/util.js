@@ -1,5 +1,6 @@
 import { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, buyPrice, sellPrice, canBuyFrom } from '/shared/config.js';
 import { planPath } from '/shared/nav.js';
+import { shipStats, holdUsage } from '/shared/ships.js';
 import { state, esc } from './state.js';
 import { spriteUrl } from './assets.js';
 
@@ -34,7 +35,10 @@ export function playerPrice(e, g, dir = null) {
 
 export const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 export const cargoUsed = (s) => Object.values(s.cargo || {}).reduce((a, b) => a + b, 0);
-export const shipSpeed = (s) => SHIP_TYPES[s.type].speed;
+export const shipSpeed = (s) => (s.upg ? shipStats(s).speed : SHIP_TYPES[s.type].speed);
+/** Belegung des normalen Laderaums (0..1) */
+export const cargoFill = (s) => { const st = shipStats(s); return st.cargo ? Math.min(1, holdUsage(s).cargo / st.cargo) : 0; };
+export const canMine = (s, good) => (shipStats(s).mining[GOODS[good].mine || 'std'] || 0) > 0;
 
 /** Geschätzte Flugzeit in Sekunden: bekannte Wurmlöcher und Sondergebiete eingerechnet */
 export function flightSecs(ship, e) {
@@ -79,6 +83,7 @@ export function queueText(c) {
     case 'dock': return `Andocken ${nm(c.target)}${c.actions?.length ? ': ' + c.actions.map(actionText).join(', ') : ''}`;
     case 'mine': return `Abbauen bis voll: ${nm(c.target)}`;
     case 'wait': return `Warte ${c.secs} s`;
+    case 'harvest': return 'Nebelgas sammeln';
     case 'route': {
       const r = state.routes.get(c.route);
       return `Route ${esc(r?.name || '?')}${c.rounds ? ` (${(c.done || 0)}/${c.rounds} Runden)` : ' (endlos)'}`;

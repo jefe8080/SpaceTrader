@@ -3,12 +3,13 @@ import ship from './ship.js';
 import trade from './trade.js';
 import route from './route.js';
 import fleet from './fleet.js';
+import shipyard from './shipyard.js';
 
 /**
  * Befehls-Handler. Jeder Handler: { args: { feld: validator }, run(ctx, args) -> Fehlertext | undefined }
  * ctx = { game, player }
  */
-const HANDLERS = { ...ship, ...trade, ...route, ...fleet };
+const HANDLERS = { ...ship, ...trade, ...route, ...fleet, ...shipyard };
 
 export function runCommand(game, player, msg) {
   const h = Object.hasOwn(HANDLERS, msg.cmd) ? HANDLERS[msg.cmd] : null;

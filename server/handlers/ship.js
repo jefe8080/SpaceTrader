@@ -6,9 +6,10 @@ const MAX_QUEUE = 30;
 
 /** Ein Queue-Befehl vom Client -> bereinigter Befehl */
 const queueCmd = (v, ctx) => {
-  const t = V.oneOf('move', 'goto', 'dock', 'mine', 'wait', 'route')(v?.t);
+  const t = V.oneOf('move', 'goto', 'dock', 'mine', 'wait', 'route', 'harvest')(v?.t);
   switch (t) {
-    case 'move': return { t, x: V.num(-1e9, 1e9)(v.x), y: V.num(-1e9, 1e9)(v.y) };
+    case 'move':
+    case 'harvest': return { t, x: V.num(-1e9, 1e9)(v.x), y: V.num(-1e9, 1e9)(v.y) };
     case 'goto': return { t, target: V.entity()(v.target, ctx).id };
     case 'mine': {
       const e = V.entity()(v.target, ctx);

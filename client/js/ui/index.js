@@ -8,6 +8,7 @@ import { refreshModals } from './dom.js';
 import './routes.js';
 import './favorites.js';
 import './almanac.js';
+import './almanacShips.js';
 
 export { renderLogin, loginError, enterGame, leaveGame, addLog, updateTooltip, renderTop } from './hud.js';
 export { toast, hint, closeTopModal, toggleModal, typing } from './dom.js';

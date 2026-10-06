@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Generiert von scripts/gen-ship-sprites.js. Nase zeigt nach rechts. #ff00ff = Spielerfarbe -->
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0f7fa"/><stop offset="1" stop-color="#00838f"/></linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#00838f"/><stop offset="1" stop-color="#e0f7fa"/></linearGradient>
+    <radialGradient id="flame" cx="100%" cy="50%" r="100%"><stop offset="0" stop-color="#fff3c4"/><stop offset="0.5" stop-color="#ffab40"/><stop offset="1" stop-color="#ff6d00" stop-opacity="0"/></radialGradient>
+  </defs>
+  <path d="M43 52.8 L93 52.8 L59 4 L51.8 4 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M51.8 4 L59 4 L55 10 L53.8 10 Z" fill="#ff00ff"/>
+  <path d="M43 75.2 L93 75.2 L59 124 L51.8 124 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M51.8 124 L59 124 L55 118 L53.8 118 Z" fill="#ff00ff"/>
+  <ellipse cx="50.6" cy="64" rx="7" ry="26" fill="none" stroke="#78909c" stroke-width="4"/><ellipse cx="50.6" cy="64" rx="7" ry="26" fill="none" stroke="#ff00ff" stroke-width="1.5" stroke-dasharray="3 4"/>
+  <ellipse cx="4" cy="53.3" rx="8" ry="4.3" fill="url(#flame)"/>
+  <rect x="6" y="49" width="9" height="8.7" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <ellipse cx="4" cy="64" rx="8" ry="4.3" fill="url(#flame)"/>
+  <rect x="6" y="59.7" width="9" height="8.7" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <ellipse cx="4" cy="74.7" rx="8" ry="4.3" fill="url(#flame)"/>
+  <rect x="6" y="70.3" width="9" height="8.7" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <path d="M12 50 L90 51.4 Q120 62.6 120 64 Q120 65.4 90 76.6 L12 78 Q8 64 12 50 Z" fill="url(#hull)" stroke="#1c2529" stroke-width="2.5"/>
+  <path d="M18 64 L86 64" stroke="#263238" stroke-width="1" opacity="0.45"/>
+  <rect x="43.8" y="52" width="9" height="24" fill="#ff00ff" opacity="0.9"/>
+  <path d="M12 55.6 L4 43 L24 52.8 Z" fill="#ff00ff" stroke="#1c2529" stroke-width="1.5"/>
+  <path d="M12 72.4 L4 85 L24 75.2 Z" fill="#ff00ff" stroke="#1c2529" stroke-width="1.5"/>
+  <ellipse cx="88" cy="64" rx="12" ry="6.3" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
+  <ellipse cx="90" cy="61.9" rx="5" ry="1.7" fill="#e1f5fe" opacity="0.7"/>
+</svg>

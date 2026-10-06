@@ -1,7 +1,7 @@
 import { GOODS, SHIP_TYPES, BELT_TYPES, canBuyFrom, canSellTo } from '/shared/config.js';
 import { state, esc, fmtK, fleetOrder, selectedShips } from '../state.js';
 import { socket, cmd } from '../net.js';
-import { typeName, playerPrice, dist, shipSymbol, hasWarn, actionText } from '../util.js';
+import { typeName, playerPrice, dist, shipSymbol, hasWarn, actionText, canMine } from '../util.js';
 import { $, hint, registerModal, openModal, closeModal, isOpen, toast, setHtml } from './dom.js';
 import { sparkline, stockBar } from './charts.js';
 import { bus } from './bus.js';
@@ -52,7 +52,7 @@ function refShip() {
 
 function defaultActions(e) {
   const ship = refShip();
-  if (e.kind === 'belt') return ship && SHIP_TYPES[ship.type].mining ? [{ op: 'mine' }] : [];
+  if (e.kind === 'belt') return ship && canMine(ship, BELT_TYPES[e.type].good) ? [{ op: 'mine' }] : [];
   // Waren verkaufen, die woanders auf der Route gekauft oder abgebaut werden
   const gathered = new Set();
   for (const st of ed.stops) {

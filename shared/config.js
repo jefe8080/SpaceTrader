@@ -5,7 +5,7 @@ export const WORLD = {
   FOG_CELL: 1000,            // Kantenlänge einer Nebel-Zelle
   SENSOR_RANGE: 2500,        // Sensorreichweite eines Schiffes
   SYSTEM_DETECT: 50000,      // Fernortung: Sonnensysteme in diesem Umkreis werden bekannt
-  START_CREDITS: 1500,
+  START_CREDITS: 5000,
   DOCK_OFFSET: 28,           // Abstand zur Oberfläche beim Andocken
   HEX_SPACING: 240000,       // Abstand der Sektormittelpunkte (Sektor 150.000 + Leerraum 90.000)
   SECTOR_RADIUS: 75000,      // Radius des besiedelten Sektorbereichs
@@ -25,7 +25,7 @@ export const ZONE_TYPES = {
   ionstorm:  { name: 'Ionensturm', fuel: 2, color: '#4fc3f7', desc: '+100 % Treibstoffverbrauch', weight: 20 },
   nebula:    { name: 'Dichter Nebel', sensor: 0.3, color: '#90a4ae', desc: 'Sensorreichweite −70 %', weight: 20 },
   solarwind: { name: 'Sonnenwindkorridor', speed: 1.4, color: '#ffca28', desc: '+40 % Geschwindigkeit', weight: 20 },
-  plasma:    { name: 'Plasmawolke', mining: 'gas', color: '#f06292', desc: 'Abbau von Spezialressourcen', weight: 15 },
+  plasma:    { name: 'Plasmawolke', mining: 'nebulagas', color: '#f06292', desc: 'Nebelgas sammeln (Gaskollektor)', weight: 15 },
 };
 
 // Spezialisierungs-Tags: Rohstoffe, deren Vorkommen ein System häufiger hat (Wahrscheinlichkeit ×3)
@@ -62,6 +62,8 @@ export const SUPPLY = {
 
 import { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES } from './goods.js';
 export { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES, RECIPES, TIER_NAMES, CARGO_CLASSES, MINE_CLASSES, ULTRA, STATION_FOOD } from './goods.js';
+export { SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, STEP, YARD_MARGIN, MODULE_SIZE, MODULE_REFUND,
+  upgradeCost, moduleCapacity, moduleMiningRate, shipStats, holdOf, holdUsage, freeFor, sellValue, countModules, buildMaterials } from './ships.js';
 
 // Preis = Basispreis × Standort-Modifier × Füllstandskurve(stock/cap) ± Spread
 export const PRICE = { MAX_FACTOR: 1.8, MIN_FACTOR: 0.45, SPREAD: 0.06 };
@@ -119,24 +121,6 @@ export const TRADER = { PLANET: [5, 10], STATION: [0, 3], CAP: [300, 900] };
 export const FUEL = { HOURS: 8, EMPTY_SPEED: 0.3, AUTO_DEFAULT: 0.3 };
 export const fuelBurn = (tank) => tank / (FUEL.HOURS * 3600); // Einheiten je Flugsekunde
 
-export const SHIP_TYPES = {
-  spatz:     { name: 'Spatz',     sprite: 'ship_spatz',     size: 26, cargo: 30,  speed: 150, mining: 1.5, price: 2500, tank: 8,
-               build: { plates: 12, electronics: 3, shipfuel: 10 }, desc: 'Kleiner Allrounder mit Bergbaulaser.' },
-  lastesel:  { name: 'Lastesel',  sprite: 'ship_lastesel',  size: 40, cargo: 120, speed: 100, mining: 0,   price: 9000, tank: 20,
-               build: { plates: 40, hullparts: 4, electronics: 6 }, desc: 'Träger Frachter mit großem Laderaum.' },
-  maulwurf:  { name: 'Maulwurf',  sprite: 'ship_maulwurf',  size: 34, cargo: 80,  speed: 95,  mining: 5,   price: 7500, tank: 16,
-               build: { plates: 30, engines: 2, electronics: 4 }, desc: 'Bergbauschiff mit schwerem Bohrkopf.' },
-  kolibri:   { name: 'Kolibri',   sprite: 'ship_kolibri',   size: 28, cargo: 45,  speed: 240, mining: 0,   price: 11000, tank: 14,
-               build: { plates: 20, engines: 4, electronics: 10 }, desc: 'Schneller Kurier für lange Strecken.' },
-  versorger: { name: 'Versorger', sprite: 'ship_versorger', size: 30, cargo: 100, speed: 120, mining: 4,   price: 0, tank: 0,
-               build: null, npc: true, desc: 'Stationseigenes Versorgungsschiff. Holt Rohstoffe für leere Stationen.' },
-};
-
-export const SHIPYARD = {
-  MAX_FOR_SALE: 3,
-  BUILD_TIME: 30,
-  BUILD_ORDER: ['lastesel', 'spatz', 'maulwurf', 'kolibri', 'spatz'],
-};
 
 export const NPC_OWNER = 'npc';
 export const NPC_COLOR = '#b0bec5';

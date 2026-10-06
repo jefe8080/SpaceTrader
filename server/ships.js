@@ -1,9 +1,17 @@
-import { SHIP_TYPES, BELT_TYPES, WORLD, GOODS, FUEL, slotPrice, fuelBurn } from '../shared/config.js';
+import { SHIP_TYPES, BELT_TYPES, WORLD, GOODS, FUEL, ZONE_TYPES, slotPrice, fuelBurn, shipStats, freeFor } from '../shared/config.js';
 import { stat } from './markets.js';
-import { zoneEffects } from '../shared/nav.js';
+import { zoneEffects, inZone } from '../shared/nav.js';
+
+const inZoneAt = (z, p) => inZone(z, p.x, p.y);
 
 export const cargoUsed = (ship) => Object.values(ship.cargo).reduce((a, b) => a + b, 0);
-export const cargoFree = (ship) => SHIP_TYPES[ship.type].cargo - cargoUsed(ship);
+
+/** Abbaurate eines Schiffes für eine Ware (Standard: Bergbaulaser, Spezial: Module). NPC-Versorger bauen alles ab. */
+export function miningRate(ship, good) {
+  const d = SHIP_TYPES[ship.type];
+  if (d.npc) return d.mining;
+  return shipStats(ship).mining[GOODS[good].mine || 'std'] || 0;
+}
 
 const FAIL_WARN = 3; // so viele Fehlschläge derselben Aktion in Folge -> Warnung
 
@@ -103,21 +111,25 @@ function flyToEntity(ship, e, dt, game) {
   return false;
 }
 
-/** Baut ab, liefert true, wenn nichts mehr abgebaut werden kann (voll / kein Bergbau möglich). */
+/** Baut ab, liefert true, wenn nichts mehr abgebaut werden kann (voll / kein passendes Gerät). */
 function mineStep(ship, e, dt) {
-  const rate = SHIP_TYPES[ship.type].mining;
-  if (!rate || e.kind !== 'belt') return true;
-  const free = cargoFree(ship);
+  if (e.kind !== 'belt') return true;
+  return extract(ship, BELT_TYPES[e.type].good, (e.richness || 1), dt);
+}
+
+function extract(ship, g, richness, dt) {
+  const rate = miningRate(ship, g);
+  if (!rate) return true;
+  const free = freeFor(ship, g);
   if (free <= 0) return true;
   ship.state = 'mining';
-  ship.mineAcc = (ship.mineAcc || 0) + rate * (e.richness || 1) * dt;
+  ship.mineAcc = (ship.mineAcc || 0) + rate * richness * dt;
   const n = Math.min(free, Math.floor(ship.mineAcc));
   if (n > 0) {
     ship.mineAcc -= n;
-    const g = BELT_TYPES[e.type].good;
     ship.cargo[g] = (ship.cargo[g] || 0) + n;
   }
-  return cargoFree(ship) <= 0;
+  return freeFor(ship, g) <= 0;
 }
 
 // ---------- Fehlerzähler und Warnungen ----------
@@ -151,7 +163,7 @@ function actionOk(ship, key) {
 function doTrade(ship, e, a, game, opts = {}) {
   const key = actionKey(a, e.id);
   const amount = a.amount > 0 ? a.amount : Infinity;
-  if (a.op === 'buy' && cargoFree(ship) <= 0) return;           // voll: nichts zu tun, kein Fehler
+  if (a.op === 'buy' && freeFor(ship, a.good) <= 0) return;      // voll: nichts zu tun, kein Fehler
   if (a.op === 'sell' && !(ship.cargo[a.good] > 0)) return;      // nichts geladen: kein Fehler
   const res = game.trade(ship, e, a.good, amount, a.op, a.limit || 0, opts);
   if (res.n > 0) { actionOk(ship, key); return; }
@@ -245,6 +257,23 @@ const EXEC = {
     }
     return false;
   },
+  /** Nebelgas in einer Plasmawolke sammeln (Gaskollektor) */
+  harvest(ship, c, dt, game) {
+    if (!followNav(ship, `p:${c.x},${c.y}`, c.x, c.y, dt, game)) return false;
+    if (Math.hypot(c.x - ship.x, c.y - ship.y) > 1) {
+      ship.state = 'flying';
+      if (!flyTo(ship, c.x, c.y, dt, game)) return false;
+      ship.nav = null;
+    }
+    const zone = game.world.zonesNear(ship.x, ship.y).find((z) => ZONE_TYPES[z.type].mining && inZoneAt(z, ship));
+    if (!zone) { game.shipLog(ship, 'Hier gibt es nichts zu sammeln.'); return true; }
+    if (extract(ship, ZONE_TYPES[zone.type].mining, 1, dt)) {
+      ship.state = 'idle';
+      game.shipLog(ship, 'Sammeln beendet (voll oder kein Gaskollektor)');
+      return true;
+    }
+    return false;
+  },
   wait(ship, c, dt, game) {
     c.until ??= game.time + c.secs;
     ship.state = ship.dockedAt ? 'docked' : 'idle';
@@ -327,7 +356,7 @@ function runSupply(ship, o, dt, game) {
       if (!mineStep(ship, src, dt)) return false;
     } else {
       const slot = src.market?.goods[o.good];
-      const n = slot ? Math.min(cargoFree(ship), Math.floor(slot.stock)) : 0;
+      const n = slot ? Math.min(freeFor(ship, o.good), Math.floor(slot.stock)) : 0;
       if (n > 0) {
         slot.stock -= n;
         ship.cargo[o.good] = (ship.cargo[o.good] || 0) + n;

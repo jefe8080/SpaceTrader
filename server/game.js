@@ -1,10 +1,10 @@
-import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, FUEL, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
+import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, FUEL, shipStats, freeFor, holdOf, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
   cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, slotPrice } from '../shared/config.js';
 import { World } from './world.js';
 import { hexAt, hexKey } from '../shared/hex.js';
 import { planPath, zoneEffects } from '../shared/nav.js';
 import { tickMarket, stat, missingInput } from './markets.js';
-import { updateShip, cargoFree, setWarn } from './ships.js';
+import { updateShip, setWarn } from './ships.js';
 import { Store } from './db.js';
 import { addToBuckets, bucketOf, summary, sumWindow, balance, SHIP_STATS } from './stats.js';
 
@@ -25,7 +25,7 @@ export class Game {
     this.counters = { player: 0, ship: 0, route: 0, group: 0 };
     this.econAcc = 0;
     this.newDiscoveries = []; // [player, kind, key] seit dem letzten Speichern
-    this.listeners = { reveal: [], log: [], routes: [], player: [] };
+    this.listeners = { reveal: [], log: [], routes: [], player: [], notice: [] };
     if (!this.load()) {
       this.world = new World(seed ?? ((Math.random() * 2 ** 31) | 0));
       this.world.ensureSector(0, 0);
@@ -150,7 +150,7 @@ export class Game {
   createPlayer(name) {
     const id = 'p' + ++this.counters.player;
     const p = { id, name, color: PLAYER_COLORS[(this.counters.player - 1) % PLAYER_COLORS.length], credits: WORLD.START_CREDITS,
-      revealed: new Set(), favorites: {}, known: newKnown(), groups: [], stopLoss: 0, createdAt: Date.now(), lastSeen: Date.now() };
+      revealed: new Set(), favorites: {}, known: newKnown(), groups: [], stopLoss: 0, pilot: 1, createdAt: Date.now(), lastSeen: Date.now() };
     this.players.set(id, p);
     // Startwissen: Startsystem aufgedeckt, alle Systeme und Sondergebiete des Startsektors bekannt
     const home = this.world.sectors.get('0,0');
@@ -188,8 +188,9 @@ export class Game {
       x: atEntity.x + Math.cos(a) * d, y: atEntity.y + Math.sin(a) * d, angle: a + Math.PI / 2, vx: 0, vy: 0,
       cargo: {}, queue: [], qid: 0, state: 'docked', dockedAt: atEntity.id, log: [],
       group: null, ord: own.reduce((m, s) => Math.max(m, s.ord || 0), 0) + 1, tot: {},
-      fuel: SHIP_TYPES[type].tank, autoRefuel: FUEL.AUTO_DEFAULT,
+      fuel: SHIP_TYPES[type].tank, autoRefuel: FUEL.AUTO_DEFAULT, upg: {}, modules: [], upgValue: 0,
     };
+    this.discover(player, 'ship', type);
     this.ships.set(id, ship);
     return ship;
   }
@@ -242,6 +243,8 @@ export class Game {
         // Almanach: Rezept bzw. Planeten-/Feldtyp ist entdeckt, sobald der Markt in Sensorreichweite war
         const rk = recipeKey(e);
         if (rk) this.discover(p, 'recipe', rk);
+        for (const it of e.market?.forSale || []) this.discover(p, 'ship', it.type);
+        for (const m of e.market?.modules || []) this.discover(p, 'module', m);
         // Das andere Ende eines Wurmlochs ist schon bekannt: Verbindung gilt als aufgedeckt
         if (e.kind === 'wormhole') {
           const other = this.world.entities.get(e.pair);
@@ -263,6 +266,8 @@ export class Game {
     if (kind === 'zone') out.zones = [this.findZone(key)];
     if (kind === 'wh') out.wh = [this.wormholeInfo(key)];
     if (kind === 'recipe') out.recipes = [key];
+    if (kind === 'ship') out.ships = [key];
+    if (kind === 'module') out.modules = [key];
     this.emit('reveal', p, out);
     return true;
   }
@@ -298,12 +303,19 @@ export class Game {
     return planPath(ship, { x, y }, this.knownWormholes(p), this.shipSpeed(ship), [...new Set(zones)]);
   }
 
-  shipSpeed(ship) { return SHIP_TYPES[ship.type].speed; }
-  shipTank(ship) { return SHIP_TYPES[ship.type].tank || 0; }
+  shipSpeed(ship) { return shipStats(ship).speed; }
+  shipTank(ship) { return shipStats(ship).tank || 0; }
 
   /** Beim Andocken: Auto-Tanken unter der eingestellten Schwelle */
   onDock(ship, e) {
     if (ship.owner === NPC_OWNER) return;
+    // Almanach: angebotene Schiffe und Module sind gesehen
+    const p = this.players.get(ship.owner);
+    if (p && e.market) {
+      for (const it of e.market.forSale || []) this.discover(p, 'ship', it.type);
+      if (e.market.building) this.discover(p, 'ship', e.market.building.type);
+      for (const m of e.market.modules || []) this.discover(p, 'module', m);
+    }
     const tank = this.shipTank(ship);
     if (tank > 0 && ship.autoRefuel > 0 && ship.fuel < tank * ship.autoRefuel && e.market?.goods.shipfuel && canBuyFrom(e.market.goods.shipfuel)) {
       this.refuel(ship, e);
@@ -356,6 +368,9 @@ export class Game {
       if (!p.known.zone.has(z.id) && Math.hypot(z.x - ship.x, z.y - ship.y) <= WORLD.SYSTEM_DETECT * 0.6 + Math.max(z.rx, z.ry)) this.discover(p, 'zone', z.id);
     }
   }
+
+  /** Gouverneurslizenz (Phase 6) */
+  buyGovernor() { return 'Die Gouverneurslizenz ist noch nicht verfügbar.'; }
 
   /** Nach einem Wurmlochdurchflug ist die Verbindung bekannt */
   onWormholeTransit(ship, whId, exit) {
@@ -418,7 +433,11 @@ export class Game {
     if (dir === 'buy') {
       if (!canBuyFrom(slot)) return { n: 0, reason: 'Ware wird hier nicht verkauft' };
       const floor = opts.auto ? this.stopLossFor(p, opts.route) : 0;
-      const max = Math.min(amount, cargoFree(ship), Math.floor(slot.stock));
+      const free = freeFor(ship, good);
+      if (free <= 0 && holdOf(good) !== 'cargo' && !shipStats(ship)[holdOf(good)]) {
+        return { n: 0, reason: holdOf(good) === 'hazard' ? 'Gefahrgut braucht eine Geschirmte Kammer' : 'Passagiere brauchen eine Passagierkabine' };
+      }
+      const max = Math.min(amount, free, Math.floor(slot.stock));
       let blocked = false;
       while (n < max) {
         const pr = buyPrice(good, slot);
@@ -432,6 +451,7 @@ export class Game {
       if (!n) {
         if (blocked) return { n: 0, reason: 'stoploss' };
         if (slot.stock < 1) return { n: 0, reason: 'kein Bestand' };
+        if (free <= 0) return { n: 0, reason: 'Laderaum voll' };
         if (limit && buyPrice(good, slot) > limit) return { n: 0, reason: 'Preisgrenze' };
         return { n: 0, reason: 'zu wenig Credits' };
       }
@@ -541,7 +561,7 @@ export class Game {
   }
 }
 
-const newKnown = () => ({ system: new Set(), sector: new Set(), zone: new Set(), wh: new Set(), recipe: new Set() });
+const newKnown = () => ({ system: new Set(), sector: new Set(), zone: new Set(), wh: new Set(), recipe: new Set(), ship: new Set(), module: new Set() });
 
 /** Almanach-Schlüssel: st:<Stationstyp>, pl:<Planetentyp>, bt:<Feldtyp> */
 export function recipeKey(e) {

@@ -1,7 +1,7 @@
 import { SHIP_TYPES } from '/shared/config.js';
 import { state, fleetOrder, esc, fmtK } from '../state.js';
 import { cmd } from '../net.js';
-import { shipSprite, cargoUsed, statusText, shipSymbol, hasWarn } from '../util.js';
+import { shipSprite, cargoFill, statusText, shipSymbol, hasWarn } from '../util.js';
 import { $, setHtml } from './dom.js';
 import { bus } from './bus.js';
 
@@ -50,7 +50,6 @@ export function renderFleet() {
 
 function shipRow(s) {
   const def = SHIP_TYPES[s.type];
-  const used = cargoUsed(s);
   const sel = state.selection.has(s.id) || (state.selected?.kind === 'ship' && state.selected.id === s.id);
   const sal = state.fleetStats.ships[s.id] || 0;
   const warn = hasWarn(s) ? `<span class="warn" title="${esc(Object.values(s.warn).join('\n'))}">⚠</span>` : '';
@@ -58,9 +57,9 @@ function shipRow(s) {
     <span class="sym">${shipSymbol(s)}</span>
     <img src="${shipSprite(s.type, state.me.color)}" alt="">
     <div class="fi-main">
-      <div class="name">${esc(s.name)} ${warn}<span class="muted type">${def.name}</span></div>
+      <div class="name">${esc(s.name)} ${warn}<span class="muted type">${def.name} · ${def.cls}</span></div>
       <div class="sub">${statusText(s)}</div>
-      <div class="bar"><div style="width:${(used / def.cargo) * 100}%"></div></div>
+      <div class="bar"><div style="width:${cargoFill(s) * 100}%"></div></div>
     </div>
     <span class="saldo ${sal < 0 ? 'neg' : ''}" title="Saldo letzte Stunde">${fmtK(sal)}</span></div>`;
 }

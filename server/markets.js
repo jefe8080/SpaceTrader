@@ -1,4 +1,4 @@
-import { GOODS, PLANET_TYPES, STATION_TYPES, STATION_FOOD, SHIP_TYPES, SHIPYARD, STORAGE, STATS, TRADER, ULTRA,
+import { GOODS, PLANET_TYPES, STATION_TYPES, STATION_FOOD, SHIP_TYPES, SHIPYARD, STORAGE, STATS, TRADER, ULTRA, MODULES, YARD_MARGIN,
   slotPrice, selfUse } from '../shared/config.js';
 
 /**
@@ -60,8 +60,20 @@ export function createMarket(kind, type, r, scale = 1, { slow = 1, traders = tru
     consume('food', STATION_FOOD, STORAGE.STATION_FOOD);
     m = { strategy: 'extractor', goods, eff: 1, supply: null };
   } else if (def.buys) {
-    for (const g of def.buys) goods[g] = slot('consume', 0, STORAGE.SHIPYARD, 20 * r());
-    return { strategy: 'shipyard', goods, eff: 1, forSale: [], building: null, nextBuild: Math.floor(r() * SHIPYARD.BUILD_ORDER.length) };
+    // Werft: Lager groß genug für den teuersten Bau, große Werften bieten 1-2 Module an
+    const order = SHIPYARD.ORDER[type];
+    const need = {};
+    for (const t of order) for (const [g, n] of Object.entries(SHIP_TYPES[t].build)) need[g] = Math.max(need[g] || 0, n);
+    for (const g of new Set([...def.buys, ...Object.keys(need)])) {
+      const cap = Math.max(STORAGE.SHIPYARD * (GOODS[g].base < 200 ? 1 : 0.2), Math.round((need[g] || 0) * 1.6));
+      goods[g] = slot('consume', 0, cap, cap * 0.05 * r());
+    }
+    const mods = [];
+    if (type === 'bigyard') {
+      const pool = Object.keys(MODULES);
+      for (let i = 0, n = 1 + Math.floor(r() * 2); i < n; i++) mods.push(pool.splice(Math.floor(r() * pool.length), 1)[0]);
+    }
+    return { strategy: 'shipyard', yard: type, goods, eff: 1, forSale: [], building: null, nextBuild: Math.floor(r() * order.length), modules: mods };
   } else if (type === 'hub') {
     // Hub: verkauft Schiffstreibstoff, kauft alle ultraseltenen Waren, handelt eine breite Auswahl
     produce('shipfuel', 1.2, STORAGE.HUB_FUEL);
@@ -194,24 +206,38 @@ export const STRATEGIES = {
     },
   },
 
+  /**
+   * NPC-Werft: baut selbstständig aus angelieferten Materialien, max. 3 Schiffe im Angebot.
+   * Verkaufspreis = Materialkosten (Basispreis × Standort-Modifier) plus Marge.
+   */
   shipyard: {
     tick(e, m, dt, now) {
+      if (m.owner) return; // Spielerwerften bauen nur auf Befehl
       if (m.building) {
         m.building.remaining -= dt;
         if (m.building.remaining <= 0) {
-          m.forSale.push({ type: m.building.type, price: SHIP_TYPES[m.building.type].price });
+          m.forSale.push({ type: m.building.type, price: m.building.price });
           m.building = null;
-          m.nextBuild = (m.nextBuild + 1) % SHIPYARD.BUILD_ORDER.length;
           stat(m, now, 'n', null, 1);
         }
         return;
       }
       if (m.forSale.length >= SHIPYARD.MAX_FOR_SALE) return;
-      const type = SHIPYARD.BUILD_ORDER[m.nextBuild];
-      const req = SHIP_TYPES[type].build;
-      if (Object.entries(req).every(([g, n]) => (m.goods[g]?.stock || 0) >= n)) {
-        for (const [g, n] of Object.entries(req)) { m.goods[g].stock -= n; stat(m, now, 'c', g, n); }
-        m.building = { type, remaining: SHIPYARD.BUILD_TIME };
+      const order = SHIPYARD.ORDER[m.yard || 'shipyard'];
+      // Reihum: der nächste Typ, für den Material vorhanden ist
+      for (let k = 0; k < order.length; k++) {
+        const type = order[(m.nextBuild + k) % order.length];
+        const req = SHIP_TYPES[type].build;
+        if (!Object.entries(req).every(([g, n]) => (m.goods[g]?.stock || 0) >= n)) continue;
+        let cost = 0;
+        for (const [g, n] of Object.entries(req)) {
+          m.goods[g].stock -= n;
+          cost += n * GOODS[g].base * (m.goods[g].mod || 1);
+          stat(m, now, 'c', g, n);
+        }
+        m.building = { type, remaining: SHIPYARD.BUILD_TIME[SHIP_TYPES[type].cls], price: Math.round(cost * (1 + YARD_MARGIN) / 100) * 100 };
+        m.nextBuild = (m.nextBuild + k + 1) % order.length;
+        return;
       }
     },
   },

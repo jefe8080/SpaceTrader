@@ -275,3 +275,18 @@ select.small { padding: 1px 4px; font-size: 12px; }
 .chain-graph text { fill: var(--text); font-size: 10.5px; }
 .cg-edge { fill: none; stroke: rgba(160, 190, 255, 0.45); stroke-width: 1.5; }
 .cg-node { cursor: pointer; }
+
+/* ---------- Phase 4: Schiffe ---------- */
+.price-tag { color: #ffb74d; font-weight: 600; }
+.badge.cls-S { background: rgba(129, 199, 132, 0.25); }
+.badge.cls-M { background: rgba(79, 195, 247, 0.25); }
+.badge.cls-L { background: rgba(255, 183, 77, 0.25); }
+.badge.cls-XL { background: rgba(240, 98, 146, 0.3); }
+.badge.cls-F { background: rgba(186, 104, 200, 0.35); }
+.sub-title { font-size: 11px; color: var(--muted); margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 1px; }
+.alm-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 8px; max-height: 64vh; overflow: auto; }
+.alm-cards .alm-tier { grid-column: 1 / -1; }
+.alm-card { display: flex; gap: 10px; border: 1px solid var(--panel-border); border-radius: 8px; padding: 8px; background: rgba(0, 0, 0, 0.18); }
+.alm-card img { width: 64px; height: 64px; flex: none; }
+.alm-card.unknown { min-height: 60px; align-items: center; justify-content: center; }
+.kv.small { font-size: 12px; margin-top: 4px; }

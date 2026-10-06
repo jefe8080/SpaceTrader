@@ -17,6 +17,10 @@ export const state = {
   zones: new Map(),     // bekannte Sondergebiete
   wh: new Map(),        // bekannte Wurmlochverbindungen { id, a, b }
   recipes: new Set(),   // entdeckte Rezepte / Planeten- / Feldtypen (Almanach)
+  shipTypes: new Set(), // gesehene oder gekaufte Schiffstypen
+  moduleTypes: new Set(),
+  shipPrices: (() => { try { return JSON.parse(localStorage.getItem('st_ship_prices') || '{}'); } catch { return {}; } })(),
+  pilot: 1,
   markerMode: (() => { try { return localStorage.getItem('st_marker') || 'color'; } catch { return 'color'; } })(),
   entities: new Map(),  // id -> Entity inkl. Markt
   ships: new Map(),     // id -> Schiff (+ rx/ry/ra für Interpolation)

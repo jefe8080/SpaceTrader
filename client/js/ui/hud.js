@@ -1,4 +1,4 @@
-import { GOODS, SHIP_TYPES, canBuyFrom } from '/shared/config.js';
+import { GOODS, SHIP_TYPES, PILOT_LICENSES, canBuyFrom } from '/shared/config.js';
 import { state, myShips, fmt, esc, playerColor, playerName, selectedShips } from '../state.js';
 import { socket, cmd } from '../net.js';
 import { typeName, playerPrice, flightSecs, fmtDuration } from '../util.js';
@@ -56,7 +56,8 @@ $('btnMarker').onclick = () => {
 export function renderTop() {
   $('btnMarker').textContent = state.markerMode === 'state' ? '◆ Marker: Zustand' : '◆ Marker: Farbe';
   $('credits').textContent = fmt(state.credits) + ' Cr';
-  $('shipCount').textContent = myShips().length;
+  $('shipCount').textContent = `${myShips().length} / ${PILOT_LICENSES[state.pilot || 1].maxShips}`;
+  $('pilotLevel').textContent = 'P' + (state.pilot || 1);
   setHtml($('onlinePlayers'), state.players.filter((p) => p.online)
     .map((p) => `<span class="player-chip"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</span>`).join(''));
   const sl = state.stopLoss;

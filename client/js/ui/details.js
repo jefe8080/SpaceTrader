@@ -4,6 +4,8 @@ import { socket, cmd } from '../net.js';
 import { typeName, entitySprite, shipSprite, goodTag, playerPrice, cargoUsed, statusText, queueText, shipSymbol, hasWarn, flightSecs, fmtDuration, systemName, sectorName } from '../util.js';
 import { ZONE_TYPES } from '/shared/config.js';
 import { openAlmanac } from './almanac.js';
+import { shipyardSection, hubSection } from './shipyard.js';
+import { shipStats, holdUsage, countModules, MODULES as MODS, holdOf } from '/shared/ships.js';
 import { $, setHtml, typing } from './dom.js';
 import { barChart, fmtNum, stockBar } from './charts.js';
 import { bus } from './bus.js';
@@ -81,19 +83,26 @@ function shipDetails(s) {
       <button class="small" data-act="clearWarn" data-ship="${s.id}">Quittieren</button></div>`;
   }
   const here = state.entities.get(s.dockedAt);
-  h += `<div class="kv"><span>Laderaum</span><span>${used} / ${def.cargo}</span>
-    <span>Geschwindigkeit</span><span>${def.speed}</span>
-    <span>Bergbau</span><span>${def.mining ? def.mining + ' / s' : '–'}</span>
+  const st = shipStats(s), hu = holdUsage(s);
+  const mods = Object.entries(countModules(s));
+  const mineTxt = Object.entries(st.mining).filter(([, v]) => v > 0).map(([k, v]) => `${{ std: 'Laser', drill: 'Tiefbohrer', acid: 'Säure', gas: 'Gas' }[k]} ${Math.round(v * 10) / 10}/s`).join(', ');
+  const up = (l) => (s.upg?.[l] ? ` <span class="badge" title="Upgrade-Stufe">+${s.upg[l]}</span>` : '');
+  h += `<div class="kv"><span>Klasse</span><span>${def.cls} · ${def.name}</span>
+    <span>Laderaum</span><span>${hu.cargo} / ${st.cargo}${up('cargo')}${st.hazard ? ` · ☢ ${hu.hazard}/${st.hazard}` : ''}${st.passenger ? ` · 👤 ${hu.passenger}/${st.passenger}` : ''}</span>
+    <span>Geschwindigkeit</span><span>${Math.round(st.speed)}${up('speed')}</span>
+    <span>Bergbau</span><span>${mineTxt || '–'}</span>
+    ${mods.length ? `<span>Module</span><span>${mods.map(([id, n]) => MODS[id].name + (n > 1 ? ' ×' + n : '')).join(', ')}</span>` : ''}
     <span>Position</span><span>${here ? esc(systemName(here)) + ' · ' : ''}${esc(sectorOfPoint(s))}</span>
     <span>Markerfarbe</span><span><input type="color" class="marker-color" data-ship="${s.id}" value="${s.marker || state.me.color}"></span></div>`;
 
   // Treibstoff
-  if (s.tank > 0) {
+  if (st.tank > 0) {
+    s.tank = st.tank;
     const pct = Math.max(0, Math.min(100, (s.fuel / s.tank) * 100));
     const canFuel = here?.market?.goods.shipfuel && canBuyFrom(here.market.goods.shipfuel);
     h += `<div class="fuel-row"><span class="muted">Treibstoff</span>
       <span class="fuelbar${pct < 15 ? ' low' : ''}"><div style="width:${pct}%"></div></span>
-      <span>${s.fuel.toFixed(1)} / ${s.tank}</span>
+      <span>${s.fuel.toFixed(1)} / ${Math.round(s.tank * 10) / 10}${up('tank')}</span>
       ${canFuel ? `<button class="small" data-act="refuel" data-ship="${s.id}" ${pct > 99 ? 'disabled' : ''}>⛽ Tanken (${playerPrice(here, 'shipfuel', 'buy').toFixed(1)} Cr)</button>` : ''}
       <label class="muted" title="Beim Andocken an einem Markt mit Treibstoff automatisch tanken, wenn der Tank darunter liegt">Auto unter
         <select class="small auto-refuel" data-ship="${s.id}">${[0, 0.1, 0.2, 0.3, 0.5, 0.7, 0.9].map((v) => `<option value="${v}" ${Math.abs((s.autoRefuel ?? 0) - v) < 0.01 ? 'selected' : ''}>${v ? Math.round(v * 100) + ' %' : 'aus'}</option>`).join('')}</select></label></div>`;
@@ -104,7 +113,7 @@ function shipDetails(s) {
     <button data-act="follow" data-ship="${s.id}">◎ Folgen</button>
     <button data-act="addWait" data-ship="${s.id}" title="Warte-Befehl anhängen">⏱ Warten</button>`;
   const docked = s.dockedAt ? state.entities.get(s.dockedAt) : null;
-  if (docked?.kind === 'belt' && def.mining && !s.queue?.length) {
+  if (docked?.kind === 'belt' && (st.mining[GOODS[BELT_TYPES[docked.type].good].mine || 'std'] || 0) > 0 && !s.queue?.length) {
     h += `<button data-act="mine" data-ship="${s.id}" data-ent="${docked.id}">⛏ Abbauen</button>`;
   }
   h += `</div></div>`;
@@ -127,6 +136,7 @@ function shipDetails(s) {
   h += `</div>`;
 
   if (docked?.market) h += `<div class="section"><div class="section-title">Markt: ${esc(docked.name)}</div>${marketTable(docked, s)}</div>`;
+  if (docked?.market?.strategy === 'shipyard' || docked?.type === 'hub') h += `<div class="muted small-note">Werft- und Lizenzdienste: Station anklicken.</div>`;
   h += shipStatsSection(s);
   if (s.log?.length) {
     h += `<div class="section"><div class="section-title">Logbuch</div><div class="loglines">${s.log.slice(0, 8).map((l) => `<div>${esc(l.msg)}</div>`).join('')}</div></div>`;
@@ -250,7 +260,9 @@ function entityDetails(e) {
     const tradeShip = dockedHere.find((s) => s === selShip) || dockedHere.find((s) => s.queue?.[0]?.t !== 'route') || dockedHere[0];
     h += `<div class="section"><div class="section-title">Markt${tradeShip ? ' · handelt mit ' + esc(tradeShip.name) : ''}</div>${marketTable(e, tradeShip)}</div>`;
   }
-  if (m?.strategy === 'shipyard') h += shipyardSection(e, dockedHere.length > 0);
+  const myDocked = dockedHere.find((s) => state.selected?.kind === 'ship' && s.id === state.selected.id) || dockedHere[0];
+  if (m?.strategy === 'shipyard') h += shipyardSection(e, myDocked);
+  if (e.type === 'hub') h += hubSection(e, myDocked);
   if (m) h += statsSection(e);
 
   if (ships.length) {
@@ -261,30 +273,6 @@ function entityDetails(e) {
   return h;
 }
 
-function shipyardSection(e, canBuy) {
-  const m = e.market;
-  let h = `<div class="section"><div class="section-title">Schiffe zum Verkauf</div>`;
-  if (!m.forSale?.length) h += `<div class="muted">Derzeit keine Schiffe verfügbar.</div>`;
-  (m.forSale || []).forEach((it, i) => {
-    const d = SHIP_TYPES[it.type];
-    h += `<div class="forsale"><img src="${shipSprite(it.type, state.me.color)}" alt=""><div class="info"><b>${d.name}</b><br>
-      Laderaum ${d.cargo} · Tempo ${d.speed}${d.mining ? ' · Bergbau ' + d.mining : ''}<br><span class="muted">${d.desc}</span></div>
-      <div style="text-align:right"><div style="color:#ffb74d;font-weight:600">${fmt(it.price)} Cr</div>
-      <button class="small primary" data-act="buyShip" data-ent="${e.id}" data-idx="${i}" ${!canBuy || state.credits < it.price ? 'disabled' : ''}
-        title="${canBuy ? '' : 'Ein eigenes Schiff muss hier angedockt sein'}">Kaufen</button></div></div>`;
-  });
-  if (m.building) {
-    h += `<div style="margin-top:6px">🔧 Im Bau: <b>${SHIP_TYPES[m.building.type].name}</b> (noch ${m.building.remaining}s)</div>`;
-  } else if ((m.forSale?.length || 0) < SHIPYARD.MAX_FOR_SALE) {
-    const next = SHIPYARD.BUILD_ORDER[m.nextBuild];
-    const req = Object.entries(SHIP_TYPES[next].build)
-      .map(([g, n]) => `${GOODS[g].name} ${Math.floor(m.goods[g]?.stock || 0)}/${n}`).join(', ');
-    h += `<div style="margin-top:6px" class="muted">Nächster Bau: <b>${SHIP_TYPES[next].name}</b> · benötigt ${req}</div>`;
-  } else {
-    h += `<div style="margin-top:6px" class="muted">Dock voll, keine weiteren Bauten.</div>`;
-  }
-  return h + '</div>';
-}
 
 // ---------- Marktstatistik ----------
 function chartSeries(e) {
@@ -362,6 +350,11 @@ det.addEventListener('click', (ev) => {
     case 'jettison': if (confirm(`${GOODS[d.good].name} wirklich abwerfen?`)) cmd('jettison', { ship: d.ship, good: d.good }); break;
     case 'trade': cmd('trade', { ship: d.ship, target: d.ent, good: d.good, dir: d.dir, amount: d.amt }); break;
     case 'buyShip': cmd('buyShip', { target: d.ent, index: Number(d.idx) }); break;
+    case 'upgrade': cmd('upgrade', { ship: d.ship, line: d.line }); break;
+    case 'buyModule': cmd('buyModule', { ship: d.ship, module: d.module }); break;
+    case 'removeModule': cmd('removeModule', { ship: d.ship, module: d.module }); break;
+    case 'sellShip': if (confirm('Schiff wirklich verkaufen?')) cmd('sellShip', { ship: d.ship }); break;
+    case 'buyLicense': cmd('buyLicense', { kind: d.kind }); break;
     case 'fav': cmd('favorite', { target: d.ent, on: !state.favorites[d.ent] }); break;
     case 'selone': state.selection.clear(); bus.select({ kind: 'ship', id: d.ship }); break;
     case 'stopAll': cmd('stop', { ships: selectedShips().map((s) => s.id) }); break;

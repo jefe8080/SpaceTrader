@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Generiert von scripts/gen-ship-sprites.js. Nase zeigt nach rechts. #ff00ff = Spielerfarbe -->
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffecb3"/><stop offset="1" stop-color="#6d4c41"/></linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6d4c41"/><stop offset="1" stop-color="#ffecb3"/></linearGradient>
+    <radialGradient id="flame" cx="100%" cy="50%" r="100%"><stop offset="0" stop-color="#fff3c4"/><stop offset="0.5" stop-color="#ffab40"/><stop offset="1" stop-color="#ff6d00" stop-opacity="0"/></radialGradient>
+  </defs>
+  <path d="M48 43.2 L88 43.2 L114 22 L78 22 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M78 22 L114 22 L110 28 L80 28 Z" fill="#ff00ff"/>
+  <path d="M48 84.8 L88 84.8 L114 106 L78 106 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M78 106 L114 106 L110 100 L80 100 Z" fill="#ff00ff"/>
+  <rect x="32.8" y="29" width="16" height="10" rx="2" fill="#b0bec5" stroke="#263238" stroke-width="1.5"/>
+  <rect x="32.8" y="89" width="16" height="10" rx="2" fill="#b0bec5" stroke="#263238" stroke-width="1.5"/>
+  <rect x="51.8" y="29" width="16" height="10" rx="2" fill="#90a4ae" stroke="#263238" stroke-width="1.5"/>
+  <rect x="51.8" y="89" width="16" height="10" rx="2" fill="#90a4ae" stroke="#263238" stroke-width="1.5"/>
+  <ellipse cx="8" cy="46" rx="8" ry="5" fill="url(#flame)"/>
+  <rect x="10" y="41" width="9" height="10" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <ellipse cx="8" cy="58" rx="8" ry="5" fill="url(#flame)"/>
+  <rect x="10" y="53" width="9" height="10" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <ellipse cx="8" cy="70" rx="8" ry="5" fill="url(#flame)"/>
+  <rect x="10" y="65" width="9" height="10" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <ellipse cx="8" cy="82" rx="8" ry="5" fill="url(#flame)"/>
+  <rect x="10" y="77" width="9" height="10" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <path d="M16 38 L103.6 40.6 Q116 53.1 116 64 Q116 74.9 103.6 87.4 L16 90 Q12 64 16 38 Z" fill="url(#hull)" stroke="#1c2529" stroke-width="2.5"/>
+  <path d="M22 64 L99.6 64" stroke="#263238" stroke-width="1" opacity="0.45"/>
+  <rect x="45.3" y="40" width="8.3" height="48" fill="#ff00ff" opacity="0.9"/>
+  <path d="M112 48.4 L128 64 L112 79.6 Z" fill="#ffca28" stroke="#5d4037" stroke-width="2"/>
+  <path d="M116 54.9 L122 62 M116 73.1 L122 66" stroke="#5d4037" stroke-width="2"/>
+  <ellipse cx="93.6" cy="64" rx="6.8" ry="11.7" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
+  <ellipse cx="95.6" cy="60.1" rx="3.1" ry="3.1" fill="#e1f5fe" opacity="0.7"/>
+</svg>

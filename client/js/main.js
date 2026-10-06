@@ -32,6 +32,8 @@ socket.on('welcome', (d) => {
   state.zones = new Map(d.zones.map((z) => [z.id, z]));
   state.wh = new Map(d.wh.map((w) => [w.id, w]));
   state.recipes = new Set(d.recipes || []);
+  state.shipTypes = new Set(d.shipTypes || []);
+  state.moduleTypes = new Set(d.moduleTypes || []);
   state.ships.clear();
   state.selection.clear();
   lastSub = '';
@@ -62,7 +64,7 @@ socket.on('ships', (d) => {
   ui.scheduleRender();
 });
 socket.on('me', (d) => {
-  Object.assign(state, { stopLoss: d.stopLoss, groups: d.groups, favorites: d.favorites });
+  Object.assign(state, { stopLoss: d.stopLoss, groups: d.groups, favorites: d.favorites, pilot: d.pilot });
   ui.scheduleRender(true);
 });
 socket.on('routes', (list) => {
@@ -85,7 +87,9 @@ socket.on('reveal', (d) => {
   for (const z of d.zones || []) state.zones.set(z.id, z);
   for (const w of d.wh || []) state.wh.set(w.id, w);
   for (const k of d.recipes || []) state.recipes.add(k);
-  if (d.recipes) ui.refreshAlmanac();
+  for (const k of d.ships || []) state.shipTypes.add(k);
+  for (const k of d.modules || []) state.moduleTypes.add(k);
+  if (d.recipes || d.ships || d.modules) ui.refreshAlmanac();
   if (d.systems || d.sectors || d.wh) ui.scheduleRender(true);
 });
 socket.on('markets', (upd) => {
@@ -93,7 +97,12 @@ socket.on('markets', (upd) => {
     const e = state.entities.get(id);
     if (!e?.market) continue;
     if (m.s) for (const [g, v] of Object.entries(m.s)) if (e.market.goods[g]) e.market.goods[g].stock = v;
-    if (m.x) Object.assign(e.market, m.x);
+    if (m.x) {
+      Object.assign(e.market, m.x);
+      // zuletzt gesehene Schiffspreise für den Almanach
+      for (const it of m.x.forSale || []) state.shipPrices[it.type] = it.price;
+      if (m.x.forSale?.length) { try { localStorage.setItem('st_ship_prices', JSON.stringify(state.shipPrices)); } catch { /* egal */ } }
+    }
   }
   ui.scheduleRender(true);
 });
@@ -104,6 +113,7 @@ socket.on('stats', (d) => {
 });
 setInterval(ui.requestStats, 10000);
 socket.on('errorMsg', (m) => ui.toast(m));
+socket.on('notice', (m) => ui.toast(m, 'info'));
 socket.on('kicked', (msg) => {
   state.me = null;
   ui.leaveGame(msg);
