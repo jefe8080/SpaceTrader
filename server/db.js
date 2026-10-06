@@ -26,6 +26,10 @@ export const MIGRATIONS = [
     CREATE INDEX ships_owner ON ships(owner);
     CREATE INDEX discoveries_player ON discoveries(player);
   `),
+  // 2: Ringpuffer für Routenstatistik
+  (db) => db.exec(`
+    CREATE TABLE route_stats (route TEXT NOT NULL, bucket INTEGER NOT NULL, data TEXT NOT NULL, PRIMARY KEY (route, bucket));
+  `),
 ];
 
 /** Tabellen mit (id, data) und optionalen Zusatzspalten */
@@ -40,6 +44,7 @@ const TABLES = {
   ownership: { key: ['entity'], cols: ['player'] },
   market_stats: { key: ['entity', 'bucket'], cols: [] },
   ship_stats: { key: ['ship', 'bucket'], cols: [] },
+  route_stats: { key: ['route', 'bucket'], cols: [] },
 };
 
 export class Store {

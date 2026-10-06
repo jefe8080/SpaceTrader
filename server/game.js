@@ -1,11 +1,14 @@
 import { WORLD, GOODS, BELT_TYPES, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
-  cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo } from '../shared/config.js';
+  cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, unitPrice } from '../shared/config.js';
 import { World } from './world.js';
 import { tickMarket, stat, missingInput } from './markets.js';
-import { updateShip, cargoFree } from './ships.js';
+import { updateShip, cargoFree, setWarn } from './ships.js';
 import { Store } from './db.js';
+import { addToBuckets, bucketOf, summary, sumWindow, balance, SHIP_STATS } from './stats.js';
 
 export const WORLD_GEN_VERSION = 1; // ändert sich die Generierung inkompatibel, wird die Welt neu erzeugt
+const ALL_TABLES = ['players', 'ships', 'sectors', 'entities', 'markets', 'routes', 'favorites', 'discoveries', 'ownership',
+  'market_stats', 'ship_stats', 'route_stats', 'meta'];
 
 export class Game {
   /** dbFile: Pfad zur SQLite-Datei oder ':memory:' */
@@ -15,10 +18,12 @@ export class Game {
     this.players = new Map();
     this.ships = new Map();
     this.routes = new Map();
-    this.counters = { player: 0, ship: 0, route: 0 };
+    this.shipStats = new Map();  // Schiff-ID -> Ringpuffer
+    this.routeStats = new Map(); // Routen-ID -> Ringpuffer
+    this.counters = { player: 0, ship: 0, route: 0, group: 0 };
     this.econAcc = 0;
     this.newDiscoveries = []; // [player, kind, key] seit dem letzten Speichern
-    this.listeners = { reveal: [], log: [] };
+    this.listeners = { reveal: [], log: [], routes: [], player: [] };
     if (!this.load()) {
       this.world = new World(seed ?? ((Math.random() * 2 ** 31) | 0));
       this.world.ensureChunk(0, 0);
@@ -35,11 +40,7 @@ export class Game {
     if (gen === undefined) return false;
     if (gen !== WORLD_GEN_VERSION) {
       console.log(`Weltgenerierung ${gen} ist veraltet (aktuell ${WORLD_GEN_VERSION}). Neue Welt wird erzeugt.`);
-      st.transaction(() => {
-        for (const t of ['players', 'ships', 'sectors', 'entities', 'markets', 'routes', 'favorites', 'discoveries', 'ownership', 'market_stats', 'ship_stats', 'meta']) {
-          st.db.prepare(`DELETE FROM ${t}`).run();
-        }
-      });
+      st.transaction(() => { for (const t of ALL_TABLES) st.db.prepare(`DELETE FROM ${t}`).run(); });
       for (const c of st.cache.values()) c.clear();
       return false;
     }
@@ -47,27 +48,29 @@ export class Game {
     this.counters = { ...this.counters, ...st.getMeta('counters') };
     this.world = new World(st.getMeta('seed'));
     const markets = new Map(st.loadAll('markets').map((r) => [r.id, r.data]));
-    const stats = new Map();
-    for (const r of st.loadAll('market_stats')) {
-      if (!stats.has(r.entity)) stats.set(r.entity, []);
-      stats.get(r.entity).push({ b: r.bucket, ...r.data });
-    }
+    const stats = groupRows(st.loadAll('market_stats'), 'entity');
     for (const r of st.loadAll('sectors')) this.world.chunks.add(r.id);
     for (const r of st.loadAll('entities')) {
       const e = r.data;
       if (markets.has(e.id)) {
         e.market = markets.get(e.id);
-        e.market.stats = (stats.get(e.id) || []).sort((a, b) => a.b - b.b);
+        e.market.stats = stats.get(e.id) || [];
       }
       this.world.addEntity(e);
     }
-    for (const r of st.loadAll('players')) this.players.set(r.id, { ...r.data, revealed: new Set() });
+    for (const r of st.loadAll('players')) this.players.set(r.id, { ...r.data, revealed: new Set(), favorites: {} });
     for (const d of st.loadDiscoveries()) {
       const p = this.players.get(d.player);
       if (p && d.kind === 'cell') p.revealed.add(d.key);
     }
+    for (const r of st.loadAll('favorites')) {
+      const p = this.players.get(r.player);
+      if (p) p.favorites[r.entity] = r.data;
+    }
     for (const r of st.loadAll('ships')) this.ships.set(r.id, r.data);
     for (const r of st.loadAll('routes')) this.routes.set(r.id, r.data);
+    this.shipStats = groupRows(st.loadAll('ship_stats'), 'ship');
+    this.routeStats = groupRows(st.loadAll('route_stats'), 'route');
     console.log(`Spielstand geladen: ${this.players.size} Spieler, ${this.world.entities.size} Objekte, ${this.ships.size} Schiffe`);
     return true;
   }
@@ -76,6 +79,11 @@ export class Game {
     const st = this.store;
     const t0 = Date.now();
     let n = 0;
+    const bucketRows = (map) => {
+      const rows = [];
+      for (const [id, list] of map) for (const { b, ...data } of list) rows.push({ key: [id, b], data });
+      return rows;
+    };
     st.transaction(() => {
       st.setMeta('worldGen', WORLD_GEN_VERSION);
       st.setMeta('seed', this.world.seed);
@@ -89,22 +97,27 @@ export class Game {
         if (market) {
           const { stats, ...m } = market;
           mkts.push({ key: [e.id], data: m });
-          for (const b of stats || []) {
-            const { b: bucket, ...data } = b;
-            mstats.push({ key: [e.id, bucket], data });
-          }
+          for (const { b, ...data } of stats || []) mstats.push({ key: [e.id, b], data });
         }
       }
       n += st.sync('entities', ents);
       n += st.sync('markets', mkts);
       n += st.sync('market_stats', mstats, false);
       st.trimStats('market_stats', Math.floor(this.time / STATS.BUCKET_SECS) - STATS.BUCKETS);
+      const favs = [];
       n += st.sync('players', [...this.players.values()].map((p) => {
-        const { revealed, ...data } = p;
+        const { revealed, favorites, ...data } = p;
+        for (const [ent, f] of Object.entries(favorites)) favs.push({ key: [p.id, ent], data: f });
         return { key: [p.id], data };
       }));
+      n += st.sync('favorites', favs);
       n += st.sync('ships', [...this.ships.values()].map((s) => ({ key: [s.id], cols: [s.owner], data: s })));
       n += st.sync('routes', [...this.routes.values()].map((r) => ({ key: [r.id], cols: [r.owner], data: r })));
+      n += st.sync('ship_stats', bucketRows(this.shipStats), false);
+      n += st.sync('route_stats', bucketRows(this.routeStats), false);
+      const minB = bucketOf(this.time) - SHIP_STATS.BUCKETS;
+      st.trimStats('ship_stats', minB);
+      st.trimStats('route_stats', minB);
       st.addDiscoveries(this.newDiscoveries);
       n += this.newDiscoveries.length;
       this.newDiscoveries = [];
@@ -133,25 +146,59 @@ export class Game {
   createPlayer(name) {
     const id = 'p' + ++this.counters.player;
     const p = { id, name, color: PLAYER_COLORS[(this.counters.player - 1) % PLAYER_COLORS.length], credits: WORLD.START_CREDITS,
-      revealed: new Set(), createdAt: Date.now(), lastSeen: Date.now() };
+      revealed: new Set(), favorites: {}, groups: [], stopLoss: 0, createdAt: Date.now(), lastSeen: Date.now() };
     this.players.set(id, p);
     this.revealAround(p, 0, 0, WORLD.START_REVEAL_RADIUS);
     this.spawnShip(p, 'spatz', this.world.entities.get('origin_yard'));
     return p;
   }
 
+  shipsOf(playerId) { return [...this.ships.values()].filter((s) => s.owner === playerId); }
+
+  /** Eindeutiger Schiffsname je Spieler */
+  uniqueShipName(playerId, wanted, exceptId = null) {
+    const taken = new Set(this.shipsOf(playerId).filter((s) => s.id !== exceptId).map((s) => s.name.toLowerCase()));
+    if (!taken.has(wanted.toLowerCase())) return wanted;
+    for (let i = 2; ; i++) {
+      const n = `${wanted.slice(0, 20)} ${i}`;
+      if (!taken.has(n.toLowerCase())) return n;
+    }
+  }
+
   spawnShip(player, type, atEntity) {
     const id = 's' + ++this.counters.ship;
     const a = Math.random() * Math.PI * 2;
     const d = atEntity.radius + WORLD.DOCK_OFFSET;
-    const own = [...this.ships.values()].filter((s) => s.owner === player.id).length;
+    const own = this.shipsOf(player.id);
+    const name = this.uniqueShipName(player.id, SHIP_NAMES[(own.length + this.counters.player * 3) % SHIP_NAMES.length]);
     const ship = {
-      id, owner: player.id, type, name: SHIP_NAMES[(own + this.counters.player * 3) % SHIP_NAMES.length] + (own >= SHIP_NAMES.length ? ' ' + (own + 1) : ''),
+      id, owner: player.id, type, name,
       x: atEntity.x + Math.cos(a) * d, y: atEntity.y + Math.sin(a) * d, angle: a + Math.PI / 2, vx: 0, vy: 0,
-      cargo: {}, orders: { type: 'idle' }, state: 'docked', dockedAt: atEntity.id, log: [],
+      cargo: {}, queue: [], qid: 0, state: 'docked', dockedAt: atEntity.id, log: [],
+      group: null, ord: own.reduce((m, s) => Math.max(m, s.ord || 0), 0) + 1, tot: {},
     };
     this.ships.set(id, ship);
     return ship;
+  }
+
+  // ---------- Statistik ----------
+  recordShip(ship, field, n, route = null) {
+    if (!n || ship.owner === NPC_OWNER) return;
+    ship.tot ||= {};
+    ship.tot[field] = (ship.tot[field] || 0) + n;
+    if (!this.shipStats.has(ship.id)) this.shipStats.set(ship.id, []);
+    addToBuckets(this.shipStats.get(ship.id), this.time, field, n);
+    if (route && (field === 'inc' || field === 'buy' || field === 'fuel')) {
+      if (!this.routeStats.has(route.id)) this.routeStats.set(route.id, []);
+      addToBuckets(this.routeStats.get(route.id), this.time, field, n);
+    }
+  }
+
+  shipSummary(ship) { return summary(ship.tot, this.shipStats.get(ship.id), this.time); }
+  shipBalance1h(ship) { return balance(sumWindow(this.shipStats.get(ship.id), this.time, 3600)); }
+  routeSummary(route) {
+    const l = this.routeStats.get(route.id);
+    return { h1: Math.round(balance(sumWindow(l, this.time, 3600))), d24: Math.round(balance(sumWindow(l, this.time, 86400))) };
   }
 
   // ---------- Nebel des Krieges ----------
@@ -203,29 +250,48 @@ export class Game {
   }
 
   shipLog(ship, msg) {
-    ship.log.unshift({ t: Date.now(), msg });
-    if (ship.log.length > 8) ship.log.length = 8;
+    ship.log.unshift({ t: Math.round(this.time), msg });
+    if (ship.log.length > 12) ship.log.length = 12;
     this.emit('log', ship, msg);
   }
 
-  /** limit: max. Einkaufspreis bzw. min. Verkaufspreis pro Einheit (0 = egal) */
-  trade(ship, e, good, amount, dir, limit = 0) {
+  /** Stop-Loss: Schwelle, unter die automatische Einkäufe den Kontostand nicht drücken dürfen */
+  stopLossFor(player, route) {
+    return Math.max(player.stopLoss || 0, route?.minBalance || 0);
+  }
+
+  /**
+   * Handel. limit: max. Einkaufspreis bzw. min. Verkaufspreis pro Einheit (0 = egal).
+   * opts.auto: automatischer Einkauf aus Routen (Stop-Loss greift), opts.route: Routenvorlage für die Statistik
+   */
+  trade(ship, e, good, amount, dir, limit = 0, opts = {}) {
     const p = this.players.get(ship.owner);
     const slot = e.market?.goods[good];
-    if (!slot || !GOODS[good]) return { n: 0, reason: 'Diese Ware wird hier nicht gehandelt.' };
-    if (ship.dockedAt !== e.id) return { n: 0, reason: 'Schiff ist nicht angedockt.' };
+    if (!slot || !GOODS[good]) return { n: 0, reason: 'Ware wird hier nicht gehandelt' };
+    if (ship.dockedAt !== e.id) return { n: 0, reason: 'Schiff ist nicht angedockt' };
     let n = 0, total = 0;
     if (dir === 'buy') {
-      if (!canBuyFrom(slot)) return { n: 0, reason: 'Hier wird diese Ware nicht verkauft.' };
+      if (!canBuyFrom(slot)) return { n: 0, reason: 'Ware wird hier nicht verkauft' };
+      const floor = opts.auto ? this.stopLossFor(p, opts.route) : 0;
       const max = Math.min(amount, cargoFree(ship), Math.floor(slot.stock));
+      let blocked = false;
       while (n < max) {
         const pr = buyPrice(good, slot.stock, slot.cap);
-        if (p.credits < pr || (limit && pr > limit)) break;
+        if (limit && pr > limit) break;
+        if (p.credits - pr < floor) { blocked = floor > 0; break; }
         p.credits -= pr; slot.stock -= 1; total += pr; n++;
       }
+      if (opts.auto) setWarn(ship, 'stoploss', blocked ? `Stop-Loss: Einkauf ${GOODS[good].name} gestoppt` : null);
       if (n) ship.cargo[good] = (ship.cargo[good] || 0) + n;
+      if (n) this.recordShip(ship, 'buy', total, opts.route);
+      if (!n) {
+        if (blocked) return { n: 0, reason: 'stoploss' };
+        if (slot.stock < 1) return { n: 0, reason: 'kein Bestand' };
+        if (limit && buyPrice(good, slot.stock, slot.cap) > limit) return { n: 0, reason: 'Preisgrenze' };
+        return { n: 0, reason: 'zu wenig Credits' };
+      }
     } else {
-      if (!canSellTo(slot)) return { n: 0, reason: 'Hier wird diese Ware nicht angekauft.' };
+      if (!canSellTo(slot)) return { n: 0, reason: 'Ware wird hier nicht angekauft' };
       const have = ship.cargo[good] || 0;
       const max = Math.min(amount, have, Math.floor(slot.cap - slot.stock));
       while (n < max) {
@@ -235,9 +301,11 @@ export class Game {
       }
       ship.cargo[good] = have - n;
       if (!ship.cargo[good]) delete ship.cargo[good];
+      if (n) this.recordShip(ship, 'inc', total, opts.route);
+      if (!n) return { n: 0, reason: slot.cap - slot.stock < 1 ? 'Lager voll' : limit ? 'Preisgrenze' : 'nicht möglich' };
     }
-    if (n) stat(e.market, this.time, dir === 'buy' ? 'o' : 'i', good, n);
-    if (n) this.shipLog(ship, `${dir === 'buy' ? 'Gekauft' : 'Verkauft'}: ${n} ${GOODS[good].name} für ${Math.round(total)} Cr bei ${e.name}`);
+    stat(e.market, this.time, dir === 'buy' ? 'o' : 'i', good, n);
+    this.shipLog(ship, `${dir === 'buy' ? 'Gekauft' : 'Verkauft'}: ${n} ${GOODS[good].name} für ${Math.round(total)} Cr bei ${e.name}`);
     return { n, total };
   }
 
@@ -255,7 +323,7 @@ export class Game {
       return;
     }
     const ship = this.spawnNpcShip(e);
-    ship.orders = { type: 'supply', stationId: e.id, sourceId: src.id, good, phase: 'toSource' };
+    ship.queue = [{ t: 'supply', stationId: e.id, sourceId: src.id, good, phase: 'toSource' }];
     m.supply = { state: 'active', good, shipId: ship.id, sourceId: src.id };
   }
 
@@ -285,7 +353,7 @@ export class Game {
     const ship = {
       id, owner: NPC_OWNER, type: SUPPLY.SHIP_TYPE, name: `Versorger ${station.name}`,
       x: station.x + Math.cos(a) * d, y: station.y + Math.sin(a) * d, angle: a, vx: 0, vy: 0,
-      cargo: {}, orders: { type: 'idle' }, state: 'docked', dockedAt: station.id, log: [],
+      cargo: {}, queue: [], state: 'docked', dockedAt: station.id, log: [],
     };
     this.ships.set(id, ship);
     return ship;
@@ -302,21 +370,38 @@ export class Game {
       delivered += k;
       stat(m, this.time, 'i', g, k);
     }
-    m.supply = { state: 'cooldown', good: ship.orders.good, delivered, until: this.time + SUPPLY.COOLDOWN };
+    m.supply = { state: 'cooldown', good: ship.queue[0]?.good, delivered, until: this.time + SUPPLY.COOLDOWN };
     this.removeShip(ship);
   }
 
   removeShip(ship) {
     this.ships.delete(ship.id);
+    this.shipStats.delete(ship.id);
   }
 
   statsFor(player, entityId) {
     const e = this.world.entities.get(entityId);
     if (!e?.market || !this.isKnown(player, e)) return null;
-    const round = (o) => Object.fromEntries(Object.entries(o).map(([g, v]) => [g, Math.round(v * 10) / 10]));
+    const round = (o) => Object.fromEntries(Object.entries(o || {}).map(([g, v]) => [g, Math.round(v * 10) / 10]));
     return {
       id: e.id, bucketSecs: STATS.BUCKET_SECS, buckets: STATS.BUCKETS, now: Math.floor(this.time / STATS.BUCKET_SECS),
-      data: (e.market.stats || []).map((b) => ({ b: b.b, n: b.n, p: round(b.p), c: round(b.c), i: round(b.i), o: round(b.o) })),
+      data: (e.market.stats || []).map((b) => ({ b: b.b, n: b.n, p: round(b.p), c: round(b.c), i: round(b.i), o: round(b.o), pr: round(b.pr) })),
     };
   }
+
+  /** Aktueller Mittelpreis (ohne Spread) */
+  midPrice(e, good) {
+    const s = e.market?.goods[good];
+    return s ? unitPrice(good, s.stock, s.cap) : null;
+  }
+}
+
+function groupRows(rows, keyCol) {
+  const m = new Map();
+  for (const r of rows) {
+    if (!m.has(r[keyCol])) m.set(r[keyCol], []);
+    m.get(r[keyCol]).push({ b: r.bucket, ...r.data });
+  }
+  for (const l of m.values()) l.sort((a, b) => a.b - b.b);
+  return m;
 }

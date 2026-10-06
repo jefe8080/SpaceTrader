@@ -1,8 +1,10 @@
-import { SHIP_TYPES, BELT_TYPES, WORLD } from '../shared/config.js';
+import { SHIP_TYPES, BELT_TYPES, WORLD, GOODS, unitPrice } from '../shared/config.js';
 import { stat } from './markets.js';
 
 export const cargoUsed = (ship) => Object.values(ship.cargo).reduce((a, b) => a + b, 0);
 export const cargoFree = (ship) => SHIP_TYPES[ship.type].cargo - cargoUsed(ship);
+
+const FAIL_WARN = 3; // so viele Fehlschläge derselben Aktion in Folge -> Warnung
 
 function approachPoint(ship, e) {
   let dx = ship.x - e.x, dy = ship.y - e.y;
@@ -12,7 +14,7 @@ function approachPoint(ship, e) {
   return { x: e.x + (dx / d) * off, y: e.y + (dy / d) * off };
 }
 
-function flyTo(ship, tx, ty, dt) {
+function flyTo(ship, tx, ty, dt, game) {
   const speed = SHIP_TYPES[ship.type].speed;
   const dx = tx - ship.x, dy = ty - ship.y;
   const d = Math.hypot(dx, dy);
@@ -20,6 +22,7 @@ function flyTo(ship, tx, ty, dt) {
   ship.dockedAt = null;
   if (d <= step) {
     ship.x = tx; ship.y = ty;
+    game.recordShip(ship, 'dist', d);
     return true;
   }
   ship.vx = (dx / d) * speed;
@@ -27,14 +30,18 @@ function flyTo(ship, tx, ty, dt) {
   ship.x += (dx / d) * step;
   ship.y += (dy / d) * step;
   ship.angle = Math.atan2(dy, dx);
+  game.recordShip(ship, 'dist', step);
   return false;
 }
 
-function flyToEntity(ship, e, dt) {
+/** Fliegt zum Objekt. true, sobald angedockt. Zählt die Ankunft als Flug. */
+function flyToEntity(ship, e, dt, game) {
   if (ship.dockedAt === e.id) return true;
   const p = approachPoint(ship, e);
-  if (flyTo(ship, p.x, p.y, dt)) {
+  ship.state = 'flying';
+  if (flyTo(ship, p.x, p.y, dt, game)) {
     ship.dockedAt = e.id;
+    game.recordShip(ship, 'f', 1);
     return true;
   }
   return false;
@@ -46,6 +53,7 @@ function mineStep(ship, e, dt) {
   if (!rate || e.kind !== 'belt') return true;
   const free = cargoFree(ship);
   if (free <= 0) return true;
+  ship.state = 'mining';
   ship.mineAcc = (ship.mineAcc || 0) + rate * (e.richness || 1) * dt;
   const n = Math.min(free, Math.floor(ship.mineAcc));
   if (n > 0) {
@@ -56,100 +64,193 @@ function mineStep(ship, e, dt) {
   return cargoFree(ship) <= 0;
 }
 
-export function updateShip(ship, dt, game) {
-  const o = ship.orders;
-  ship.vx = 0;
-  ship.vy = 0;
-  switch (o.type) {
-    case 'move':
-      ship.state = 'flying';
-      if (flyTo(ship, o.x, o.y, dt)) {
-        ship.orders = { type: 'idle' };
-        ship.state = 'idle';
-      }
-      break;
-    case 'goto': {
-      const e = game.world.entities.get(o.targetId);
-      if (!e) { ship.orders = { type: 'idle' }; break; }
-      ship.state = 'flying';
-      if (flyToEntity(ship, e, dt)) {
-        ship.orders = { type: 'idle' };
-        ship.state = 'docked';
-        game.shipLog(ship, `Angekommen bei ${e.name}`);
-      }
-      break;
-    }
-    case 'mine': {
-      const e = game.world.entities.get(o.targetId);
-      if (!e) { ship.orders = { type: 'idle' }; break; }
-      if (!flyToEntity(ship, e, dt)) { ship.state = 'flying'; break; }
-      ship.state = 'mining';
-      if (mineStep(ship, e, dt)) {
-        ship.orders = { type: 'idle' };
-        ship.state = 'docked';
-        game.shipLog(ship, `Laderaum voll (${e.name})`);
-      }
-      break;
-    }
-    case 'route':
-      runRoute(ship, o, dt, game);
-      break;
-    case 'supply':
-      runSupply(ship, o, dt, game);
-      break;
-    default:
-      ship.state = ship.dockedAt ? 'docked' : 'idle';
+// ---------- Fehlerzähler und Warnungen ----------
+export function setWarn(ship, key, msg) {
+  ship.warn ||= {};
+  if (msg) ship.warn[key] = msg;
+  else delete ship.warn[key];
+}
+
+function actionKey(a, targetId) { return `${targetId}:${a.op}:${a.good || ''}`; }
+
+function actionFailed(ship, key, msg, game) {
+  ship.fails ||= {};
+  const n = (ship.fails[key] || 0) + 1;
+  ship.fails[key] = n;
+  game.shipLog(ship, `Übersprungen: ${msg}`);
+  if (n >= FAIL_WARN) setWarn(ship, 'fail', `${msg} (${n}× in Folge)`);
+}
+
+function actionOk(ship, key) {
+  if (ship.fails?.[key]) {
+    delete ship.fails[key];
+    if (!Object.keys(ship.fails).length) setWarn(ship, 'fail', null);
   }
 }
 
-function runRoute(ship, r, dt, game) {
-  if (!r.stops.length) { ship.orders = { type: 'idle' }; return; }
-  if (r.index >= r.stops.length) r.index = 0;
-  const stop = r.stops[r.index];
-  const e = game.world.entities.get(stop.targetId);
-  const next = () => { r.index = (r.index + 1) % r.stops.length; r.phase = 'travel'; };
-  if (!e) { next(); return; }
+/**
+ * Führt eine Handelsaktion aus (kaufen/verkaufen). Fehlschläge werden gezählt.
+ * opts.auto: automatischer Einkauf (Stop-Loss greift), opts.routeId für die Routenstatistik.
+ */
+function doTrade(ship, e, a, game, opts = {}) {
+  const key = actionKey(a, e.id);
+  const amount = a.amount > 0 ? a.amount : Infinity;
+  if (a.op === 'buy' && cargoFree(ship) <= 0) return;           // voll: nichts zu tun, kein Fehler
+  if (a.op === 'sell' && !(ship.cargo[a.good] > 0)) return;      // nichts geladen: kein Fehler
+  const res = game.trade(ship, e, a.good, amount, a.op, a.limit || 0, opts);
+  if (res.n > 0) { actionOk(ship, key); return; }
+  if (res.reason === 'stoploss') return; // Stop-Loss ist kein Fehler der Aktion, Warnung setzt trade()
+  actionFailed(ship, key, `${a.op === 'buy' ? 'Kauf' : 'Verkauf'} ${GOODS[a.good].name} bei ${e.name}${res.reason ? ': ' + res.reason : ''}`, game);
+}
 
-  if (r.phase === 'travel') {
-    ship.state = 'flying';
-    if (!flyToEntity(ship, e, dt)) return;
-    r.phase = 'act';
-    r.actionIdx = 0;
-  }
-  if (r.phase === 'act') {
-    ship.state = 'docked';
-    while (r.actionIdx < stop.actions.length) {
-      const a = stop.actions[r.actionIdx];
-      if (a.op === 'mine') {
-        ship.state = 'mining';
-        if (!mineStep(ship, e, dt)) return;
-        ship.state = 'docked';
-      } else {
-        game.trade(ship, e, a.good, a.amount > 0 ? a.amount : Infinity, a.op, a.limit || 0);
-      }
-      r.actionIdx++;
+/** Bedingung für "Warten bis" */
+function waitCondMet(e, a) {
+  const s = e.market?.goods[a.good];
+  if (!s) return true;
+  const v = a.cond.startsWith('stock') ? s.stock : unitPrice(a.good, s.stock, s.cap);
+  return a.cond.endsWith('>=') ? v >= a.value : v <= a.value;
+}
+
+/**
+ * Aktionen eines Stopps abarbeiten. Liefert true, wenn alle Aktionen erledigt sind.
+ * st = Laufzeitzustand { actionIdx, waitStart }
+ */
+function runActions(ship, e, actions, st, dt, game, opts) {
+  while (st.actionIdx < actions.length) {
+    const a = actions[st.actionIdx];
+    if (a.op === 'mine') {
+      if (!mineStep(ship, e, dt)) return false;
+      ship.state = 'docked';
+    } else if (a.op === 'waitUntil') {
+      st.waitStart ??= game.time;
+      if (!waitCondMet(e, a)) {
+        if (game.time - st.waitStart < (a.timeout || 600)) { ship.state = 'waiting'; return false; }
+        actionFailed(ship, actionKey(a, e.id), `Warten auf ${GOODS[a.good]?.name || '?'} bei ${e.name}: Zeitlimit erreicht`, game);
+      } else actionOk(ship, actionKey(a, e.id));
+      st.waitStart = null;
+      ship.state = 'docked';
+    } else if (a.op === 'buy' || a.op === 'sell') {
+      doTrade(ship, e, a, game, opts);
     }
-    r.phase = 'wait';
-    r.waitUntil = game.time + 2;
+    st.actionIdx++;
   }
-  if (r.phase === 'wait') {
+  return true;
+}
+
+// ---------- Befehlsqueue ----------
+/** Ausführung je Befehlstyp. Rückgabe: true = erledigt, false = läuft noch */
+const EXEC = {
+  move(ship, c, dt, game) {
+    ship.state = 'flying';
+    return flyTo(ship, c.x, c.y, dt, game);
+  },
+  goto(ship, c, dt, game) {
+    const e = game.world.entities.get(c.target);
+    if (!e) return true;
+    if (!flyToEntity(ship, e, dt, game)) return false;
     ship.state = 'docked';
-    if (game.time >= r.waitUntil) next();
+    if (!c.arrived) { c.arrived = true; game.shipLog(ship, `Angekommen bei ${e.name}`); }
+    return true;
+  },
+  dock(ship, c, dt, game) {
+    const e = game.world.entities.get(c.target);
+    if (!e) return true;
+    if (!flyToEntity(ship, e, dt, game)) return false;
+    ship.state = 'docked';
+    c.actionIdx ??= 0;
+    return runActions(ship, e, c.actions || [], c, dt, game, { auto: false });
+  },
+  mine(ship, c, dt, game) {
+    const e = game.world.entities.get(c.target);
+    if (!e) return true;
+    if (!flyToEntity(ship, e, dt, game)) return false;
+    if (mineStep(ship, e, dt)) {
+      ship.state = 'docked';
+      game.shipLog(ship, `Laderaum voll (${e.name})`);
+      return true;
+    }
+    return false;
+  },
+  wait(ship, c, dt, game) {
+    c.until ??= game.time + c.secs;
+    ship.state = ship.dockedAt ? 'docked' : 'idle';
+    return game.time >= c.until;
+  },
+  route(ship, c, dt, game) { return runRoute(ship, c, dt, game); },
+  supply(ship, c, dt, game) { return runSupply(ship, c, dt, game); },
+};
+
+export function updateShip(ship, dt, game) {
+  ship.vx = 0;
+  ship.vy = 0;
+  const q = ship.queue;
+  // Mehrere sofort erledigte Befehle (z.B. Handel am selben Ort) in einem Tick abarbeiten
+  for (let guard = 0; guard < 8; guard++) {
+    const c = q[0];
+    if (!c) {
+      ship.state = ship.dockedAt ? 'docked' : 'idle';
+      return;
+    }
+    const done = EXEC[c.t] ? EXEC[c.t](ship, c, dt, game) : true;
+    if (!done) return;
+    if (q[0] === c) q.shift();
+    dt = 0;
   }
+}
+
+/** Routenvorlage abfahren. c = { route, rounds, done, idx, phase, actionIdx } */
+function runRoute(ship, c, dt, game) {
+  const route = game.routes.get(c.route);
+  if (!route || !route.stops.length) return true;
+  c.idx ??= 0; c.phase ??= 'travel'; c.done ??= 0;
+  if (c.idx >= route.stops.length) c.idx = 0;
+  const stop = route.stops[c.idx];
+  const e = game.world.entities.get(stop.targetId);
+  const next = () => {
+    c.idx++;
+    c.phase = 'travel';
+    if (c.idx >= route.stops.length) {
+      c.idx = 0;
+      c.done++;
+    }
+  };
+  if (!e) { next(); return false; }
+
+  if (c.phase === 'travel') {
+    if (route.paused) { ship.state = ship.dockedAt ? 'docked' : 'idle'; return false; }
+    if (!flyToEntity(ship, e, dt, game)) return false;
+    c.phase = 'act';
+    c.actionIdx = 0;
+    c.waitStart = null;
+  }
+  if (c.phase === 'act') {
+    ship.state = 'docked';
+    if (!runActions(ship, e, stop.actions, c, dt, game, { auto: true, route })) return false;
+    c.phase = 'wait';
+    c.waitUntil = game.time + 2;
+  }
+  if (c.phase === 'wait') {
+    ship.state = 'docked';
+    if (game.time < c.waitUntil) return false;
+    next();
+    if (c.rounds > 0 && c.done >= c.rounds && c.idx === 0) {
+      game.shipLog(ship, `Route ${route.name}: ${c.rounds} Runde(n) abgeschlossen`);
+      return true;
+    }
+  }
+  return false;
 }
 
 /** Stationseigener Versorger: Quelle anfliegen, laden/abbauen, zur Station zurück, entladen. */
 function runSupply(ship, o, dt, game) {
   const station = game.world.entities.get(o.stationId);
-  if (!station) { game.removeShip(ship); return; }
+  if (!station) { game.removeShip(ship); return true; }
   if (o.phase === 'toSource') {
     const src = game.world.entities.get(o.sourceId);
-    if (!src) { o.phase = 'toStation'; return; }
-    ship.state = 'flying';
-    if (!flyToEntity(ship, src, dt)) return;
+    if (!src) { o.phase = 'toStation'; return false; }
+    if (!flyToEntity(ship, src, dt, game)) return false;
     if (src.kind === 'belt') {
-      ship.state = 'mining';
-      if (!mineStep(ship, src, dt)) return;
+      if (!mineStep(ship, src, dt)) return false;
     } else {
       const slot = src.market?.goods[o.good];
       const n = slot ? Math.min(cargoFree(ship), Math.floor(slot.stock)) : 0;
@@ -161,9 +262,7 @@ function runSupply(ship, o, dt, game) {
     }
     o.phase = 'toStation';
   }
-  if (o.phase === 'toStation') {
-    ship.state = 'flying';
-    if (!flyToEntity(ship, station, dt)) return;
-    game.finishSupply(ship, station);
-  }
+  if (!flyToEntity(ship, station, dt, game)) return false;
+  game.finishSupply(ship, station);
+  return true;
 }

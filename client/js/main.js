@@ -1,9 +1,8 @@
-import { SHIP_TYPES } from '/shared/config.js';
-import { state } from './state.js';
-import { socket, cmd } from './net.js';
+import { state, selectedShips } from './state.js';
+import { socket } from './net.js';
 import { loadAssets } from './assets.js';
 import { initRenderer, render, screenToWorld, pickAt } from './render.js';
-import * as ui from './ui.js';
+import * as ui from './ui/index.js';
 
 await loadAssets();
 const canvas = document.getElementById('view');
@@ -17,7 +16,7 @@ socket.on('connect', () => {
 socket.on('players', (list) => {
   state.players = list;
   ui.renderLogin();
-  if (state.me) ui.renderOnline();
+  if (state.me) ui.renderTop();
 });
 socket.on('loginError', ui.loginError);
 socket.on('welcome', (d) => {
@@ -27,9 +26,11 @@ socket.on('welcome', (d) => {
   state.cells = new Set(d.cells);
   state.entities = new Map(d.entities.map((e) => [e.id, e]));
   state.ships.clear();
+  state.selection.clear();
   lastSub = '';
   state.awaitCenter = first;
   ui.enterGame();
+  ui.renderAll();
 });
 socket.on('ships', (d) => {
   state.credits = d.credits;
@@ -37,20 +38,37 @@ socket.on('ships', (d) => {
   const seen = new Set();
   for (const c of d.ships) {
     let s = state.ships.get(c.id);
-    if (!s) { s = { id: c.id, cargo: {}, log: [], orders: { type: 'idle' } }; state.ships.set(c.id, s); }
+    if (!s) { s = { id: c.id, cargo: {}, log: [], queue: [], warn: {} }; state.ships.set(c.id, s); }
     Object.assign(s, { x: c.x, y: c.y, angle: c.a, vx: c.vx, vy: c.vy, state: c.st, dockedAt: c.dk, recv: now });
     if (c.d) Object.assign(s, c.d);
     if (c.owner) Object.assign(s, { owner: c.owner, type: c.type, name: c.name, task: c.task, cargo: c.cargo || s.cargo });
     seen.add(c.id);
   }
   for (const id of state.ships.keys()) if (!seen.has(id)) state.ships.delete(id);
+  for (const id of state.selection) if (!state.ships.has(id)) state.selection.delete(id);
   if (state.awaitCenter) {
     const own = d.ships.find((s) => state.ships.get(s.id).owner === state.me.id);
     if (own) { cam.x = own.x; cam.y = own.y; ui.select({ kind: 'ship', id: own.id }); }
     state.awaitCenter = false;
   }
   if (state.selected?.kind === 'ship' && !state.ships.has(state.selected.id)) state.selected = null;
-  ui.onState();
+  ui.scheduleRender();
+});
+socket.on('me', (d) => {
+  Object.assign(state, { stopLoss: d.stopLoss, groups: d.groups, favorites: d.favorites });
+  ui.scheduleRender(true);
+});
+socket.on('routes', (list) => {
+  state.routes = new Map(list.map((r) => [r.id, r]));
+  ui.scheduleRender(true);
+});
+socket.on('fleetStats', (d) => {
+  state.fleetStats = d;
+  ui.scheduleRender(true);
+});
+socket.on('shipStats', (d) => {
+  state.shipStats.set(d.ship, d);
+  ui.scheduleRender();
 });
 socket.on('reveal', ({ cells, entities }) => {
   for (const c of cells) state.cells.add(c);
@@ -63,37 +81,39 @@ socket.on('markets', (upd) => {
     if (m.s) for (const [g, v] of Object.entries(m.s)) if (e.market.goods[g]) e.market.goods[g].stock = v;
     if (m.x) Object.assign(e.market, m.x);
   }
-  ui.onMarkets();
+  ui.scheduleRender(true);
 });
 socket.on('log', ({ ship, msg }) => ui.addLog(ship, msg));
 socket.on('stats', (d) => {
   state.stats.set(d.id, d);
-  ui.onMarkets();
+  ui.scheduleRender(true);
 });
-setInterval(ui.requestStats, 15000);
+setInterval(ui.requestStats, 10000);
+socket.on('errorMsg', (m) => ui.toast(m));
+socket.on('kicked', (msg) => {
+  state.me = null;
+  ui.leaveGame(msg);
+});
 
+// Abos: Sichtbereich + Märkte im Bild + offene Dialoge
 let lastSub = '';
 function sendSubscriptions() {
   if (!state.me) return;
   const [x0, y0] = screenToWorld(0, 0);
   const [x1, y1] = screenToWorld(innerWidth, innerHeight);
-  const ids = new Set();
+  const ids = new Set(ui.dialogMarkets());
   for (const e of state.entities.values()) {
+    if (ids.size >= 400) break;
     if (e.market && e.x > x0 - 300 && e.x < x1 + 300 && e.y > y0 - 300 && e.y < y1 + 300) ids.add(e.id);
   }
-  for (const id of ui.dialogMarkets()) ids.add(id);
   const markets = [...ids].slice(0, 400);
-  const key = markets.join(',') + '|' + [x0, y0, x1, y1].map((v) => Math.round(v / 200)).join(',');
+  const q = (v) => Math.round(v / Math.max(200, (x1 - x0) / 10));
+  const key = markets.join(',') + '|' + [x0, y0, x1, y1].map(q).join(',');
   if (key === lastSub) return;
   lastSub = key;
   socket.emit('sub', { view: { x0, y0, x1, y1 }, markets });
 }
 setInterval(sendSubscriptions, 250);
-socket.on('errorMsg', ui.toast);
-socket.on('kicked', (msg) => {
-  state.me = null;
-  ui.leaveGame(msg);
-});
 
 // ---------------- Eingabe ----------------
 let drag = null;
@@ -124,24 +144,28 @@ addEventListener('mouseup', (e) => {
     if (hit?.kind === 'entity') state.pickMode(hit.id);
     return;
   }
+  // Strg+Klick auf eigenes Schiff: Mehrfachauswahl
+  if ((e.ctrlKey || e.metaKey) && hit?.kind === 'ship' && state.ships.get(hit.id)?.owner === state.me.id) {
+    if (!state.selection.size && state.selected?.kind === 'ship') state.selection.add(state.selected.id);
+    if (state.selection.has(hit.id)) state.selection.delete(hit.id); else state.selection.add(hit.id);
+    ui.select({ kind: 'ship', id: hit.id }, { keepSelection: true });
+    return;
+  }
   ui.select(hit);
+});
+canvas.addEventListener('dblclick', (e) => {
+  const hit = pickAt(e.clientX, e.clientY);
+  if (hit?.kind === 'ship') state.follow = hit.id;
 });
 canvas.addEventListener('contextmenu', (e) => {
   e.preventDefault();
-  const sel = state.selected;
-  if (sel?.kind !== 'ship') return;
-  const ship = state.ships.get(sel.id);
-  if (!ship || ship.owner !== state.me?.id) return;
+  const ships = selectedShips();
+  if (!ships.length) return;
   const hit = pickAt(e.clientX, e.clientY);
   const [wx, wy] = screenToWorld(e.clientX, e.clientY);
   state.clickFx = { x: wx, y: wy, t: performance.now() };
-  if (hit?.kind === 'entity') {
-    const ent = state.entities.get(hit.id);
-    const mine = ent.kind === 'belt' && SHIP_TYPES[ship.type].mining;
-    cmd(mine ? 'mine' : 'goto', { ship: ship.id, target: ent.id });
-  } else {
-    cmd('move', { ship: ship.id, x: wx, y: wy });
-  }
+  const target = hit?.kind === 'entity' ? state.entities.get(hit.id) : { x: wx, y: wy };
+  ui.orderShips(ships, target, e.shiftKey);
 });
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
@@ -154,13 +178,19 @@ canvas.addEventListener('wheel', (e) => {
   }
 }, { passive: false });
 addEventListener('keydown', (e) => {
-  if (e.target.matches('input, select, textarea')) return;
+  if (!state.me || ui.typing()) return;
   if (e.key === 'Escape') {
     if (state.pickMode) state.pickMode(null);
-    else ui.select(null);
+    else if (!ui.closeTopModal()) ui.select(null);
   } else if (e.key === ' ' && state.selected?.kind === 'ship') {
     e.preventDefault();
     state.follow = state.selected.id;
+  } else if (e.ctrlKey || e.metaKey || e.altKey) {
+    // keine Kürzel mit Modifikatoren
+  } else if (e.key === 'r' || e.key === 'R') {
+    ui.toggleModal('routesOverview');
+  } else if (e.key === 'f' || e.key === 'F') {
+    ui.toggleModal('favorites');
   }
 });
 

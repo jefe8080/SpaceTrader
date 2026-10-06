@@ -30,13 +30,17 @@
       <div class="logo">SPACE<span>TRADER</span></div>
       <div class="stat"><span class="label">Credits</span><span id="credits" class="value">0</span></div>
       <div class="stat"><span class="label">Schiffe</span><span id="shipCount" class="value">0</span></div>
+      <button id="stopLossBtn" class="small">Stop-Loss aus</button>
       <div id="onlinePlayers"></div>
       <div class="spacer"></div>
+      <button id="btnRoutes" title="Routenübersicht (R)">↻ Routen <kbd>R</kbd></button>
+      <button id="btnFavs" title="Favoriten (F)">★ Favoriten <kbd>F</kbd></button>
       <button id="btnHome" title="Zum Startpunkt">⌂ Start</button>
       <button id="btnHelp" title="Hilfe">?</button>
     </div>
     <div id="fleet" class="panel">
-      <h2>Flotte</h2>
+      <div class="panel-head"><h2>Flotte</h2><span style="flex:1"></span><button id="btnNewGroup" class="small" title="Neue Gruppe (mit Auswahl)">＋ Gruppe</button></div>
+      <div id="fleetFilter" class="btnrow"></div>
       <div id="fleetList"></div>
     </div>
     <div id="details" class="panel" hidden></div>
@@ -49,15 +53,23 @@
   <div id="routeEditor" class="overlay" hidden>
     <div class="card route-card" id="routeCard"></div>
   </div>
+  <div id="routesOverview" class="overlay" hidden>
+    <div class="card wide-card" id="routesCard"></div>
+  </div>
+  <div id="favorites" class="overlay" hidden>
+    <div class="card wide-card" id="favCard"></div>
+  </div>
+  <div id="popMenu" class="popmenu" hidden></div>
 
   <div id="help" class="overlay" hidden>
     <div class="card help-card">
       <h2>Steuerung</h2>
       <ul>
-        <li><b>Linksklick</b> auf Schiff oder Objekt: auswählen</li>
-        <li><b>Rechtsklick</b> mit gewähltem Schiff: dorthin fliegen (auf Asteroidenfeld: abbauen)</li>
+        <li><b>Linksklick</b> auf Schiff oder Objekt: auswählen, <b>Strg/Shift+Klick</b> in der Flottenliste: Mehrfachauswahl</li>
+        <li><b>Doppelklick</b> auf ein Schiff: auswählen und Kamera folgen lassen</li>
+        <li><b>Rechtsklick</b>: Befehl an alle gewählten Schiffe (ersetzt die Queue), <b>Shift+Rechtsklick</b>: Befehl anhängen</li>
         <li><b>Ziehen</b> mit linker Maustaste: Karte verschieben, <b>Mausrad</b>: Zoom</li>
-        <li><b>Leertaste</b>: Kamera auf gewähltes Schiff, <b>Esc</b>: Auswahl aufheben</li>
+        <li><b>R</b> Routenübersicht, <b>F</b> Favoriten, <b>Leertaste</b> Kamera folgen, <b>Esc</b> schließen bzw. Auswahl aufheben</li>
       </ul>
       <h2>Wirtschaft</h2>
       <ul>
@@ -65,7 +77,8 @@
         <li>Stationen verarbeiten genau ein Rezept, z.B. 2 Erz → 1 Metall. Ohne Nahrung arbeiten sie langsamer.</li>
         <li>Preise richten sich nach dem Lagerstand: volles Lager = billig, leeres Lager = teuer.</li>
         <li>Werften kaufen Metall, Elektronik und Maschinen und bauen daraus Schiffe, die du kaufen kannst.</li>
-        <li>Mit <b>Routen</b> fliegen deine Schiffe automatisch Handels- oder Bergbaurunden.</li>
+        <li><b>Routen</b> sind Vorlagen: mehrere Schiffe fahren dieselbe Route, Änderungen wirken auf alle.</li>
+        <li><b>Stop-Loss</b> (oben) verhindert automatische Einkäufe, wenn dein Kontostand zu tief fällt.</li>
       </ul>
       <button class="primary" id="btnHelpClose">Los geht's</button>
     </div>

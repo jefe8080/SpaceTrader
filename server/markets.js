@@ -1,4 +1,4 @@
-import { PLANET_TYPES, STATION_TYPES, STATION_FOOD, SHIP_TYPES, SHIPYARD, STORAGE, STATS } from '../shared/config.js';
+import { PLANET_TYPES, STATION_TYPES, STATION_FOOD, SHIP_TYPES, SHIPYARD, STORAGE, STATS, unitPrice } from '../shared/config.js';
 
 /**
  * Märkte nach Rollen- und Strategie-Modell.
@@ -43,17 +43,22 @@ export function createMarket(kind, type, r, scale = 1) {
 /**
  * Statistik buchen. kind: p = produziert, c = verbraucht, i = angeliefert (Schiffe), o = abgeholt (Schiffe), n = Zyklen
  */
-export function stat(m, now, kind, good, n) {
-  if (!n) return;
+function bucketFor(m, now) {
   const b = Math.floor(now / STATS.BUCKET_SECS);
   m.stats ||= [];
   let cur = m.stats[m.stats.length - 1];
   if (!cur || cur.b !== b) {
-    cur = { b, p: {}, c: {}, i: {}, o: {}, n: 0 };
+    cur = { b, p: {}, c: {}, i: {}, o: {}, n: 0, pr: {} };
     m.stats.push(cur);
     const oldest = b - STATS.BUCKETS + 1;
     while (m.stats.length && m.stats[0].b < oldest) m.stats.shift();
   }
+  return cur;
+}
+
+export function stat(m, now, kind, good, n) {
+  if (!n) return;
+  const cur = bucketFor(m, now);
   if (kind === 'n') cur.n += n;
   else cur[kind][good] = (cur[kind][good] || 0) + n;
 }
@@ -150,6 +155,10 @@ export function tickMarket(e, dt, now, game) {
   const m = e.market;
   if (!m) return;
   STRATEGIES[m.strategy].tick(e, m, dt, now, game);
+  // Preisverlauf: letzter Mittelpreis je 5-Minuten-Block (für Sparklines)
+  const cur = bucketFor(m, now);
+  cur.pr ||= {};
+  for (const [g, s] of Object.entries(m.goods)) cur.pr[g] = Math.round(unitPrice(g, s.stock, s.cap) * 10) / 10;
 }
 
 export function missingInput(m) {

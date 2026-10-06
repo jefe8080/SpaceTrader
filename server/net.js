@@ -79,6 +79,12 @@ export class Net {
       if (data) socket.emit('stats', data);
     });
 
+    socket.on('shipStats', (msg) => {
+      if (!session) return;
+      const ship = this.game.ships.get(msg?.ship);
+      if (ship?.owner === session.player.id) socket.emit('shipStats', { ship: ship.id, ...this.game.shipSummary(ship) });
+    });
+
     socket.on('disconnect', () => {
       if (!session || this.sessions.get(session.player.id) !== session) return;
       this.sessions.delete(session.player.id);
@@ -97,7 +103,10 @@ export class Net {
       entities,
       players: this.game.playerList(this.online()),
     });
+    s.sentMe = null;
+    s.sentRoutes = null;
     this.sendShipsTo(s);
+    this.sendFleetStats();
   }
 
   // ---------- Schiffe ----------
@@ -128,6 +137,21 @@ export class Net {
     }
     for (const id of s.sentDetail.keys()) if (!this.game.ships.has(id) || this.game.ships.get(id).owner !== p.id) s.sentDetail.delete(id);
     s.socket.emit('ships', { t: r1(this.game.time), credits: Math.floor(p.credits), ships });
+    // Spielerdaten und Routen nur bei Änderung
+    const me = JSON.stringify(playerDetail(p));
+    if (me !== s.sentMe) { s.sentMe = me; s.socket.emit('me', JSON.parse(me)); }
+    const routes = JSON.stringify([...this.game.routes.values()].filter((r) => r.owner === p.id));
+    if (routes !== s.sentRoutes) { s.sentRoutes = routes; s.socket.emit('routes', JSON.parse(routes)); }
+  }
+
+  /** Salden je Schiff (1 h) und je Route (1 h / 24 h), alle paar Sekunden */
+  sendFleetStats() {
+    for (const s of this.sessions.values()) {
+      const ships = {}, routes = {};
+      for (const ship of this.game.ships.values()) if (ship.owner === s.player.id) ships[ship.id] = Math.round(this.game.shipBalance1h(ship));
+      for (const r of this.game.routes.values()) if (r.owner === s.player.id) routes[r.id] = this.game.routeSummary(r);
+      s.socket.emit('fleetStats', { ships, routes });
+    }
   }
 
   // ---------- Märkte ----------
@@ -212,8 +236,9 @@ function compactShip(s) {
 
 function foreignInfo(s) {
   const o = { owner: s.owner, type: s.type, name: s.name };
-  if (s.owner === NPC_OWNER && s.orders.type === 'supply') {
-    const { stationId, sourceId, good, phase } = s.orders;
+  const c = s.queue[0];
+  if (s.owner === NPC_OWNER && c?.t === 'supply') {
+    const { stationId, sourceId, good, phase } = c;
     o.task = { stationId, sourceId, good, phase };
     o.cargo = s.cargo;
   }
@@ -221,9 +246,12 @@ function foreignInfo(s) {
 }
 
 function shipDetail(s) {
-  const ord = s.orders;
   return {
-    owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, log: s.log,
-    orders: ord.type === 'route' ? { type: 'route', stops: ord.stops, index: ord.index, phase: ord.phase } : ord,
+    owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, log: s.log, group: s.group, ord: s.ord,
+    queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},
   };
+}
+
+function playerDetail(p) {
+  return { stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {} };
 }

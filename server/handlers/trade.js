@@ -5,9 +5,9 @@ export default {
   trade: {
     args: { ship: V.ownShip(), target: V.entity(), good: V.key(GOODS), dir: V.oneOf('buy', 'sell'), amount: V.opt((v) => (v === 'max' ? Infinity : V.int(1, 1e6)(v)), 1) },
     run({ game }, { ship, target, good, dir, amount }) {
-      if (ship.orders.type === 'route') return 'Schiff fährt eine Route. Erst stoppen.';
+      if (ship.queue[0]?.t === 'route') return 'Schiff fährt eine Route. Erst stoppen.';
       const res = game.trade(ship, target, good, amount, dir);
-      if (!res.n) return res.reason || (dir === 'buy' ? 'Kauf nicht möglich (Credits, Laderaum oder Bestand).' : 'Verkauf nicht möglich (Lager voll?).');
+      if (!res.n) return `${dir === 'buy' ? 'Kauf' : 'Verkauf'} nicht möglich: ${res.reason}`;
     },
   },
   buyShip: {

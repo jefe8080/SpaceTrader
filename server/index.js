@@ -28,6 +28,7 @@ setInterval(() => {
 }, NET.TICK_MS);
 setInterval(() => net.sendShips(), NET.STATE_MS);
 setInterval(() => net.sendMarkets(), NET.MARKET_MS);
+setInterval(() => net.sendFleetStats(), 5000);
 setInterval(() => {
   const r = game.save();
   if (r.ms > 200) console.log(`Gespeichert: ${r.rows} Zeilen in ${r.ms} ms`);

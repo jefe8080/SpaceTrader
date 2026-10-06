@@ -1,6 +1,6 @@
 import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, cellKey } from '/shared/config.js';
 import { getSprite } from './assets.js';
-import { state, playerColor } from './state.js';
+import { state, playerColor, selectedShips } from './state.js';
 
 const TAU = Math.PI * 2;
 const cam = state.camera;
@@ -233,42 +233,54 @@ function entitySelectRadius(e) {
   return Math.max(e.radius, 7 / cam.zoom) * 1.25;
 }
 
-/** Linien für die Befehle des gewählten Schiffes */
+/** Punkt eines Queue-Befehls (Ziel) */
+function cmdPoint(c) {
+  if (c.t === 'move') return { x: c.x, y: c.y, move: true };
+  if (c.target) return state.entities.get(c.target);
+  return null;
+}
+
+/** Linien für die Befehle der gewählten Schiffe: Queue als Pfad, Routen als Rundkurs */
 function drawOrders(now) {
-  const sel = state.selected;
-  if (sel?.kind !== 'ship') return;
-  const s = state.ships.get(sel.id);
-  if (!s?.orders) return;
-  const col = playerColor(s.owner);
+  const ships = selectedShips();
+  if (!ships.length && state.selected?.kind === 'ship') return;
   ctx.save();
   ctx.lineWidth = 1.6 / cam.zoom;
   ctx.setLineDash([10 / cam.zoom, 8 / cam.zoom]);
   ctx.lineDashOffset = -now / 40 / cam.zoom;
-  const o = s.orders;
-  if (o.type === 'route') {
-    const pts = o.stops.map((st) => state.entities.get(st.targetId)).filter(Boolean);
-    if (pts.length > 1) {
-      ctx.strokeStyle = col + '55';
-      ctx.beginPath();
-      pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
-      ctx.closePath();
-      ctx.stroke();
-    }
-    const cur = state.entities.get(o.stops[o.index]?.targetId);
-    if (cur && o.phase === 'travel') {
-      ctx.strokeStyle = col;
-      ctx.beginPath(); ctx.moveTo(s.rx, s.ry); ctx.lineTo(cur.x, cur.y); ctx.stroke();
-    }
-  } else if (o.type === 'move' || o.type === 'goto' || o.type === 'mine') {
-    const t = o.type === 'move' ? o : state.entities.get(o.targetId);
-    if (t) {
-      ctx.strokeStyle = col;
-      ctx.beginPath(); ctx.moveTo(s.rx, s.ry); ctx.lineTo(t.x, t.y); ctx.stroke();
-      if (o.type === 'move') {
+  for (const s of ships) {
+    if (!s.queue?.length || s.rx === undefined) continue;
+    const col = playerColor(s.owner);
+    let px = s.rx, py = s.ry;
+    ctx.strokeStyle = col;
+    for (const c of s.queue) {
+      if (c.t === 'route') {
+        const r = state.routes.get(c.route);
+        const pts = (r?.stops || []).map((st) => state.entities.get(st.targetId)).filter(Boolean);
+        if (pts.length > 1) {
+          ctx.strokeStyle = col + '55';
+          ctx.beginPath();
+          pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+          ctx.closePath();
+          ctx.stroke();
+          ctx.strokeStyle = col;
+        }
+        const cur = pts[c.idx || 0];
+        if (cur && (c.phase || 'travel') === 'travel' && c === s.queue[0]) { ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(cur.x, cur.y); ctx.stroke(); }
+        break; // Route läuft endlos oder lange: dahinter nichts zeichnen
+      }
+      const t = cmdPoint(c);
+      if (!t) continue;
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(t.x, t.y); ctx.stroke();
+      if (t.move) {
         const k = 8 / cam.zoom;
+        ctx.save();
         ctx.setLineDash([]);
         ctx.beginPath(); ctx.moveTo(t.x - k, t.y - k); ctx.lineTo(t.x + k, t.y + k); ctx.moveTo(t.x + k, t.y - k); ctx.lineTo(t.x - k, t.y + k); ctx.stroke();
+        ctx.restore();
       }
+      px = t.x; py = t.y;
+      ctx.strokeStyle = col + '99';
     }
   }
   ctx.restore();
@@ -351,16 +363,18 @@ function drawLabels() {
   const sel = state.selected;
   if (sel?.kind === 'ship') {
     const s = state.ships.get(sel.id);
-    if (s?.orders?.type === 'route') {
+    const rc = s?.queue?.[0]?.t === 'route' ? s.queue[0] : null;
+    const route = rc && state.routes.get(rc.route);
+    if (route) {
       ctx.font = '700 11px "Segoe UI", sans-serif';
       ctx.textBaseline = 'middle';
-      s.orders.stops.forEach((st, i) => {
+      route.stops.forEach((st, i) => {
         const e = state.entities.get(st.targetId);
         if (!e) return;
         const [sx, sy] = worldToScreen(e.x, e.y);
         const r = (e.kind === 'belt' ? e.radius * 0.7 : Math.max(e.radius, 7 / z)) * z;
         const x = sx + r * 0.75 + 6, y = sy - r * 0.75 - 6 - (i % 2) * 2;
-        ctx.fillStyle = i === s.orders.index ? '#ffb74d' : playerColor(s.owner);
+        ctx.fillStyle = i === (rc.idx || 0) ? '#ffb74d' : playerColor(s.owner);
         ctx.beginPath(); ctx.arc(x, y, 9, 0, TAU); ctx.fill();
         ctx.fillStyle = '#051020';
         ctx.fillText(String(i + 1), x, y + 0.5);
@@ -396,7 +410,8 @@ export function render(now, dt) {
 
   drawOrders(now);
   for (const s of state.ships.values()) if (inView(s.rx, s.ry, 40)) drawShip(s, now);
-  if (sel?.kind === 'ship') { const s = state.ships.get(sel.id); if (s) ring(s.rx, s.ry, Math.max(SHIP_TYPES[s.type].size, 16 / z) * 0.9, '#4fc3f7', now); }
+  for (const s of selectedShips()) ring(s.rx, s.ry, Math.max(SHIP_TYPES[s.type].size, 16 / z) * 0.9, '#4fc3f7', now);
+  if (sel?.kind === 'ship' && !state.selection.size) { const s = state.ships.get(sel.id); if (s && s.owner !== state.me.id) ring(s.rx, s.ry, Math.max(SHIP_TYPES[s.type].size, 16 / z) * 0.9, '#4fc3f7', now); }
   if (hov?.kind === 'ship') { const s = state.ships.get(hov.id); if (s) ring(s.rx, s.ry, Math.max(SHIP_TYPES[s.type].size, 16 / z) * 0.9, 'rgba(255,255,255,0.35)', now, false); }
 
   // Klick-Effekt
