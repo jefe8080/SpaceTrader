@@ -200,6 +200,9 @@ Object.assign(STATION_TYPES, {
   bigyard:  { name: 'Große Werft', sprite: 'station_bigyard', accent: '#ff7043', weight: 0, radius: 110,
               buys: ['plates', 'shipparts', 'reactorcores', 'hullparts', 'engines', 'aicores'] },
   hub:      { name: 'Handels-Hub', sprite: 'station_hub', accent: '#4dd0e1', weight: 0, radius: 150 },
+  // Fraktionen: Außenposten (Module, Nachfrage nach der Schiffswährung) und Fraktionswerft (Fraktionsschiff)
+  outpost:  { name: 'Außenposten', sprite: 'station_ring', accent: '#ab47bc', weight: 0, radius: 60, outpost: true },
+  factionyard: { name: 'Fraktionswerft', sprite: 'station_bigyard', accent: '#ab47bc', weight: 0, radius: 110, factionyard: true },
   // Produzenten ultraseltener Waren: fördern ohne Zutaten, sehr langsam
   deepmine: { name: 'Tiefenmine', sprite: 'station_deepmine', accent: '#ffd54f', weight: 0, radius: 58,
               extract: ['gold', 'diamond', 'uranium', 'exocrystals'], rate: 0.02 },

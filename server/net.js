@@ -207,6 +207,7 @@ export function serializeEntity(e) {
   if (e.noBuy) o.noBuy = true;
   if (e.size) o.size = e.size;
   if (e.wh) o.wh = e.wh;
+  if (e.faction) o.faction = e.faction;
   return o;
 }
 

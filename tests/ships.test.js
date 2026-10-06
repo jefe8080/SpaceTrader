@@ -25,7 +25,8 @@ test('Schiffskatalog: Klassen, Preisbereiche, Material + Marge ≈ Referenzpreis
   assert.equal(byCls.M.length, 4);
   assert.equal(byCls.L.length, 4);
   assert.equal(byCls.XL.length, 2);
-  const range = { S: [3e3, 15e3], M: [25e3, 120e3], L: [250e3, 1.5e6], XL: [3e6, 10e6] };
+  assert.equal(byCls.F.length, 6, 'je Fraktion ein Schiff');
+  const range = { S: [3e3, 15e3], M: [25e3, 120e3], L: [250e3, 1.5e6], XL: [3e6, 10e6], F: [5e6, 12e6] };
   for (const [cls, list] of Object.entries(byCls)) {
     for (const t of list) {
       const d = SHIP_TYPES[t];

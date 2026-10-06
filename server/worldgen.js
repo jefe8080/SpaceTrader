@@ -1,4 +1,5 @@
-import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, ZONE_TYPES, TAG_FACTOR, GOODS, LOCATION, distancePremium, canBuyFrom, canSellTo } from '../shared/config.js';
+import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, ZONE_TYPES, TAG_FACTOR, GOODS, LOCATION, distancePremium, canBuyFrom, canSellTo,
+  FACTIONS, FACTION, MODULES, STORAGE, SHIP_TYPES } from '../shared/config.js';
 import { hexCenter, hexKey, hexNeighbors } from '../shared/hex.js';
 import { createMarket } from './markets.js';
 
@@ -115,14 +116,29 @@ export function generateSector(seed, q, r) {
     systems: [], zones: [], wormholes: [], hub: null, bigyard: null,
   };
 
+  // Fraktionscluster: ca. jeder dritte Sektor, 2-3 benachbarte Systeme ersetzen normale Systeme
+  const allNormal = L.systems.filter((s) => !s.start);
+  const clusterIds = new Set();
+  let faction = null;
+  if (!start && hashN(seed, q, r, 3) % FACTION.CLUSTER_EVERY === 0 && allNormal.length >= 6) {
+    faction = Object.keys(FACTIONS)[hashN(seed, q, r, 4) % Object.keys(FACTIONS).length];
+    const fr = rng(hashN(seed, q, r, 5));
+    const first = pick(fr, allNormal);
+    const n = between(fr, FACTION.SYSTEMS[0], FACTION.SYSTEMS[1]);
+    const near = [...allNormal].sort((a, b) => Math.hypot(a.x - first.x, a.y - first.y) - Math.hypot(b.x - first.x, b.y - first.y)).slice(0, n);
+    const names = [...FACTIONS[faction].systems].sort(() => fr() - 0.5);
+    near.forEach((s, i) => { clusterIds.add(s.id); s.name = names[i]; });
+  }
+
   // Spezialisierung, Treibstoff, Werften
-  const normal = L.systems.filter((s) => !s.start);
+  const normal = allNormal.filter((s) => !clusterIds.has(s.id));
   for (const s of L.systems) {
     const tags = [];
     const nTags = rr() < 0.5 ? 1 : 2;
     while (tags.length < nTags) { const t = pick(rr, TAGGABLE); if (!tags.includes(t)) tags.push(t); }
-    sector.systems.push({ id: s.id, name: s.name, x: s.x, y: s.y, sector: L.key, tags: s.start ? [] : tags,
-      star: starOf(rr), start: !!s.start, fuel: s.start || rr() < 0.7, yard: false, bigyard: false });
+    const fac = clusterIds.has(s.id) ? faction : null;
+    sector.systems.push({ id: s.id, name: s.name, x: s.x, y: s.y, sector: L.key, tags: s.start ? [] : fac ? FACTIONS[fac].tags.slice(0, 2) : tags,
+      star: starOf(rr), start: !!s.start, fuel: s.start || rr() < 0.7, yard: false, bigyard: false, ...(fac ? { faction: fac } : {}) });
   }
   const sysById = new Map(sector.systems.map((s) => [s.id, s]));
   const nYards = Math.min(normal.length, between(rr, 3, 5));
@@ -141,9 +157,12 @@ export function generateSector(seed, q, r) {
   // Systeminhalte
   for (const sys of sector.systems) {
     if (sys.start) entities.push(...startSystem(sys, rr, hub));
+    else if (sys.faction) entities.push(...populateFactionSystem(sys, rr, nextId, sector.systems.filter((x) => x.faction)[0] === sys));
     else entities.push(...populateSystem(sys, rr, nextId));
     if (sys.bigyard) sector.bigyard = entities.find((e) => e.system === sys.id && e.type === 'bigyard')?.id || null;
   }
+
+  if (faction) sector.faction = { id: faction, systems: [...clusterIds] };
 
   // Produzenten ultraseltener Waren: 1 bis 3 je Sektor
   const nUltra = between(rr, 1, 3);
@@ -320,6 +339,61 @@ function populateSystem(sys, r, nextId) {
     if (!p) continue;
     out.push({ id: nextId(), kind: 'belt', type, name: `${BELT_TYPES[type].name} ${sys.name}${i ? ' ' + ROMAN[i] : ''}`, x: p.x, y: p.y, radius,
       richness: Math.round((0.7 + r() * 0.8) * 100) / 100, ...base });
+  }
+  return out;
+}
+
+/**
+ * Fraktionssystem: thematische Märkte, Außenposten mit 60 % des Modulkatalogs, im ersten System die Fraktionswerft.
+ * Alle Märkte fragen dauerhaft die Schiffswährung der Fraktion nach. Nicht kaufbar.
+ */
+function populateFactionSystem(sys, r, nextId, withYard) {
+  const F = FACTIONS[sys.faction];
+  const out = [];
+  const place = placer(sys, r);
+  const base = { sector: sys.sector, system: sys.id, faction: sys.faction, noBuy: true };
+  const planets = [];
+  for (let i = 0, n = between(r, 2, 5); i < n; i++) {
+    const type = weightedTagged(r, PLANET_TYPES, 'planet', F.tags);
+    const def = PLANET_TYPES[type];
+    const radius = Math.round(def.radius[0] + r() * (def.radius[1] - def.radius[0]));
+    const p = place(radius);
+    if (!p) continue;
+    const scale = 0.7 + ((radius - def.radius[0]) / (def.radius[1] - def.radius[0])) * 0.6;
+    planets.push({ id: nextId(), kind: 'planet', type, x: p.x, y: p.y, radius, size: Math.round(scale * 100) / 100, ...base, market: createMarket('planet', type, r, scale) });
+  }
+  planets.sort((a, b) => Math.hypot(a.x - sys.x, a.y - sys.y) - Math.hypot(b.x - sys.x, b.y - sys.y));
+  planets.forEach((p, i) => { p.name = `${sys.name} ${ROMAN[i]}`; });
+  out.push(...planets);
+  const types = ['outpost'];
+  if (withYard) types.push('factionyard');
+  for (let i = 0, n = between(r, 1, 2); i < n; i++) types.push(weightedTagged(r, STATION_TYPES, 'station', F.tags));
+  for (const type of types) {
+    const def = STATION_TYPES[type];
+    const p = place(def.radius || 48);
+    if (!p) continue;
+    const name = type === 'factionyard' ? F.yard(sys.name) : type === 'outpost' ? F.station(sys.name) : `${def.name} ${sys.name}`;
+    const e = { id: nextId(), kind: 'station', type, name, x: p.x, y: p.y, radius: def.radius || 48, ...base, market: createMarket('station', type, r) };
+    if (type === 'outpost') {
+      const pool = Object.keys(MODULES);
+      const k = Math.round(pool.length * FACTION.MODULE_SHARE);
+      e.market.modules = [...pool].sort(() => r() - 0.5).slice(0, k);
+    }
+    if (type === 'factionyard') e.market.forSale = [{ type: F.ship, price: SHIP_TYPES[F.ship].price, currency: SHIP_TYPES[F.ship].currency, faction: true }];
+    out.push(e);
+  }
+  for (let i = 0, nb = between(r, 0, 2); i < nb; i++) {
+    const type = weightedTagged(r, BELT_TYPES, 'belt', F.tags);
+    const radius = Math.round(200 + r() * 160);
+    const p = place(radius);
+    if (!p) continue;
+    out.push({ id: nextId(), kind: 'belt', type, name: `${BELT_TYPES[type].name} ${sys.name}`, x: p.x, y: p.y, radius, richness: Math.round((0.8 + r() * 0.8) * 100) / 100, ...base });
+  }
+  // Dauerhafte Nachfrage nach der Schiffswährung
+  const g = F.currency;
+  for (const e of out) {
+    if (!e.market) continue;
+    e.market.goods[g] = { role: 'consume', rate: FACTION.CURRENCY_DEMAND * (300 / GOODS[g].base), cap: STORAGE.ULTRA_HUB, stock: STORAGE.ULTRA_HUB * 0.1 * r(), mod: 1 };
   }
   return out;
 }

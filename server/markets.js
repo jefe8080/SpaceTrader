@@ -74,6 +74,12 @@ export function createMarket(kind, type, r, scale = 1, { slow = 1, traders = tru
       for (let i = 0, n = 1 + Math.floor(r() * 2); i < n; i++) mods.push(pool.splice(Math.floor(r() * pool.length), 1)[0]);
     }
     return { strategy: 'shipyard', yard: type, goods, eff: 1, forSale: [], building: null, nextBuild: Math.floor(r() * order.length), modules: mods };
+  } else if (def.outpost) {
+    consume('food', 0.3, STORAGE.CONSUMER_STATION.min * 2);
+    addTraders(goods, r, [3, 6]);
+    return { strategy: 'consumer', goods, eff: 1, modules: [] };
+  } else if (def.factionyard) {
+    return { strategy: 'factionyard', goods, eff: 1, forSale: [] };
   } else if (type === 'hub') {
     // Hub: verkauft Schiffstreibstoff, kauft alle ultraseltenen Waren, handelt eine breite Auswahl
     produce('shipfuel', 1.2, STORAGE.HUB_FUEL);
@@ -180,7 +186,7 @@ export const STRATEGIES = {
 
   consumer: {
     tick(e, m, dt, now) {
-      const cons = Object.entries(m.goods).filter(([, s]) => s.role === 'consume');
+      const cons = Object.entries(m.goods).filter(([, s]) => s.role === 'consume' && s.rate > 0);
       for (const [g, s] of cons) consumeSlot(m, now, g, s, s.rate * dt);
       m.eff = cons.every(([, s]) => s.stock > 0) ? 1 : 0.5;
     },
@@ -195,6 +201,13 @@ export const STRATEGIES = {
       m.eff = mult;
     },
     missingInput: (m) => (m.goods.food.stock < 1 ? 'food' : null),
+  },
+
+  /** Fraktionswerft: Fraktionsschiff dauerhaft im Angebot, nimmt die Schiffswährung an */
+  factionyard: {
+    tick(e, m, dt, now) {
+      for (const [g, s] of Object.entries(m.goods)) if (s.role === 'consume') consumeSlot(m, now, g, s, s.rate * dt);
+    },
   },
 
   hub: {

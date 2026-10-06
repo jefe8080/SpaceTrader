@@ -1,4 +1,4 @@
-import { SHIP_TYPES, SHIP_CLASSES, UPGRADES, MODULES, PILOT_LICENSES, MODULE_SIZE, MODULE_REFUND,
+import { GOODS, SHIP_TYPES, SHIP_CLASSES, UPGRADES, MODULES, PILOT_LICENSES, MODULE_SIZE, MODULE_REFUND,
   upgradeCost, shipStats, holdUsage, sellValue, countModules, moduleCapacity } from '../../shared/config.js';
 import { V } from './validate.js';
 
@@ -7,7 +7,7 @@ const dockedAt = (game, ship, pred) => {
   const e = game.world.entities.get(ship.dockedAt);
   return e && pred(e) ? e : null;
 };
-const isYard = (e) => e.market?.strategy === 'shipyard';
+const isYard = (e) => e.market?.strategy === 'shipyard' || e.market?.strategy === 'factionyard';
 const isHub = (e) => e.type === 'hub';
 /** Module erhältlich: große Werften (1-2 Module), Fraktionsstationen (60 % des Katalogs) */
 const offersModule = (e, id) => (e.market?.modules || []).includes(id);
@@ -36,6 +36,35 @@ export default {
       const s = game.spawnShip(player, item.type, target);
       if (item.upg) Object.assign(s, { upg: item.upg, modules: item.modules || [], upgValue: item.upgValue || 0, fuel: shipStats({ ...s, upg: item.upg }).tank });
       game.shipLog(s, `Neues Schiff gekauft: ${SHIP_TYPES[item.type].name} für ${item.price.toLocaleString('de-DE')} Cr bei ${target.name}`);
+    },
+  },
+
+  /** Fraktionsschiff: Credits plus seltene Ressource aus den Laderäumen der hier angedockten eigenen Schiffe */
+  buyFactionShip: {
+    args: { target: V.entity() },
+    run({ game, player }, { target }) {
+      const m = target.market;
+      if (m?.strategy !== 'factionyard') return 'Keine Fraktionswerft.';
+      const docked = game.shipsOf(player.id).filter((s) => s.dockedAt === target.id);
+      if (!docked.length) return 'Eines deiner Schiffe muss an der Fraktionswerft angedockt sein.';
+      const item = m.forSale[0];
+      const lic = pilotLicense(player);
+      if (!lic.classes.includes('F')) return 'Fraktionsschiffe erfordern Pilotenlizenz 4.';
+      if (game.shipsOf(player.id).length >= lic.maxShips) return `Pilotenlizenz ${lic.level} erlaubt höchstens ${lic.maxShips} Schiffe.`;
+      const { good, n } = item.currency;
+      const have = docked.reduce((s, x) => s + (x.cargo[good] || 0), 0);
+      if (have < n) return `Es fehlen ${n - have} ${GOODS[good].name} (in den Laderäumen der angedockten Schiffe).`;
+      if (player.credits < item.price) return 'Nicht genug Credits.';
+      player.credits -= item.price;
+      let rest = n;
+      for (const s of docked) {
+        const k = Math.min(rest, s.cargo[good] || 0);
+        s.cargo[good] -= k;
+        if (!s.cargo[good]) delete s.cargo[good];
+        rest -= k;
+      }
+      const s = game.spawnShip(player, item.type, target);
+      game.shipLog(s, `Fraktionsschiff ${SHIP_TYPES[item.type].name} erworben`);
     },
   },
 

@@ -87,6 +87,40 @@ function sellRow(s) {
     <span class="muted small-note">60 % Marktpreis + 50 % der Upgrades und Module</span></div>`;
 }
 
+/** Fraktionswerft: Fraktionsschiff für Credits plus seltene Ressource */
+export function factionYardSection(e, dockedShip) {
+  const it = e.market.forSale?.[0];
+  if (!it) return '';
+  const d = SHIP_TYPES[it.type];
+  const L = lic();
+  const docked = myShips().filter((s) => s.dockedAt === e.id);
+  const have = docked.reduce((a, s) => a + (s.cargo?.[it.currency.good] || 0), 0);
+  const why = !dockedShip ? 'Ein eigenes Schiff muss hier angedockt sein' : !L.classes.includes('F') ? 'Pilotenlizenz 4 nötig'
+    : myShips().length >= L.maxShips ? `Lizenz erlaubt max. ${L.maxShips} Schiffe` : have < it.currency.n ? `Es fehlen ${it.currency.n - have} ${GOODS[it.currency.good].name}`
+      : state.credits < it.price ? 'Nicht genug Credits' : '';
+  return `<div class="section"><div class="section-title">Fraktionsschiff</div>
+    <div class="forsale"><img src="${shipSprite(it.type, state.me.color)}" alt=""><div class="info"><b>${d.name}</b> ${clsBadge('F')} <span class="muted">${esc(d.factionName)}</span><br>
+    ${typeLine(it.type)}<br><span class="muted">${esc(d.desc)}</span></div>
+    <div style="text-align:right"><div class="price-tag">${fmt(it.price)} Cr</div><div class="price-tag">+ ${fmt(it.currency.n)} ${GOODS[it.currency.good].name}</div>
+    <div class="muted small-note">an Bord: ${fmt(have)}</div>
+    <button class="small primary" data-act="buyFactionShip" data-ent="${e.id}" ${why ? 'disabled' : ''} title="${esc(why)}">Kaufen</button></div></div></div>`;
+}
+
+/** Außenposten einer Fraktion: Module (60 % des Katalogs) */
+export function outpostSection(e, dockedShip) {
+  const mods = e.market.modules || [];
+  if (!mods.length) return '';
+  let h = `<div class="section"><div class="section-title">Module im Angebot</div>`;
+  const st = dockedShip && shipStats(dockedShip);
+  const free = st ? st.cargo - holdUsage(dockedShip).cargo : 0;
+  for (const id of mods) {
+    const why = !dockedShip ? 'Ein eigenes Schiff muss hier angedockt sein' : free < MODULE_SIZE ? `Braucht ${MODULE_SIZE} freie Frachteinheiten` : state.credits < MODULES[id].price ? 'Nicht genug Credits' : '';
+    h += `<div class="cargo-row" title="${esc(MODULES[id].desc)}">${MODULES[id].name} <span class="muted">${fmt(MODULES[id].price)} Cr</span><span class="amt"></span>
+      <button class="small" data-act="buyModule" data-ship="${dockedShip?.id || ''}" data-module="${id}" ${why ? 'disabled' : ''} title="${esc(why)}">Einbauen</button></div>`;
+  }
+  return h + `<div class="muted small-note">Ausbau an jeder Werft (50 % Erstattung).</div></div>`;
+}
+
 /** Hub: Lizenzen und Schiffsverkauf */
 export function hubSection(e, dockedShip) {
   const cur = lic();

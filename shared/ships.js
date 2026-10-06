@@ -1,5 +1,6 @@
 // Schiffe, Klassen, Stufen-Upgrades, Module und Pilotenlizenz. Alle Zahlen sind Kalibrierungsannahmen.
 import { GOODS } from './goods.js';
+import { FACTIONS, FACTION_SHIPS } from './factions.js';
 
 export const SHIP_CLASSES = {
   S:  { name: 'S', license: 1, yard: 'shipyard' },
@@ -51,6 +52,11 @@ export const SHIP_TYPES = {
   versorger:  { cls: 'S', name: 'Versorger', sprite: 'ship_versorger', size: 30, cargo: 100, speed: 120, mining: 4, price: 0, tank: 0, npc: true,
                 desc: 'Stationseigenes Versorgungsschiff. Holt Rohstoffe für leere Stationen.' },
 };
+
+// Fraktionsschiffe (Klasse F): nur im Fraktionscluster, Credits plus seltene Ressource
+for (const [id, d] of Object.entries(FACTION_SHIPS)) {
+  SHIP_TYPES[id] = { cls: 'F', sprite: 'ship_' + id, factionName: FACTIONS[d.faction].name, ...d };
+}
 
 // Baumaterial: Anteile am Materialwert je Klasse, Menge so, dass Material + Marge ≈ Referenzpreis
 export const YARD_MARGIN = 0.25;

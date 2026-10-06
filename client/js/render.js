@@ -2,7 +2,8 @@ import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, ZONE_TYPES,
 import { hexAt, hexCorners, hexCenter, hexKey } from '/shared/hex.js';
 import { getSprite } from './assets.js';
 import { state, playerColor, selectedShips } from './state.js';
-import { hasWarn } from './util.js';
+import { hasWarn, stationAccent } from './util.js';
+import { FACTIONS } from '/shared/factions.js';
 
 const TAU = Math.PI * 2;
 const cam = state.camera;
@@ -276,7 +277,7 @@ function drawStation(e, t) {
   const def = STATION_TYPES[e.type];
   const r = Math.max(e.radius, px(7));
   const s = r * 2.56;
-  const spr = getSprite(def.sprite, def.accent, 384);
+  const spr = getSprite(def.sprite, stationAccent(e), 384);
   const h = strHash(e.id);
   ctx.save();
   ctx.translate(e.x, e.y);
@@ -540,7 +541,7 @@ function drawSystemLabels() {
     const [sx, sy] = worldToScreen(e.x, e.y);
     const r = e.kind === 'belt' ? e.radius * z * 0.9 : Math.max(e.radius, 7 / z) * z;
     const fav = state.favorites[e.id] ? '★ ' : '';
-    const col = e.kind === 'station' ? STATION_TYPES[e.type].accent : e.kind === 'belt' ? '#bcaaa4' : e.kind === 'wormhole' ? '#ce93d8' : '#e3ecff';
+    const col = e.kind === 'station' ? stationAccent(e) : e.kind === 'belt' ? '#bcaaa4' : e.kind === 'wormhole' ? '#ce93d8' : e.faction ? FACTIONS[e.faction].color : '#e3ecff';
     label(fav + e.name, sx, sy + r + 6, col, e.type === 'hub' ? '700 13px "Segoe UI", sans-serif' : undefined);
   }
   // Systemnamen über dem Stern
@@ -612,9 +613,13 @@ function drawSectorView(now) {
     g.addColorStop(1, col + '00');
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(sy.x, sy.y, px(14), 0, TAU); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-    ctx.lineWidth = px(1);
+    ctx.strokeStyle = sy.faction ? FACTIONS[sy.faction].color + 'cc' : 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = px(sy.faction ? 2.5 : 1);
     ctx.beginPath(); ctx.arc(sy.x, sy.y, WORLD.SYSTEM_RADIUS, 0, TAU); ctx.stroke();
+    if (sy.faction) {
+      ctx.fillStyle = FACTIONS[sy.faction].color + '18';
+      ctx.beginPath(); ctx.arc(sy.x, sy.y, WORLD.SYSTEM_RADIUS, 0, TAU); ctx.fill();
+    }
   }
   // Hubs
   for (const s of state.sectors.values()) {
@@ -645,7 +650,8 @@ function drawSectorLabels() {
     let marks = '';
     if (sy.start) marks += ' ⌂';
     if (sy.bigyard) marks += ' ⚒';
-    label(sy.name + marks, sx, syy + 22, sy.start ? '#ffd54f' : '#e3ecff');
+    label(sy.name + marks, sx, syy + 22, sy.start ? '#ffd54f' : sy.faction ? FACTIONS[sy.faction].color : '#e3ecff');
+    if (sy.faction) label(FACTIONS[sy.faction].name, sx, syy - 24, FACTIONS[sy.faction].color, 'italic 600 11px "Segoe UI", sans-serif');
     // Spezialisierungs-Icons: farbige Punkte der Tag-Rohstoffe
     (sy.tags || []).forEach((g, i) => {
       const x = sx - ((sy.tags.length - 1) * 10) / 2 + i * 10;
@@ -701,8 +707,8 @@ function drawGalaxyView(now) {
   drawBlackHoles(now);
   for (const sy of state.systems.values()) {
     if (!inView(sy.x, sy.y, 1000)) continue;
-    ctx.fillStyle = sy.star?.color || '#fff3c4';
-    ctx.beginPath(); ctx.arc(sy.x, sy.y, px(1.6), 0, TAU); ctx.fill();
+    ctx.fillStyle = sy.faction ? FACTIONS[sy.faction].color : sy.star?.color || '#fff3c4';
+    ctx.beginPath(); ctx.arc(sy.x, sy.y, px(sy.faction ? 3 : 1.6), 0, TAU); ctx.fill();
   }
   drawWormholeLinks(0.8);
   for (const s of selectedShips()) drawMarker(s, shipColor(s), now);
@@ -722,6 +728,7 @@ function drawGalaxyLabels() {
     if (!inView(s.bh.x, s.bh.y, WORLD.HEX_SPACING)) continue;
     const [sx, sy] = worldToScreen(s.bh.x, s.bh.y);
     label(s.name, sx, sy - 24, 'rgba(190,210,255,0.9)', '600 12px "Segoe UI", sans-serif');
+    if (s.faction) label(FACTIONS[s.faction.id].name, sx, sy - 8, FACTIONS[s.faction.id].color, 'italic 11px "Segoe UI", sans-serif');
   }
   for (const [k, n] of counts) {
     const [q, r] = k.split(',').map(Number);

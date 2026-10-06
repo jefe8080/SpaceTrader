@@ -4,7 +4,8 @@ import { socket, cmd } from '../net.js';
 import { typeName, entitySprite, shipSprite, goodTag, playerPrice, cargoUsed, statusText, queueText, shipSymbol, hasWarn, flightSecs, fmtDuration, systemName, sectorName } from '../util.js';
 import { ZONE_TYPES } from '/shared/config.js';
 import { openAlmanac } from './almanac.js';
-import { shipyardSection, hubSection } from './shipyard.js';
+import { shipyardSection, hubSection, factionYardSection, outpostSection } from './shipyard.js';
+import { FACTIONS } from '/shared/factions.js';
 import { shipStats, holdUsage, countModules, MODULES as MODS, holdOf } from '/shared/ships.js';
 import { $, setHtml, typing } from './dom.js';
 import { barChart, fmtNum, stockBar } from './charts.js';
@@ -235,6 +236,10 @@ function entityDetails(e) {
     } else if (def.extract) {
       const g = Object.keys(m.goods).find((x) => GOODS[x].ultra);
       h += `<div class="kv"><span>Förderung</span><span>${g ? goodTag(g) : '?'} (ultraselten, nur am Hub verkäuflich)</span><span>Status</span><span>${m.eff >= 1 ? 'läuft' : 'langsam (keine Nahrung)'}</span></div>`;
+    } else if (def.outpost) {
+      h += `<div class="muted">${esc(FACTIONS[e.faction]?.desc || '')} Bietet Module an und fragt dauerhaft ${GOODS[FACTIONS[e.faction]?.currency]?.name || '?'} nach.</div>`;
+    } else if (def.factionyard) {
+      h += `<div class="muted">Werft der ${esc(FACTIONS[e.faction]?.name || 'Fraktion')}. Das Fraktionsschiff kostet Credits und ${GOODS[FACTIONS[e.faction]?.currency]?.name || '?'}.</div>`;
     } else if (e.type === 'hub') {
       h += `<div class="muted">Handelszentrum des Sektors: verkauft Schiffstreibstoff, kauft alle ultraseltenen Waren und handelt eine breite Auswahl.</div>`;
     }
@@ -263,6 +268,8 @@ function entityDetails(e) {
   const myDocked = dockedHere.find((s) => state.selected?.kind === 'ship' && s.id === state.selected.id) || dockedHere[0];
   if (m?.strategy === 'shipyard') h += shipyardSection(e, myDocked);
   if (e.type === 'hub') h += hubSection(e, myDocked);
+  if (m?.strategy === 'factionyard') h += factionYardSection(e, myDocked);
+  if (e.type === 'outpost') h += outpostSection(e, myDocked);
   if (m) h += statsSection(e);
 
   if (ships.length) {
@@ -355,6 +362,7 @@ det.addEventListener('click', (ev) => {
     case 'removeModule': cmd('removeModule', { ship: d.ship, module: d.module }); break;
     case 'sellShip': if (confirm('Schiff wirklich verkaufen?')) cmd('sellShip', { ship: d.ship }); break;
     case 'buyLicense': cmd('buyLicense', { kind: d.kind }); break;
+    case 'buyFactionShip': cmd('buyFactionShip', { target: d.ent }); break;
     case 'fav': cmd('favorite', { target: d.ent, on: !state.favorites[d.ent] }); break;
     case 'selone': state.selection.clear(); bus.select({ kind: 'ship', id: d.ship }); break;
     case 'stopAll': cmd('stop', { ships: selectedShips().map((s) => s.id) }); break;

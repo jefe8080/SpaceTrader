@@ -573,7 +573,7 @@ export function recipeKey(e) {
 
 /** Sektor-Kurzinfo für den Client */
 export function sectorSummary(s) {
-  return { key: s.key, q: s.q, r: s.r, name: s.name, bh: s.bh, hub: s.hub, hubPos: s.hubPos, bigyard: s.bigyard };
+  return { key: s.key, q: s.q, r: s.r, name: s.name, bh: s.bh, hub: s.hub, hubPos: s.hubPos, bigyard: s.bigyard, faction: s.faction || null };
 }
 
 function groupRows(rows, keyCol) {

@@ -123,3 +123,30 @@ test('Spiel: Wurmlochdurchflug macht die Verbindung bekannt', () => {
   assert.ok(Math.hypot(ship.x - b.x, ship.y - b.y) < 400, 'Schiff am Austritt');
   assert.ok(p.known.wh.has(w.id), 'Verbindung bekannt');
 });
+
+test('Fraktionscluster: ca. jeder dritte Sektor, 2-3 Systeme, Werft und Module, nicht kaufbar', async () => {
+  const { FACTIONS, FACTION, MODULES } = await import('../shared/config.js');
+  let clusters = 0, total = 0;
+  for (let q = -3; q <= 3; q++) {
+    for (let r = -3; r <= 3; r++) {
+      total++;
+      const { sector, entities } = generateSector(5, q, r);
+      if (!sector.faction) continue;
+      clusters++;
+      const sys = sector.systems.filter((s) => s.faction);
+      assert.ok(sys.length >= FACTION.SYSTEMS[0] && sys.length <= FACTION.SYSTEMS[1]);
+      assert.ok(sys.every((s) => !s.yard && !s.bigyard), 'Fraktionssysteme ersetzen normale Systeme');
+      const F = FACTIONS[sector.faction.id];
+      const ents = entities.filter((e) => e.faction);
+      assert.ok(ents.every((e) => e.noBuy));
+      assert.equal(ents.filter((e) => e.type === 'factionyard').length, 1);
+      for (const s of sys) {
+        const op = ents.find((e) => e.system === s.id && e.type === 'outpost');
+        assert.ok(op, 'Außenposten je System');
+        assert.equal(op.market.modules.length, Math.round(Object.keys(MODULES).length * 0.6));
+      }
+      assert.ok(ents.filter((e) => e.market).every((e) => e.market.goods[F.currency]?.role === 'consume'), 'Nachfrage nach Schiffswährung');
+    }
+  }
+  assert.ok(clusters / total > 0.2 && clusters / total < 0.5, `${clusters}/${total}`);
+});

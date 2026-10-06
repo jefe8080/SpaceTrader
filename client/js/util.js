@@ -1,19 +1,22 @@
-import { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, buyPrice, sellPrice, canBuyFrom } from '/shared/config.js';
+import { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, FACTIONS, buyPrice, sellPrice, canBuyFrom } from '/shared/config.js';
+
+/** Akzentfarbe einer Station: Fraktionsfarbe oder Besitzerfarbe, sonst Typfarbe */
+export const stationAccent = (e) => (e.ownerColor || (e.faction ? FACTIONS[e.faction].color : STATION_TYPES[e.type].accent));
 import { planPath } from '/shared/nav.js';
 import { shipStats, holdUsage } from '/shared/ships.js';
 import { state, esc } from './state.js';
 import { spriteUrl } from './assets.js';
 
 export function typeName(e) {
-  if (e.kind === 'planet') return PLANET_TYPES[e.type].name;
-  if (e.kind === 'station') return STATION_TYPES[e.type].name;
+  if (e.kind === 'planet') return PLANET_TYPES[e.type].name + (e.faction ? ' · ' + FACTIONS[e.faction].name : '');
+  if (e.kind === 'station') return STATION_TYPES[e.type].name + (e.faction ? ' · ' + FACTIONS[e.faction].name : '');
   if (e.kind === 'wormhole') return 'Wurmloch';
   return 'Asteroidenfeld · ' + GOODS[BELT_TYPES[e.type].good].name;
 }
 
 export function entitySprite(e) {
   if (e.kind === 'planet') return spriteUrl(PLANET_TYPES[e.type].sprite);
-  if (e.kind === 'station') return spriteUrl(STATION_TYPES[e.type].sprite, STATION_TYPES[e.type].accent);
+  if (e.kind === 'station') return spriteUrl(STATION_TYPES[e.type].sprite, stationAccent(e));
   if (e.kind === 'wormhole') return '/assets/wormhole.svg';
   return spriteUrl(BELT_TYPES[e.type].sprite);
 }
