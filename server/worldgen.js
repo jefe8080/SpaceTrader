@@ -1,4 +1,4 @@
-import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, ZONE_TYPES, TAG_FACTOR, GOODS } from '../shared/config.js';
+import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, ZONE_TYPES, TAG_FACTOR, GOODS, LOCATION, distancePremium, canBuyFrom, canSellTo } from '../shared/config.js';
 import { hexCenter, hexKey, hexNeighbors } from '../shared/hex.js';
 import { createMarket } from './markets.js';
 
@@ -48,7 +48,8 @@ const sectorName = (r) => `${baseName(r)}-${pick(r, GREEK)}`;
 /** Welche Waren erzeugt ein Typ? (für Tag-Gewichtung) */
 const producesOf = {
   planet: (t) => Object.keys(PLANET_TYPES[t].produce || {}),
-  station: (t) => Object.keys(STATION_TYPES[t].recipe?.out || {}),
+  // Stationen: Rezepte, die einen Tag-Rohstoff verarbeiten, sind in spezialisierten Systemen häufiger
+  station: (t) => Object.keys(STATION_TYPES[t].recipe?.in || {}),
   belt: (t) => [BELT_TYPES[t].good],
 };
 
@@ -61,8 +62,8 @@ function weightedTagged(r, table, kind, tags) {
 }
 
 /** Rohstoffe, die als Spezialisierung eines Systems in Frage kommen */
-export const TAGGABLE = [...new Set(Object.values(BELT_TYPES).map((b) => b.good)
-  .concat(Object.values(PLANET_TYPES).flatMap((p) => Object.keys(p.produce)).filter((g) => GOODS[g].tier === 0 && g !== 'passengers')))];
+export const TAGGABLE = [...new Set(Object.values(BELT_TYPES).map((b) => b.good).concat(Object.values(PLANET_TYPES).flatMap((p) => Object.keys(p.produce))))]
+  .filter((g) => GOODS[g].tier === 0 && !GOODS[g].ultra && GOODS[g].cls !== 'passenger' && GOODS[g].mine !== 'acid');
 
 // ---------- Layout ----------
 /**
@@ -144,6 +145,22 @@ export function generateSector(seed, q, r) {
     if (sys.bigyard) sector.bigyard = entities.find((e) => e.system === sys.id && e.type === 'bigyard')?.id || null;
   }
 
+  // Produzenten ultraseltener Waren: 1 bis 3 je Sektor
+  const nUltra = between(rr, 1, 3);
+  for (let i = 0; i < nUltra && normal.length; i++) {
+    const chosen = pick(rr, normal);
+    const sys = sector.systems.find((x) => x.id === chosen.id);
+    const type = pick(rr, ['deepmine', 'deepmine', 'antimatterlab', 'gasharvester']);
+    const place = placer(sys, rr, entities.filter((e) => e.system === sys.id));
+    const p = place(STATION_TYPES[type].radius);
+    if (!p) continue;
+    const market = createMarket('station', type, rr);
+    const good = Object.keys(market.goods).find((g) => GOODS[g].ultra);
+    entities.push({ id: nextId(), kind: 'station', type, name: `${STATION_TYPES[type].name} ${sys.name}`, x: p.x, y: p.y,
+      radius: STATION_TYPES[type].radius, sector: L.key, system: sys.id, market, ultra: good });
+    sys.ultra = good;
+  }
+
   // Sondergebiete
   const nZones = between(rr, 0, 3);
   for (let i = 0; i < nZones; i++) {
@@ -186,7 +203,47 @@ export function generateSector(seed, q, r) {
     entities.push(...ends);
     sector.wormholes.push({ id, a: ends[0].id, b: ends[1].id, sectors: [L.key, bSector] });
   }
+  applyLocationMods(entities.filter((e) => e.sector === L.key), rr);
   return { sector, entities };
+}
+
+/**
+ * Standort-Modifier je Markt und Ware, einmalig bei der Generierung:
+ * Zufall ±15 %, Glättung mit dem Systemmittel, Entfernungsprämie für angekaufte Waren
+ * (Flugzeit bei Speed 150 zum nächsten Produzenten oder Abbaufeld im Sektor).
+ */
+export function applyLocationMods(entities, r) {
+  const markets = entities.filter((e) => e.market);
+  for (const e of markets) for (const s of Object.values(e.market.goods)) s.mod = 1 + (r() * 2 - 1) * LOCATION.RANDOM;
+  // Glättung je System (Hub und Märkte ohne System bilden eine eigene Gruppe)
+  const groups = new Map();
+  for (const e of markets) {
+    const k = e.system || 'none:' + e.id;
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(e);
+  }
+  for (const list of groups.values()) {
+    const sum = {}, cnt = {};
+    for (const e of list) for (const [g, s] of Object.entries(e.market.goods)) { sum[g] = (sum[g] || 0) + s.mod; cnt[g] = (cnt[g] || 0) + 1; }
+    for (const e of list) for (const [g, s] of Object.entries(e.market.goods)) s.mod = (1 - LOCATION.SMOOTH) * s.mod + LOCATION.SMOOTH * (sum[g] / cnt[g]);
+  }
+  // Produzenten je Ware: Märkte mit Rolle produce, Abbaufelder
+  const producers = {};
+  const addP = (g, e) => { (producers[g] ||= []).push(e); };
+  for (const e of markets) for (const [g, s] of Object.entries(e.market.goods)) if (s.role === 'produce') addP(g, e);
+  for (const e of entities) if (e.kind === 'belt') addP(BELT_TYPES[e.type].good, e);
+  for (const e of markets) {
+    for (const [g, s] of Object.entries(e.market.goods)) {
+      if (canSellTo(s)) {
+        let best = Infinity;
+        for (const p of producers[g] || []) if (p !== e) best = Math.min(best, Math.hypot(p.x - e.x, p.y - e.y));
+        const minutes = best === Infinity ? null : best / LOCATION.REF_SPEED / 60;
+        s.mod *= 1 + distancePremium(minutes);
+      }
+      s.mod = Math.round(s.mod * 1000) / 1000;
+    }
+  }
+  void canBuyFrom;
 }
 
 function weightedPlain(r, table) {
@@ -203,8 +260,8 @@ function starOf(r) {
 }
 
 /** Platziert Objekte in einem System (Abstand zum Stern und untereinander) */
-function placer(sys, r) {
-  const placed = [{ x: sys.x, y: sys.y, r: 520 }];
+function placer(sys, r, existing = []) {
+  const placed = [{ x: sys.x, y: sys.y, r: 520 }, ...existing.map((e) => ({ x: e.x, y: e.y, r: e.radius }))];
   return (radius) => {
     for (let i = 0; i < 80; i++) {
       const a = r() * TAU;
@@ -242,7 +299,7 @@ function populateSystem(sys, r, nextId) {
   // Stationen: Treibstoff (ca. 70 %), Werften, Rest nach Spezialisierung
   const n = between(r, 1, 4);
   const types = [];
-  if (sys.fuel) types.push('refinery');
+  if (sys.fuel) types.push('fueldepot');
   if (sys.yard) types.push('shipyard');
   if (sys.bigyard) types.push('bigyard');
   while (types.length < n) types.push(weightedTagged(r, STATION_TYPES, 'station', sys.tags));
@@ -274,7 +331,7 @@ function populateSystem(sys, r, nextId) {
 function startSystem(sys, r, hub) {
   const slow = WORLD.START_SLOW;
   const base = { sector: sys.sector, system: sys.id, noBuy: true };
-  // Positionen relativ zum Systemzentrum, Hub liegt auf der Seite des Schwarzen Lochs
+  // Positionen relativ zum Systemzentrum, Hub liegt auf der Seite des Schwarzen Lochs (+x)
   const ang = Math.atan2(hub.y - sys.y, hub.x - sys.x);
   const rot = (dx, dy) => ({
     x: Math.round(sys.x + dx * Math.cos(ang) - dy * Math.sin(ang)),
@@ -284,13 +341,13 @@ function startSystem(sys, r, hub) {
   const add = (id, kind, type, name, dx, dy, radius, extra = {}) => {
     const p = rot(dx, dy);
     const e = { id, kind, type, name, ...p, radius, ...base, ...extra };
-    if (kind !== 'belt') e.market = createMarket(kind, type, r, kind === 'planet' ? slow : 1, { slow });
+    if (kind !== 'belt') e.market = createMarket(kind, type, r, 1, { slow, traders: kind === 'planet' });
     out.push(e);
     return e;
   };
   const yard = add('origin_yard', 'station', 'shipyard', 'Werft Ursprung', 1300, 400, 64);
-  yard.market.goods.metal.stock = 12;
-  yard.market.goods.fuel.stock = 5;
+  yard.market.goods.plates.stock = 6;
+  yard.market.goods.shipfuel.stock = 5;
   yard.market.forSale = [{ type: 'spatz', price: 2500 }];
   yard.market.nextBuild = 0;
   add('origin_agrar', 'planet', 'agrar', 'Gaia Nova', -1500, -1400, 105);
@@ -298,18 +355,22 @@ function startSystem(sys, r, hub) {
   add('origin_mining', 'planet', 'mining', 'Ferrum', 300, -2400, 90);
   add('origin_ice', 'planet', 'ice', 'Glacia', -3300, -900, 80);
   add('origin_gas', 'planet', 'gasgiant', 'Aeolus', 2600, -1900, 135);
+  add('origin_ocean', 'planet', 'ocean', 'Thalassa', -600, 3200, 100);
+  add('origin_desert', 'planet', 'desert', 'Arrakon', 3100, 1300, 85);
+  add('origin_fuel', 'station', 'fueldepot', 'Treibstoffdepot Funke', 2200, -600, 52);
   add('origin_smelter', 'station', 'smelter', 'Schmelzwerk Glut', 1200, -1300, 48);
-  add('origin_refinery', 'station', 'refinery', 'Raffinerie Funke', 2200, -600, 48);
+  add('origin_refinery', 'station', 'refinery', 'Raffinerie Tiefgrund', 400, 2100, 48);
   add('origin_waterworks', 'station', 'waterworks', 'Wasserwerk Quelle', -2200, -300, 48);
-  add('origin_hotel', 'station', 'hotel', 'Orbitalhotel Sternblick', -1100, 1900, 48);
-  add('origin_belt', 'belt', 'ore', 'Erzfeld Alpha', -400, 2600, 260, { richness: 1 });
-  add('origin_belt_ice', 'belt', 'ice', 'Eisfeld Beta', -3300, 2300, 220, { richness: 0.9 });
-  add('origin_belt_cry', 'belt', 'crystals', 'Kristallfeld Gamma', 1400, 2500, 220, { richness: 0.9 });
-  add('origin_belt_rare', 'belt', 'rareearth', 'Seltenerdfeld Delta', 2900, 1600, 200, { richness: 0.8 });
+  add('origin_foodplant', 'station', 'foodplant', 'Nahrungsfabrik Ähre', -500, -1700, 48);
+  add('origin_hotel', 'station', 'hotel', 'Orbitalhotel Sternblick', -1300, 1900, 48);
+  add('origin_belt', 'belt', 'ore', 'Erzfeld Alpha', -2800, 2600, 260, { richness: 1 });
+  add('origin_belt_ice', 'belt', 'ice', 'Eisfeld Beta', -3500, 1700, 220, { richness: 0.9 });
+  add('origin_belt_cry', 'belt', 'crystals', 'Kristallfeld Gamma', 1600, 2700, 220, { richness: 0.9 });
+  add('origin_belt_rare', 'belt', 'rareearth', 'Seltenerdfeld Delta', 3300, -300, 200, { richness: 0.8 });
   // Planetenmärkte für den Start: Produkte vorrätig, Bedarf offen
   for (const e of out) {
     if (e.kind !== 'planet') continue;
-    for (const s of Object.values(e.market.goods)) s.stock = s.role === 'produce' ? s.cap * 0.7 : s.cap * 0.1;
+    for (const sl of Object.values(e.market.goods)) if (sl.role !== 'trade') sl.stock = sl.role === 'produce' ? sl.cap * 0.7 : sl.cap * 0.1;
   }
   return out;
 }

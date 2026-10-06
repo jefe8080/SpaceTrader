@@ -6,8 +6,8 @@ const MAX_ROUTES = 100;
 
 /** Aktion eines Stopps: kaufen, verkaufen, abbauen, warten bis */
 export const tradeAction = (v) => {
-  const op = V.oneOf('buy', 'sell', 'mine', 'waitUntil')(v?.op);
-  if (op === 'mine') return { op };
+  const op = V.oneOf('buy', 'sell', 'mine', 'waitUntil', 'refuel')(v?.op);
+  if (op === 'mine' || op === 'refuel') return { op };
   if (op === 'waitUntil') {
     return {
       op,
@@ -30,6 +30,7 @@ const stop = (v, ctx) => {
   const actions = V.arr(tradeAction, 8)(v?.actions ?? []);
   for (const a of actions) {
     if (a.op === 'mine' && e.kind !== 'belt') throw new CmdError(`${e.name}: Abbauen nur in Asteroidenfeldern.`);
+    if (a.op === 'refuel' && !e.market?.goods.shipfuel) throw new CmdError(`${e.name}: Hier gibt es keinen Schiffstreibstoff.`);
     if (a.good && !e.market?.goods[a.good]) throw new CmdError(`${e.name}: ${GOODS[a.good].name} wird dort nicht gehandelt.`);
   }
   return { targetId: e.id, actions };

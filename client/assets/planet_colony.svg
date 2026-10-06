@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="atmo" cx="50%" cy="50%" r="50%">
+      <stop offset="0.74" stop-color="#dcedc8" stop-opacity="0.45"/>
+      <stop offset="0.86" stop-color="#9ccc65" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#9ccc65" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="base" cx="38%" cy="35%" r="75%">
+      <stop offset="0" stop-color="#d7ccc8"/>
+      <stop offset="0.5" stop-color="#8d7b6a"/>
+      <stop offset="1" stop-color="#3e2f26"/>
+    </radialGradient>
+    <radialGradient id="shade" cx="34%" cy="30%" r="80%">
+      <stop offset="0.4" stop-color="#000" stop-opacity="0"/>
+      <stop offset="0.8" stop-color="#0a0604" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#0a0604" stop-opacity="0.9"/>
+    </radialGradient>
+    <clipPath id="clip"><circle cx="128" cy="128" r="100"/></clipPath>
+  </defs>
+  <circle cx="128" cy="128" r="128" fill="url(#atmo)"/>
+  <circle cx="128" cy="128" r="100" fill="url(#base)"/>
+  <g clip-path="url(#clip)">
+    <!-- Krater -->
+    <g fill="#5d4a3e" opacity="0.6">
+      <circle cx="80" cy="80" r="14"/><circle cx="170" cy="70" r="9"/><circle cx="186" cy="160" r="16"/><circle cx="70" cy="176" r="10"/>
+    </g>
+    <!-- Grüne Terraforming-Zonen -->
+    <g fill="#7cb342" opacity="0.7">
+      <path d="M96 110 C110 96 140 100 150 116 C152 134 128 146 108 140 C94 134 90 122 96 110Z"/>
+      <path d="M140 170 C150 164 164 168 166 178 C160 186 146 186 140 170Z"/>
+    </g>
+    <!-- Habitatkuppeln mit Lichtern -->
+    <g fill="#e3f2fd" stroke="#90caf9" stroke-width="1.5">
+      <path d="M112 126 a8 8 0 0 1 16 0 Z"/>
+      <path d="M128 132 a6 6 0 0 1 12 0 Z"/>
+      <path d="M146 178 a5 5 0 0 1 10 0 Z"/>
+    </g>
+    <g fill="#ffeb3b"><circle cx="120" cy="134" r="2"/><circle cx="136" cy="138" r="2"/><circle cx="151" cy="182" r="1.6"/><circle cx="104" cy="118" r="1.6"/></g>
+    <!-- Straßen -->
+    <path d="M100 136 L70 160 M140 132 L176 110 M134 140 L150 176" stroke="#cfd8dc" stroke-width="1.5" opacity="0.6"/>
+  </g>
+  <circle cx="128" cy="128" r="100" fill="url(#shade)"/>
+  <ellipse cx="92" cy="84" rx="34" ry="22" fill="#fff" opacity="0.12"/>
+</svg>

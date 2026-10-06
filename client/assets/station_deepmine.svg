@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Förderstation für ultraseltene Waren: Bohrturm auf Asteroid. #ff00ff = Akzentfarbe -->
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0.25" stop-color="#ff00ff" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#ff00ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rock" cx="40%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#a1887f"/>
+      <stop offset="0.6" stop-color="#5d4037"/>
+      <stop offset="1" stop-color="#2b1d18"/>
+    </radialGradient>
+    <linearGradient id="hull" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eceff1"/>
+      <stop offset="1" stop-color="#455a64"/>
+    </linearGradient>
+  </defs>
+  <circle cx="128" cy="128" r="126" fill="url(#glow)"/>
+  <path d="M60 120 C52 84 84 50 124 52 C170 50 206 80 204 124 C210 170 176 206 130 204 C84 210 50 170 60 120Z" fill="url(#rock)" stroke="#1b120e" stroke-width="3"/>
+  <g fill="#3e2723" opacity="0.7"><circle cx="96" cy="100" r="12"/><circle cx="166" cy="160" r="15"/><circle cx="160" cy="88" r="8"/></g>
+  <!-- Kristalladern -->
+  <g fill="#ff00ff" opacity="0.9">
+    <polygon points="84,150 92,134 100,150 92,160"/>
+    <polygon points="170,112 178,98 186,112 178,120"/>
+    <polygon points="120,176 126,166 132,176 126,182"/>
+  </g>
+  <!-- Bohrturm -->
+  <g stroke="#263238" stroke-width="2.5" fill="url(#hull)">
+    <polygon points="112,128 144,128 136,60 120,60"/>
+  </g>
+  <g stroke="#37474f" stroke-width="2"><path d="M118 72 L138 92 M138 72 L118 92 M116 96 L140 116 M140 96 L116 116"/></g>
+  <rect x="104" y="124" width="48" height="22" rx="5" fill="url(#hull)" stroke="#263238" stroke-width="2.5"/>
+  <rect x="116" y="130" width="24" height="10" rx="2" fill="#ff00ff"/>
+  <circle cx="128" cy="56" r="6" fill="#ffeb3b" stroke="#5d4037" stroke-width="1.5"/>
+</svg>

@@ -3,6 +3,7 @@ import { state, myShips, fmt, fmtK, esc, playerColor, playerName, selectedShips,
 import { socket, cmd } from '../net.js';
 import { typeName, entitySprite, shipSprite, goodTag, playerPrice, cargoUsed, statusText, queueText, shipSymbol, hasWarn, flightSecs, fmtDuration, systemName, sectorName } from '../util.js';
 import { ZONE_TYPES } from '/shared/config.js';
+import { openAlmanac } from './almanac.js';
 import { $, setHtml, typing } from './dom.js';
 import { barChart, fmtNum, stockBar } from './charts.js';
 import { bus } from './bus.js';
@@ -86,6 +87,17 @@ function shipDetails(s) {
     <span>Position</span><span>${here ? esc(systemName(here)) + ' · ' : ''}${esc(sectorOfPoint(s))}</span>
     <span>Markerfarbe</span><span><input type="color" class="marker-color" data-ship="${s.id}" value="${s.marker || state.me.color}"></span></div>`;
 
+  // Treibstoff
+  if (s.tank > 0) {
+    const pct = Math.max(0, Math.min(100, (s.fuel / s.tank) * 100));
+    const canFuel = here?.market?.goods.shipfuel && canBuyFrom(here.market.goods.shipfuel);
+    h += `<div class="fuel-row"><span class="muted">Treibstoff</span>
+      <span class="fuelbar${pct < 15 ? ' low' : ''}"><div style="width:${pct}%"></div></span>
+      <span>${s.fuel.toFixed(1)} / ${s.tank}</span>
+      ${canFuel ? `<button class="small" data-act="refuel" data-ship="${s.id}" ${pct > 99 ? 'disabled' : ''}>⛽ Tanken (${playerPrice(here, 'shipfuel', 'buy').toFixed(1)} Cr)</button>` : ''}
+      <label class="muted" title="Beim Andocken an einem Markt mit Treibstoff automatisch tanken, wenn der Tank darunter liegt">Auto unter
+        <select class="small auto-refuel" data-ship="${s.id}">${[0, 0.1, 0.2, 0.3, 0.5, 0.7, 0.9].map((v) => `<option value="${v}" ${Math.abs((s.autoRefuel ?? 0) - v) < 0.01 ? 'selected' : ''}>${v ? Math.round(v * 100) + ' %' : 'aus'}</option>`).join('')}</select></label></div>`;
+  }
   h += `<div class="section"><div class="btnrow">
     <button data-act="routeMenu" data-ship="${s.id}">↻ Route …</button>
     <button data-act="stop" data-ship="${s.id}" ${s.queue?.length ? '' : 'disabled'}>■ Stopp</button>
@@ -178,7 +190,8 @@ export function marketTable(e, ship) {
     const prices = [];
     if (buy) prices.push(`<span class="price-buy" title="Einkaufspreis für dich">K ${playerPrice(e, g, 'buy').toFixed(1)}</span>`);
     if (sell) prices.push(`<span class="price-sell" title="Verkaufserlös für dich">V ${playerPrice(e, g, 'sell').toFixed(1)}</span>`);
-    return `<tr><td>${goodTag(g)} <span class="role role-${sl.role}">${ROLE_LABEL[sl.role]}</span></td>
+    const modTxt = sl.mod && Math.abs(sl.mod - 1) > 0.005 ? `Standort-Modifier ×${sl.mod.toFixed(2)}` : 'Standort-Modifier ×1,00';
+    return `<tr><td><span class="link-good" data-act="alm" data-good="${g}" title="Im Almanach zeigen">${goodTag(g)}</span> <span class="role role-${sl.role}" title="${modTxt}">${ROLE_LABEL[sl.role]}${sl.mod > 1.2 ? ' ▲' : sl.mod < 0.9 ? ' ▼' : ''}</span>${GOODS[g].cls !== 'normal' ? ` <span title="${GOODS[g].cls === 'hazard' ? 'Gefahrgut' : 'Passagiere'}">${GOODS[g].cls === 'hazard' ? '☢' : '👤'}</span>` : ''}</td>
       <td>${stockBar(sl.stock, sl.cap, barCol)} <span class="muted">${Math.floor(sl.stock)}/${sl.cap}</span></td>
       <td>${prices.join('<br>')}</td>
       <td style="white-space:nowrap">${act}</td></tr>`;
@@ -206,9 +219,14 @@ function entityDetails(e) {
         <span>Status</span><span>${m.eff >= 1 ? 'läuft' : m.eff > 0 ? 'langsam (keine Nahrung)' : 'steht still'}</span>
         <span>Versorgung</span><span>${supplyText(m)}</span></div>`;
     } else if (def.consume) {
-      h += `<div class="muted">Kauft Touristen, Nahrung und Luxusgüter.</div>`;
-    } else if (e.type === 'shipyard') {
+      h += `<div class="muted">Kauft ${Object.keys(def.consume).map((g) => GOODS[g].name).join(', ')}.</div>`;
+    } else if (def.buys) {
       h += `<div class="muted">Kauft Baumaterial und baut daraus Schiffe.</div>`;
+    } else if (def.extract) {
+      const g = Object.keys(m.goods).find((x) => GOODS[x].ultra);
+      h += `<div class="kv"><span>Förderung</span><span>${g ? goodTag(g) : '?'} (ultraselten, nur am Hub verkäuflich)</span><span>Status</span><span>${m.eff >= 1 ? 'läuft' : 'langsam (keine Nahrung)'}</span></div>`;
+    } else if (e.type === 'hub') {
+      h += `<div class="muted">Handelszentrum des Sektors: verkauft Schiffstreibstoff, kauft alle ultraseltenen Waren und handelt eine breite Auswahl.</div>`;
     }
   } else if (e.kind === 'wormhole') {
     const w = state.wh.get(e.wh);
@@ -339,6 +357,8 @@ det.addEventListener('click', (ev) => {
     case 'qdown': cmd('queueMove', { ship: d.ship, qid: Number(d.qid), dir: 1 }); break;
     case 'qdel': cmd('queueRemove', { ship: d.ship, qid: Number(d.qid) }); break;
     case 'clearWarn': cmd('clearWarn', { ship: d.ship }); break;
+    case 'refuel': cmd('refuel', { ship: d.ship }); break;
+    case 'alm': openAlmanac(d.good); break;
     case 'jettison': if (confirm(`${GOODS[d.good].name} wirklich abwerfen?`)) cmd('jettison', { ship: d.ship, good: d.good }); break;
     case 'trade': cmd('trade', { ship: d.ship, target: d.ent, good: d.good, dir: d.dir, amount: d.amt }); break;
     case 'buyShip': cmd('buyShip', { target: d.ent, index: Number(d.idx) }); break;
@@ -358,6 +378,7 @@ det.addEventListener('click', (ev) => {
 det.addEventListener('change', (ev) => {
   const el = ev.target;
   if (el.classList.contains('marker-color')) cmd('shipSettings', { ship: el.dataset.ship, marker: el.value });
+  if (el.classList.contains('auto-refuel')) cmd('shipSettings', { ship: el.dataset.ship, autoRefuel: Number(el.value) });
   if (el.classList.contains('fav-note')) cmd('favoriteNote', { target: el.dataset.ent, note: el.value.slice(0, 120) });
 });
 

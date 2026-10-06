@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Treibstoffdepot: Tankkugeln um ein Andockkreuz. #ff00ff = Akzentfarbe -->
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0.3" stop-color="#ff00ff" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#ff00ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tank" cx="35%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.45" stop-color="#ffcc80"/>
+      <stop offset="1" stop-color="#bf5f1c"/>
+    </radialGradient>
+    <linearGradient id="hull" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eceff1"/>
+      <stop offset="1" stop-color="#546e7a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="128" cy="128" r="126" fill="url(#glow)"/>
+  <g stroke="#78909c" stroke-width="10" stroke-linecap="round">
+    <line x1="128" y1="34" x2="128" y2="222"/>
+    <line x1="34" y1="128" x2="222" y2="128"/>
+  </g>
+  <g stroke="#263238" stroke-width="3">
+    <circle cx="74" cy="74" r="34" fill="url(#tank)"/>
+    <circle cx="182" cy="74" r="34" fill="url(#tank)"/>
+    <circle cx="74" cy="182" r="34" fill="url(#tank)"/>
+    <circle cx="182" cy="182" r="34" fill="url(#tank)"/>
+  </g>
+  <g fill="none" stroke="#5d4037" stroke-width="2" opacity="0.6">
+    <path d="M44 74 H104 M152 74 H212 M44 182 H104 M152 182 H212"/>
+  </g>
+  <rect x="104" y="104" width="48" height="48" rx="10" fill="url(#hull)" stroke="#263238" stroke-width="3"/>
+  <path d="M120 140 L128 112 L136 140 Z" fill="#ff00ff"/>
+  <circle cx="128" cy="136" r="6" fill="#ff00ff"/>
+  <g fill="#ff00ff">
+    <circle cx="128" cy="30" r="6"/><circle cx="128" cy="226" r="6"/><circle cx="30" cy="128" r="6"/><circle cx="226" cy="128" r="6"/>
+  </g>
+</svg>

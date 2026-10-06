@@ -5,14 +5,16 @@ import { runCommand } from '../server/handlers/index.js';
 import { diffMarket } from '../server/net.js';
 import { unitPrice, buyPrice, sellPrice, GOODS, PRICE } from '../shared/config.js';
 
-test('Preisformel: leeres Lager teuer, volles billig, Spread symmetrisch', () => {
+test('Preisformel: Basispreis × Standort-Modifier × Füllstandskurve ± Spread', () => {
   const g = 'ore', base = GOODS[g].base;
   assert.equal(unitPrice(g, 0, 100), base * PRICE.MAX_FACTOR);
   assert.ok(Math.abs(unitPrice(g, 100, 100) - base * PRICE.MIN_FACTOR) < 1e-9);
   assert.ok(unitPrice(g, 30, 100) > unitPrice(g, 60, 100));
-  const u = unitPrice(g, 50, 100);
-  assert.ok(Math.abs(buyPrice(g, 50, 100) - u * (1 + PRICE.SPREAD)) < 1e-9);
-  assert.ok(Math.abs(sellPrice(g, 50, 100) - u * (1 - PRICE.SPREAD)) < 1e-9);
+  assert.ok(Math.abs(unitPrice(g, 50, 100, 1.25) - unitPrice(g, 50, 100) * 1.25) < 1e-9, 'Modifier wirkt linear');
+  const slot = { stock: 50, cap: 100, mod: 1.1 };
+  const u = unitPrice(g, 50, 100, 1.1);
+  assert.ok(Math.abs(buyPrice(g, slot) - u * (1 + PRICE.SPREAD)) < 1e-9);
+  assert.ok(Math.abs(sellPrice(g, slot) - u * (1 - PRICE.SPREAD)) < 1e-9);
 });
 
 test('Persistenz: Spielstand übersteht Speichern und Laden', () => {

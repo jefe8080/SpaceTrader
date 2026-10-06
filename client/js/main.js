@@ -31,6 +31,7 @@ socket.on('welcome', (d) => {
   state.systems = new Map(d.systems.map((s) => [s.id, s]));
   state.zones = new Map(d.zones.map((z) => [z.id, z]));
   state.wh = new Map(d.wh.map((w) => [w.id, w]));
+  state.recipes = new Set(d.recipes || []);
   state.ships.clear();
   state.selection.clear();
   lastSub = '';
@@ -83,6 +84,8 @@ socket.on('reveal', (d) => {
   for (const s of d.systems || []) state.systems.set(s.id, s);
   for (const z of d.zones || []) state.zones.set(z.id, z);
   for (const w of d.wh || []) state.wh.set(w.id, w);
+  for (const k of d.recipes || []) state.recipes.add(k);
+  if (d.recipes) ui.refreshAlmanac();
   if (d.systems || d.sectors || d.wh) ui.scheduleRender(true);
 });
 socket.on('markets', (upd) => {
@@ -225,6 +228,8 @@ addEventListener('keydown', (e) => {
     ui.toggleModal('routesOverview');
   } else if (e.key === 'f' || e.key === 'F') {
     ui.toggleModal('favorites');
+  } else if (e.key === 'a' || e.key === 'A') {
+    ui.toggleModal('almanac');
   }
 });
 

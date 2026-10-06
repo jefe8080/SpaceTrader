@@ -7,6 +7,7 @@ import { renderDetails, requestStats } from './details.js';
 import { refreshModals } from './dom.js';
 import './routes.js';
 import './favorites.js';
+import './almanac.js';
 
 export { renderLogin, loginError, enterGame, leaveGame, addLog, updateTooltip, renderTop } from './hud.js';
 export { toast, hint, closeTopModal, toggleModal, typing } from './dom.js';
@@ -14,6 +15,7 @@ export { requestStats } from './details.js';
 export { dialogMarkets } from './subs.js';
 export { openRoutesOverview, openRouteEditor } from './routes.js';
 export { openFavorites } from './favorites.js';
+export { openAlmanac, refreshAlmanac } from './almanac.js';
 export { orderShips } from './orders.js';
 
 export function renderAll() {
@@ -51,4 +53,5 @@ let pendingModals = false;
 
 document.getElementById('btnRoutes').onclick = () => toggleModalImpl('routesOverview');
 document.getElementById('btnFavs').onclick = () => toggleModalImpl('favorites');
+document.getElementById('btnAlmanac').onclick = () => toggleModalImpl('almanac');
 import { toggleModal as toggleModalImpl } from './dom.js';

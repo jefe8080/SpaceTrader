@@ -1,5 +1,5 @@
-import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
-  cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, unitPrice } from '../shared/config.js';
+import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, FUEL, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
+  cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, slotPrice } from '../shared/config.js';
 import { World } from './world.js';
 import { hexAt, hexKey } from '../shared/hex.js';
 import { planPath, zoneEffects } from '../shared/nav.js';
@@ -188,6 +188,7 @@ export class Game {
       x: atEntity.x + Math.cos(a) * d, y: atEntity.y + Math.sin(a) * d, angle: a + Math.PI / 2, vx: 0, vy: 0,
       cargo: {}, queue: [], qid: 0, state: 'docked', dockedAt: atEntity.id, log: [],
       group: null, ord: own.reduce((m, s) => Math.max(m, s.ord || 0), 0) + 1, tot: {},
+      fuel: SHIP_TYPES[type].tank, autoRefuel: FUEL.AUTO_DEFAULT,
     };
     this.ships.set(id, ship);
     return ship;
@@ -238,6 +239,9 @@ export class Game {
       for (const id of this.world.entitiesInCell(k)) {
         const e = this.world.entities.get(id);
         entities.push(e);
+        // Almanach: Rezept bzw. Planeten-/Feldtyp ist entdeckt, sobald der Markt in Sensorreichweite war
+        const rk = recipeKey(e);
+        if (rk) this.discover(p, 'recipe', rk);
         // Das andere Ende eines Wurmlochs ist schon bekannt: Verbindung gilt als aufgedeckt
         if (e.kind === 'wormhole') {
           const other = this.world.entities.get(e.pair);
@@ -258,6 +262,7 @@ export class Game {
     if (kind === 'sector') out.sectors = [sectorSummary(this.world.sectors.get(key))];
     if (kind === 'zone') out.zones = [this.findZone(key)];
     if (kind === 'wh') out.wh = [this.wormholeInfo(key)];
+    if (kind === 'recipe') out.recipes = [key];
     this.emit('reveal', p, out);
     return true;
   }
@@ -294,6 +299,42 @@ export class Game {
   }
 
   shipSpeed(ship) { return SHIP_TYPES[ship.type].speed; }
+  shipTank(ship) { return SHIP_TYPES[ship.type].tank || 0; }
+
+  /** Beim Andocken: Auto-Tanken unter der eingestellten Schwelle */
+  onDock(ship, e) {
+    if (ship.owner === NPC_OWNER) return;
+    const tank = this.shipTank(ship);
+    if (tank > 0 && ship.autoRefuel > 0 && ship.fuel < tank * ship.autoRefuel && e.market?.goods.shipfuel && canBuyFrom(e.market.goods.shipfuel)) {
+      this.refuel(ship, e);
+    }
+  }
+
+  /**
+   * Tanken: Schiffstreibstoff aus dem Marktbestand zum Marktpreis. Nicht vom Stop-Loss betroffen.
+   * Rückgabe { ok, n, cost } oder { ok: false, reason }
+   */
+  refuel(ship, e, route = null) {
+    const p = this.players.get(ship.owner);
+    const tank = this.shipTank(ship);
+    const slot = e.market?.goods.shipfuel;
+    if (ship.dockedAt !== e.id) return { ok: false, reason: 'nicht angedockt' };
+    if (!slot || !canBuyFrom(slot)) return { ok: false, reason: 'kein Treibstoff im Angebot' };
+    const missing = tank - ship.fuel;
+    if (missing < 0.05) return { ok: false, reason: 'voll' };
+    const price = buyPrice('shipfuel', slot);
+    const n = Math.min(missing, slot.stock, p.credits / price);
+    if (n < 0.05) return { ok: false, reason: slot.stock < 0.05 ? 'kein Bestand' : 'zu wenig Credits' };
+    const cost = n * price;
+    p.credits -= cost;
+    slot.stock -= n;
+    ship.fuel = Math.min(tank, ship.fuel + n);
+    stat(e.market, this.time, 'o', 'shipfuel', n);
+    this.recordShip(ship, 'fuel', cost, route);
+    setWarn(ship, 'fuel', null);
+    this.shipLog(ship, `Getankt: ${n.toFixed(1)} Schiffstreibstoff für ${Math.round(cost)} Cr bei ${e.name}`);
+    return { ok: true, n, cost };
+  }
 
   /** Sensorlauf eines Spielerschiffs: Nebel, Fernortung, Sondergebiete, Sektoren, Nachgenerierung */
   scan(ship) {
@@ -380,7 +421,7 @@ export class Game {
       const max = Math.min(amount, cargoFree(ship), Math.floor(slot.stock));
       let blocked = false;
       while (n < max) {
-        const pr = buyPrice(good, slot.stock, slot.cap);
+        const pr = buyPrice(good, slot);
         if (limit && pr > limit) break;
         if (p.credits - pr < floor) { blocked = floor > 0; break; }
         p.credits -= pr; slot.stock -= 1; total += pr; n++;
@@ -391,7 +432,7 @@ export class Game {
       if (!n) {
         if (blocked) return { n: 0, reason: 'stoploss' };
         if (slot.stock < 1) return { n: 0, reason: 'kein Bestand' };
-        if (limit && buyPrice(good, slot.stock, slot.cap) > limit) return { n: 0, reason: 'Preisgrenze' };
+        if (limit && buyPrice(good, slot) > limit) return { n: 0, reason: 'Preisgrenze' };
         return { n: 0, reason: 'zu wenig Credits' };
       }
     } else {
@@ -399,7 +440,7 @@ export class Game {
       const have = ship.cargo[good] || 0;
       const max = Math.min(amount, have, Math.floor(slot.cap - slot.stock));
       while (n < max) {
-        const pr = sellPrice(good, slot.stock, slot.cap);
+        const pr = sellPrice(good, slot);
         if (limit && pr < limit) break;
         p.credits += pr; slot.stock += 1; total += pr; n++;
       }
@@ -496,11 +537,19 @@ export class Game {
   /** Aktueller Mittelpreis (ohne Spread) */
   midPrice(e, good) {
     const s = e.market?.goods[good];
-    return s ? unitPrice(good, s.stock, s.cap) : null;
+    return s ? slotPrice(good, s) : null;
   }
 }
 
-const newKnown = () => ({ system: new Set(), sector: new Set(), zone: new Set(), wh: new Set() });
+const newKnown = () => ({ system: new Set(), sector: new Set(), zone: new Set(), wh: new Set(), recipe: new Set() });
+
+/** Almanach-Schlüssel: st:<Stationstyp>, pl:<Planetentyp>, bt:<Feldtyp> */
+export function recipeKey(e) {
+  if (e.kind === 'station') return 'st:' + e.type;
+  if (e.kind === 'planet') return 'pl:' + e.type;
+  if (e.kind === 'belt') return 'bt:' + e.type;
+  return null;
+}
 
 /** Sektor-Kurzinfo für den Client */
 export function sectorSummary(s) {

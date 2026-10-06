@@ -1,4 +1,4 @@
-import { NET, NPC_OWNER, cellKey, cellOf } from '../shared/config.js';
+import { NET, NPC_OWNER, SHIP_TYPES, cellKey, cellOf } from '../shared/config.js';
 import { runCommand } from './handlers/index.js';
 import { sectorSummary } from './game.js';
 
@@ -110,6 +110,7 @@ export class Net {
       systems: [...p.known.system].map((id) => w.systems.get(id)).filter(Boolean),
       zones: [...p.known.zone].map((id) => this.game.findZone(id)).filter(Boolean),
       wh: [...p.known.wh].filter((id) => w.wormholes.has(id)).map((id) => this.game.wormholeInfo(id)),
+      recipes: [...p.known.recipe],
       players: this.game.playerList(this.online()),
     });
     s.sentMe = null;
@@ -209,7 +210,7 @@ export function serializeEntity(e) {
 /** Struktur des Marktes (Rollen, Kapazitäten) plus aktueller Zustand */
 export function serializeMarket(m) {
   const goods = {};
-  for (const [g, s] of Object.entries(m.goods)) goods[g] = { role: s.role, rate: s.rate, cap: s.cap, stock: r1(s.stock) };
+  for (const [g, s] of Object.entries(m.goods)) goods[g] = { role: s.role, rate: s.rate, cap: s.cap, stock: r1(s.stock), mod: s.mod || 1 };
   return { strategy: m.strategy, recipe: m.recipe, goods, ...extraOf(m) };
 }
 
@@ -265,6 +266,7 @@ function shipDetail(s) {
     queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},
     nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,
     transit: s.transit ? s.transit.exit : null, zone: s.zone || null, marker: s.marker || null,
+    fuel: Math.round((s.fuel || 0) * 10) / 10, tank: SHIP_TYPES[s.type].tank, autoRefuel: s.autoRefuel ?? 0,
   };
 }
 

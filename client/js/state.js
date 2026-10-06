@@ -16,6 +16,7 @@ export const state = {
   systems: new Map(),   // bekannte Sonnensysteme
   zones: new Map(),     // bekannte Sondergebiete
   wh: new Map(),        // bekannte Wurmlochverbindungen { id, a, b }
+  recipes: new Set(),   // entdeckte Rezepte / Planeten- / Feldtypen (Almanach)
   markerMode: (() => { try { return localStorage.getItem('st_marker') || 'color'; } catch { return 'color'; } })(),
   entities: new Map(),  // id -> Entity inkl. Markt
   ships: new Map(),     // id -> Schiff (+ rx/ry/ra für Interpolation)

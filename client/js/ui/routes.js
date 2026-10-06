@@ -7,7 +7,7 @@ import { sparkline, stockBar } from './charts.js';
 import { bus } from './bus.js';
 import { extraSubs } from './subs.js';
 
-const OP_NAMES = { buy: 'Kaufen', sell: 'Verkaufen', mine: 'Abbauen', waitUntil: 'Warten bis' };
+const OP_NAMES = { buy: 'Kaufen', sell: 'Verkaufen', mine: 'Abbauen', waitUntil: 'Warten bis', refuel: 'Tanken' };
 const COND_NAMES = { 'stock>=': 'Bestand ≥', 'stock<=': 'Bestand ≤', 'price>=': 'Preis ≥', 'price<=': 'Preis ≤' };
 const goodsWhere = (e, pred) => Object.entries(e?.market?.goods || {}).filter(([, s]) => pred(s)).map(([g]) => g);
 const buyable = (e) => goodsWhere(e, canBuyFrom);
@@ -19,6 +19,7 @@ const allowedOps = (e) => {
   if (sellable(e).length) ops.push('sell');
   if (e?.kind === 'belt') ops.push('mine');
   if (allGoods(e).length) ops.push('waitUntil');
+  if (e?.market?.goods.shipfuel && canBuyFrom(e.market.goods.shipfuel)) ops.push('refuel');
   return ops;
 };
 const goodsForOp = (e, op) => (op === 'buy' ? buyable(e) : op === 'sell' ? sellable(e) : allGoods(e));
@@ -77,6 +78,8 @@ function actionRow(a, i, j, e) {
     ${ops.map((o) => `<option value="${o}" ${o === a.op ? 'selected' : ''}>${OP_NAMES[o]}</option>`).join('')}</select>`;
   if (a.op === 'mine') {
     h += `<span class="hintp">bis der Laderaum voll ist</span>`;
+  } else if (a.op === 'refuel') {
+    h += `<span class="hintp">bis der Tank voll ist (${playerPrice(e, 'shipfuel', 'buy')?.toFixed(1)} Cr je Einheit)</span>`;
   } else {
     const goods = goodsForOp(e, a.op);
     h += `<select data-f="good" data-i="${i}" data-j="${j}">${goods.map((g) => `<option value="${g}" ${g === a.good ? 'selected' : ''}>${GOODS[g].name}</option>`).join('')}</select>`;
@@ -147,8 +150,8 @@ card.addEventListener('click', (ev) => {
     case 'addAct': {
       const e = state.entities.get(ed.stops[i].targetId);
       const op = b.dataset.op;
-      const good = op === 'mine' ? undefined : goodsForOp(e, op)[0];
-      ed.stops[i].actions.push(op === 'waitUntil' ? { op, good, cond: 'stock>=', value: 50, timeout: 600 } : { op, good, amount: 0 });
+      const good = op === 'mine' || op === 'refuel' ? undefined : goodsForOp(e, op)[0];
+      ed.stops[i].actions.push(op === 'waitUntil' ? { op, good, cond: 'stock>=', value: 50, timeout: 600 } : op === 'refuel' || op === 'mine' ? { op } : { op, good, amount: 0 });
       break;
     }
     case 'add': addStop($('reAddSel').value); return;
@@ -189,8 +192,8 @@ card.addEventListener('change', (ev) => {
   switch (el.dataset.f) {
     case 'op': {
       const op = el.value;
-      const good = op === 'mine' ? undefined : goodsForOp(e, op).includes(a.good) ? a.good : goodsForOp(e, op)[0];
-      st.actions[Number(el.dataset.j)] = op === 'waitUntil' ? { op, good, cond: 'stock>=', value: 50, timeout: 600 } : { op, good, amount: 0 };
+      const good = op === 'mine' || op === 'refuel' ? undefined : goodsForOp(e, op).includes(a.good) ? a.good : goodsForOp(e, op)[0];
+      st.actions[Number(el.dataset.j)] = op === 'waitUntil' ? { op, good, cond: 'stock>=', value: 50, timeout: 600 } : op === 'refuel' || op === 'mine' ? { op } : { op, good, amount: 0 };
       break;
     }
     case 'good': a.good = el.value; break;

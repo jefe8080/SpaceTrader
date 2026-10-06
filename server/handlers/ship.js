@@ -18,7 +18,10 @@ const queueCmd = (v, ctx) => {
     case 'dock': {
       const e = V.entity()(v.target, ctx);
       const actions = V.arr(tradeAction, 8)(v.actions ?? []).filter((a) => a.op !== 'mine' && a.op !== 'waitUntil');
-      for (const a of actions) if (!e.market?.goods[a.good]) throw new CmdError(`${GOODS[a.good].name} wird bei ${e.name} nicht gehandelt.`);
+      for (const a of actions) {
+        if (a.op === 'refuel') { if (!e.market?.goods.shipfuel) throw new CmdError(`Bei ${e.name} gibt es keinen Schiffstreibstoff.`); continue; }
+        if (!e.market?.goods[a.good]) throw new CmdError(`${GOODS[a.good].name} wird bei ${e.name} nicht gehandelt.`);
+      }
       return { t, target: e.id, actions };
     }
     case 'wait': return { t, secs: V.int(1, 86400)(v.secs) };
@@ -72,8 +75,20 @@ export default {
     run(ctx, { ships }) { for (const s of ships) { s.queue = []; s.warn = {}; s.fails = {}; } },
   },
   shipSettings: {
-    args: { ship: V.ownShip(), marker: V.opt(V.color(), null) },
-    run(ctx, { ship, marker }) { ship.marker = marker; },
+    args: { ship: V.ownShip(), marker: V.opt(V.color()), autoRefuel: V.opt(V.num(0, 0.95)) },
+    run(ctx, { ship, marker, autoRefuel }) {
+      if (marker !== undefined) ship.marker = marker;
+      if (autoRefuel !== undefined) ship.autoRefuel = Math.round(autoRefuel * 100) / 100;
+    },
+  },
+  refuel: {
+    args: { ship: V.ownShip() },
+    run({ game }, { ship }) {
+      const e = game.world.entities.get(ship.dockedAt);
+      if (!e) return 'Schiff ist nicht angedockt.';
+      const res = game.refuel(ship, e);
+      if (!res.ok) return `Tanken nicht möglich: ${res.reason}`;
+    },
   },
   clearWarn: {
     args: { ship: V.ownShip() },

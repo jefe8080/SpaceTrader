@@ -29,7 +29,7 @@ export function playerPrice(e, g, dir = null) {
   const s = e.market?.goods[g];
   if (!s) return null;
   const d = dir || (canBuyFrom(s) ? 'buy' : 'sell');
-  return d === 'buy' ? buyPrice(g, s.stock, s.cap) : sellPrice(g, s.stock, s.cap);
+  return d === 'buy' ? buyPrice(g, s) : sellPrice(g, s);
 }
 
 export const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -63,6 +63,7 @@ export function shipSymbol(s) {
 
 export function actionText(a) {
   if (a.op === 'mine') return 'Abbauen';
+  if (a.op === 'refuel') return 'Tanken';
   if (a.op === 'waitUntil') {
     const what = a.cond.startsWith('stock') ? 'Bestand' : 'Preis';
     return `Warten bis ${what} ${GOODS[a.good].name} ${a.cond.slice(-2) === '>=' ? '≥' : '≤'} ${a.value}`;

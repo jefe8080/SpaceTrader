@@ -252,3 +252,26 @@ select.small { padding: 1px 4px; font-size: 12px; }
   #topbar kbd, .zoom-info, #onlinePlayers { display: none; }
   .logo { display: none; }
 }
+
+/* ---------- Phase 3: Wirtschaft ---------- */
+.fuel-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; font-size: 12px; }
+.fuelbar { width: 90px; height: 7px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden; display: inline-block; }
+.fuelbar > div { height: 100%; background: #ff7043; }
+.fuelbar.low > div { background: var(--bad); }
+.link-good { cursor: pointer; }
+.link-good:hover { text-decoration: underline dotted; }
+.tabs { display: flex; gap: 4px; }
+.alm-grid { display: grid; grid-template-columns: 260px 1fr; gap: 14px; min-height: 420px; }
+.alm-list { max-height: 62vh; overflow: auto; border-right: 1px solid rgba(255, 255, 255, 0.07); padding-right: 8px; }
+.alm-tier { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 10px 0 4px; }
+.alm-item { padding: 3px 6px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.alm-item:hover { background: rgba(80, 120, 200, 0.15); }
+.alm-item.sel { background: rgba(79, 195, 247, 0.18); }
+.alm-item.unknown { cursor: default; }
+.alm-detail h3 { margin: 0 0 8px; }
+.ultra { color: #18ffff; }
+.cls { font-size: 11px; }
+.chain-graph { margin: 10px 0; }
+.chain-graph text { fill: var(--text); font-size: 10.5px; }
+.cg-edge { fill: none; stroke: rgba(160, 190, 255, 0.45); stroke-width: 1.5; }
+.cg-node { cursor: pointer; }

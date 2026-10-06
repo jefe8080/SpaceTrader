@@ -1,4 +1,4 @@
-import { SHIP_TYPES, BELT_TYPES, WORLD, GOODS, unitPrice } from '../shared/config.js';
+import { SHIP_TYPES, BELT_TYPES, WORLD, GOODS, FUEL, slotPrice, fuelBurn } from '../shared/config.js';
 import { stat } from './markets.js';
 import { zoneEffects } from '../shared/nav.js';
 
@@ -18,11 +18,19 @@ function approachPoint(ship, e) {
 function flyTo(ship, tx, ty, dt, game) {
   const fx = zoneEffects(game.world.zonesNear(ship.x, ship.y), ship.x, ship.y);
   ship.zone = fx.zones ? fx.zones.map((z) => z.type) : null;
-  const speed = game.shipSpeed(ship) * fx.speed;
+  let speed = game.shipSpeed(ship) * fx.speed;
+  const tank = game.shipTank(ship);
+  if (tank > 0 && ship.fuel <= 0) speed *= FUEL.EMPTY_SPEED; // leerer Tank: 30 % Geschwindigkeit, Befehl läuft weiter
   const dx = tx - ship.x, dy = ty - ship.y;
   const d = Math.hypot(dx, dy);
   const step = speed * dt;
   ship.dockedAt = null;
+  // Verbrauch nur im Flug, Ionensturm verdoppelt
+  if (tank > 0 && dt > 0) {
+    const flown = Math.min(1, step > 0 ? d / step : 0) * dt;
+    ship.fuel = Math.max(0, ship.fuel - fuelBurn(tank) * fx.fuel * flown);
+    setWarn(ship, 'fuel', ship.fuel <= 0 ? 'Tank leer: nur 30 % Geschwindigkeit' : null);
+  }
   if (d <= step) {
     ship.x = tx; ship.y = ty;
     game.recordShip(ship, 'dist', d);
@@ -89,6 +97,7 @@ function flyToEntity(ship, e, dt, game) {
     ship.dockedAt = e.id;
     ship.nav = null;
     game.recordShip(ship, 'f', 1);
+    game.onDock(ship, e);
     return true;
   }
   return false;
@@ -154,7 +163,7 @@ function doTrade(ship, e, a, game, opts = {}) {
 function waitCondMet(e, a) {
   const s = e.market?.goods[a.good];
   if (!s) return true;
-  const v = a.cond.startsWith('stock') ? s.stock : unitPrice(a.good, s.stock, s.cap);
+  const v = a.cond.startsWith('stock') ? s.stock : slotPrice(a.good, s);
   return a.cond.endsWith('>=') ? v >= a.value : v <= a.value;
 }
 
@@ -178,6 +187,11 @@ function runActions(ship, e, actions, st, dt, game, opts) {
       ship.state = 'docked';
     } else if (a.op === 'buy' || a.op === 'sell') {
       doTrade(ship, e, a, game, opts);
+    } else if (a.op === 'refuel') {
+      const key = actionKey(a, e.id);
+      const res = game.refuel(ship, e, opts.route);
+      if (res.ok) actionOk(ship, key);
+      else if (res.reason !== 'voll') actionFailed(ship, key, `Tanken bei ${e.name}: ${res.reason}`, game);
     }
     st.actionIdx++;
   }
