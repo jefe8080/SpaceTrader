@@ -5,11 +5,13 @@ import { renderTop } from './hud.js';
 import { renderFleet } from './fleet.js';
 import { renderDetails, requestStats } from './details.js';
 import { refreshModals } from './dom.js';
+import { renderQuestBox } from './quests.js';
 import './routes.js';
 import './favorites.js';
 import './almanac.js';
 import './almanacShips.js';
 import './property.js';
+import './audioMenu.js';
 
 export { renderLogin, loginError, enterGame, leaveGame, addLog, updateTooltip, renderTop } from './hud.js';
 export { toast, hint, closeTopModal, toggleModal, typing } from './dom.js';
@@ -24,6 +26,7 @@ export function renderAll() {
   renderTop();
   renderFleet();
   renderDetails();
+  renderQuestBox();
 }
 
 /**

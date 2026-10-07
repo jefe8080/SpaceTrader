@@ -13,7 +13,7 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-size: 14px; }
-canvas#view { position: fixed; inset: 0; display: block; }
+canvas#view { position: fixed; inset: 0; display: block; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 [hidden] { display: none !important; }
 button {
   font: inherit; color: var(--text); background: rgba(80, 120, 200, 0.18); border: 1px solid var(--panel-border);
@@ -294,3 +294,27 @@ select.small { padding: 1px 4px; font-size: 12px; }
 /* ---------- Phase 6: Besitz ---------- */
 .own-prop { border-top-color: rgba(129, 199, 132, 0.4); }
 .own-prop input[type=range] { width: 110px; }
+
+/* PRD-2: Hauptschiff, Audio */
+.crown { color: #ffd54f; }
+.audio-menu { padding: 8px 10px; gap: 6px; min-width: 240px; }
+.audio-row { display: flex; align-items: center; gap: 8px; }
+.audio-row span { min-width: 60px; }
+.audio-row input[type=range] { flex: 1; padding: 0; }
+
+/* PRD-2: Level, Quests */
+.xpbar { display: block; width: 52px; height: 3px; margin-top: 2px; background: rgba(255, 255, 255, 0.12); border-radius: 2px; overflow: hidden; }
+.xpbar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.4s; }
+#questBox { top: 56px; left: 310px; width: 320px; font-size: 12px; z-index: 4; }
+.qb-head, .qo-head, .qb-foot, .qo-foot { display: flex; align-items: center; gap: 6px; }
+.qb-head { font-weight: 600; margin-bottom: 4px; }
+.qb-text { margin-bottom: 4px; }
+.qb-prog { color: var(--accent); margin-bottom: 6px; }
+.quest-offer { border: 1px solid var(--panel-border); border-radius: 8px; padding: 6px 8px; margin: 6px 0; background: rgba(255, 255, 255, 0.03); }
+.qo-head { margin-bottom: 3px; }
+.qo-foot { margin-top: 4px; font-size: 12px; }
+.tt-title-badge { color: #ffd54f; font-style: italic; }
+@media (max-width: 900px) { #questBox { top: auto; bottom: 10px; left: 10px; width: 290px; } }
+.ability { color: #ffd54f; font-size: 12px; }
+.badge.bonus { background: rgba(129, 199, 132, 0.2); color: var(--good); }
+.badge.neg { background: rgba(229, 115, 115, 0.2); }

@@ -30,7 +30,8 @@
       <div class="logo">SPACE<span>TRADER</span></div>
       <div class="stat"><span class="label">Credits</span><span id="credits" class="value">0</span></div>
       <div class="stat"><span class="label">Schiffe</span><span id="shipCount" class="value">0</span></div>
-      <div class="stat" title="Pilotenlizenz (Kauf am Handels-Hub)"><span class="label">Lizenz</span><span id="pilotLevel" class="value">P1</span></div>
+      <div class="stat" id="levelStat" title="Pilotenlevel und Erfahrung"><span class="label">Level</span><span id="levelValue" class="value">1</span><span class="xpbar"><span id="xpFill"></span></span></div>
+      <div class="stat" title="Pilotenlizenz (Kauf am Handels-Hub, erfordert das gleiche Pilotenlevel)"><span class="label">Lizenz</span><span id="pilotLevel" class="value">P1</span></div>
       <button id="stopLossBtn" class="small">Stop-Loss aus</button>
       <div id="onlinePlayers"></div>
       <div class="spacer"></div>
@@ -41,6 +42,7 @@
       <button id="btnAlmanac" title="Almanach (A)">📖 Almanach <kbd>A</kbd></button>
       <button id="btnProps" title="Besitz (B)">🏠 Besitz <kbd>B</kbd></button>
       <button id="btnHome" title="Zum Startpunkt">⌂ Start</button>
+      <button id="btnAudio" title="Ton: Musik und Effekte">🔊</button>
       <button id="btnHelp" title="Hilfe">?</button>
     </div>
     <div id="fleet" class="panel">
@@ -49,6 +51,7 @@
       <div id="fleetList"></div>
     </div>
     <div id="details" class="panel" hidden></div>
+    <div id="questBox" class="panel" hidden></div>
     <div id="log" class="panel"></div>
     <div id="hint" hidden></div>
     <div id="tooltip" hidden></div>
@@ -71,6 +74,7 @@
     <div class="card wide-card" id="propsCard"></div>
   </div>
   <div id="popMenu" class="popmenu" hidden></div>
+  <div id="audioMenu" class="popmenu audio-menu" hidden></div>
 
   <div id="help" class="overlay" hidden>
     <div class="card help-card">
@@ -97,7 +101,8 @@
         <li><b>Routen</b> sind Vorlagen: mehrere Schiffe fahren dieselbe Route, Änderungen wirken auf alle.</li>
         <li><b>Stop-Loss</b> (oben) verhindert automatische Einkäufe, wenn dein Kontostand zu tief fällt.</li>
         <li><b>Gouverneurslizenz</b> (am Hub): Stationen und Planeten kaufen, Lager nutzen, Zoll und Fixpreise festlegen, eigene Werften betreiben.</li>
-        <li><b>Pilotenlizenz</b> (am Hub) schaltet größere Schiffsklassen, mehr Schiffe und höhere Upgrade-Stufen frei. <b>Module</b> (Passagierkabine, Geschirmte Kammer, Abbaugeräte) gibt es an großen Werften.</li>
+        <li><b>Erfahrung</b> sammelst du mit Quests (Questtafeln an Planeten und Werften), beim Erkunden neuer Sektoren, mit neuen Almanach-Einträgen und beim manuellen Handel deines <b>Hauptschiffs</b> (♛, Tempo ×4). Routenhandel bringt keine Erfahrung.</li>
+        <li><b>Pilotenlizenz</b> (am Hub, erfordert das gleiche Pilotenlevel) schaltet größere Schiffsklassen, mehr Schiffe und höhere Upgrade-Stufen frei. <b>Module</b> (Passagierkabine, Geschirmte Kammer, Abbaugeräte) gibt es an großen Werften.</li>
       </ul>
       <button class="primary" id="btnHelpClose">Los geht's</button>
     </div>

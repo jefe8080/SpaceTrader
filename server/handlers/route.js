@@ -58,7 +58,7 @@ export default {
       Object.assign(route, { name, stops, minBalance });
       // Laufende Schiffe auf gültigen Stopp setzen
       for (const s of shipsOnRoute(game, route.id)) for (const c of s.queue) if (c.route === route.id && c.idx >= stops.length) { c.idx = 0; c.phase = 'travel'; }
-      for (const s of new Set(assign)) giveOrder(game, s, { t: 'route', route: route.id, rounds: 0 }, false);
+      for (const s of new Set(assign)) if (!s.main) giveOrder(game, s, { t: 'route', route: route.id, rounds: 0 }, false);
       game.emit('routes', player);
       return undefined;
     },

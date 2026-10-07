@@ -1,5 +1,5 @@
-import { GOODS, SHIP_TYPES, SHIP_CLASSES, UPGRADES, MODULES, PILOT_LICENSES, MODULE_SIZE, MODULE_REFUND,
-  upgradeCost, shipStats, holdUsage, sellValue, countModules, moduleCapacity } from '../../shared/config.js';
+import { GOODS, SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, MODULE_SIZE, MODULE_REFUND,
+  upgradeCost, shipStats, holdUsage, sellValue, countModules, moduleCapacity, pilotLevel, factionRank, RANK_NAMES, FACTIONS } from '../../shared/config.js';
 import { V } from './validate.js';
 
 /** Eigenes Schiff ist an einem Ort angedockt, der die Bedingung erfüllt */
@@ -24,6 +24,8 @@ export default {
       const m = target.market;
       const item = m.forSale[index];
       if (!item) return 'Schiff nicht mehr verfügbar.';
+      if (item.faction) return 'Fraktionsschiffe gibt es nur über das Angebot der Fraktionswerft.';
+      if (item.reservedFor && item.reservedFor !== player.id && game.time < item.reservedUntil) return `Dieses Schiff ist noch ${Math.ceil((item.reservedUntil - game.time) / 60)} min für den Besteller reserviert.`;
       if (m.owner && m.owner !== player.id && !m.yardSale) return 'Diese Werft verkauft nicht an andere Spieler.';
       const lic = pilotLicense(player);
       const cls = SHIP_TYPES[item.type].cls;
@@ -34,22 +36,30 @@ export default {
       if (m.owner && m.owner !== player.id) game.players.get(m.owner).credits += item.price; // Verkauf aus Spielerwerft
       m.forSale.splice(index, 1);
       const s = game.spawnShip(player, item.type, target);
+      if (item.bonus) Object.assign(s, { bonus: item.bonus, yardLvl: item.yardLvl, fuel: shipStats({ ...s, bonus: item.bonus }).tank });
       if (item.upg) Object.assign(s, { upg: item.upg, modules: item.modules || [], upgValue: item.upgValue || 0, fuel: shipStats({ ...s, upg: item.upg }).tank });
       game.shipLog(s, `Neues Schiff gekauft: ${SHIP_TYPES[item.type].name} für ${item.price.toLocaleString('de-DE')} Cr bei ${target.name}`);
     },
   },
 
-  /** Fraktionsschiff: Credits plus seltene Ressource aus den Laderäumen der hier angedockten eigenen Schiffe */
+  /**
+   * Fraktionsschiff: doppelt gesperrt durch Fraktionsrang und Pilotenlizenz.
+   * Preis: Credits plus Schiffswährung aus den Laderäumen der hier angedockten eigenen Schiffe.
+   */
   buyFactionShip: {
-    args: { target: V.entity() },
-    run({ game, player }, { target }) {
+    args: { target: V.entity(), index: V.opt(V.int(0, 10), 0) },
+    run({ game, player }, { target, index }) {
       const m = target.market;
       if (m?.strategy !== 'factionyard') return 'Keine Fraktionswerft.';
       const docked = game.shipsOf(player.id).filter((s) => s.dockedAt === target.id);
       if (!docked.length) return 'Eines deiner Schiffe muss an der Fraktionswerft angedockt sein.';
-      const item = m.forSale[0];
+      const item = m.forSale[index];
+      if (!item) return 'Unbekanntes Schiff.';
+      const d = SHIP_TYPES[item.type];
+      const rank = factionRank(player.rep?.[d.faction]);
+      if (rank < d.rank) return `${d.name} erfordert Rang ${d.rank} (${RANK_NAMES[d.rank]}) bei ${FACTIONS[d.faction].name}, du hast Rang ${rank}.`;
       const lic = pilotLicense(player);
-      if (!lic.classes.includes('F')) return 'Fraktionsschiffe erfordern Pilotenlizenz 4.';
+      if (!lic.classes.includes(d.cls)) return `${d.name} erfordert Pilotenlizenz ${SHIP_CLASSES[d.cls].license}.`;
       if (game.shipsOf(player.id).length >= lic.maxShips) return `Pilotenlizenz ${lic.level} erlaubt höchstens ${lic.maxShips} Schiffe.`;
       const { good, n } = item.currency;
       const have = docked.reduce((s, x) => s + (x.cargo[good] || 0), 0);
@@ -65,6 +75,33 @@ export default {
       }
       const s = game.spawnShip(player, item.type, target);
       game.shipLog(s, `Fraktionsschiff ${SHIP_TYPES[item.type].name} erworben`);
+    },
+  },
+
+  /**
+   * Bestellslot einer NPC-Werft: bekannter, erlaubter Typ in der passenden Werftgröße. Anzahlung 2 × Katalogpreis
+   * (keine Erstattung). Eine offene Bestellung je Werft für alle Spieler.
+   */
+  yardOrder: {
+    args: { target: V.entity(), type: V.key(SHIP_TYPES) },
+    run({ game, player }, { target: e, type }) {
+      const m = e.market;
+      if (m?.strategy === 'factionyard') return 'Fraktionsschiffe sind an der Fraktionswerft dauerhaft im Angebot.';
+      if (m?.strategy !== 'shipyard') return 'Keine Werft.';
+      if (m.owner) return 'Spielerwerften haben keinen Bestellslot.';
+      if (!game.shipsOf(player.id).some((s) => s.dockedAt === e.id)) return 'Eines deiner Schiffe muss an der Werft angedockt sein.';
+      if (m.order) return `Bestellt: ${SHIP_TYPES[m.order.type].name}. Eine neue Bestellung ist erst nach Fertigstellung möglich.`;
+      const d = SHIP_TYPES[type];
+      if (d.npc || d.faction) return 'Dieser Typ ist nicht bestellbar.';
+      if (!player.known.ship.has(type)) return 'Bestellen kannst du nur Schiffe aus deinem Almanach.';
+      if (!SHIPYARD.ORDER_CLASSES[e.type]?.includes(d.cls)) return `${e.type === 'bigyard' ? 'Große Werften' : 'Werften'} bauen nur Klasse ${SHIPYARD.ORDER_CLASSES[e.type].join(' und ')}.`;
+      const lic = pilotLicense(player);
+      if (!lic.classes.includes(d.cls)) return `Für Klasse ${SHIP_CLASSES[d.cls].name} brauchst du Pilotenlizenz ${SHIP_CLASSES[d.cls].license}.`;
+      const deposit = d.price * SHIPYARD.DEPOSIT;
+      if (player.credits < deposit) return `Die Anzahlung beträgt ${deposit.toLocaleString('de-DE')} Cr.`;
+      player.credits -= deposit;
+      m.order = { type, player: player.id, name: player.name, paid: deposit, at: Math.round(game.time) };
+      game.emit('notice', player, `${d.name} bei ${e.name} bestellt (Anzahlung ${deposit.toLocaleString('de-DE')} Cr).`);
     },
   },
 
@@ -146,6 +183,7 @@ export default {
       if (args.kind === 'governor') return game.buyGovernor(player, args);
       const next = PILOT_LICENSES[(player.pilot || 1) + 1];
       if (!next) return 'Höchste Pilotenlizenz erreicht.';
+      if (pilotLevel(player.xp) < next.level) return `Pilotenlizenz ${next.level} erfordert Pilotenlevel ${next.level} (Erfahrung aus Quests, Erkundung und Almanach).`;
       if (player.credits < next.cost) return 'Nicht genug Credits.';
       player.credits -= next.cost;
       player.pilot = next.level;

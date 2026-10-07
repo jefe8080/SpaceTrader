@@ -125,10 +125,10 @@ function renderEditor() {
 
   const onRoute = ed.id ? new Set(shipsOnRoute(ed.id).map((s) => s.id)) : new Set();
   h += `<div class="section"><div class="section-title">Schiffe zuweisen</div><div class="chips">
-    ${fleetOrder().map((s) => {
+    ${fleetOrder().filter((s) => !s.main).map((s) => {
       const on = onRoute.has(s.id);
       return `<label class="chip${on ? ' on' : ''}"><input type="checkbox" data-assign="${s.id}" ${on || ed.assign.has(s.id) ? 'checked' : ''} ${on ? 'disabled' : ''}> ${shipSymbol(s)} ${esc(s.name)}</label>`;
-    }).join('')}</div><div class="muted small-note">Zugewiesene Schiffe ersetzen ihre Queue durch diese Route (endlos).</div></div>
+    }).join('')}</div><div class="muted small-note">Zugewiesene Schiffe ersetzen ihre Queue durch diese Route (endlos). Das Hauptschiff fährt keine Routen.</div></div>
     <div class="route-footer">
       ${ed.id ? '<button class="danger" data-a="delete">Route löschen</button>' : ''}
       <span style="flex:1"></span>
@@ -353,6 +353,15 @@ export function openRouteMenu(shipId, anchor) {
   const cur = s.queue?.find((c) => c.t === 'route');
   const routes = [...state.routes.values()];
   let h = '';
+  if (s.main) {
+    menu.innerHTML = '<div class="menu-sep">♛ Das Hauptschiff fährt keine Routen.</div>';
+    menu.dataset.ship = shipId;
+    const rc = anchor.getBoundingClientRect();
+    menu.hidden = false;
+    menu.style.left = Math.min(rc.left, innerWidth - menu.offsetWidth - 8) + 'px';
+    menu.style.top = Math.min(rc.bottom + 4, innerHeight - menu.offsetHeight - 8) + 'px';
+    return;
+  }
   if (cur) h += `<button data-m="edit" data-id="${cur.route}">✎ Aktuelle Route bearbeiten</button>`;
   h += `<button data-m="new">＋ Neue Route mit diesem Schiff</button>`;
   if (routes.length) h += `<div class="menu-sep">Zuweisen (Shift: anhängen)</div>` + routes.map((r) => `<button data-m="assign" data-id="${r.id}">↻ ${esc(r.name)}</button>`).join('');

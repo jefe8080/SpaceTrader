@@ -2,16 +2,17 @@ import { GOODS, SHIP_TYPES, STATION_TYPES, PLANET_TYPES, BELT_TYPES, SUPPLY, rec
 import { state, myShips, fmt, fmtK, esc, playerColor, playerName, selectedShips, fleetOrder } from '../state.js';
 import { socket, cmd } from '../net.js';
 import { typeName, entitySprite, shipSprite, goodTag, playerPrice, cargoUsed, statusText, queueText, shipSymbol, hasWarn, flightSecs, fmtDuration, systemName, sectorName } from '../util.js';
-import { ZONE_TYPES } from '/shared/config.js';
+import { ZONE_TYPES, ABILITIES } from '/shared/config.js';
 import { openAlmanac } from './almanac.js';
-import { shipyardSection, hubSection, factionYardSection, outpostSection } from './shipyard.js';
+import { shipyardSection, hubSection, factionYardSection, outpostSection, bonusBadge, repLine } from './shipyard.js';
 import { propertySection, governorSection, handlePropertyAction, handlePropertyChange } from './property.js';
 import { FACTIONS } from '/shared/factions.js';
-import { shipStats, holdUsage, countModules, MODULES as MODS, holdOf } from '/shared/ships.js';
+import { shipStats, holdUsage, countModules, MODULES as MODS, holdOf, FLAGSHIP } from '/shared/ships.js';
 import { $, setHtml, typing } from './dom.js';
 import { barChart, fmtNum, stockBar } from './charts.js';
 import { bus } from './bus.js';
 import { orderShips } from './orders.js';
+import { questBoardSection } from './quests.js';
 
 const entName = (id) => esc(state.entities.get(id)?.name || 'unbekannter Ort');
 /** Sektorname an einer Position (oder "Leerraum") */
@@ -73,7 +74,7 @@ function shipDetails(s) {
   const own = s.owner === state.me.id;
   const color = playerColor(s.owner);
   let h = `<div class="det-head"><img src="${shipSprite(s.type, color)}" alt=""><div>
-    <div class="title">${esc(s.name)}${own ? ` <button class="small ghost" data-act="rename" data-ship="${s.id}" title="Umbenennen">✎</button>` : ''}</div>
+    <div class="title">${s.main ? '<span class="crown" title="Hauptschiff">♛</span> ' : ''}${esc(s.name)}${own ? ` <button class="small ghost" data-act="rename" data-ship="${s.id}" title="Umbenennen">✎</button>` : ''}</div>
     <div class="type">${def.name}${own ? '' : ' · ' + esc(s.task ? 'Station' : playerName(s.owner))}</div></div></div>`;
   if (s.task) return h + npcTaskHtml(s);
   if (!own) return h + `<div class="muted">${def.desc}</div>`;
@@ -89,10 +90,12 @@ function shipDetails(s) {
   const mods = Object.entries(countModules(s));
   const mineTxt = Object.entries(st.mining).filter(([, v]) => v > 0).map(([k, v]) => `${{ std: 'Laser', drill: 'Tiefbohrer', acid: 'Säure', gas: 'Gas' }[k]} ${Math.round(v * 10) / 10}/s`).join(', ');
   const up = (l) => (s.upg?.[l] ? ` <span class="badge" title="Upgrade-Stufe">+${s.upg[l]}</span>` : '');
-  h += `<div class="kv"><span>Klasse</span><span>${def.cls} · ${def.name}</span>
+  h += `<div class="kv"><span>Klasse</span><span>${def.cls} · ${def.name}${bonusBadge(s)}</span>
+    ${def.ability ? `<span>Fähigkeit</span><span class="ability">★ ${ABILITIES[def.ability]}</span>` : ''}
     <span>Laderaum</span><span>${hu.cargo} / ${st.cargo}${up('cargo')}${st.hazard ? ` · ☢ ${hu.hazard}/${st.hazard}` : ''}${st.passenger ? ` · 👤 ${hu.passenger}/${st.passenger}` : ''}</span>
     <span>Geschwindigkeit</span><span>${Math.round(st.speed)}${up('speed')}</span>
     <span>Bergbau</span><span>${mineTxt || '–'}</span>
+    <span>Sensor</span><span>${fmt(st.sensor)}</span>
     ${mods.length ? `<span>Module</span><span>${mods.map(([id, n]) => MODS[id].name + (n > 1 ? ' ×' + n : '')).join(', ')}</span>` : ''}
     <span>Position</span><span>${here ? esc(systemName(here)) + ' · ' : ''}${esc(sectorOfPoint(s))}</span>
     <span>Markerfarbe</span><span><input type="color" class="marker-color" data-ship="${s.id}" value="${s.marker || state.me.color}"></span></div>`;
@@ -113,7 +116,8 @@ function shipDetails(s) {
     <button data-act="routeMenu" data-ship="${s.id}">↻ Route …</button>
     <button data-act="stop" data-ship="${s.id}" ${s.queue?.length ? '' : 'disabled'}>■ Stopp</button>
     <button data-act="follow" data-ship="${s.id}">◎ Folgen</button>
-    <button data-act="addWait" data-ship="${s.id}" title="Warte-Befehl anhängen">⏱ Warten</button>`;
+    <button data-act="addWait" data-ship="${s.id}" title="Warte-Befehl anhängen">⏱ Warten</button>
+    ${flagshipButton(s)}`;
   const docked = s.dockedAt ? state.entities.get(s.dockedAt) : null;
   if (docked?.kind === 'belt' && (st.mining[GOODS[BELT_TYPES[docked.type].good].mine || 'std'] || 0) > 0 && !s.queue?.length) {
     h += `<button data-act="mine" data-ship="${s.id}" data-ent="${docked.id}">⛏ Abbauen</button>`;
@@ -144,6 +148,14 @@ function shipDetails(s) {
     h += `<div class="section"><div class="section-title">Logbuch</div><div class="loglines">${s.log.slice(0, 8).map((l) => `<div>${esc(l.msg)}</div>`).join('')}</div></div>`;
   }
   return h;
+}
+
+/** Hauptschiff ernennen bzw. abberufen, mit Sperre nach jeder Änderung */
+function flagshipButton(s) {
+  const wait = (state.flagshipAt ?? -Infinity) + FLAGSHIP.COOLDOWN - state.time;
+  const lock = wait > 0 ? ` disabled title="Wechsel erst in ${Math.ceil(wait / 60)} min möglich"` : '';
+  if (s.main) return `<button data-act="flagship" data-ship=""${lock} title="Hauptschiff abberufen">♛ Abberufen</button>`;
+  return `<button data-act="flagship" data-ship="${s.id}"${lock || ' title="Tempo ×4, Verbrauch ×4 pro Sekunde, keine Routen"'}>♛ Hauptschiff</button>`;
 }
 
 function shipStatsSection(s) {
@@ -205,8 +217,7 @@ export function marketTable(e, ship) {
     const prices = [];
     if (buy) prices.push(`<span class="price-buy" title="Einkaufspreis für dich">K ${(playerPrice(e, g, 'buy') * (1 + customs)).toFixed(1)}</span>`);
     if (sell) prices.push(`<span class="price-sell" title="Verkaufserlös für dich">V ${(playerPrice(e, g, 'sell') * (1 - customs)).toFixed(1)}</span>`);
-    const modTxt = sl.mod && Math.abs(sl.mod - 1) > 0.005 ? `Standort-Modifier ×${sl.mod.toFixed(2)}` : 'Standort-Modifier ×1,00';
-    return `<tr><td><span class="link-good" data-act="alm" data-good="${g}" title="Im Almanach zeigen">${goodTag(g)}</span> <span class="role role-${sl.role}" title="${modTxt}">${ROLE_LABEL[sl.role]}${sl.mod > 1.2 ? ' ▲' : sl.mod < 0.9 ? ' ▼' : ''}</span>${GOODS[g].cls !== 'normal' ? ` <span title="${GOODS[g].cls === 'hazard' ? 'Gefahrgut' : 'Passagiere'}">${GOODS[g].cls === 'hazard' ? '☢' : '👤'}</span>` : ''}</td>
+    return `<tr><td><span class="link-good" data-act="alm" data-good="${g}" title="Im Almanach zeigen">${goodTag(g)}</span> <span class="role role-${sl.role}">${ROLE_LABEL[sl.role]}</span>${GOODS[g].cls !== 'normal' ? ` <span title="${GOODS[g].cls === 'hazard' ? 'Gefahrgut' : 'Passagiere'}">${GOODS[g].cls === 'hazard' ? '☢' : '👤'}</span>` : ''}</td>
       <td>${stockBar(sl.stock, sl.cap, barCol)} <span class="muted">${Math.floor(sl.stock)}/${sl.cap}</span></td>
       <td>${prices.join('<br>')}</td>
       <td style="white-space:nowrap">${act}</td></tr>`;
@@ -287,6 +298,8 @@ function entityDetails(e) {
     h += `<div class="section"><div class="section-title">Markt${tradeShip ? ' · handelt mit ' + esc(tradeShip.name) : ''}</div>${marketTable(e, tradeShip)}</div>`;
   }
   const myDocked = dockedHere.find((s) => state.selected?.kind === 'ship' && s.id === state.selected.id) || dockedHere[0];
+  if (e.faction && e.kind === 'planet') h += `<div class="muted small-note">${repLine(e.faction)}</div>`;
+  if (m && (e.kind === 'planet' || m.strategy === 'shipyard')) h += questBoardSection(e, myDocked);
   if (m?.strategy === 'shipyard') h += shipyardSection(e, myDocked);
   if (e.type === 'hub') h += hubSection(e, myDocked) + governorSection(myDocked);
   if (m) h += propertySection(e);
@@ -376,16 +389,26 @@ det.addEventListener('click', (ev) => {
     case 'qdel': cmd('queueRemove', { ship: d.ship, qid: Number(d.qid) }); break;
     case 'clearWarn': cmd('clearWarn', { ship: d.ship }); break;
     case 'refuel': cmd('refuel', { ship: d.ship }); break;
+    case 'questAccept': cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); break;
+    case 'flagship':
+      if (d.ship && state.ships.get(d.ship)?.queue?.some((c) => c.t === 'route') && !confirm('Das Hauptschiff fährt keine Routen. Routenbefehle aus der Queue entfernen?')) break;
+      cmd('flagship', { ship: d.ship || null });
+      break;
     case 'alm': openAlmanac(d.good); break;
     case 'jettison': if (confirm(`${GOODS[d.good].name} wirklich abwerfen?`)) cmd('jettison', { ship: d.ship, good: d.good }); break;
     case 'trade': cmd('trade', { ship: d.ship, target: d.ent, good: d.good, dir: d.dir, amount: d.amt }); break;
     case 'buyShip': cmd('buyShip', { target: d.ent, index: Number(d.idx) }); break;
+    case 'yardOrder': {
+      const t = $('orderType')?.value;
+      if (t && confirm(`${SHIP_TYPES[t].name} bestellen? Die Anzahlung wird sofort fällig und nicht erstattet.`)) cmd('yardOrder', { target: d.ent, type: t });
+      break;
+    }
     case 'upgrade': cmd('upgrade', { ship: d.ship, line: d.line }); break;
     case 'buyModule': cmd('buyModule', { ship: d.ship, module: d.module }); break;
     case 'removeModule': cmd('removeModule', { ship: d.ship, module: d.module }); break;
     case 'sellShip': if (confirm('Schiff wirklich verkaufen?')) cmd('sellShip', { ship: d.ship }); break;
     case 'buyLicense': cmd('buyLicense', { kind: d.kind }); break;
-    case 'buyFactionShip': cmd('buyFactionShip', { target: d.ent }); break;
+    case 'buyFactionShip': cmd('buyFactionShip', { target: d.ent, index: Number(d.idx || 0) }); break;
     case 'fav': cmd('favorite', { target: d.ent, on: !state.favorites[d.ent] }); break;
     case 'selone': state.selection.clear(); bus.select({ kind: 'ship', id: d.ship }); break;
     case 'stopAll': cmd('stop', { ships: selectedShips().map((s) => s.id) }); break;

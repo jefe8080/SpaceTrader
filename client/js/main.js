@@ -3,6 +3,7 @@ import { socket } from './net.js';
 import { loadAssets } from './assets.js';
 import { initRenderer, render, screenToWorld, pickAt, viewMode, ZOOM_PRESETS, ZOOM_MIN, ZOOM_MAX } from './render.js';
 import * as ui from './ui/index.js';
+import { sfx } from './audio.js';
 
 await loadAssets();
 const canvas = document.getElementById('view');
@@ -41,6 +42,7 @@ socket.on('welcome', (d) => {
 });
 socket.on('ships', (d) => {
   state.credits = d.credits;
+  state.time = d.t;
   const now = performance.now();
   const seen = new Set();
   for (const c of d.ships) {
@@ -62,7 +64,8 @@ socket.on('ships', (d) => {
   ui.scheduleRender();
 });
 socket.on('me', (d) => {
-  Object.assign(state, { stopLoss: d.stopLoss, groups: d.groups, favorites: d.favorites, pilot: d.pilot, governor: d.governor, faction: d.faction });
+  Object.assign(state, { stopLoss: d.stopLoss, groups: d.groups, favorites: d.favorites, pilot: d.pilot, governor: d.governor, faction: d.faction, flagshipAt: d.flagshipAt,
+    xp: d.xp, level: d.level, quest: d.quest, questLock: d.questLock, rep: d.rep });
   ui.scheduleRender(true);
 });
 socket.on('routes', (list) => {
@@ -109,13 +112,22 @@ socket.on('markets', (upd) => {
   }
   ui.scheduleRender(true);
 });
-socket.on('log', ({ ship, msg }) => ui.addLog(ship, msg));
+socket.on('log', ({ ship, id, msg }) => {
+  ui.addLog(ship, msg);
+  // Geräusche nur für gewählte Schiffe und das Hauptschiff, sonst klingelt jede Route
+  const s = state.ships.get(id);
+  if (!s || !(s.main || state.selection.has(id) || state.selected?.id === id)) return;
+  if (msg.startsWith('Gekauft') || msg.startsWith('Geladen')) sfx('buy');
+  else if (msg.startsWith('Verkauft') || msg.startsWith('Eingelagert')) sfx('sell');
+  else if (msg.startsWith('Angekommen')) sfx('dock');
+});
+socket.on('sfx', sfx);
 socket.on('stats', (d) => {
   state.stats.set(d.id, d);
   ui.scheduleRender(true);
 });
 setInterval(ui.requestStats, 10000);
-socket.on('errorMsg', (m) => ui.toast(m));
+socket.on('errorMsg', (m) => { ui.toast(m); sfx('error'); });
 socket.on('notice', (m) => ui.toast(m, 'info'));
 socket.on('kicked', (msg) => {
   state.me = null;
@@ -176,7 +188,11 @@ addEventListener('mouseup', (e) => {
   const wasDrag = drag.moved;
   drag = null;
   if (wasDrag || e.target !== canvas || !state.me) return;
-  const hit = pickAt(e.clientX, e.clientY);
+  clickAt(e.clientX, e.clientY, e.ctrlKey || e.metaKey);
+});
+/** Linksklick bzw. Tippen: auswählen, hineinzoomen oder Ziel wählen */
+function clickAt(sx, sy, multi) {
+  const hit = pickAt(sx, sy);
   if (state.pickMode) {
     if (hit?.kind === 'entity') state.pickMode(hit.id);
     return;
@@ -195,42 +211,134 @@ addEventListener('mouseup', (e) => {
     return;
   }
   // Strg+Klick auf eigenes Schiff: Mehrfachauswahl
-  if ((e.ctrlKey || e.metaKey) && hit?.kind === 'ship' && state.ships.get(hit.id)?.owner === state.me.id) {
+  if (multi && hit?.kind === 'ship' && state.ships.get(hit.id)?.owner === state.me.id) {
     if (!state.selection.size && state.selected?.kind === 'ship') state.selection.add(state.selected.id);
     if (state.selection.has(hit.id)) state.selection.delete(hit.id); else state.selection.add(hit.id);
     ui.select({ kind: 'ship', id: hit.id }, { keepSelection: true });
     return;
   }
   ui.select(hit);
-});
+}
 canvas.addEventListener('dblclick', (e) => {
   const hit = pickAt(e.clientX, e.clientY);
   if (hit?.kind === 'ship') state.follow = hit.id;
 });
 canvas.addEventListener('contextmenu', (e) => {
   e.preventDefault();
+  // Android meldet langes Drücken zusätzlich als contextmenu, das übernimmt die Touch-Steuerung
+  if (performance.now() - lastTouch < 1000) return;
+  orderAt(e.clientX, e.clientY, e.shiftKey);
+});
+/** Rechtsklick bzw. langes Drücken: gewählte Schiffe dorthin schicken */
+function orderAt(sx, sy, append) {
   const ships = selectedShips();
-  if (!ships.length) return;
-  const hit = pickAt(e.clientX, e.clientY);
-  const [wx, wy] = screenToWorld(e.clientX, e.clientY);
+  if (!ships.length) return false;
+  const hit = pickAt(sx, sy);
+  const [wx, wy] = screenToWorld(sx, sy);
   state.clickFx = { x: wx, y: wy, t: performance.now() };
   let target = { x: wx, y: wy };
   if (hit?.kind === 'entity') target = state.entities.get(hit.id);
   else if (hit?.kind === 'system') { const sy = state.systems.get(hit.id); target = { x: sy.x + 1500, y: sy.y }; }
   else if (hit?.kind === 'sector') { const s = state.sectors.get(hit.id); target = s.hubPos ? { x: s.hubPos.x + 400, y: s.hubPos.y } : { x: s.bh.x + 3000, y: s.bh.y }; }
-  ui.orderShips(ships, target, e.shiftKey);
-});
+  ui.orderShips(ships, target, append);
+  return true;
+}
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
-  const [wx, wy] = screenToWorld(e.clientX, e.clientY);
+  zoomAt(e.clientX, e.clientY, cam.zoom * Math.exp(-e.deltaY * 0.0015));
+}, { passive: false });
+/** Zoomen mit festem Bildschirmpunkt (sofern keinem Schiff gefolgt wird) */
+function zoomAt(sx, sy, zoom) {
+  const [wx, wy] = screenToWorld(sx, sy);
   camAnim = null;
-  cam.zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, cam.zoom * Math.exp(-e.deltaY * 0.0015)));
+  cam.zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom));
   if (!state.follow) {
-    const [nx, ny] = screenToWorld(e.clientX, e.clientY);
+    const [nx, ny] = screenToWorld(sx, sy);
     cam.x += wx - nx;
     cam.y += wy - ny;
   }
+}
+
+// ---------------- Touch (Tablet) ----------------
+// 1 Finger: Karte verschieben, Tippen = auswählen, Doppeltippen = Schiff folgen,
+// langes Drücken = gewählte Schiffe schicken. 2 Finger: Pinch-Zoom und verschieben.
+const LONG_PRESS_MS = 500, TAP_SLOP = 10;
+let lastTouch = 0;
+let touch = null;   // { mode: 'one'|'pinch', ... }
+let lastTap = null; // { x, y, t } für Doppeltippen
+const touchPts = (e) => [...e.touches].map((t) => ({ x: t.clientX, y: t.clientY }));
+function startTouch(e) {
+  const pts = touchPts(e);
+  clearTimeout(touch?.timer);
+  if (pts.length === 1) {
+    const p = pts[0];
+    touch = { mode: 'one', x: p.x, y: p.y, cx: cam.x, cy: cam.y, moved: false, long: false };
+    touch.timer = setTimeout(() => {
+      if (!touch || touch.mode !== 'one' || touch.moved || !state.me || state.pickMode) return;
+      touch.long = true;
+      if (orderAt(touch.x, touch.y, false)) navigator.vibrate?.(30);
+    }, LONG_PRESS_MS);
+  } else if (pts.length >= 2) {
+    const [a, b] = pts;
+    touch = { mode: 'pinch', d: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)), z: cam.zoom, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
+  } else touch = null;
+}
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  lastTouch = performance.now();
+  // dritter Finger o. ä.: Geste abbrechen und neu aufsetzen
+  if (touch?.mode === 'one' && e.touches.length > 1) touch.moved = true;
+  startTouch(e);
 }, { passive: false });
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  lastTouch = performance.now();
+  if (!touch) return;
+  const pts = touchPts(e);
+  if (touch.mode === 'one' && pts.length === 1) {
+    const dx = pts[0].x - touch.x, dy = pts[0].y - touch.y;
+    if (!touch.moved && Math.hypot(dx, dy) > TAP_SLOP && !touch.long) { touch.moved = true; clearTimeout(touch.timer); }
+    if (touch.moved) {
+      camAnim = null;
+      cam.x = touch.cx - dx / cam.zoom;
+      cam.y = touch.cy - dy / cam.zoom;
+      state.follow = null;
+    }
+  } else if (touch.mode === 'pinch' && pts.length >= 2) {
+    const [a, b] = pts;
+    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    // erst um den alten Mittelpunkt zoomen, dann um die Fingerbewegung verschieben
+    zoomAt(touch.mx, touch.my, touch.z * Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)) / touch.d);
+    if (!state.follow) { cam.x -= (mx - touch.mx) / cam.zoom; cam.y -= (my - touch.my) / cam.zoom; }
+    touch.z = cam.zoom;
+    touch.d = Math.max(1, Math.hypot(a.x - b.x, a.y - b.y));
+    touch.mx = mx; touch.my = my;
+  }
+}, { passive: false });
+function endTouch(e) {
+  e.preventDefault();
+  lastTouch = performance.now();
+  const t = touch;
+  if (!t) return;
+  clearTimeout(t.timer);
+  if (e.touches.length) {
+    // ein Finger bleibt nach dem Pinch liegen: als Verschieben weiterführen, kein Tippen
+    startTouch(e);
+    if (touch?.mode === 'one') { touch.moved = true; clearTimeout(touch.timer); }
+    return;
+  }
+  touch = null;
+  if (e.type === 'touchcancel' || t.mode !== 'one' || t.moved || t.long || !state.me) return;
+  const now = performance.now();
+  if (lastTap && now - lastTap.t < 350 && Math.hypot(t.x - lastTap.x, t.y - lastTap.y) < 30) {
+    lastTap = null;
+    const hit = pickAt(t.x, t.y);
+    if (hit?.kind === 'ship') { state.follow = hit.id; return; }
+  } else lastTap = { x: t.x, y: t.y, t: now };
+  clickAt(t.x, t.y, false);
+}
+canvas.addEventListener('touchend', endTouch, { passive: false });
+canvas.addEventListener('touchcancel', endTouch, { passive: false });
 addEventListener('keydown', (e) => {
   if (!state.me || ui.typing()) return;
   if (e.key === 'Escape') {

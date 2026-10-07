@@ -57,7 +57,7 @@ function shipRow(s) {
     <span class="sym">${shipSymbol(s)}</span>
     <img src="${shipSprite(s.type, state.me.color)}" alt="">
     <div class="fi-main">
-      <div class="name">${esc(s.name)} ${warn}<span class="muted type">${def.name} · ${def.cls}</span></div>
+      <div class="name">${s.main ? '<span class="crown" title="Hauptschiff">♛</span> ' : ''}${esc(s.name)} ${warn}<span class="muted type">${def.name} · ${def.cls}</span></div>
       <div class="sub">${statusText(s)}</div>
       <div class="bar"><div style="width:${cargoFill(s) * 100}%"></div></div>
     </div>

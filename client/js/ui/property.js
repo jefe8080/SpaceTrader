@@ -87,7 +87,7 @@ function yardSection(e, prop) {
   const m = e.market;
   const x = prop.upg.extra || 0;
   const classes = e.type === 'bigyard' ? (x ? ['S', 'M', 'L', 'XL'] : ['S', 'M', 'L']) : (x ? ['S', 'M'] : ['S']);
-  const types = Object.entries(SHIP_TYPES).filter(([, d]) => !d.npc && d.cls !== 'F' && classes.includes(d.cls));
+  const types = Object.entries(SHIP_TYPES).filter(([, d]) => !d.npc && !d.faction && classes.includes(d.cls));
   let h = `<div class="sub-title">Werft: Bau auf Befehl (Klassen ${classes.join(', ')})</div>`;
   if (m.building) h += `<div>🔧 Im Bau: <b>${SHIP_TYPES[m.building.type].name}</b> (noch ${m.building.remaining} s)</div>`;
   else {

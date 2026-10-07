@@ -1,4 +1,4 @@
-import { GOODS } from '../../shared/config.js';
+import { GOODS, FLAGSHIP } from '../../shared/config.js';
 import { V, CmdError } from './validate.js';
 import { tradeAction } from './route.js';
 
@@ -32,6 +32,7 @@ const queueCmd = (v, ctx) => {
 
 /** Befehl an Schiff übergeben: ersetzen oder anhängen */
 export function giveOrder(game, ship, cmd, append) {
+  if (cmd.t === 'route' && ship.main) return `${ship.name} ist dein Hauptschiff und fährt keine Routen.`;
   const c = { ...cmd, qid: ++ship.qid };
   if (!append) {
     ship.queue = [c];
@@ -101,6 +102,24 @@ export default {
       const taken = game.shipsOf(player.id).some((s) => s.id !== ship.id && s.name.toLowerCase() === name.toLowerCase());
       if (taken) return 'Diesen Namen trägt schon ein anderes deiner Schiffe.';
       ship.name = name;
+    },
+  },
+  /** Hauptschiff ernennen (ship) oder abberufen (ship = null), 5 min Sperre nach jeder Änderung */
+  flagship: {
+    args: { ship: V.opt(V.ownShip(), null) },
+    run({ game, player }, { ship }) {
+      const wait = (player.flagshipAt ?? -Infinity) + FLAGSHIP.COOLDOWN - game.time;
+      if (wait > 0) return `Das Hauptschiff kannst du erst in ${Math.ceil(wait / 60)} min wieder wechseln.`;
+      const cur = game.shipsOf(player.id).find((s) => s.main);
+      if (cur === ship || (!cur && !ship)) return;
+      if (cur) { cur.main = false; cur.nav = null; game.shipLog(cur, 'Als Hauptschiff abberufen'); }
+      if (ship) {
+        ship.main = true;
+        ship.nav = null; // Weg mit neuer Geschwindigkeit planen
+        ship.queue = ship.queue.filter((c) => c.t !== 'route');
+        game.shipLog(ship, 'Zum Hauptschiff ernannt: Tempo ×4, Verbrauch ×4 pro Sekunde, keine Routen');
+      }
+      player.flagshipAt = game.time;
     },
   },
   jettison: {

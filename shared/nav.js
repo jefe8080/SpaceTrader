@@ -9,15 +9,18 @@ export function inZone(z, x, y) {
   return (lx * lx) / (z.rx * z.rx) + (ly * ly) / (z.ry * z.ry) <= 1;
 }
 
-/** Produkt der Zoneneffekte an einem Punkt: { speed, fuel, sensor } */
-export function zoneEffects(zones, x, y) {
+/**
+ * Produkt der Zoneneffekte an einem Punkt: { speed, fuel, sensor }.
+ * opts.void (Sternenläufer): keine Bremse durch Gravitationsstörungen, halber Sensor-Malus im Nebel.
+ */
+export function zoneEffects(zones, x, y, opts = {}) {
   const out = { speed: 1, fuel: 1, sensor: 1, zones: null };
   for (const z of zones || []) {
     if (!inZone(z, x, y)) continue;
     const t = ZONE_TYPES[z.type];
-    out.speed *= t.speed || 1;
+    if (!(opts.void && (t.speed || 1) < 1)) out.speed *= t.speed || 1;
     out.fuel *= t.fuel || 1;
-    out.sensor *= t.sensor || 1;
+    out.sensor *= opts.void && t.sensor ? 1 - (1 - t.sensor) / 2 : t.sensor || 1;
     (out.zones ||= []).push(z);
   }
   return out;

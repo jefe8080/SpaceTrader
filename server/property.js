@@ -1,6 +1,6 @@
 import { RECIPES, PLANET_TYPES, PROP_UPGRADES, FIXED, SHIP_TYPES, buyPrice, sellPrice,
   priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref } from '../shared/config.js';
-import { stat } from './markets.js';
+import { stat, applyLevel } from './markets.js';
 import { addToBuckets } from './stats.js';
 
 /**
@@ -21,17 +21,14 @@ export function applyProperty(game, e, prop) {
   e.ownerName = p?.faction?.name || p?.name || '?';
   e.ownerColor = p?.faction?.color || p?.color || null;
   const u = prop.upg || {};
-  for (const s of Object.values(m.goods)) {
-    s.baseCap ??= s.cap;
-    s.cap = Math.round(s.baseCap * (1 + PROP_UPGRADES.storage.per * (u.storage || 0)));
-  }
+  m.storageMul = 1 + PROP_UPGRADES.storage.per * (u.storage || 0);
   m.boost = 1 + PROP_UPGRADES.speed.per * (u.speed || 0);
   m.yieldBoost = 1 + PROP_UPGRADES.yield.per * (u.yield || 0);
   // Zusatzproduktion
   if (e.kind === 'planet') {
     for (const g of prop.extras) {
-      if (!m.goods[g]) m.goods[g] = { role: 'produce', rate: 0.3 * (e.size || 1), cap: 600, baseCap: 600, stock: 0, mod: 1 };
-      else if (m.goods[g].role !== 'produce') Object.assign(m.goods[g], { role: 'produce', rate: 0.3 * (e.size || 1) });
+      if (!m.goods[g]) m.goods[g] = { role: 'produce', rate: 0.3 * (e.size || 1), baseRate: 0.3 * (e.size || 1), cap: 600, baseCap: 600, stock: 0, mod: 1 };
+      else if (m.goods[g].role !== 'produce') Object.assign(m.goods[g], { role: 'produce', rate: 0.3 * (e.size || 1), baseRate: 0.3 * (e.size || 1) });
     }
   } else if (m.strategy === 'factory') {
     m.extraRecipes = [...prop.extras];
@@ -41,6 +38,9 @@ export function applyProperty(game, e, prop) {
       for (const [g, n] of Object.entries(r.out)) if (!m.goods[g]) m.goods[g] = { role: 'produce', rate: n / r.time, cap: n * 300, baseCap: n * 300, stock: 0, mod: 1 };
     }
   }
+  // Lager: Besitz-Upgrade, bei Planeten zusätzlich das Planetenlevel
+  if (e.kind === 'planet') applyLevel(e);
+  else for (const s of Object.values(m.goods)) { s.baseCap ??= s.cap; s.cap = Math.round(s.baseCap * m.storageMul); }
   m.rev = (m.rev || 0) + 1; // Struktur geändert -> Clients bekommen den ganzen Markt neu
 }
 
@@ -59,7 +59,7 @@ export function tickOwnedPlanet(game, e, prop, dt) {
   const def = PLANET_TYPES[e.type];
   for (const [g, s] of Object.entries(m.goods)) {
     if (s.role !== 'consume') continue;
-    const baseRate = (def.consume[g] || s.rate) * (e.size || 1);
+    const baseRate = s.rate; // enthält Größe und Planetenlevel
     const sv = prop.fixed[g] ?? FIXED.DEFAULT;
     const { pmin, pmax } = priceWindow(g, s.mod || 1);
     const perSec = fixedConsumptionPerHour(fixedRref(baseRate, pmin, pmax), sv, pmin, pmax) / 3600;
@@ -113,5 +113,5 @@ export function yardClasses(e, prop) {
   if (e.type === 'bigyard') return x > 0 ? ['S', 'M', 'L', 'XL'] : ['S', 'M', 'L'];
   return x > 0 ? ['S', 'M'] : ['S'];
 }
-export const buildableTypes = (e, prop) => Object.entries(SHIP_TYPES).filter(([, d]) => !d.npc && d.cls !== 'F' && yardClasses(e, prop).includes(d.cls)).map(([t]) => t);
+export const buildableTypes = (e, prop) => Object.entries(SHIP_TYPES).filter(([, d]) => !d.npc && !d.faction && yardClasses(e, prop).includes(d.cls)).map(([t]) => t);
 

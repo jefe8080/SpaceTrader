@@ -1,15 +1,17 @@
 import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, FUEL, GOVERNOR_LICENSES, shipStats, freeFor, holdOf, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
-  cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, slotPrice } from '../shared/config.js';
+  cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, slotPrice, supplyLoad, targetOf,
+  XP, pilotLevel, pilotTitle, giverLevel, GIVER_TRADE_CR, factionRank, RANK_NAMES, FACTIONS, hasAbility, holdFor } from '../shared/config.js';
+import { refreshBoards, boardSectors, isGiver, questProgress, exploreCells, exploreZone } from './quests.js';
 import { World } from './world.js';
 import { hexAt, hexKey } from '../shared/hex.js';
 import { planPath, zoneEffects } from '../shared/nav.js';
-import { tickMarket, stat, missingInput } from './markets.js';
+import { tickMarket, stat, missingInputs, applyLevel } from './markets.js';
 import { updateShip, setWarn } from './ships.js';
 import { Store } from './db.js';
 import { addToBuckets, bucketOf, summary, sumWindow, balance, SHIP_STATS } from './stats.js';
 import { applyProperty, tickOwnedPlanet, strangerBlocked, payForDelivery, sellToSupplier, propBook } from './property.js';
 
-export const WORLD_GEN_VERSION = 2; // ändert sich die Generierung inkompatibel, wird die Welt neu erzeugt
+export const WORLD_GEN_VERSION = 3; // ändert sich die Generierung inkompatibel, wird die Welt neu erzeugt
 const ALL_TABLES = ['players', 'ships', 'sectors', 'entities', 'markets', 'routes', 'favorites', 'discoveries', 'ownership',
   'market_stats', 'ship_stats', 'route_stats', 'meta'];
 
@@ -25,10 +27,13 @@ export class Game {
     this.shipStats = new Map();  // Schiff-ID -> Ringpuffer
     this.routeStats = new Map(); // Routen-ID -> Ringpuffer
     this.ownership = new Map();  // Entity-ID -> Besitz
-    this.counters = { player: 0, ship: 0, route: 0, group: 0 };
+    this.counters = { player: 0, ship: 0, route: 0, group: 0, quest: 0 };
+    this.boardAcc = 0;
     this.econAcc = 0;
+    this.npcBusy = new Set();    // "Markt:Ware", für die ein NPC-Schiff unterwegs ist (Ziel oder Quelle)
+    this.activity = new Map();   // Sektor -> letzte Spielzeit mit einem fliegenden Spielerschiff
     this.newDiscoveries = []; // [player, kind, key] seit dem letzten Speichern
-    this.listeners = { reveal: [], log: [], routes: [], player: [], notice: [], entity: [] };
+    this.listeners = { reveal: [], log: [], routes: [], player: [], notice: [], entity: [], sfx: [] };
     if (!this.load()) {
       this.world = new World(seed ?? ((Math.random() * 2 ** 31) | 0));
       this.world.ensureSector(0, 0);
@@ -75,6 +80,7 @@ export class Game {
       if (p) p.favorites[r.entity] = r.data;
     }
     for (const r of st.loadAll('ships')) this.ships.set(r.id, r.data);
+    for (const s of this.ships.values()) if (s.owner === NPC_OWNER) this.markNpc(s, true);
     for (const r of st.loadAll('routes')) this.routes.set(r.id, r.data);
     for (const r of st.loadAll('ownership')) {
       const e = this.world.entities.get(r.entity);
@@ -148,7 +154,73 @@ export class Game {
   playerList(online = new Set()) {
     return [...this.players.values()]
       .sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0))
-      .map((p) => ({ id: p.id, name: p.name, color: p.color, online: online.has(p.id) }));
+      .map((p) => ({ id: p.id, name: p.name, color: p.color, online: online.has(p.id), level: pilotLevel(p.xp), title: pilotTitle(p.xp) }));
+  }
+
+  // ---------- Erfahrung, Level, Ruf ----------
+  /** XP gutschreiben; Aufstieg wird gemeldet. Während der Spielererstellung gibt es keine XP. */
+  addXp(p, n) {
+    if (!n || this.noXp) return;
+    const before = pilotLevel(p.xp);
+    p.xp = (p.xp || 0) + n;
+    const after = pilotLevel(p.xp);
+    if (after > before) {
+      this.emit('notice', p, `Pilotenlevel ${after} erreicht${pilotTitle(p.xp) ? ': ' + pilotTitle(p.xp) : ` (Pilotenlizenz ${after} jetzt kaufbar)`}`);
+      this.emit('sfx', p, 'levelUp');
+      this.emit('player', p);
+    }
+  }
+
+  /** XP für Planeten und Werften (Questgeber), Level 0 bis 6 */
+  addGiverXp(e, n) {
+    if (!isGiver(e) || !n) return;
+    const m = e.market;
+    const before = giverLevel(m.qxp);
+    m.qxp = (m.qxp || 0) + n;
+    const after = giverLevel(m.qxp);
+    if (after > before) this.onGiverLevel(e, after);
+  }
+  /** Wirkung der Level von Planeten und Werften */
+  onGiverLevel(e, lvl) {
+    e.market.lvl = lvl;
+    if (e.kind === 'planet') applyLevel(e);
+    const prop = this.ownership.get(e.id);
+    if (prop) this.emit('notice', this.players.get(prop.player), `${e.name} erreicht Level ${lvl}`);
+    this.emit('entity', e);
+  }
+
+  addRep(p, faction, n) {
+    p.rep ||= {};
+    const before = factionRank(p.rep[faction]);
+    p.rep[faction] = (p.rep[faction] || 0) + n;
+    const after = factionRank(p.rep[faction]);
+    if (after > before) {
+      this.emit('notice', p, `${FACTIONS[faction].name}: Rang ${after} (${RANK_NAMES[after]})`);
+      this.emit('sfx', p, 'rankUp');
+    }
+  }
+
+  /** Einstandspreis je Ware mitführen; manueller Handel des Hauptschiffs bringt XP (gedeckelt je Stunde) */
+  tradeBasis(ship, good, n, total, dir) {
+    if (ship.owner === NPC_OWNER || !n) return;
+    ship.basis ||= {};
+    if (dir === 'buy') {
+      const have = (ship.cargo[good] || 0) - n;
+      ship.basis[good] = ((ship.basis[good] || 0) * Math.max(0, have) + total) / Math.max(1, have + n);
+      return;
+    }
+    const profit = total - n * (ship.basis[good] || 0);
+    if (!ship.cargo[good]) delete ship.basis[good];
+    if (!ship.main || profit <= 0) return;
+    const p = this.players.get(ship.owner);
+    const hour = Math.floor(this.time / 3600);
+    if (p.tradeXp?.hour !== hour) p.tradeXp = { hour, n: 0, acc: p.tradeXp?.acc || 0 };
+    p.tradeXp.acc += profit;
+    let xp = Math.floor(p.tradeXp.acc / XP.TRADE_CR);
+    p.tradeXp.acc -= xp * XP.TRADE_CR;
+    xp = Math.min(xp, XP.TRADE_MAX_H - p.tradeXp.n);
+    if (xp > 0) { p.tradeXp.n += xp; this.addXp(p, xp); }
+    if (p.tradeXp.n >= XP.TRADE_MAX_H) p.tradeXp.acc = 0;
   }
 
   findPlayerByName(name) {
@@ -162,6 +234,7 @@ export class Game {
     const p = { id, name, color: PLAYER_COLORS[(this.counters.player - 1) % PLAYER_COLORS.length], credits: WORLD.START_CREDITS,
       revealed: new Set(), favorites: {}, known: newKnown(), groups: [], stopLoss: 0, pilot: 1, createdAt: Date.now(), lastSeen: Date.now() };
     this.players.set(id, p);
+    this.noXp = true;
     // Startwissen: Startsystem aufgedeckt, alle Systeme und Sondergebiete des Startsektors bekannt
     const home = this.world.sectors.get('0,0');
     const startSys = home.systems.find((x) => x.start);
@@ -172,6 +245,9 @@ export class Game {
     for (const sy of home.systems) this.discover(p, 'system', sy.id);
     for (const z of home.zones) this.discover(p, 'zone', z.id);
     this.spawnShip(p, 'spatz', this.world.entities.get('origin_yard'));
+    this.discover(p, 'visit', home.key);
+    home.firstVisit ||= 'start';
+    this.noXp = false;
     return p;
   }
 
@@ -245,6 +321,7 @@ export class Game {
       }
     }
     if (!newCells.length) return;
+    if (p.quest?.type === 'explore') exploreCells(this, p, newCells);
     const entities = [];
     for (const k of newCells) {
       for (const id of this.world.entitiesInCell(k)) {
@@ -278,7 +355,11 @@ export class Game {
     if (kind === 'recipe') out.recipes = [key];
     if (kind === 'ship') out.ships = [key];
     if (kind === 'module') out.modules = [key];
-    this.emit('reveal', p, out);
+    // Almanach: neue Einträge bringen XP
+    if (kind === 'recipe') this.addXp(p, XP.RECIPE);
+    if (kind === 'ship') this.addXp(p, XP.SHIP);
+    if (kind === 'module') this.addXp(p, XP.MODULE);
+    if (Object.keys(out).length) this.emit('reveal', p, out);
     return true;
   }
 
@@ -326,6 +407,7 @@ export class Game {
       if (e.market.building) this.discover(p, 'ship', e.market.building.type);
       for (const m of e.market.modules || []) this.discover(p, 'module', m);
     }
+    if (p) questProgress(this, p, ship);
     const tank = this.shipTank(ship);
     if (tank > 0 && ship.autoRefuel > 0 && ship.fuel < tank * ship.autoRefuel && e.market?.goods.shipfuel && canBuyFrom(e.market.goods.shipfuel)) {
       this.refuel(ship, e);
@@ -363,10 +445,21 @@ export class Game {
     const p = this.players.get(ship.owner);
     if (!p) return;
     for (const { sector, entities } of this.world.ensureAround(ship.x, ship.y)) this.onSectorCreated(sector, entities);
-    const fx = zoneEffects(this.world.zonesNear(ship.x, ship.y), ship.x, ship.y);
-    this.revealAround(p, ship.x, ship.y, WORLD.SENSOR_RANGE * fx.sensor);
+    const fx = zoneEffects(this.world.zonesNear(ship.x, ship.y), ship.x, ship.y, { void: hasAbility(ship, 'void') });
+    this.revealAround(p, ship.x, ship.y, shipStats(ship).sensor * fx.sensor);
     const h = hexAt(ship.x, ship.y);
-    if (this.world.sectors.has(hexKey(h.q, h.r))) this.discover(p, 'sector', hexKey(h.q, h.r));
+    const key = hexKey(h.q, h.r);
+    this.activity.set(key, this.time);
+    const sec = this.world.sectors.get(key);
+    if (sec) {
+      this.discover(p, 'sector', key);
+      // Erster Besuch: Erstentdeckung weltweit 60 XP, sonst 20 XP
+      if (this.discover(p, 'visit', key)) {
+        this.addXp(p, sec.firstVisit ? XP.SECTOR_VISIT : XP.SECTOR_FIRST);
+        if (!sec.firstVisit) { sec.firstVisit = p.id; this.emit('notice', p, `Erstentdeckung: Sektor ${sec.name}`); }
+      }
+    }
+    if (p.quest?.type === 'explore' && fx.zones) exploreZone(this, p, fx.zones);
     for (const sy of this.world.systemsNear(ship.x, ship.y)) {
       if (p.known.system.has(sy.id)) continue;
       if (Math.hypot(sy.x - ship.x, sy.y - ship.y) <= WORLD.SYSTEM_DETECT) {
@@ -444,11 +537,19 @@ export class Game {
         const e = this.world.entities.get(prop.entity);
         if (e?.kind === 'planet') tickOwnedPlanet(this, e, prop, this.econAcc);
       }
+      const propSectors = new Set([...this.ownership.keys()].map((id) => this.world.entities.get(id)?.sector));
       for (const e of this.world.entities.values()) {
         tickMarket(e, this.econAcc, this.time, this);
-        if (e.market && SUPPLIED.has(e.market.strategy)) this.checkSupply(e);
+        if (!e.market) continue;
+        if (SUPPLIED.has(e.market.strategy)) this.checkSupply(e);
+        else if (e.market.strategy === 'planet' && (propSectors.has(e.sector) || this.time - (this.activity.get(e.sector) ?? -Infinity) < SUPPLY.ACTIVITY)) this.checkHaul(e);
       }
       this.econAcc = 0;
+    }
+    this.boardAcc += dt;
+    if (this.boardAcc >= 10) {
+      this.boardAcc = 0;
+      refreshBoards(this, boardSectors(this, this.time - SUPPLY.ACTIVITY));
     }
   }
 
@@ -484,7 +585,7 @@ export class Game {
       if (!canBuyFrom(slot)) return { n: 0, reason: 'Ware wird hier nicht verkauft' };
       const floor = opts.auto ? this.stopLossFor(p, opts.route) : 0;
       const free = freeFor(ship, good);
-      if (free <= 0 && holdOf(good) !== 'cargo' && !shipStats(ship)[holdOf(good)]) {
+      if (free <= 0 && holdFor(ship, good) !== 'cargo' && !shipStats(ship)[holdFor(ship, good)]) {
         return { n: 0, reason: holdOf(good) === 'hazard' ? 'Gefahrgut braucht eine Geschirmte Kammer' : 'Passagiere brauchen eine Passagierkabine' };
       }
       const max = Math.min(amount, free, Math.floor(slot.stock));
@@ -509,8 +610,9 @@ export class Game {
       if (!canSellTo(slot)) return { n: 0, reason: 'Ware wird hier nicht angekauft' };
       const have = ship.cargo[good] || 0;
       const max = Math.min(amount, have, Math.floor(slot.cap - slot.stock));
+      const bonus = hasAbility(ship, 'trader') ? 1.05 : 1;
       while (n < max) {
-        const pr = sellPrice(good, slot);
+        const pr = sellPrice(good, slot) * bonus;
         if (limit && pr < limit) break;
         p.credits += pr; slot.stock += 1; total += pr; n++;
       }
@@ -521,7 +623,14 @@ export class Game {
     }
     stat(e.market, this.time, dir === 'buy' ? 'o' : 'i', good, n);
     this.shipLog(ship, `${dir === 'buy' ? 'Gekauft' : 'Verkauft'}: ${n} ${GOODS[good].name} für ${Math.round(total)} Cr bei ${e.name}`);
+    this.afterTrade(ship, e, good, n, total, dir);
     return { n, total };
+  }
+
+  /** Nach jedem Handel mit Fremden: Einstandspreis bzw. Hauptschiff-XP, wenig XP für den Questgeber aus dem Umsatz */
+  afterTrade(ship, e, good, n, total, dir) {
+    this.tradeBasis(ship, good, n, total, dir);
+    this.addGiverXp(e, total / GIVER_TRADE_CR);
   }
 
   /** Eigenes Lager: kostenlos laden und einlagern */
@@ -554,7 +663,8 @@ export class Game {
     const p = this.players.get(ship.owner);
     const owner = this.players.get(prop.player);
     const slot = e.market.goods[good];
-    const c = prop.customs || 0;
+    const trader = hasAbility(ship, 'trader');
+    const c = trader ? 0 : prop.customs || 0;
     let n = 0, total = 0;
     if (dir === 'buy') {
       if (!canBuyFrom(slot)) return { n: 0, reason: 'Ware wird hier nicht verkauft' };
@@ -572,7 +682,7 @@ export class Game {
       const max = Math.min(amount, have, Math.floor(slot.cap - slot.stock));
       const floor = owner.stopLoss || 0;
       while (n < max) {
-        const pr = sellPrice(good, slot) * (1 - c);
+        const pr = sellPrice(good, slot) * (1 - c) * (trader ? 1.05 : 1);
         if (limit && pr < limit) break;
         if (owner.credits - pr < floor || owner.credits < pr) break;
         owner.credits -= pr; p.credits += pr; slot.stock += 1; total += pr; n++;
@@ -585,44 +695,78 @@ export class Game {
     if (!n) return { n: 0, reason: dir === 'buy' ? 'nicht möglich' : 'Lager voll' };
     stat(e.market, this.time, dir === 'buy' ? 'o' : 'i', good, n);
     this.shipLog(ship, `${dir === 'buy' ? 'Gekauft' : 'Verkauft'}: ${n} ${GOODS[good].name} für ${Math.round(total)} Cr bei ${e.name}${c ? ` (Zoll ${Math.round(c * 100)} %)` : ''}`);
+    this.afterTrade(ship, e, good, n, total, dir);
     return { n, total };
   }
 
   /** Besitz-Eintrag eines Objekts (oder undefined) */
   propertyOf(e) { return this.ownership.get(e.id); }
 
-  // ---------- Automatische Versorgung ----------
+  // ---------- NPC-Verkehr: Versorger und Abholer ----------
+  /** Belegung "Markt:Ware" eines NPC-Schiffs setzen oder freigeben (höchstens ein NPC-Schiff je Markt und Ware) */
+  markNpc(ship, on) {
+    const c = ship.queue?.[0];
+    if (c?.t !== 'supply') return;
+    for (const k of [c.stationId + ':' + c.good, c.sourceId + ':' + c.good]) on ? this.npcBusy.add(k) : this.npcBusy.delete(k);
+  }
+  npcFree(e, good) { return !this.npcBusy.has(e.id + ':' + good); }
+
+  /** Station: Versorger für fehlende Zutaten, je Ware höchstens einer gleichzeitig */
   checkSupply(e) {
     const m = e.market;
-    const prop = this.ownership.get(e.id);
-    if (prop?.mode === 'private') return; // privat: keine NPC-Versorger
-    const sup = m.supply;
-    if (sup?.shipId && this.ships.has(sup.shipId)) return;      // Versorger unterwegs
-    if (sup?.until && this.time < sup.until) return;            // Abklingzeit
-    const good = missingInput(m);
-    if (!good) { m.supply = null; return; }
-    const src = this.findSource(e, good);
-    if (!src) {
-      m.supply = { state: 'nosource', good, until: this.time + SUPPLY.RETRY_NO_SOURCE };
-      return;
-    }
-    const ship = this.spawnNpcShip(e);
-    ship.queue = [{ t: 'supply', stationId: e.id, sourceId: src.id, good, phase: 'toSource' }];
-    m.supply = { state: 'active', good, shipId: ship.id, sourceId: src.id };
+    if (this.ownership.get(e.id)?.mode === 'private') return; // privat: keine NPC-Versorger
+    const wants = missingInputs(m);
+    if (!wants.length) { if (m.supply?.state !== 'active') m.supply = null; return; }
+    this.sendNpc(e, wants, false);
   }
 
-  /** Nächstgelegene Quelle im Umkreis: Produzent mit Vorrat oder passendes Asteroidenfeld */
-  findSource(e, good) {
+  /** Planet: Abholer für Verbrauchsgüter unter dem Ziel-Füllstand, geholt bei Produzenten über dem Ziel */
+  checkHaul(e) {
+    const m = e.market;
+    if (this.ownership.get(e.id)?.mode === 'private') return;
+    const wants = Object.entries(m.goods).filter(([, s]) => s.role === 'consume' && s.stock / s.cap < targetOf(s) - SUPPLY.MARGIN / 2)
+      .sort(([, a], [, b]) => a.stock / a.cap - targetOf(a) - (b.stock / b.cap - targetOf(b))).map(([g]) => g);
+    if (wants.length) this.sendNpc(e, wants, true);
+  }
+
+  /** Schickt höchstens ein NPC-Schiff für die erste Ware, die frei, nicht in Abklingzeit und beschaffbar ist */
+  sendNpc(e, goods, haul) {
+    const m = e.market;
+    m.supCd ||= {};
+    for (const good of goods) {
+      if (!this.npcFree(e, good) || (m.supCd[good] || 0) > this.time) continue;
+      const amount = supplyLoad(m.goods[good] || { cap: 0, stock: 0 });
+      if (!amount) continue;
+      const src = this.findSource(e, good, haul);
+      if (!src) {
+        m.supCd[good] = this.time + SUPPLY.RETRY_NO_SOURCE;
+        if (!haul && m.supply?.state !== 'active') m.supply = { state: 'nosource', good };
+        continue;
+      }
+      const ship = this.spawnNpcShip(e, haul);
+      ship.queue = [{ t: 'supply', stationId: e.id, sourceId: src.id, good, amount, phase: 'toSource', haul }];
+      this.markNpc(ship, true);
+      m.supply = { state: 'active', good, shipId: ship.id, sourceId: src.id };
+      return;
+    }
+  }
+
+  /**
+   * Nächstgelegene Quelle im Umkreis.
+   * Versorger: Produzent mit Vorrat oder passendes Asteroidenfeld. Abholer: Fabrik oder Extraktor mit Output über dem Ziel.
+   */
+  findSource(e, good, haul = false) {
     let best = null, bestD = Infinity;
     for (const s of this.world.sectorEntities(e.sector)) {
       if (s === e || s.kind === 'wormhole') continue;
       const d = Math.hypot(s.x - e.x, s.y - e.y);
       if (d > SUPPLY.RANGE || d >= bestD) continue;
       if (s.kind === 'belt') {
-        if (BELT_TYPES[s.type].good !== good) continue;
+        if (haul || BELT_TYPES[s.type].good !== good || !this.npcFree(s, good)) continue;
       } else {
         const sl = s.market?.goods[good];
-        if (!sl || !canBuyFrom(sl) || sl.stock < SUPPLY.MIN_SOURCE_STOCK) continue;
+        if (!sl || !canBuyFrom(sl) || sl.stock < SUPPLY.MIN_SOURCE_STOCK || !this.npcFree(s, good)) continue;
+        if (haul && (sl.role !== 'produce' || !['factory', 'extractor'].includes(s.market.strategy) || sl.stock / sl.cap <= targetOf(sl) + SUPPLY.MARGIN)) continue;
         if (this.ownership.get(s.id)?.mode === 'private') continue;
       }
       best = s;
@@ -631,12 +775,12 @@ export class Game {
     return best;
   }
 
-  spawnNpcShip(station) {
+  spawnNpcShip(station, haul = false) {
     const id = 's' + ++this.counters.ship;
     const a = Math.random() * Math.PI * 2;
     const d = station.radius + WORLD.DOCK_OFFSET;
     const ship = {
-      id, owner: NPC_OWNER, type: SUPPLY.SHIP_TYPE, name: `Versorger ${station.name}`,
+      id, owner: NPC_OWNER, type: SUPPLY.SHIP_TYPE, name: `${haul ? 'Abholer' : 'Versorger'} ${station.name}`,
       x: station.x + Math.cos(a) * d, y: station.y + Math.sin(a) * d, angle: a, vx: 0, vy: 0,
       cargo: {}, queue: [], state: 'docked', dockedAt: station.id, log: [],
     };
@@ -644,8 +788,10 @@ export class Game {
     return ship;
   }
 
+  /** Ablieferung: nur, was ins Lager passt (die Ladung wurde passend bemessen) */
   finishSupply(ship, station) {
     const m = station.market;
+    const c = ship.queue[0];
     let delivered = 0;
     const prop = this.ownership.get(station.id);
     for (const [g, n] of Object.entries(ship.cargo)) {
@@ -657,11 +803,14 @@ export class Game {
       delivered += k;
       stat(m, this.time, 'i', g, k);
     }
-    m.supply = { state: 'cooldown', good: ship.queue[0]?.good, delivered, until: this.time + SUPPLY.COOLDOWN };
+    m.supCd ||= {};
+    if (c?.good) m.supCd[c.good] = this.time + SUPPLY.COOLDOWN;
+    if (!c?.haul) m.supply = { state: 'cooldown', good: c?.good, delivered };
     this.removeShip(ship);
   }
 
   removeShip(ship) {
+    if (ship.owner === NPC_OWNER) this.markNpc(ship, false);
     this.ships.delete(ship.id);
     this.shipStats.delete(ship.id);
   }
@@ -686,7 +835,7 @@ export class Game {
 /** Strategien, die bei fehlenden Zutaten NPC-Versorger losschicken */
 const SUPPLIED = new Set(['factory', 'extractor', 'shipyard']);
 
-const newKnown = () => ({ system: new Set(), sector: new Set(), zone: new Set(), wh: new Set(), recipe: new Set(), ship: new Set(), module: new Set() });
+const newKnown = () => ({ system: new Set(), sector: new Set(), zone: new Set(), wh: new Set(), recipe: new Set(), ship: new Set(), module: new Set(), visit: new Set() });
 
 /** Almanach-Schlüssel: st:<Stationstyp>, pl:<Planetentyp>, bt:<Feldtyp> */
 export function recipeKey(e) {

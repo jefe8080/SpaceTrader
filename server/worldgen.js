@@ -1,5 +1,5 @@
 import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, ZONE_TYPES, TAG_FACTOR, GOODS, LOCATION, distancePremium, premiumFactor, canSellTo,
-  FACTIONS, FACTION, MODULES, STORAGE, SHIP_TYPES } from '../shared/config.js';
+  FACTIONS, FACTION, MODULES, STORAGE, SHIP_TYPES, factionShips } from '../shared/config.js';
 import { hexCenter, hexKey, hexNeighbors } from '../shared/hex.js';
 import { createMarket } from './markets.js';
 
@@ -378,7 +378,7 @@ function populateFactionSystem(sys, r, nextId, withYard) {
       const k = Math.round(pool.length * FACTION.MODULE_SHARE);
       e.market.modules = [...pool].sort(() => r() - 0.5).slice(0, k);
     }
-    if (type === 'factionyard') e.market.forSale = [{ type: F.ship, price: SHIP_TYPES[F.ship].price, currency: SHIP_TYPES[F.ship].currency, faction: true }];
+    if (type === 'factionyard') e.market.forSale = factionShips(sys.faction).map((t) => ({ type: t, price: SHIP_TYPES[t].price, currency: SHIP_TYPES[t].currency, faction: true }));
     out.push(e);
   }
   for (let i = 0, nb = between(r, 0, 2); i < nb; i++) {

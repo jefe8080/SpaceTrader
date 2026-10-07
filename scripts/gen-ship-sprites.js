@@ -29,6 +29,19 @@ const SHIPS = {
   f_order:    { len: 114, w: 18, nose: 0.85, wing: { span: 48, sweep: 30, root: 40, tip: 20 }, engines: 2, ring: true, fins: true, hull: ['#f3e5f5', '#4a148c'] },
   f_league:   { len: 112, w: 24, nose: 0.5, wing: { span: 28, sweep: 12, root: 46, tip: 24 }, pods: 4, engines: 4, hull: ['#e8f5e9', '#1b5e20'] },
   f_syndicate: { len: 116, w: 28, nose: 0.35, wing: { span: 34, sweep: 16, root: 50, tip: 30 }, pods: 2, engines: 6, fins: true, hull: ['#ffcdd2', '#3e2723'] },
+  // Fraktionsschiffe L und XL (PRD-2): Silhouette des Gegenstücks, Rumpffarben der Fraktion
+  fl_miners:    { len: 102, w: 25, nose: 0.2, wing: { span: 18, sweep: 4, root: 40, tip: 30 }, pods: 2, engines: 4, drill: true, fins: true, hull: ['#ffe082', '#5d4037'] },
+  fx_miners:    { len: 118, w: 27, nose: 0.3, wing: { span: 28, sweep: 10, root: 54, tip: 30 }, pods: 4, engines: 5, drill: true, ring: true, hull: ['#ffd54f', '#4e342e'] },
+  fl_tech:      { len: 110, w: 14, nose: 1, wing: { span: 44, sweep: 36, root: 44, tip: 8 }, pods: 1, engines: 4, fins: true, hull: ['#e0f7fa', '#006064'] },
+  fx_tech:      { len: 118, w: 22, nose: 0.8, wing: { span: 36, sweep: 26, root: 54, tip: 18 }, pods: 3, engines: 5, ring: true, fins: true, hull: ['#b2ebf2', '#00838f'] },
+  fl_nomads:    { len: 108, w: 17, nose: 0.75, wing: { span: 40, sweep: 26, root: 40, tip: 12 }, pods: 2, engines: 4, fins: true, hull: ['#ffccbc', '#d84315'] },
+  fx_nomads:    { len: 118, w: 26, nose: 0.55, wing: { span: 32, sweep: 16, root: 54, tip: 24 }, pods: 4, engines: 5, ring: true, hull: ['#ffab91', '#bf360c'] },
+  fl_order:     { len: 110, w: 15, nose: 0.9, wing: { span: 46, sweep: 30, root: 40, tip: 16 }, engines: 3, ring: true, fins: true, hull: ['#f3e5f5', '#6a1b9a'] },
+  fx_order:     { len: 118, w: 24, nose: 0.6, wing: { span: 40, sweep: 20, root: 56, tip: 26 }, pods: 2, engines: 5, ring: true, fins: true, hull: ['#e1bee7', '#4a148c'] },
+  fl_league:    { len: 110, w: 29, nose: 0.4, wing: { span: 12, sweep: 4, root: 44, tip: 36 }, pods: 4, engines: 4, hull: ['#e8f5e9', '#2e7d32'] },
+  fx_league:    { len: 120, w: 33, nose: 0.35, wing: { span: 24, sweep: 10, root: 60, tip: 40 }, pods: 5, engines: 6, ring: true, hull: ['#c8e6c9', '#1b5e20'] },
+  fl_syndicate: { len: 110, w: 30, nose: 0.3, wing: { span: 12, sweep: 4, root: 44, tip: 36 }, pods: 4, engines: 4, fins: true, hull: ['#ffcdd2', '#4e342e'] },
+  fx_syndicate: { len: 120, w: 33, nose: 0.3, wing: { span: 26, sweep: 12, root: 60, tip: 40 }, pods: 5, engines: 6, ring: true, fins: true, hull: ['#ef9a9a', '#3e2723'] },
 };
 
 const r1 = (v) => Math.round(v * 10) / 10;

@@ -1,5 +1,5 @@
 import { GOODS, SHIP_TYPES, SHIPYARD, GOVERNOR_LICENSES, UNLOCK_NAMES, PROP_UPGRADES, FIXED, CUSTOMS_MAX, RECYCLE_SHARE, PILOT_LICENSES,
-  propertyKind, minGovernorFor, propertyPrice, propUpgradeCost, extraOptions } from '../../shared/config.js';
+  propertyKind, minGovernorFor, propertyPrice, propUpgradeCost, extraOptions, LEVEL_FX, giverLevel, shipStats } from '../../shared/config.js';
 import { V, CmdError } from './validate.js';
 import { newProperty, buildableTypes, propBook } from '../property.js';
 
@@ -113,7 +113,8 @@ export default {
       const req = SHIP_TYPES[type].build;
       for (const [g, n] of Object.entries(req)) if ((m.goods[g]?.stock || 0) < n) return `Es fehlen ${Math.ceil(n - (m.goods[g]?.stock || 0))} ${GOODS[g].name} im Werftlager.`;
       for (const [g, n] of Object.entries(req)) m.goods[g].stock -= n;
-      m.building = { type, remaining: SHIPYARD.BUILD_TIME[SHIP_TYPES[type].cls] };
+      const lvl = giverLevel(m.qxp);
+      m.building = { type, remaining: SHIPYARD.BUILD_TIME[SHIP_TYPES[type].cls], bonus: lvl * LEVEL_FX.YARD_BONUS, yardLvl: lvl };
     },
   },
   yardClaim: {
@@ -126,6 +127,7 @@ export default {
       if (!lic.classes.includes(SHIP_TYPES[item.type].cls)) return 'Für diese Klasse fehlt dir die Pilotenlizenz.';
       e.market.forSale.splice(index, 1);
       const s = game.spawnShip(player, item.type, e);
+      if (item.bonus) Object.assign(s, { bonus: item.bonus, yardLvl: item.yardLvl, fuel: shipStats({ ...s, bonus: item.bonus }).tank });
       game.shipLog(s, `In die Flotte übernommen von ${e.name}`);
     },
   },

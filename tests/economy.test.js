@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GOODS, RECIPES, PLANET_TYPES, STATION_TYPES, ULTRA, distancePremium, selfUse, canSellTo, LOCATION, SHIP_TYPES } from '../shared/config.js';
+import { GOODS, RECIPES, PLANET_TYPES, STATION_TYPES, ULTRA, distancePremium, canSellTo, LOCATION, SHIP_TYPES, ECON, SUPPLY, supplyLoad, targetOf } from '../shared/config.js';
 import { generateSector, applyLocationMods, rng } from '../server/worldgen.js';
 import { createMarket, tickMarket } from '../server/markets.js';
 import { Game } from '../server/game.js';
@@ -55,19 +55,85 @@ test('Standort-Modifier: Zufall, Glättung im System, Prämie nur für angekauft
   for (const e of entities.filter((x) => x.market)) for (const s of Object.values(e.market.goods)) assert.ok(s.mod >= lo - 1e-3 && s.mod <= hi * 2 + 1e-3);
 });
 
-test('Eigenverbrauch: nur über 80 %, 2 % des Überschusses pro Minute, nicht bei Spielerbesitz', () => {
-  assert.equal(selfUse(80, 100, 60), 0);
-  assert.ok(Math.abs(selfUse(100, 100, 60) - 20 * 0.02) < 1e-9);
+test('Drift: Rückkehr zum Ziel-Füllstand mit 45 min Halbwertszeit, nicht bei Spielerbesitz', () => {
   const m = createMarket('station', 'hotel', rng(1), 1, { traders: false });
   const e = { market: m };
-  m.goods.tourists.stock = m.goods.tourists.cap;
-  m.goods.tourists.rate = 0;
+  const s = m.goods.tourists;
+  assert.ok(s.target >= ECON.TARGET.consume[0] && s.target <= ECON.TARGET.consume[1], 'Verbraucher 30-40 %');
+  // leergehandelt: Hintergrundzufluss füllt in einer Halbwertszeit die halbe Lücke
+  s.stock = 0;
+  for (let t = 0; t < ECON.HALF_LIFE; t += 10) tickMarket(e, 10, t);
+  assert.ok(Math.abs(s.stock - s.target * s.cap / 2) < s.cap * 0.01, `halbe Lücke: ${s.stock}`);
+  // übervoll: Verbrauch über dem Ziel, höchstens mit der eigenen Rate
+  s.stock = s.cap;
   tickMarket(e, 60, 0);
-  assert.ok(m.goods.tourists.stock < m.goods.tourists.cap);
+  assert.ok(s.stock < s.cap && s.cap - s.stock <= s.rate * 60 + 1e-9);
+  // Spielerbesitz: keine Drift, keine Zuflüsse
   m.owner = 'p1';
-  m.goods.tourists.stock = m.goods.tourists.cap;
-  tickMarket(e, 60, 60);
-  assert.equal(m.goods.tourists.stock, m.goods.tourists.cap);
+  s.stock = 0;
+  tickMarket(e, 600, 600);
+  assert.equal(s.stock, 0);
+  // Produzent: 60-70 %, erholt sich von 0 innerhalb von 2 h auf über 70 % des Ziels
+  const pl = createMarket('planet', 'mining', rng(4), 1, { traders: false });
+  const ore = pl.goods.ore;
+  assert.ok(ore.target >= 0.6 && ore.target <= 0.7);
+  ore.stock = 0;
+  for (let t = 0; t < 7200; t += 10) tickMarket({ market: pl }, 10, t);
+  assert.ok(ore.stock > 0.7 * ore.target * ore.cap, `erholt: ${ore.stock}`);
+});
+
+test('Nachfrage-Schwankung: Planeten würfeln den Ziel-Füllstand alle 2-6 h neu', () => {
+  const pl = createMarket('planet', 'urban', rng(8), 1, { traders: false });
+  const e = { market: pl };
+  tickMarket(e, 1, 0);
+  const before = Object.fromEntries(Object.entries(pl.goods).map(([g, s]) => [g, s.target]));
+  for (const s of Object.values(pl.goods)) assert.ok(s.swingAt >= ECON.SWING_EVERY[0] && s.swingAt <= ECON.SWING_EVERY[1]);
+  for (let t = 60; t <= 6.5 * 3600; t += 60) tickMarket(e, 60, t);
+  let changed = 0;
+  for (const [g, s] of Object.entries(pl.goods)) {
+    if (s.target !== before[g]) changed++;
+    assert.ok(s.target >= ECON.SWING[s.role][0] && s.target <= ECON.SWING[s.role][1]);
+  }
+  assert.ok(changed >= Object.keys(pl.goods).length - 1, 'fast alle Ziele neu gewürfelt');
+});
+
+test('NPC-Ladung: 10 % des Ziellagers, 5 bis 40, nur was passt', () => {
+  assert.equal(supplyLoad({ cap: 300, stock: 0 }), 30);
+  assert.equal(supplyLoad({ cap: 1000, stock: 0 }), SUPPLY.LOAD_MAX);
+  assert.equal(supplyLoad({ cap: 30, stock: 0 }), SUPPLY.LOAD_MIN);
+  assert.equal(supplyLoad({ cap: 300, stock: 288 }), 12);
+  assert.equal(supplyLoad({ cap: 300, stock: 297 }), 0);
+});
+
+test('Planeten-Abholer: nur in Sektoren mit Spieleraktivität, höchstens einer je Markt und Ware', () => {
+  const g = new Game(':memory:', { seed: 9 });
+  const planet = g.world.entities.get('origin_urban');
+  const food = planet.market.goods.food;
+  const plant = g.world.entities.get('origin_foodplant');
+  plant.market.goods.food.stock = plant.market.goods.food.cap; // Produzent über dem Ziel
+  food.stock = 0;
+  food.target = 0.4;
+  g.tick(1.5);
+  const haulers = () => [...g.ships.values()].filter((s) => s.owner === 'npc' && s.queue[0]?.haul);
+  assert.equal(haulers().length, 0, 'ohne Spieler kein Abholer');
+  const p = g.createPlayer('Anna');
+  // Sensorlauf markiert den Heimatsektor als aktiv; die Quelle kann kurz durch einen Versorger belegt sein
+  let h = [];
+  for (let i = 0; i < 600 && !h.length; i++) {
+    g.tick(1.5);
+    h = haulers().filter((s) => s.queue[0].stationId === planet.id && s.queue[0].good === 'food');
+    const keys = [...g.ships.values()].filter((s) => s.owner === 'npc').flatMap((s) => [s.queue[0].stationId + ':' + s.queue[0].good, s.queue[0].sourceId + ':' + s.queue[0].good]);
+    assert.equal(new Set(keys).size, keys.length, 'höchstens ein NPC-Schiff je Markt und Ware');
+  }
+  assert.equal(h.length, 1, 'genau ein Abholer für Nahrung');
+  assert.equal(h[0].queue[0].amount, supplyLoad(food));
+  assert.ok(h[0].queue[0].amount <= SUPPLY.LOAD_MAX);
+  // fliegt hin, lädt, liefert ab
+  const before = food.stock;
+  for (let i = 0; i < 3000 && g.ships.has(h[0].id); i++) g.tick(0.5);
+  assert.ok(!g.ships.has(h[0].id), 'Abholer ist fertig');
+  assert.ok(food.stock > before, 'Lieferung angekommen');
+  assert.ok(p);
 });
 
 test('Händlerrolle: Planeten 5-10 Händler-Waren, Ultraselten nur am Hub', () => {

@@ -3,7 +3,7 @@
 // Maßstab: Speed 150 = 150 Einheiten/s. 1 Minute Flug = 9.000 Einheiten.
 export const WORLD = {
   FOG_CELL: 1000,            // Kantenlänge einer Nebel-Zelle
-  SENSOR_RANGE: 2500,        // Sensorreichweite eines Schiffes
+  SENSOR_RANGE: 2500,        // Sensorreichweite eines Schiffes ohne Sensorphalanx (siehe SENSOR in ships.js)
   SYSTEM_DETECT: 50000,      // Fernortung: Sonnensysteme in diesem Umkreis werden bekannt
   START_CREDITS: 5000,
   DOCK_OFFSET: 28,           // Abstand zur Oberfläche beim Andocken
@@ -51,20 +51,34 @@ export const STORAGE = {
 // Statistik: 36 Blöcke à 5 Minuten = 3 Stunden Rückblick (Spielzeit)
 export const STATS = { BUCKET_SECS: 300, BUCKETS: 36 };
 
-// Automatische Versorgung leerer Stationen
+// NPC-Verkehr: Versorger (Stationen holen fehlende Zutaten) und Abholer (Planeten holen Waren bei Produzenten)
 export const SUPPLY = {
   RANGE: 90000,       // Suchradius für Bezugsquellen (gleicher Sektor)
   MIN_SOURCE_STOCK: 10,
-  COOLDOWN: 20,       // Sekunden nach einer Lieferung
+  COOLDOWN: 20,       // Sekunden nach einer Lieferung (je Ware)
   RETRY_NO_SOURCE: 120,
   SHIP_TYPE: 'versorger',
+  LOAD_SHARE: 0.1,    // Ladung je Fahrt: höchstens 10 % der Kapazität des Ziellagers ...
+  LOAD_MIN: 5,        // ... mindestens 5 ...
+  LOAD_MAX: 40,       // ... höchstens 40 Einheiten
+  MARGIN: 0.1,        // Abstand zum Ziel-Füllstand (Anteil der Kapazität), ab dem NPC-Schiffe losfliegen
+  ACTIVITY: 1800,     // Abholer nur in Sektoren mit Spielerschiffen in den letzten 30 min oder mit Spielerbesitz
 };
+
+/** Ladung eines NPC-Schiffs für ein Ziellager: min(10 % der Kapazität, freier Platz), 5 bis 40, 0 = passt nicht */
+export function supplyLoad(slot) {
+  const free = Math.floor(slot.cap - slot.stock);
+  if (free < SUPPLY.LOAD_MIN) return 0;
+  return Math.min(free, SUPPLY.LOAD_MAX, Math.max(SUPPLY.LOAD_MIN, Math.floor(slot.cap * SUPPLY.LOAD_SHARE)));
+}
 
 import { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES } from './goods.js';
 export { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES, RECIPES, TIER_NAMES, CARGO_CLASSES, MINE_CLASSES, ULTRA, STATION_FOOD } from './goods.js';
-export { FACTIONS, FACTION_SHIPS, FACTION } from './factions.js';
-export { SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, STEP, YARD_MARGIN, MODULE_SIZE, MODULE_REFUND,
-  upgradeCost, moduleCapacity, moduleMiningRate, shipStats, holdOf, holdUsage, freeFor, sellValue, countModules, buildMaterials } from './ships.js';
+export { FACTIONS, FACTION_SHIPS, FACTION, ABILITIES, factionShips } from './factions.js';
+export { SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, STEP, YARD_MARGIN, MODULE_SIZE, MODULE_REFUND, SENSOR, FLAGSHIP, sensorFactor,
+  upgradeCost, moduleCapacity, moduleMiningRate, shipStats, holdOf, holdFor, hasAbility, holdUsage, freeFor, sellValue, countModules, buildMaterials } from './ships.js';
+
+export * from './progression.js';
 
 // Preis = Basispreis × Standort-Modifier × Füllstandskurve(stock/cap) ± Spread
 import { PRICE, curveMax, curveMin } from './price.js';
@@ -89,10 +103,11 @@ export const sellPrice = (good, s) => slotPrice(good, s) * (1 - PRICE.SPREAD);
 
 /**
  * Standort-Modifier (fest ab Sektorgenerierung):
- * Zufall ±15 %, geglättet mit dem Mittel der Märkte im selben System, plus Entfernungsprämie für angekaufte Waren.
+ * Zufall ±25 %, geglättet mit dem Mittel der Märkte im selben System, plus Entfernungsprämie für angekaufte Waren.
+ * Der Modifier wird nicht angezeigt (PRD-2 4.5), das Rauschen überdeckt die Prämie.
  */
 export const LOCATION = {
-  RANDOM: 0.15,
+  RANDOM: 0.25,
   SMOOTH: 0.5,         // Anteil des Systemmittels
   REF_SPEED: 150,      // Flugzeit wird bei Speed 150 gemessen
   // Flugzeit zum nächsten Produzenten im Sektor (Minuten) -> Prämie, dazwischen linear
@@ -114,12 +129,22 @@ export function distancePremium(minutes) {
   return LOCATION.PREMIUM_MAX;
 }
 
-/** Eigenverbrauch: Bestand über 80 % schrumpft um 2 % des Überschusses pro Minute (nicht bei Spielerbesitz) */
-export const SELF_USE = { THRESHOLD: 0.8, PER_MIN: 0.02 };
-export function selfUse(stock, cap, dt) {
-  const over = stock - SELF_USE.THRESHOLD * cap;
-  return over > 0 ? over * (SELF_USE.PER_MIN / 60) * dt : 0;
-}
+/**
+ * Wirtschaftsdynamik (PRD-2 Kapitel 4, ersetzt den Eigenverbrauch): Jeder Lagerplatz eines NPC-Marktes hat einen
+ * Ziel-Füllstand. Der Bestand nähert sich ihm exponentiell (Halbwertszeit 45 min), als Verbrauch über und als Zufluss
+ * unter dem Ziel. Planeten würfeln den Ziel-Füllstand je Ware alle 2 bis 6 h neu (Nachfrage-Schwankung).
+ * Spielerbesitz hat keine Drift, dort gilt die Besitzerwirtschaft.
+ */
+export const ECON = {
+  HALF_LIFE: 2700,
+  TARGET: { produce: [0.6, 0.7], consume: [0.3, 0.4], trade: [0.45, 0.55] },
+  SWING: { produce: [0.45, 0.85], consume: [0.15, 0.55], trade: [0.3, 0.7] },
+  SWING_EVERY: [7200, 21600],
+};
+/** Ziel-Füllstand eines Lagerplatzes (Anteil der Kapazität) */
+export const targetOf = (s) => s.target ?? (ECON.TARGET[s.role][0] + ECON.TARGET[s.role][1]) / 2;
+/** Änderung des Bestands durch die Drift in dt Sekunden (positiv = Zufluss) */
+export const driftDelta = (stock, target, dt) => (target - stock) * (1 - 2 ** (-dt / ECON.HALF_LIFE));
 
 /** Händlerrolle: Planeten bekommen 5-10, Stationen 0-3 Händler-Waren (nie ultraselten) */
 export const TRADER = { PLANET: [5, 10], STATION: [0, 3], CAP: [300, 900] };

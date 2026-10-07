@@ -1,4 +1,4 @@
-import { NET, NPC_OWNER, cellKey, cellOf } from '../shared/config.js';
+import { NET, NPC_OWNER, cellKey, cellOf, pilotLevel } from '../shared/config.js';
 import { runCommand } from './handlers/index.js';
 import { sectorSummary } from './game.js';
 import { sumWindow } from './stats.js';
@@ -23,7 +23,9 @@ export class Net {
       if (d.entities) out.entities = d.entities.map((e) => serializeEntity(e));
       s.socket.emit('reveal', out);
     });
-    game.on('log', (ship, msg) => this.sessions.get(ship.owner)?.socket.emit('log', { ship: ship.name, msg }));
+    game.on('log', (ship, msg) => this.sessions.get(ship.owner)?.socket.emit('log', { ship: ship.name, id: ship.id, msg }));
+    game.on('sfx', (p, name) => this.sessions.get(p.id)?.socket.emit('sfx', name));
+    game.on('player', () => this.broadcastPlayers()); // Level und Titel für die Tooltips der anderen
     game.on('notice', (p, msg) => this.sessions.get(p.id)?.socket.emit('notice', msg));
     // Geänderte Objekte (Besitzwechsel, Upgrades) an alle, die sie kennen
     game.on('entity', (e) => {
@@ -237,12 +239,16 @@ export function serializeMarket(m) {
 
 function extraOf(m) {
   const out = { eff: r1(m.eff ?? 1) };
+  if (m.qxp) out.qxp = Math.floor(m.qxp);
+  if (m.lvl) out.lvl = m.lvl;
+  if (m.board) out.board = m.board.offers;
   if (m.modules) out.modules = m.modules;
   if (m.owner) Object.assign(out, { owner: m.owner, yardSale: !!m.yardSale, mode: m.mode, customs: m.customs || 0 });
   if (m.forSale) {
     out.forSale = m.forSale;
-    out.building = m.building ? { type: m.building.type, remaining: Math.ceil(m.building.remaining) } : null;
+    out.building = m.building ? { type: m.building.type, remaining: Math.ceil(m.building.remaining), bonus: m.building.bonus || 0 } : null;
     out.nextBuild = m.nextBuild;
+    if (m.strategy === 'shipyard' && !m.owner) out.order = m.order ? { type: m.order.type, player: m.order.player, name: m.order.name } : null;
   }
   if (m.progress !== undefined) out.progress = r1(m.progress);
   if (m.supply !== undefined) out.supply = m.supply && { state: m.supply.state, good: m.supply.good, sourceId: m.supply.sourceId, shipId: m.supply.shipId };
@@ -273,7 +279,7 @@ function compactShip(s) {
 }
 
 function foreignInfo(s) {
-  const o = { owner: s.owner, type: s.type, name: s.name };
+  const o = { owner: s.owner, type: s.type, name: s.name, main: !!s.main };
   const c = s.queue[0];
   if (s.owner === NPC_OWNER && c?.t === 'supply') {
     const { stationId, sourceId, good, phase } = c;
@@ -289,10 +295,12 @@ function shipDetail(s) {
     queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},
     nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,
     transit: s.transit ? s.transit.exit : null, zone: s.zone || null, marker: s.marker || null,
-    fuel: Math.round((s.fuel || 0) * 10) / 10, autoRefuel: s.autoRefuel ?? 0, upg: s.upg || {}, modules: s.modules || [], upgValue: s.upgValue || 0,
+    fuel: Math.round((s.fuel || 0) * 10) / 10, autoRefuel: s.autoRefuel ?? 0, upg: s.upg || {}, modules: s.modules || [], upgValue: s.upgValue || 0, main: !!s.main, mined: s.mined || {}, bonus: s.bonus || 0, yardLvl: s.yardLvl || 0,
   };
 }
 
 function playerDetail(p) {
-  return { stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1, governor: p.governor || 0, faction: p.faction || null };
+  return { stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1, governor: p.governor || 0, faction: p.faction || null,
+    flagshipAt: p.flagshipAt ?? null, xp: Math.floor(p.xp || 0), level: pilotLevel(p.xp), quest: p.quest || null, questLock: p.questLock || 0,
+    rep: p.rep || {}, questsDone: p.questsDone || 0 };
 }

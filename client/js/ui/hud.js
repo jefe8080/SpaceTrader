@@ -1,4 +1,4 @@
-import { GOODS, SHIP_TYPES, PILOT_LICENSES, canBuyFrom } from '/shared/config.js';
+import { GOODS, SHIP_TYPES, PILOT_LICENSES, PILOT_LEVELS, canBuyFrom } from '/shared/config.js';
 import { state, myShips, fmt, esc, playerColor, playerName, selectedShips } from '../state.js';
 import { socket, cmd } from '../net.js';
 import { typeName, playerPrice, flightSecs, fmtDuration } from '../util.js';
@@ -58,6 +58,10 @@ export function renderTop() {
   $('credits').textContent = fmt(state.credits) + ' Cr';
   $('shipCount').textContent = `${myShips().length} / ${PILOT_LICENSES[state.pilot || 1].maxShips}`;
   $('pilotLevel').textContent = 'P' + (state.pilot || 1);
+  const L = state.level || 1, cur = PILOT_LEVELS[L], next = PILOT_LEVELS[L + 1];
+  $('levelValue').textContent = String(L);
+  $('xpFill').style.width = next ? Math.min(100, ((state.xp - cur.xp) / (next.xp - cur.xp)) * 100) + '%' : '100%';
+  $('levelStat').title = next ? `Pilotenlevel ${L}: ${state.xp.toLocaleString('de-DE')} / ${next.xp.toLocaleString('de-DE')} XP` : `Pilotenlevel ${L} · ${cur.title || ''}`;
   setHtml($('onlinePlayers'), state.players.filter((p) => p.online)
     .map((p) => `<span class="player-chip"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</span>`).join(''));
   const sl = state.stopLoss;
@@ -108,7 +112,9 @@ export function updateTooltip(mx, my) {
   } else if (hov?.kind === 'ship') {
     const s = state.ships.get(hov.id);
     if (s) {
-      html = `<div class="tt-title" style="color:${playerColor(s.owner)}">${esc(s.name)}</div><div class="muted">${SHIP_TYPES[s.type].name} · ${esc(s.task ? 'Station' : playerName(s.owner))}</div>`;
+      const pl = state.players.find((x) => x.id === s.owner);
+      html = `<div class="tt-title" style="color:${playerColor(s.owner)}">${s.main ? '♛ ' : ''}${esc(s.name)}</div><div class="muted">${SHIP_TYPES[s.type].name} · ${esc(s.task ? 'Station' : playerName(s.owner))}${pl?.level ? ' · Level ' + pl.level : ''}</div>`;
+      if (pl?.title) html += `<div class="tt-title-badge">„${esc(pl.title)}“</div>`;
       if (s.task) html += `<div>Holt ${GOODS[s.task.good].name} von ${entName(s.task.sourceId)}</div>`;
     }
   }

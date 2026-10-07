@@ -1,4 +1,4 @@
-import { SHIP_TYPES, BELT_TYPES, WORLD, GOODS, FUEL, ZONE_TYPES, slotPrice, fuelBurn, shipStats, freeFor } from '../shared/config.js';
+import { SHIP_TYPES, BELT_TYPES, WORLD, GOODS, FUEL, ZONE_TYPES, slotPrice, fuelBurn, shipStats, freeFor, hasAbility } from '../shared/config.js';
 import { stat } from './markets.js';
 import { sellToSupplier as sellToSupplierImpl } from './property.js';
 import { zoneEffects, inZone } from '../shared/nav.js';
@@ -25,7 +25,7 @@ function approachPoint(ship, e) {
 }
 
 function flyTo(ship, tx, ty, dt, game) {
-  const fx = zoneEffects(game.world.zonesNear(ship.x, ship.y), ship.x, ship.y);
+  const fx = zoneEffects(game.world.zonesNear(ship.x, ship.y), ship.x, ship.y, { void: hasAbility(ship, 'void') });
   ship.zone = fx.zones ? fx.zones.map((z) => z.type) : null;
   let speed = game.shipSpeed(ship) * fx.speed;
   const tank = game.shipTank(ship);
@@ -37,7 +37,7 @@ function flyTo(ship, tx, ty, dt, game) {
   // Verbrauch nur im Flug, Ionensturm verdoppelt
   if (tank > 0 && dt > 0) {
     const flown = Math.min(1, step > 0 ? d / step : 0) * dt;
-    ship.fuel = Math.max(0, ship.fuel - fuelBurn(tank) * fx.fuel * flown);
+    ship.fuel = Math.max(0, ship.fuel - fuelBurn(tank) * shipStats(ship).burn * fx.fuel * flown);
     setWarn(ship, 'fuel', ship.fuel <= 0 ? 'Tank leer: nur 30 % Geschwindigkeit' : null);
   }
   if (d <= step) {
@@ -112,16 +112,16 @@ function flyToEntity(ship, e, dt, game) {
   return false;
 }
 
-/** Baut ab, liefert true, wenn nichts mehr abgebaut werden kann (voll / kein passendes Gerät). */
-function mineStep(ship, e, dt) {
+/** Baut ab, liefert true, wenn nichts mehr abgebaut werden kann (voll / Menge erreicht / kein passendes Gerät). */
+function mineStep(ship, e, dt, limit = Infinity) {
   if (e.kind !== 'belt') return true;
-  return extract(ship, BELT_TYPES[e.type].good, (e.richness || 1), dt);
+  return extract(ship, BELT_TYPES[e.type].good, (e.richness || 1), dt, limit);
 }
 
-function extract(ship, g, richness, dt) {
+function extract(ship, g, richness, dt, limit = Infinity) {
   const rate = miningRate(ship, g);
   if (!rate) return true;
-  const free = freeFor(ship, g);
+  const free = Math.min(freeFor(ship, g), limit - (ship.cargo[g] || 0));
   if (free <= 0) return true;
   ship.state = 'mining';
   ship.mineAcc = (ship.mineAcc || 0) + rate * richness * dt;
@@ -129,8 +129,9 @@ function extract(ship, g, richness, dt) {
   if (n > 0) {
     ship.mineAcc -= n;
     ship.cargo[g] = (ship.cargo[g] || 0) + n;
+    if (!SHIP_TYPES[ship.type].npc) { ship.mined ||= {}; ship.mined[g] = (ship.mined[g] || 0) + n; }
   }
-  return freeFor(ship, g) <= 0;
+  return Math.min(freeFor(ship, g), limit - (ship.cargo[g] || 0)) <= 0;
 }
 
 // ---------- Fehlerzähler und Warnungen ----------
@@ -345,7 +346,7 @@ function runRoute(ship, c, dt, game) {
   return false;
 }
 
-/** Stationseigener Versorger: Quelle anfliegen, laden/abbauen, zur Station zurück, entladen. */
+/** NPC-Versorger bzw. -Abholer: Quelle anfliegen, die bemessene Menge laden/abbauen, zum Ziel, entladen. */
 function runSupply(ship, o, dt, game) {
   const station = game.world.entities.get(o.stationId);
   if (!station) { game.removeShip(ship); return true; }
@@ -354,10 +355,10 @@ function runSupply(ship, o, dt, game) {
     if (!src) { o.phase = 'toStation'; return false; }
     if (!flyToEntity(ship, src, dt, game)) return false;
     if (src.kind === 'belt') {
-      if (!mineStep(ship, src, dt)) return false;
+      if (!mineStep(ship, src, dt, o.amount ?? Infinity)) return false;
     } else {
       const slot = src.market?.goods[o.good];
-      const n = slot ? Math.min(freeFor(ship, o.good), Math.floor(slot.stock)) : 0;
+      const n = slot ? Math.min(freeFor(ship, o.good), Math.floor(slot.stock), o.amount ?? Infinity) : 0;
       const prop = game.ownership.get(src.id);
       if (n > 0 && prop) {
         sellToSupplierImpl(game, src, prop, o.good, n);

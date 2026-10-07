@@ -2,8 +2,9 @@
 // Aufruf: node sim/simulate.js [--hours 6] [--bots 3] [--seed 42] [--quiet]
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
-import { GOODS, SHIP_TYPES, PILOT_LICENSES, WORLD, canBuyFrom, canSellTo, buyPrice, sellPrice, shipStats, holdOf } from '../shared/config.js';
+import { GOODS, SHIP_TYPES, PILOT_LICENSES, WORLD, canBuyFrom, canSellTo, buyPrice, sellPrice, shipStats, holdOf, freeFor, pilotLevel } from '../shared/config.js';
 import { sumWindow } from '../server/stats.js';
+import { isGiver, boardOf } from '../server/quests.js';
 
 const arg = (name, dflt) => {
   const i = process.argv.indexOf('--' + name);
@@ -29,7 +30,10 @@ for (let i = 0; i < BOTS; i++) {
   const p = game.createPlayer(`Bot ${i + 1}`);
   // Bots kennen ihren Heimatsektor vollständig (entspricht erfahrenen Spielern)
   game.revealAround(p, home.bh.x, home.bh.y, WORLD.SECTOR_RADIUS + 5000);
-  bots.push({ p, history: [], lastCredits: p.credits, trades: 0 });
+  // Das Startschiff wird Hauptschiff und erledigt Quests (Quest-Bot), alle weiteren Schiffe handeln
+  const qship = game.shipsOf(p.id)[0];
+  runCommand(game, p, { cmd: 'flagship', ship: qship.id });
+  bots.push({ p, history: [], lastCredits: p.credits, trades: 0, qship: qship.id, quests: 0, questCr: 0, lastXp: 0 });
 }
 
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -79,7 +83,8 @@ function shipOffer(bot) {
   const own = game.shipsOf(bot.p.id);
   // Am Limit: nur Schiffe, die deutlich größer sind als das kleinste eigene (wird dafür verkauft)
   const atLimit = own.length >= lic.maxShips;
-  const smallest = own.reduce((m, s) => (!m || SHIP_TYPES[s.type].cargo < SHIP_TYPES[m.type].cargo ? s : m), null);
+  const smallest = own.filter((s) => s.id !== bot.qship).reduce((m, s) => (!m || SHIP_TYPES[s.type].cargo < SHIP_TYPES[m.type].cargo ? s : m), null);
+  if (atLimit && !smallest) return null;
   const minCargo = atLimit ? SHIP_TYPES[smallest.type].cargo * 2.5 : 0;
   let best = null;
   for (const e of game.world.sectorEntities(home.key)) {
@@ -94,13 +99,69 @@ function shipOffer(bot) {
   return best;
 }
 
+/** Quest-Bot: das Hauptschiff nimmt die lohnendste machbare Quest im Heimatsektor an und arbeitet sie ab */
+function questThink(bot) {
+  const p = bot.p;
+  const s = game.ships.get(bot.qship);
+  if (!s) return;
+  const order = (o, append = false) => runCommand(game, p, { cmd: 'order', ships: [s.id], order: o, append });
+  if (bot.active && !p.quest) {
+    if ((p.questsDone || 0) > bot.quests) { bot.quests = p.questsDone; bot.questCr += bot.active.reward.cr; }
+    bot.active = null;
+  }
+  const q = p.quest;
+  if (q) {
+    bot.active = q;
+    if (s.queue.length) return;
+    if (++bot.qSteps > 12) { runCommand(game, p, { cmd: 'questAbort' }); bot.qSteps = 0; return; }
+    if (q.type === 'procure' || q.type === 'rush') {
+      const have = s.cargo[q.good] || 0;
+      if (have >= q.amount) order({ t: 'goto', target: q.giver });
+      else if (q.source) order({ t: 'dock', target: q.source, actions: [{ op: 'buy', good: q.good, amount: q.amount - have }] });
+      else runCommand(game, p, { cmd: 'questAbort' });
+    } else if (q.type === 'courier') order({ t: 'goto', target: q.state === 'pickup' ? q.pickup : q.dest });
+    else if (q.type === 'mine') {
+      const mined = game.shipsOf(p.id).reduce((a, x) => a + (x.mined?.[q.good] || 0), 0) - q.minedBase;
+      if (mined >= q.amount && (s.cargo[q.good] || 0) >= q.amount) order({ t: 'goto', target: q.giver });
+      else order({ t: 'mine', target: q.belt });
+    } else runCommand(game, p, { cmd: 'questAbort' });
+    return;
+  }
+  bot.qSteps = 0;
+  if (s.queue.length || (p.questLock || 0) > game.time) return;
+  if (bot.want) {
+    const e = game.world.entities.get(bot.want.giver);
+    if (s.dockedAt === e.id) runCommand(game, p, { cmd: 'questAccept', ship: s.id, target: e.id, quest: bot.want.id });
+    bot.want = null;
+    return;
+  }
+  // Angebot wählen: Belohnung je geschätzter Minute inklusive Anflug
+  const st = shipStats(s);
+  let best = null;
+  for (const e of game.world.sectorEntities(home.key)) {
+    if (!isGiver(e) || !known(p, e)) continue;
+    for (const o of boardOf(e).offers) {
+      if (!['procure', 'rush', 'courier', 'mine'].includes(o.type)) continue;
+      if ((o.type === 'procure' || o.type === 'rush') && (!o.source || o.amount > freeFor(s, o.good) + (s.cargo[o.good] || 0))) continue;
+      if (o.type === 'mine' && (!(st.mining.std > 0) || o.amount > freeFor(s, o.good))) continue;
+      const score = o.reward.cr / (o.effort + dist(s, e) / st.speed / 60 + 1);
+      if (!best || score > best.score) best = { e, o, score };
+    }
+  }
+  if (!best) return;
+  for (const g of Object.keys(s.cargo)) if (!best.o.good || g !== best.o.good) delete s.cargo[g]; // Ladung, die nicht zur Quest gehört, abwerfen
+  order({ t: 'goto', target: best.e.id });
+  bot.want = { giver: best.e.id, id: best.o.id };
+}
+
 function botThink(bot) {
   const p = bot.p;
-  const ships = game.shipsOf(p.id);
+  if (bot.buying?.ship !== bot.qship) questThink(bot);
+  const ships = game.shipsOf(p.id).filter((s) => s.id !== bot.qship);
   // Lizenz: kaufen, wenn das Schiffslimit erreicht ist und das Geld reicht
   const lic = PILOT_LICENSES[p.pilot || 1];
   const next = PILOT_LICENSES[(p.pilot || 1) + 1];
-  if (next && ships.length >= lic.maxShips && p.credits > next.cost * 1.5 && !bot.goingHub) {
+  if (next && game.shipsOf(p.id).length >= lic.maxShips && p.credits > next.cost * 1.5 && pilotLevel(p.xp) >= next.level && !bot.goingHub && ships.length) {
     const s = ships.find((x) => !x.queue.length) || ships[0];
     runCommand(game, p, { cmd: 'order', ships: [s.id], order: { t: 'goto', target: home.hub }, append: false });
     bot.goingHub = s.id;
@@ -118,9 +179,11 @@ function botThink(bot) {
   if (!bot.buying) {
     const offer = shipOffer(bot);
     if (offer) {
-      const s = ships.find((x) => !x.queue.length) || ships[0];
+      // ohne Handelsschiffe holt das Hauptschiff zwischen zwei Quests das neue Schiff ab
+      const qs = game.ships.get(bot.qship);
+      const s = ships.find((x) => !x.queue.length) || ships[0] || (!p.quest && !bot.want && !qs.queue.length ? qs : null);
       const s2 = offer.sell ? game.ships.get(offer.sell) : s;
-      if (s2.queue.length || Object.keys(s2.cargo).length) return; // erst fertig werden lassen
+      if (!s2 || s2.queue.length || Object.keys(s2.cargo).length) return; // erst fertig werden lassen
       runCommand(game, p, { cmd: 'order', ships: [s2.id], order: { t: 'goto', target: offer.e.id }, append: false });
       bot.buying = { ship: s2.id, yard: offer.e.id, sell: offer.sell };
     }
@@ -137,7 +200,7 @@ function botThink(bot) {
     } else if (!s?.queue.length) bot.buying = null;
   }
   // Untätige Schiffe handeln lassen
-  for (const s of game.shipsOf(p.id)) {
+  for (const s of ships) {
     if (s.queue.length || s.id === bot.goingHub || s.id === bot.buying?.ship) continue;
     // Ladung loswerden: an den besten Abnehmer
     const cargo = Object.entries(s.cargo);
@@ -172,7 +235,9 @@ for (let i = 1; i <= steps; i++) {
       const profit = ships.reduce((a, s) => { const w = sumWindow(game.shipStats.get(s.id), game.time, 3600); return a + (w.inc || 0) - (w.buy || 0) - (w.fuel || 0); }, 0);
       const fleet = {};
       for (const s of ships) fleet[SHIP_TYPES[s.type].cls] = (fleet[SHIP_TYPES[s.type].cls] || 0) + 1;
-      b.history.push({ h, credits: Math.round(b.p.credits), ships: ships.length, gain: Math.round(profit), pilot: b.p.pilot, fleet: Object.entries(fleet).map(([c, n]) => n + c).join('+') });
+      b.history.push({ h, credits: Math.round(b.p.credits), ships: ships.length, gain: Math.round(profit), pilot: b.p.pilot, fleet: Object.entries(fleet).map(([c, n]) => n + c).join('+'),
+        xp: Math.round((b.p.xp || 0) - b.lastXp), level: pilotLevel(b.p.xp), quests: b.quests });
+      b.lastXp = b.p.xp || 0;
       b.lastCredits = b.p.credits;
     }
     if (!QUIET) console.log(`Stunde ${h}: ` + bots.map((b) => { const x = b.history.at(-1); return `${b.p.name} ${x.credits.toLocaleString('de-DE')} Cr, ${x.ships} Schiffe`; }).join(' | '));
@@ -188,7 +253,20 @@ for (const e of game.world.entities.values()) {
   const outFull = Object.entries(e.market.goods).some(([, sl]) => sl.role === 'produce' && sl.stock + 2 > sl.cap);
   if (outFull) full++; else stalled++;
 }
-for (const s of game.ships.values()) if (s.owner === 'npc') npc++;
+let haulers = 0;
+for (const s of game.ships.values()) if (s.owner === 'npc') { npc++; if (s.queue[0]?.haul) haulers++; }
+// Füllstände der NPC-Märkte im Heimatsektor: Anteil leerer (< 5 %) und voller (> 95 %) Lagerplätze
+const fill = { low: 0, high: 0, n: 0, dev: 0 };
+for (const e of game.world.sectorEntities(home.key)) {
+  if (!e.market || e.market.owner || e.market.strategy === 'shipyard') continue;
+  for (const sl of Object.values(e.market.goods)) {
+    const r = sl.stock / sl.cap;
+    fill.n++;
+    if (r < 0.05) fill.low++;
+    if (r > 0.95) fill.high++;
+    fill.dev += Math.abs(r - (sl.target ?? 0.5));
+  }
+}
 const offers = {};
 for (const e of game.world.sectorEntities(home.key)) {
   if (e.market?.strategy !== 'shipyard') continue;
@@ -198,13 +276,14 @@ for (const e of game.world.sectorEntities(home.key)) {
 console.log('Werftangebot im Heimatsektor am Ende:', JSON.stringify(offers));
 
 console.log(`\nLaufzeit ${((Date.now() - t0) / 1000).toFixed(1)} s`);
-console.log(`Fabriken: ${stations}, Lager voll (wartet auf Abnehmer): ${full} (${Math.round((full / stations) * 100)} %), ohne Zutaten: ${stalled} (${Math.round((stalled / stations) * 100)} %), NPC-Versorger unterwegs: ${npc}`);
+console.log(`Fabriken: ${stations}, Lager voll (wartet auf Abnehmer): ${full} (${Math.round((full / stations) * 100)} %), ohne Zutaten: ${stalled} (${Math.round((stalled / stations) * 100)} %), NPC-Schiffe unterwegs: ${npc} (davon Abholer ${haulers})`);
+console.log(`Lagerplätze im Heimatsektor: ${fill.n}, leer (< 5 %): ${Math.round((fill.low / fill.n) * 100)} %, voll (> 95 %): ${Math.round((fill.high / fill.n) * 100)} %, mittlere Abweichung vom Ziel: ${Math.round((fill.dev / fill.n) * 100)} Prozentpunkte`);
 console.log('\nHandelsgewinn pro Stunde (Einnahmen - Einkauf - Treibstoff), Flotte, Lizenz:');
-console.log('Stunde | ' + bots.map((b) => b.p.name.padEnd(28)).join(' | '));
+console.log('Stunde | ' + bots.map((b) => b.p.name.padEnd(38)).join(' | '));
 for (let k = 0; k < bots[0].history.length; k++) {
   console.log(String(bots[0].history[k].h).padStart(6) + ' | ' + bots.map((b) => {
     const x = b.history[k];
-    return `${x.gain.toLocaleString('de-DE').padStart(9)} Cr/h ${x.fleet.padEnd(7)} P${x.pilot}`.padEnd(28);
+    return `${x.gain.toLocaleString('de-DE').padStart(9)} Cr/h ${x.fleet.padEnd(7)} P${x.pilot} L${x.level} ${String(x.xp).padStart(3)} XP`.padEnd(38);
   }).join(' | '));
 }
 
@@ -224,5 +303,6 @@ const tradeIncome = bots.map((b) => game.shipsOf(b.p.id).reduce((a, s) => a + (s
 bots.forEach((b, i) => {
   const hours = game.time / 3600;
   console.log(`  ${b.p.name}: Handelsgewinn gesamt ${Math.round(tradeIncome[i]).toLocaleString('de-DE')} Cr = ${Math.round(tradeIncome[i] / hours).toLocaleString('de-DE')} Cr/h im Schnitt, ${b.trades} Handelsaufträge`);
+  console.log(`    Quests (Hauptschiff): ${b.quests} erfüllt, ${Math.round(b.questCr).toLocaleString('de-DE')} Cr = ${Math.round(b.questCr / hours).toLocaleString('de-DE')} Cr/h, ${Math.round((b.p.xp || 0) / hours)} XP/h, Pilotenlevel ${pilotLevel(b.p.xp)}`);
 });
 game.store.close();

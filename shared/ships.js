@@ -1,13 +1,13 @@
 // Schiffe, Klassen, Stufen-Upgrades, Module und Pilotenlizenz. Alle Zahlen sind Kalibrierungsannahmen.
 import { GOODS } from './goods.js';
-import { FACTIONS, FACTION_SHIPS } from './factions.js';
+import { FACTIONS, FACTION_SHIPS, ABILITIES } from './factions.js';
 
 export const SHIP_CLASSES = {
   S:  { name: 'S', license: 1, yard: 'shipyard' },
   M:  { name: 'M', license: 2, yard: 'shipyard' },
   L:  { name: 'L', license: 3, yard: 'bigyard' },
   XL: { name: 'XL', license: 5, yard: 'bigyard' },
-  F:  { name: 'Fraktion', license: 4, yard: 'faction' },
+  F:  { name: 'Spezial', license: 5, yard: 'faction' },
 };
 
 /** Faktor je Stufe für Schiffe, Lizenzen und Upgrades (Geldbalance: exponentielle Senken) */
@@ -53,10 +53,11 @@ export const SHIP_TYPES = {
                 desc: 'Stationseigenes Versorgungsschiff. Holt Rohstoffe für leere Stationen.' },
 };
 
-// Fraktionsschiffe (Klasse F): nur im Fraktionscluster, Credits plus seltene Ressource
+// Fraktionsschiffe (L, XL und Spezial): nur an der Fraktionswerft, Credits plus Schiffswährung, Fraktionsrang
 for (const [id, d] of Object.entries(FACTION_SHIPS)) {
-  SHIP_TYPES[id] = { cls: 'F', sprite: 'ship_' + id, factionName: FACTIONS[d.faction].name, ...d };
+  SHIP_TYPES[id] = { sprite: 'ship_' + id, factionName: FACTIONS[d.faction].name, ...d };
 }
+export { ABILITIES };
 
 // Baumaterial: Anteile am Materialwert je Klasse, Menge so, dass Material + Marge ≈ Referenzpreis
 export const YARD_MARGIN = 0.25;
@@ -82,6 +83,10 @@ for (const t of Object.keys(SHIP_TYPES)) SHIP_TYPES[t].build = buildMaterials(t)
 export const SHIPYARD = {
   MAX_FOR_SALE: 3,
   SKIP_AFTER: 900, // Sekunden Wartezeit auf Material für den nächsten Typ der Bauliste
+  // Bestellslot (PRD-2 Kapitel 12): Anzahlung 2 × Katalogpreis ohne Erstattung, 10 min Vorkaufsrecht für den Besteller
+  DEPOSIT: 2,
+  RESERVE: 600,
+  ORDER_CLASSES: { shipyard: ['S', 'M'], bigyard: ['L', 'XL'] },
   BUILD_TIME: { S: 40, M: 90, L: 240, XL: 600, F: 600 },
   ORDER: {
     shipyard: ['spatz', 'maulwurf', 'lastesel', 'spatz', 'kolibri', 'grubenhund', 'bussard', 'maulwurf', 'pelikan'],
@@ -110,7 +115,14 @@ export const MODULES = {
   gascoll:   { name: 'Gaskollektor', mine: 'gas', rate: 0.8, price: 120000, desc: 'Sammelt Nebelgas in Plasmawolken.' },
   drill:     { name: 'Tiefbohrer', mine: 'drill', rate: 0.4, price: 200000, desc: 'Baut Gold, Diamant, Uran und Exotische Kristalle ab.' },
   acidex:    { name: 'Säureextraktor', mine: 'acid', rate: 1.5, price: 60000, desc: 'Gewinnt Säure aus Säurefeldern.' },
+  sensor:    { name: 'Sensorphalanx', sensor: true, price: 90000, desc: 'Sensorreichweite +60 %, jedes weitere Modul +30 %.' },
 };
+/** Sensorreichweite: Grundwert, Sensorphalanx +60 % für das erste und +30 % für jedes weitere Modul */
+export const SENSOR = { BASE: 2500, FIRST: 0.6, MORE: 0.3 };
+export const sensorFactor = (n) => (n > 0 ? 1 + SENSOR.FIRST + SENSOR.MORE * (n - 1) : 1);
+
+/** Hauptschiff: ×4 Tempo bei ×4 Verbrauch pro Sekunde (Verbrauch pro Strecke bleibt), 5 min Sperre nach jeder Änderung */
+export const FLAGSHIP = { SPEED: 4, COOLDOWN: 300 };
 /** Kapazität für n gleiche Module: 1 → 30, 2 → 65, 3 → 100 */
 export const moduleCapacity = (n) => (n > 0 ? MODULE_SIZE * n + MODULE_COMBO * (n - 1) : 0);
 /** Abbaurate für n gleiche Abbaumodule: jedes weitere +100 % plus Kombo-Bonus */
@@ -122,9 +134,9 @@ export const PILOT_LICENSES = [
   { level: 1, maxShips: 3, classes: ['S'], maxUpgrade: 1, cost: 0 },
   { level: 2, maxShips: 6, classes: ['S', 'M'], maxUpgrade: 2, cost: 20000 },
   { level: 3, maxShips: 12, classes: ['S', 'M', 'L'], maxUpgrade: 3, cost: 150000 },
-  { level: 4, maxShips: 20, classes: ['S', 'M', 'L', 'F'], maxUpgrade: 4, cost: 1000000 },
-  { level: 5, maxShips: 35, classes: ['S', 'M', 'L', 'F', 'XL'], maxUpgrade: 5, cost: 6000000 },
-  { level: 6, maxShips: 60, classes: ['S', 'M', 'L', 'F', 'XL'], maxUpgrade: 6, cost: 30000000 },
+  { level: 4, maxShips: 20, classes: ['S', 'M', 'L'], maxUpgrade: 4, cost: 1000000 },
+  { level: 5, maxShips: 35, classes: ['S', 'M', 'L', 'XL', 'F'], maxUpgrade: 5, cost: 6000000 },
+  { level: 6, maxShips: 60, classes: ['S', 'M', 'L', 'XL', 'F'], maxUpgrade: 6, cost: 30000000 },
 ];
 
 // ---------- Abgeleitete Werte eines Schiffes ----------
@@ -134,32 +146,49 @@ export function countModules(ship) {
   return n;
 }
 
-/** Effektive Werte: Tempo, Tank, Laderäume je Klasse, Abbauraten */
+/** Abbaurate des Erzbrechers für ultraseltene Vorkommen (ohne Tiefbohrer-Modul): wie zwei Tiefbohrer */
+export const DRILL_ABILITY_RATE = 0.8;
+
+/**
+ * Effektive Werte: Tempo, Tank, Laderäume je Klasse, Abbauraten, Sensor, Verbrauch.
+ * ship.bonus: Werftbonus (+5 % je Werftlevel) auf Tempo, Fracht, Tank und Abbau.
+ */
 export function shipStats(ship) {
   const d = SHIP_TYPES[ship.type];
   const u = ship.upg || {};
   const n = countModules(ship);
   const mods = (ship.modules || []).length;
-  const mining = { std: d.mining || 0 };
-  for (const [id, k] of Object.entries(n)) if (MODULES[id].mine) mining[MODULES[id].mine] = moduleMiningRate(MODULES[id].rate, k);
+  const b = 1 + (ship.bonus || 0);
+  const mining = { std: (d.mining || 0) * b };
+  for (const [id, k] of Object.entries(n)) if (MODULES[id].mine) mining[MODULES[id].mine] = moduleMiningRate(MODULES[id].rate, k) * b;
+  if (d.ability === 'drill') mining.drill = Math.max(mining.drill || 0, DRILL_ABILITY_RATE * b);
+  const cargoTotal = Math.round(d.cargo * (1 + UPGRADES.cargo.per * (u.cargo || 0)) * b);
   return {
-    speed: d.speed * (1 + UPGRADES.speed.per * (u.speed || 0)),
-    tank: d.tank * (1 + UPGRADES.tank.per * (u.tank || 0)),
-    cargoTotal: Math.round(d.cargo * (1 + UPGRADES.cargo.per * (u.cargo || 0))),
-    cargo: Math.max(0, Math.round(d.cargo * (1 + UPGRADES.cargo.per * (u.cargo || 0))) - MODULE_SIZE * mods),
+    speed: d.speed * (1 + UPGRADES.speed.per * (u.speed || 0)) * b * (ship.main ? FLAGSHIP.SPEED : 1),
+    tank: d.tank * (1 + UPGRADES.tank.per * (u.tank || 0)) * b,
+    cargoTotal,
+    cargo: Math.max(0, cargoTotal - MODULE_SIZE * mods),
     hazard: moduleCapacity(n.shielded || 0),
     passenger: moduleCapacity(n.cabin || 0),
     mining,
+    sensor: SENSOR.BASE * sensorFactor(n.sensor || 0) * (d.ability === 'sensor' ? 2 : 1),
+    // Treibstoffverbrauch je Flugsekunde relativ zum Normalwert
+    burn: (ship.main ? FLAGSHIP.SPEED : 1) * (d.ability === 'fuel' ? 0.5 : 1),
   };
 }
+/** Hat der Schiffstyp eine Fraktionsfähigkeit? */
+export const hasAbility = (ship, a) => SHIP_TYPES[ship.type]?.ability === a;
 
 /** Frachtklasse einer Ware -> Laderaum */
 export const holdOf = (good) => (GOODS[good].cls === 'hazard' ? 'hazard' : GOODS[good].cls === 'passenger' ? 'passenger' : 'cargo');
 
+/** Laderaum einer Ware auf einem bestimmten Schiff (Stahlkoloss: Gefahrgut im normalen Laderaum) */
+export const holdFor = (ship, good) => (GOODS[good].cls === 'hazard' && hasAbility(ship, 'hazard') ? 'cargo' : holdOf(good));
+
 /** Belegung je Laderaum */
 export function holdUsage(ship) {
   const u = { cargo: 0, hazard: 0, passenger: 0 };
-  for (const [g, n] of Object.entries(ship.cargo || {})) u[holdOf(g)] += n;
+  for (const [g, n] of Object.entries(ship.cargo || {})) u[holdFor(ship, g)] += n;
   return u;
 }
 
@@ -167,7 +196,7 @@ export function holdUsage(ship) {
 export function freeFor(ship, good) {
   const st = shipStats(ship);
   if (SHIP_TYPES[ship.type].npc) return st.cargoTotal - Object.values(ship.cargo).reduce((a, b) => a + b, 0);
-  const h = holdOf(good);
+  const h = holdFor(ship, good);
   return Math.max(0, st[h] - holdUsage(ship)[h]);
 }
 

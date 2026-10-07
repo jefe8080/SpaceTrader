@@ -558,7 +558,7 @@ function drawSystemLabels() {
     const [sx, sy] = worldToScreen(s.rx, s.ry);
     const size = Math.max(SHIP_TYPES[s.type].size, 16 / z) * z * 0.6;
     const owner = own || s.task ? '' : ` (${state.players.find((p) => p.id === s.owner)?.name || '?'})`;
-    label(s.name + owner, sx, sy + size + 4, shipColor(s), '11px "Segoe UI", sans-serif');
+    label((s.main ? '♛ ' : '') + s.name + owner, sx, sy + size + 4, shipColor(s), '11px "Segoe UI", sans-serif');
   }
   // Stoppnummern der Route
   const sel = state.selected;

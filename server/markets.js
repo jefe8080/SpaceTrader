@@ -1,5 +1,5 @@
 import { GOODS, PLANET_TYPES, STATION_TYPES, RECIPES, STATION_FOOD, SHIP_TYPES, SHIPYARD, STORAGE, STATS, TRADER, ULTRA, MODULES, YARD_MARGIN,
-  slotPrice, selfUse } from '../shared/config.js';
+  ECON, SUPPLY, LEVEL_FX, PLANET_EXTRAS, EXTRA_STEPS, slotPrice, targetOf, driftDelta, giverLevel } from '../shared/config.js';
 
 /**
  * Märkte nach Rollen- und Strategie-Modell.
@@ -27,11 +27,21 @@ function addTraders(goods, r, [min, max], slow = 1) {
   }
 }
 
+/** Ziel-Füllstand zufällig aus der Spanne der Rolle */
+export const randomTarget = (role, r, span = ECON.TARGET) => Math.round((span[role][0] + r() * (span[role][1] - span[role][0])) * 100) / 100;
+
 /**
  * Erzeugt den Markt einer Station oder eines Planeten. `r` ist ein Zufallsgenerator (0..1).
  * scale: Größenfaktor (Planeten), opts.slow: Langsam-Modifier (Raten und Lager, Startsystem), opts.traders: Händler-Waren ergänzen
+ * Jeder Lagerplatz bekommt einen Ziel-Füllstand (Produzenten 60-70 %, Verbraucher 30-40 %, Händler 45-55 %).
  */
-export function createMarket(kind, type, r, scale = 1, { slow = 1, traders = true } = {}) {
+export function createMarket(kind, type, r, scale = 1, opts = {}) {
+  const m = buildMarket(kind, type, r, scale, opts);
+  for (const s of Object.values(m.goods)) s.target ??= randomTarget(s.role, r);
+  return m;
+}
+
+function buildMarket(kind, type, r, scale = 1, { slow = 1, traders = true } = {}) {
   const goods = {};
   const produce = (g, rate, cap) => { goods[g] = slot('produce', rate, cap, Math.round(cap) * (0.4 + 0.4 * r())); };
   const consume = (g, rate, cap) => { goods[g] = slot('consume', rate, cap, Math.round(cap) * (0.1 + 0.35 * r())); };
@@ -229,28 +239,25 @@ export const STRATEGIES = {
   /**
    * NPC-Werft: baut selbstständig aus angelieferten Materialien, max. 3 Schiffe im Angebot.
    * Verkaufspreis = Materialkosten (Basispreis × Standort-Modifier) plus Marge.
+   * Bestellslot (PRD-2 Kapitel 12): Eine Bestellung hat Vorrang vor der Bauliste und darf als viertes Schiff ins Angebot.
    */
   shipyard: {
-    /** Fehlendes Material für den nächsten Bau (NPC-Werften schicken Versorger) */
-    missingInput(m) {
-      if (m.owner || m.building || m.forSale.length >= SHIPYARD.MAX_FOR_SALE) return null;
+    /** Fehlendes Material für den nächsten Bau, knappstes zuerst (NPC-Werften schicken je Ware einen Versorger) */
+    missingInputs(m) {
+      if (m.owner || m.building) return [];
+      if (!m.order && m.forSale.length >= SHIPYARD.MAX_FOR_SALE) return [];
       const order = SHIPYARD.ORDER[m.yard || 'shipyard'];
-      const req = SHIP_TYPES[order[(m.nextBuild || 0) % order.length]].build;
-      let best = null, bestRatio = Infinity;
-      for (const [g, n] of Object.entries(req)) {
-        const have = m.goods[g]?.stock || 0;
-        if (have >= n) continue;
-        if (have / n < bestRatio) { bestRatio = have / n; best = g; }
-      }
-      return best;
+      const req = SHIP_TYPES[m.order ? m.order.type : order[(m.nextBuild || 0) % order.length]].build;
+      return Object.keys(req).filter((g) => (m.goods[g]?.stock || 0) < req[g])
+        .sort((a, b) => (m.goods[a]?.stock || 0) / req[a] - (m.goods[b]?.stock || 0) / req[b]);
     },
-    tick(e, m, dt, now) {
+    tick(e, m, dt, now, game) {
       if (m.owner) {
         // Spielerwerft: baut nur auf Befehl, fertige Schiffe kommen in den Werftbestand
         if (m.building) {
           m.building.remaining -= dt;
           if (m.building.remaining <= 0) {
-            m.forSale.push({ type: m.building.type, price: SHIP_TYPES[m.building.type].price, own: true });
+            m.forSale.push({ type: m.building.type, price: SHIP_TYPES[m.building.type].price, own: true, ...yardBonusOf(m.building) });
             m.building = null;
             stat(m, now, 'n', null, 1);
           }
@@ -260,10 +267,24 @@ export const STRATEGIES = {
       if (m.building) {
         m.building.remaining -= dt;
         if (m.building.remaining <= 0) {
-          m.forSale.push({ type: m.building.type, price: m.building.price });
+          const item = { type: m.building.type, price: m.building.price, ...yardBonusOf(m.building) };
+          const o = m.building.order;
+          if (o) {
+            // Bestellung fertig: Vorkaufsrecht für den Besteller
+            Object.assign(item, { ordered: true, reservedFor: o.player, reservedName: o.name, reservedUntil: now + SHIPYARD.RESERVE });
+            m.order = null;
+            const p = game?.players.get(o.player);
+            if (p) game.emit('notice', p, `${e.name}: Deine Bestellung ${SHIP_TYPES[item.type].name} ist fertig (${SHIPYARD.RESERVE / 60} min für dich reserviert).`);
+          }
+          m.forSale.push(item);
           m.building = null;
           stat(m, now, 'n', null, 1);
         }
+        return;
+      }
+      if (m.order) {
+        // Bestellung hat Vorrang: warten, bis das Material da ist
+        if (canBuild(m, m.order.type)) startBuild(m, m.order.type, now, m.order);
         return;
       }
       if (m.forSale.length >= SHIPYARD.MAX_FOR_SALE) return;
@@ -274,16 +295,9 @@ export const STRATEGIES = {
       const patient = now - m.waitSince < SHIPYARD.SKIP_AFTER;
       for (let k = 0; k < (patient ? 1 : order.length); k++) {
         const type = order[(m.nextBuild + k) % order.length];
-        const req = SHIP_TYPES[type].build;
-        if (!Object.entries(req).every(([g, n]) => (m.goods[g]?.stock || 0) >= n)) continue;
+        if (!canBuild(m, type)) continue;
         m.waitSince = null;
-        let cost = 0;
-        for (const [g, n] of Object.entries(req)) {
-          m.goods[g].stock -= n;
-          cost += n * GOODS[g].base * (m.goods[g].mod || 1);
-          stat(m, now, 'c', g, n);
-        }
-        m.building = { type, remaining: SHIPYARD.BUILD_TIME[SHIP_TYPES[type].cls], price: Math.round(cost * (1 + YARD_MARGIN) / 100) * 100 };
+        startBuild(m, type, now);
         m.nextBuild = (m.nextBuild + k + 1) % order.length;
         return;
       }
@@ -295,6 +309,50 @@ export const STRATEGIES = {
     },
   },
 };
+
+const canBuild = (m, type) => Object.entries(SHIP_TYPES[type].build).every(([g, n]) => (m.goods[g]?.stock || 0) >= n);
+/** Bau beginnen: Material verbrauchen, Preis = Materialkosten + Marge, Werftbonus nach aktuellem Level */
+function startBuild(m, type, now, order = null) {
+  let cost = 0;
+  for (const [g, n] of Object.entries(SHIP_TYPES[type].build)) {
+    m.goods[g].stock -= n;
+    cost += n * GOODS[g].base * (m.goods[g].mod || 1);
+    stat(m, now, 'c', g, n);
+  }
+  const lvl = giverLevel(m.qxp);
+  m.building = { type, remaining: SHIPYARD.BUILD_TIME[SHIP_TYPES[type].cls], price: Math.round(cost * (1 + YARD_MARGIN) / 100) * 100,
+    bonus: lvl * LEVEL_FX.YARD_BONUS, yardLvl: lvl, ...(order ? { order } : {}) };
+}
+
+/** Werftbonus eines Baus für das Angebot (nur wenn vorhanden) */
+const yardBonusOf = (b) => (b.bonus ? { bonus: b.bonus, yardLvl: b.yardLvl } : {});
+
+/**
+ * Planetenlevel anwenden (PRD-2 10.1): Produktion und Verbrauch +10 %, Lager +15 % je Level,
+ * Zusatzwaren bei Level 2, 4 und 6. Auch das Lager-Upgrade des Besitzers (m.storageMul) fließt ein.
+ */
+export function applyLevel(e) {
+  const m = e.market;
+  if (e.kind !== 'planet' || !m) return;
+  const L = m.lvl || 0;
+  EXTRA_STEPS.forEach(([lv, role], i) => {
+    const g = PLANET_EXTRAS[e.type]?.[i];
+    if (!g || L < lv) return;
+    const s = m.goods[g];
+    if (s && (s.role !== 'trade' || s.lvlExtra)) return; // nie eine Ware, die der Planet schon produziert oder verbraucht
+    const rate = (LEVEL_FX.EXTRA_RATE_CR / GOODS[g].base) * (e.size || 1);
+    const baseCap = capOf(rate, role === 'produce' ? STORAGE.PLANET_PRODUCE : STORAGE.PLANET_CONSUME);
+    const target = randomTarget(role, Math.random);
+    if (s) Object.assign(s, { role, rate, baseRate: rate, baseCap, target, lvlExtra: true });
+    else m.goods[g] = { role, rate, baseRate: rate, cap: baseCap, baseCap, stock: target * baseCap, mod: 1, target, lvlExtra: true };
+  });
+  for (const s of Object.values(m.goods)) {
+    if (s.role !== 'trade') { s.baseRate ??= s.rate; s.rate = s.baseRate * (1 + LEVEL_FX.PLANET_RATE * L); }
+    s.baseCap ??= s.cap;
+    s.cap = Math.max(1, Math.round(s.baseCap * (m.storageMul || 1) * (1 + LEVEL_FX.PLANET_STORAGE * L)));
+  }
+  m.rev = (m.rev || 0) + 1;
+}
 
 /** Einfacher Rezeptlauf ohne Verpflegung (für Zusatzrezepte). Liefert neuen Fortschritt. */
 function runRecipe(m, r, prog, dt, now) {
@@ -309,22 +367,128 @@ function runRecipe(m, r, prog, dt, now) {
   return prog;
 }
 
+// ---------- NPC-Märkte: Drift zum Ziel-Füllstand ----------
+/**
+ * Nominale Warenflüsse eines NPC-Marktes in dt Sekunden (+ Produktion, − Verbrauch).
+ * Sie bestimmen Statistik und Effizienz und begrenzen die Drift: Ein Produzent füllt sein Lager nicht schneller auf,
+ * als er produziert, ein Verbraucher leert es nicht schneller, als er verbraucht. In die Gegenrichtung wirkt die
+ * Drift unbegrenzt (abstrakter Hintergrundhandel).
+ */
+const NOMINAL = {
+  planet(m, dt) {
+    const cons = Object.values(m.goods).filter((s) => s.role === 'consume');
+    const sat = cons.length ? cons.filter((s) => s.stock >= 1).length / cons.length : 1;
+    m.eff = 0.6 + 0.4 * sat;
+    const out = {};
+    for (const [g, s] of Object.entries(m.goods)) {
+      if (s.role === 'produce') out[g] = s.rate * m.eff * dt;
+      else if (s.role === 'consume') out[g] = -s.rate * dt;
+    }
+    return out;
+  },
+  factory(m, dt, now) {
+    const { in: inp, out, time } = STATION_TYPES[m.recipe].recipe;
+    const food = m.goods.food;
+    const mult = inp.food || food.stock > 0 ? 1 : 0.5;
+    const canRun = Object.keys(inp).every((g) => m.goods[g].stock >= 1) && Object.keys(out).every((g) => m.goods[g].stock < m.goods[g].cap);
+    m.eff = canRun ? mult : 0;
+    const flow = {};
+    if (!inp.food) flow.food = -STATION_FOOD * (m.speed || 1) * dt;
+    if (!canRun) return flow;
+    const cycles = (dt * mult * (m.speed || 1)) / time;
+    m.progress = (m.progress || 0) + cycles;
+    const whole = Math.floor(m.progress);
+    m.progress -= whole;
+    stat(m, now, 'n', null, whole);
+    for (const [g, n] of Object.entries(inp)) flow[g] = (flow[g] || 0) - n * cycles;
+    for (const [g, n] of Object.entries(out)) flow[g] = (flow[g] || 0) + n * cycles;
+    return flow;
+  },
+  consumer(m, dt) {
+    const out = {};
+    let ok = true;
+    for (const [g, s] of Object.entries(m.goods)) {
+      if (s.role !== 'consume' || !(s.rate > 0)) continue;
+      out[g] = -s.rate * dt;
+      if (s.stock <= 0) ok = false;
+    }
+    m.eff = ok ? 1 : 0.5;
+    return out;
+  },
+  extractor(m, dt) {
+    const mult = m.goods.food.stock > 0 ? 1 : 0.5;
+    m.eff = mult;
+    const out = { food: -STATION_FOOD * dt };
+    for (const [g, s] of Object.entries(m.goods)) if (s.role === 'produce') out[g] = s.rate * mult * dt;
+    return out;
+  },
+  hub(m, dt) {
+    const out = {};
+    for (const [g, s] of Object.entries(m.goods)) {
+      if (s.role === 'produce') out[g] = s.rate * dt;
+      else if (s.role === 'consume') out[g] = -s.rate * dt;
+    }
+    return out;
+  },
+  factionyard(m, dt) {
+    const out = {};
+    for (const [g, s] of Object.entries(m.goods)) if (s.role === 'consume') out[g] = -s.rate * dt;
+    return out;
+  },
+};
+/** Strategien mit Drift (Werften bauen aus echtem Material und haben keine Drift) */
+export const DRIFTING = new Set(Object.keys(NOMINAL));
+export const drifts = (m) => !m.owner && DRIFTING.has(m.strategy);
+
+/** Nachfrage-Schwankung: Ziel-Füllstand eines Planeten springt je Ware alle 2 bis 6 h */
+function swing(m, now) {
+  const [a, b] = ECON.SWING_EVERY;
+  for (const s of Object.values(m.goods)) {
+    if (s.swingAt === undefined) { s.swingAt = now + a + Math.random() * (b - a); continue; }
+    if (now < s.swingAt) continue;
+    s.target = randomTarget(s.role, Math.random, ECON.SWING);
+    s.swingAt = now + a + Math.random() * (b - a);
+  }
+}
+
+function npcTick(e, m, dt, now) {
+  if (m.strategy === 'planet') swing(m, now);
+  const flow = NOMINAL[m.strategy](m, dt, now);
+  for (const [g, s] of Object.entries(m.goods)) {
+    const f = flow[g] || 0;
+    if (f > 0) stat(m, now, 'p', g, f);
+    else if (f < 0 && s.stock > 0) stat(m, now, 'c', g, -f);
+    let d = driftDelta(s.stock, targetOf(s) * s.cap, dt);
+    if (s.role === 'produce' && d > 0) d = Math.min(d, Math.max(0, f));
+    else if (s.role === 'consume' && d < 0) d = Math.max(d, Math.min(0, f));
+    s.stock = Math.max(0, Math.min(s.cap, s.stock + d));
+  }
+}
+
 export function tickMarket(e, dt, now, game) {
   const m = e.market;
   if (!m) return;
-  STRATEGIES[m.strategy].tick(e, m, dt, now, game);
-  // Eigenverbrauch über 80 % Füllstand, für alle Rollen (nicht bei Spielerbesitz)
-  if (!m.owner) {
-    for (const [g, s] of Object.entries(m.goods)) {
-      const k = selfUse(s.stock, s.cap, dt);
-      if (k > 0) consumeSlot(m, now, g, s, k);
-    }
-  }
+  if (drifts(m)) npcTick(e, m, dt, now);
+  else STRATEGIES[m.strategy].tick(e, m, dt, now, game);
   // Preisverlauf: letzter Mittelpreis je 5-Minuten-Block (für Sparklines)
   const cur = bucketFor(m, now);
   for (const [g, s] of Object.entries(m.goods)) cur.pr[g] = Math.round(slotPrice(g, s) * 10) / 10;
 }
 
-export function missingInput(m) {
-  return STRATEGIES[m.strategy].missingInput?.(m) ?? null;
+/**
+ * Waren, für die eine Station Versorger losschickt, dringendste zuerst.
+ * NPC-Märkte mit Drift: Zutaten deutlich unter dem Ziel-Füllstand. Sonst die Regel der Strategie (fehlt für einen Zyklus).
+ */
+export function missingInputs(m) {
+  if (drifts(m)) {
+    if (m.strategy !== 'factory' && m.strategy !== 'extractor') return [];
+    const ins = m.strategy === 'factory' ? { ...STATION_TYPES[m.recipe].recipe.in, food: 1 } : { food: 1 };
+    return Object.keys(ins).filter((g) => m.goods[g] && m.goods[g].stock / m.goods[g].cap < targetOf(m.goods[g]) - SUPPLY.MARGIN)
+      .sort((a, b) => m.goods[a].stock / m.goods[a].cap - m.goods[b].stock / m.goods[b].cap);
+  }
+  const S = STRATEGIES[m.strategy];
+  if (S.missingInputs) return S.missingInputs(m);
+  const g = S.missingInput?.(m);
+  return g ? [g] : [];
 }
+export const missingInput = (m) => missingInputs(m)[0] ?? null;

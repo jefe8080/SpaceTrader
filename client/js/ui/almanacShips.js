@@ -1,28 +1,29 @@
 // Almanach-Reiter Schiffe und Module: sichtbar sind gesehene oder gekaufte Typen
-import { GOODS, SHIP_TYPES, SHIP_CLASSES, MODULES, MODULE_SIZE, moduleCapacity } from '/shared/config.js';
+import { GOODS, SHIP_TYPES, SHIP_CLASSES, MODULES, MODULE_SIZE, ABILITIES, RANK_NAMES, moduleCapacity } from '/shared/config.js';
 import { state, fmt, esc } from '../state.js';
 import { registerAlmanacTab } from './almanac.js';
 import { shipSprite } from '../util.js';
 
-const SOURCE = { shipyard: 'jede Werft', bigyard: 'große Werft', faction: 'nur im Fraktionscluster' };
+const SOURCE = { shipyard: 'jede Werft', bigyard: 'große Werft', faction: 'nur an der Fraktionswerft' };
 
 function renderShips() {
   const types = Object.entries(SHIP_TYPES).filter(([, d]) => !d.npc);
   const n = types.filter(([t]) => state.shipTypes.has(t)).length;
   let h = `<div class="toolbar"><span class="muted">${n} von ${types.length} Schiffstypen gesehen</span></div><div class="alm-cards">`;
   for (const cls of Object.keys(SHIP_CLASSES)) {
-    const list = types.filter(([, d]) => d.cls === cls);
+    const list = types.filter(([, d]) => d.cls === cls).sort(([, a], [, b]) => (a.faction ? 1 : 0) - (b.faction ? 1 : 0));
     if (!list.length) continue;
     h += `<div class="alm-tier">Klasse ${SHIP_CLASSES[cls].name} · Pilotenlizenz ${SHIP_CLASSES[cls].license} · ${SOURCE[SHIP_CLASSES[cls].yard]}</div>`;
     for (const [t, d] of list) {
       if (!state.shipTypes.has(t)) { h += `<div class="alm-card unknown"><div class="muted">???</div></div>`; continue; }
       const seen = state.shipPrices[t];
       h += `<div class="alm-card"><img src="${shipSprite(t, state.me.color)}" alt="">
-        <div><b>${d.name}</b> <span class="badge">${SHIP_CLASSES[d.cls].name}</span>${d.faction ? ` <span class="muted">${esc(d.factionName || '')}</span>` : ''}
+        <div><b>${d.name}</b> <span class="badge">${SHIP_CLASSES[d.cls].name}</span>${d.faction ? ` <span class="muted">${esc(d.factionName || '')} · Rang ${d.rank} (${RANK_NAMES[d.rank]}) · nur Fraktionswerft</span>` : ''}
+        ${d.ability ? `<div class="ability">★ ${ABILITIES[d.ability]}</div>` : ''}
         <div class="kv small"><span>Laderaum</span><span>${fmt(d.cargo)}</span><span>Tempo</span><span>${d.speed}</span>
         <span>Tank</span><span>${d.tank}</span><span>Bergbau</span><span>${d.mining || '–'}</span>
         <span>Preis</span><span>${seen ? fmt(seen) + ' Cr (zuletzt gesehen)' : 'ca. ' + fmt(d.price) + ' Cr'}${d.currency ? ` + ${fmt(d.currency.n)} ${GOODS[d.currency.good].name}` : ''}</span>
-        <span>Material</span><span>${Object.entries(d.build || {}).map(([g, k]) => `${k} ${GOODS[g].name}`).join(', ') || '–'}</span></div>
+        ${d.faction ? '' : `<span>Material</span><span>${Object.entries(d.build || {}).map(([g, k]) => `${k} ${GOODS[g].name}`).join(', ') || '–'}</span>`}</div>
         <div class="muted small-note">${esc(d.desc)}</div></div></div>`;
     }
   }

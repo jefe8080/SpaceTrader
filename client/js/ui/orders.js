@@ -3,6 +3,7 @@ import { inZone } from '/shared/nav.js';
 import { cmd } from '../net.js';
 import { state } from '../state.js';
 import { canMine } from '../util.js';
+import { sfx } from '../audio.js';
 
 /**
  * Befehl "dorthin" an Schiffe: Asteroidenfeld + Bergbau -> abbauen, Objekt -> anfliegen, Punkt -> fliegen.
@@ -11,6 +12,7 @@ import { canMine } from '../util.js';
 export function orderShips(ships, target, append = false) {
   ships = ships.filter(Boolean);
   if (!ships.length) return;
+  sfx('order');
   if (!target.id) {
     // In einer Plasmawolke: Schiffe mit Gaskollektor sammeln, die anderen fliegen hin
     const zone = [...state.zones.values()].find((z) => ZONE_TYPES[z.type].mining && inZone(z, target.x, target.y));
