@@ -46,7 +46,7 @@ export default {
       name: V.str(32, 1),
       stops: V.arr(stop, 16),
       minBalance: V.opt(V.int(0, 1e12), 0),
-      assign: V.opt(V.ownShips(), []),
+      assign: V.opt(V.arr(V.ownShip(), 100), []), // leer = nur Route bearbeiten
     },
     run({ game, player }, { id: route, name, stops, minBalance, assign }) {
       if (!stops.length) return 'Eine Route braucht mindestens einen Stopp.';
@@ -58,7 +58,7 @@ export default {
       Object.assign(route, { name, stops, minBalance });
       // Laufende Schiffe auf gültigen Stopp setzen
       for (const s of shipsOnRoute(game, route.id)) for (const c of s.queue) if (c.route === route.id && c.idx >= stops.length) { c.idx = 0; c.phase = 'travel'; }
-      for (const s of assign) giveOrder(game, s, { t: 'route', route: route.id, rounds: 0 }, false);
+      for (const s of new Set(assign)) giveOrder(game, s, { t: 'route', route: route.id, rounds: 0 }, false);
       game.emit('routes', player);
       return undefined;
     },

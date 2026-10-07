@@ -120,7 +120,7 @@ function shipDetails(s) {
   }
   h += `</div></div>`;
 
-  h += `<div class="section"><div class="section-title">Befehlsqueue <span class="muted" style="text-transform:none;letter-spacing:0">· Rechtsklick ersetzt, Shift+Rechtsklick hängt an</span></div>`;
+  h += `<div class="section"><div class="section-title">Befehlsqueue <span class="muted" style="text-transform:none;letter-spacing:0">· Rechtsklick ersetzt, Mittelklick hängt an</span></div>`;
   if (s.queue?.length) {
     h += `<div class="queue">${s.queue.map((c, i) => `<div class="qitem${i === 0 ? ' cur' : ''}"><span class="qn">${i + 1}</span><span class="qt">${queueText(c)}</span>
       <button class="small" data-act="qup" data-ship="${s.id}" data-qid="${c.qid}" ${i === 0 ? 'disabled' : ''}>↑</button>

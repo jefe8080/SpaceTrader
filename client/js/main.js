@@ -148,6 +148,13 @@ setInterval(sendSubscriptions, 250);
 let drag = null;
 canvas.addEventListener('mousedown', (e) => {
   if (e.button === 0) drag = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, moved: false };
+  else if (e.button === 1) e.preventDefault(); // kein Autoscroll
+});
+// Mittelklick: Befehl an die Queue anhängen (Firefox öffnet bei Shift+Rechtsklick immer sein Kontextmenü)
+canvas.addEventListener('auxclick', (e) => {
+  if (e.button !== 1 || !state.me) return;
+  e.preventDefault();
+  orderAt(e.clientX, e.clientY, true);
 });
 addEventListener('mousemove', (e) => {
   if (drag) {

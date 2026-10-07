@@ -34,7 +34,7 @@ Nur im Freundeskreis betreiben. Vor einem öffentlichen Betrieb sind Authentifiz
 | Strg/Shift+Klick (Flottenliste) | Mehrfachauswahl |
 | Doppelklick | Schiff auswählen und Kamera folgen lassen |
 | Rechtsklick | Befehl an alle gewählten Schiffe, ersetzt die Queue |
-| Shift+Rechtsklick | Befehl an die Queue anhängen |
+| Mittelklick, Shift+Rechtsklick | Befehl an die Queue anhängen (Firefox: nur Mittelklick) |
 | 1 / 2 / 3 | Zoom: System, Sektor, Galaxie |
 | R, F, A, B | Routenübersicht, Favoriten, Almanach, Besitz |
 | Leertaste, Esc | Kamera folgen, Fenster schließen bzw. Auswahl aufheben |

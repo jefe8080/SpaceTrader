@@ -287,6 +287,11 @@ export const STRATEGIES = {
         m.nextBuild = (m.nextBuild + k + 1) % order.length;
         return;
       }
+      // Nichts baubar und Geduld vorbei: nächsten Typ anpeilen, damit Versorger dessen Material holen
+      if (!patient) {
+        m.nextBuild = (m.nextBuild + 1) % order.length;
+        m.waitSince = now;
+      }
     },
   },
 };
