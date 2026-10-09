@@ -1,7 +1,7 @@
 # Space Trader
 
 Multiplayer-Handels- und Aufbauspiel in einer unendlichen Galaxie aus Sektoren um Schwarze Löcher.
-Umsetzung des PRD [docs/PRD.md](docs/PRD.md) (Erweiterung "Galaxie") und [docs/PRD-2.md](docs/PRD-2.md) (Erweiterung "Progression").
+Umsetzung des PRD [docs/PRD.md](docs/PRD.md) (Erweiterung "Galaxie") , [docs/PRD-2.md](docs/PRD-2.md) (Erweiterung "Progression") und [docs/PRD-3.md](docs/PRD-3.md) (Erweiterung "Gemeinschaft").
 
 ## Start
 
@@ -36,7 +36,8 @@ Nur im Freundeskreis betreiben. Vor einem öffentlichen Betrieb sind Authentifiz
 | Rechtsklick | Befehl an alle gewählten Schiffe, ersetzt die Queue |
 | Mittelklick, Shift+Rechtsklick | Befehl an die Queue anhängen (Firefox: nur Mittelklick) |
 | 1 / 2 / 3 | Zoom: System, Sektor, Galaxie |
-| R, F, A, B | Routenübersicht, Favoriten, Almanach, Besitz |
+| R, F, A, B, K | Routenübersicht, Favoriten, Almanach, Besitz, Konsortium |
+| Doppelklick auf Planet, "Landen" | Planetare Ansicht (nur mit angedocktem eigenem Schiff), verlassen mit Esc oder 1/2/3 |
 | Leertaste, Esc | Kamera folgen, Fenster schließen bzw. Auswahl aufheben |
 
 ## Aufbau
@@ -49,6 +50,10 @@ Nur im Freundeskreis betreiben. Vor einem öffentlichen Betrieb sind Authentifiz
 | `shared/factions.js` | 6 Fraktions-Archetypen, 18 Fraktionsschiffe (L, XL, Spezial) und Fähigkeiten |
 | `shared/progression.js` | Pilotenlevel, XP-Quellen, Questkatalog und Belohnung, Level von Planeten und Werften, Fraktionsruf |
 | `shared/property.js` | Gouverneurslizenz, Besitzpreise, Besitz-Upgrades, Fixpreis-Verbrauch |
+| `shared/consortium.js` | Konsortiumslevel, Gebühren, Ränge, Logaktionen |
+| `shared/events.js` | Sondernachfrage: Timer, Festpreis, Mengenformel |
+| `shared/planetside.js` | Gebäude-Ausbau, Fabrik-Bauplätze, Ausstattung der Planeten, Minispiel-Regeln |
+| `shared/facts.js`, `shared/compliments.js` | Schulfakten (402) und Komplimente des Bettlers (60) |
 | `shared/hex.js`, `shared/nav.js` | Hex-Raster, Navigation über Wurmlöcher (Dijkstra), Sondergebiete |
 | `server/db.js` | SQLite mit Migrationen (`user_version`) und Dirty-Tracking je Zeile |
 | `server/worldgen.js` | Deterministische Sektorgenerierung aus Seed und Hex-Koordinate |
@@ -57,11 +62,14 @@ Nur im Freundeskreis betreiben. Vor einem öffentlichen Betrieb sind Authentifiz
 | `server/ships.js` | Befehlsqueue, Flug, Navigation, Treibstoff, Abbau, Routen, NPC-Versorger und -Abholer |
 | `server/quests.js` | Questtafeln, 6 Questtypen, Annehmen, Fortschritt, Abschluss |
 | `server/property.js` | Besitzerwirtschaft (Lager, Fremdhandel, Fixpreis-Verbrauch, Werften) |
+| `server/consortium.js`, `server/offers.js` | Konsortien (Mitglieder, Pool, Level, Log), Karten- und Schiffshandel |
+| `server/events.js` | Sondernachfrage je Sektor |
 | `server/game.js` | Spielzustand, Simulation, Handel, Entdeckungen, Persistenz |
 | `server/net.js` | Socket.IO mit Subscription- und Delta-Modell |
 | `server/handlers/*` | Client-Befehle als Handler-Module mit Eingabevalidierung |
 | `client/js/render.js` | Canvas-Renderer mit System-, Sektor- und Galaxieansicht |
-| `client/js/ui/*` | Oberfläche: Flotte, Details, Routen, Favoriten, Almanach, Werft, Besitz, Quests, Tonmenü |
+| `client/js/planetside.js` | Planetare Ansicht: prozedurale Seitenansicht mit Gebäuden |
+| `client/js/ui/*` | Oberfläche: Flotte, Details, Routen, Favoriten, Almanach, Werft, Besitz, Quests, Tonmenü, Konsortium, Sondernachfrage, Gebäude-Panel, Minispiele |
 | `client/js/audio.js` | Prozedurale Effekte und Ambient-Musik per WebAudio (keine Audiodateien) |
 | `sim/simulate.js` | Headless-Simulation mit Bots |
 | `tests/*.test.js` | Tests für Preisformel, Modifier, Fixpreis, Kombo-Kapazität, Navigation, Generierung u.a. |
@@ -88,6 +96,12 @@ Nur im Freundeskreis betreiben. Vor einem öffentlichen Betrieb sind Authentifiz
 - **Bestellslot:** NPC-Werften nehmen eine Bestellung an (Anzahlung 2 × Katalogpreis), die Vorrang vor der Bauliste hat.
 - **Besitz:** Gouverneurslizenz am Hub, Kauf vor Ort. Eigenes Lager, Erlöse aus Fremdhandel, Fixpreis-Verbrauch auf
   Planeten, Zoll, offen/privat, Ausbau in vier Linien, eigene Werften mit Bau auf Befehl.
+- **Konsortien:** Gründung am Hub ab Pilotenlevel 2, Ränge Händler und Handelsmeister, Pool mit Gebühren (Einzahlen 10 %,
+  Auszahlen 20 %), Level 1 bis 6, gemeinsamer Besitz mit Lager zum Fixpreis, Karten- und Schiffshandel, Schwarzes Brett, Log.
+- **Sondernachfrage:** In Sektoren mit Spielerschiffen alle 20 bis 60 min ein Event an einem NPC-Planeten, Festpreis
+  2 × Ankaufspreis bei leerem Lager, nur manuelle Verkäufe, keine XP.
+- **Planetare Ansicht:** Questhaus (Quests an Planeten nur dort), Gebäude-Ausbau je Ware, Fabriken auf Bauplätzen eigener
+  Planeten, Minispiele (20 je Stunde), Schmugglerhöhle, Bettler, Hund, Schule. Jeder Planet hat einen eigenen Klang.
 
 ## Annahmen und Entscheidungen (PRD Kapitel 15)
 
@@ -139,6 +153,25 @@ Die offenen Punkte aus PRD-2 Kapitel 16 sind in Kapitel 17 entschieden. Bei der 
   dauerhaft im Angebot sind.
 - **Bestellslot:** Bestellen nur mit einem angedockten eigenen Schiff. Das fertige Schiff ist das vierte im Angebot.
 
+## Annahmen und Entscheidungen (PRD-3)
+
+- **Zeitbasis:** Einladungen (24 h), Log (30 Tage) und Schwarzes Brett nutzen Echtzeit, alles Übrige Spielzeit.
+  Das Minispiel-Limit gilt für ein Fenster von 60 min ab dem ersten Spiel.
+- **Konsortiumsbesitz:** Zoll ist ohne eigene Lizenzstufe möglich. Konsortiumswerften verkaufen Mitgliedern auch ohne
+  "an andere verkaufen", der Erlös geht in den Pool; Upgrades und Module kosten Mitgliedern dort die Hälfte, Recycling
+  ist für Mitglieder möglich. Lagerhandel der Mitglieder bringt keine Handels-XP.
+- **Angebotene Schiffe** zählen bei der Prüfung "letztes Schiff" nicht mit, sonst bliebe nach dem Verkauf keines übrig.
+- **Sondernachfrage:** Festpreis = 2 × Basispreis × Standort-Modifier × Füllstandskurve bei leerem Lager × (1 − Spread).
+  Kennt der Planet die Ware nicht, gilt Modifier 1. Das Planeten-Klicken in der Sektoransicht wählt Systeme, nicht
+  Planeten; der Planeten-Klang erklingt daher nur in der Systemansicht.
+- **Gebäude-Ausbau:** Waren je Stufe: 1 bis 3 Platten 10, Maschinen 2, Zahnräder 4; 4 bis 6 Elektronik 4, Roboter 1,
+  Rumpfsegmente 1; 7 bis 10 Roboter 2, KI-Kerne 1, Habitatmodule 1, jeweils × Level.
+- **Fabriken auf Bauplätzen:** eigene Lagerplätze mit Rate 0 (die Bevölkerung verbraucht Zutaten nicht), Lager wie bei
+  Stationen (400 bzw. 300 je Rezepteinheit). Beim Abriss fallen Lagerplätze weg, die keine andere Fabrik braucht.
+- **Geschicklichkeitsspiele:** Die Schwierigkeit (Zonenbreite, Tempo, Zahl der Versuche) ist eine Schätzung für ca. 60 %
+  Erfolg und muss im Spiel geprüft werden. Offene Spiele verfallen nach 3 min als verloren.
+- **Schmuggelaufträge** erscheinen nach der Annahme erneut nach 30 bis 60 min, die Tafeln laufen nur in aktiven Sektoren.
+
 ## Stand der Kalibrierung
 
 `npm run sim` mit 3 Bots über 12 h im Heimatsektor (Seed 42), Stand PRD-2:
@@ -152,9 +185,12 @@ Die offenen Punkte aus PRD-2 Kapitel 16 sind in Kapitel 17 entschieden. Bei der 
   Ursache ist die Drift: Ein leergekaufter Markt erholt sich wie gewollt erst in 1 bis 2 h, der Durchsatz je Markt
   sinkt dadurch. Das ist das Risiko aus PRD-2 Kapitel 14; Stellschraube ist `ECON.HALF_LIFE` in `shared/config.js`.
 - Die mittlere Phase (10 bis 20 Schiffe) erreichen die Bots nicht. Weitere Kalibrierung mit echten Spielsitzungen.
+- **PRD-3 (6 h, 3 Bots):** 94 bis 173 XP/h je Bot mit Quests (Ziel 125 bis 160). Einzelne Bots bleiben in manchen Läufen
+  am Start hängen (0 Handelsaufträge, unter 60 XP/h); das tritt auch ohne PRD-3 auf und liegt am Bot, nicht am Spiel.
+  Konsortien, Sondernachfrage, Gebäude-Ausbau und Minispiele nutzt der Bot nicht, sie sind noch nicht kalibriert.
 
 ## Nicht im Umfang
 
-Chat, Authentifizierung, Stützpunkt, Events, Kampf, Unterhaltskosten, Whitelist im Handelsmodus, automatisches Ausweichen
-um Sondergebiete (siehe PRD Kapitel 12), Questfristen, Rivalität zwischen Fraktionen, Gruppenquests und Migration
-bestehender Spielstände (siehe PRD-2 Kapitel 13).
+Chat, Authentifizierung, Stützpunkt, Kampf, Unterhaltskosten, Whitelist im Handelsmodus, automatisches Ausweichen
+um Sondergebiete (siehe PRD Kapitel 12), Questfristen, Rivalität zwischen Fraktionen, Gruppenquests, Schiffe im Besitz von Konsortien, Bündnisse zwischen Konsortien, planetare Ansicht
+für Stationen (siehe PRD-2 Kapitel 13 und PRD-3 Kapitel 11).
