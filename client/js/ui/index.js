@@ -6,6 +6,7 @@ import { renderFleet } from './fleet.js';
 import { renderDetails, requestStats } from './details.js';
 import { refreshModals } from './dom.js';
 import { renderQuestBox } from './quests.js';
+import { renderEventsButton } from './events.js';
 import './routes.js';
 import './favorites.js';
 import './almanac.js';
@@ -29,6 +30,7 @@ export function renderAll() {
   renderFleet();
   renderDetails();
   renderQuestBox();
+  renderEventsButton();
 }
 
 /**

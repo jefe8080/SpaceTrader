@@ -30,6 +30,7 @@ export const state = {
   governor: 0,
   faction: null,        // eigene Fraktion { name, color } ab Gouverneurslizenz
   props: new Map(),     // eigener Besitz: Entity-ID -> Eintrag
+  events: [],           // Sondernachfrage in bekannten Sektoren
   cons: null,           // Konsortium: Sicht des Servers ({ none, invites } ohne Mitgliedschaft)
   markerMode: (() => { try { return localStorage.getItem('st_marker') || 'color'; } catch { return 'color'; } })(),
   entities: new Map(),  // id -> Entity inkl. Markt

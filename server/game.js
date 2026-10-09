@@ -12,6 +12,7 @@ import { addToBuckets, bucketOf, summary, sumWindow, balance, SHIP_STATS } from 
 import { applyProperty, releaseMarket, tickOwnedPlanet, strangerBlocked, payForDelivery, sellToSupplier, propBook } from './property.js';
 import { flushRevenue, trimLog, isMaster } from './consortium.js';
 import { removeOffersOf } from './offers.js';
+import { tickEvents, sellToEvent } from './events.js';
 import { isConsortiumOwner, consortiumIdOf } from '../shared/consortium.js';
 
 export const WORLD_GEN_VERSION = 3; // ändert sich die Generierung inkompatibel, wird die Welt neu erzeugt
@@ -34,6 +35,7 @@ export class Game {
     this.consortiumLog = new Map();  // Konsortium-ID -> Logeinträge
     this.mapOffers = new Map();      // Angebots-ID -> Kartendaten-Angebot
     this.shipOffers = new Map();     // Schiff-ID -> Schiffsangebot (Schiff gesperrt)
+    this.sectorEvents = new Map();   // Sektor -> { timer, event } (Sondernachfrage)
     this.counters = { player: 0, ship: 0, route: 0, group: 0, quest: 0, consortium: 0, offer: 0 };
     this.boardAcc = 0;
     this.econAcc = 0;
@@ -96,6 +98,7 @@ export class Game {
     }
     for (const l of this.consortiumLog.values()) { l.sort((a, b) => a.seq - b.seq); trimLog(l); }
     for (const r of st.loadAll('map_offers')) this.mapOffers.set(r.id, r.data);
+    for (const r of st.loadAll('sector_events')) this.sectorEvents.set(r.sector, r.data);
     for (const r of st.loadAll('ship_offers')) if (this.ships.has(r.ship)) this.shipOffers.set(r.ship, r.data);
     for (const r of st.loadAll('ownership')) {
       const e = this.world.entities.get(r.entity);
@@ -154,6 +157,7 @@ export class Game {
       n += st.sync('consortium_log', clogRows);
       n += st.sync('map_offers', [...this.mapOffers.values()].map((o) => ({ key: [o.id], data: o })));
       n += st.sync('ship_offers', [...this.shipOffers.values()].map((o) => ({ key: [o.ship], data: o })));
+      n += st.sync('sector_events', [...this.sectorEvents.values()].map((r) => ({ key: [r.sector], data: r })));
       n += st.sync('ship_stats', bucketRows(this.shipStats), false);
       n += st.sync('route_stats', bucketRows(this.routeStats), false);
       const minB = bucketOf(this.time) - SHIP_STATS.BUCKETS;
@@ -618,6 +622,7 @@ export class Game {
         if (SUPPLIED.has(e.market.strategy)) this.checkSupply(e);
         else if (e.market.strategy === 'planet' && (propSectors.has(e.sector) || this.time - (this.activity.get(e.sector) ?? -Infinity) < SUPPLY.ACTIVITY)) this.checkHaul(e);
       }
+      tickEvents(this, this.econAcc);
       this.econAcc = 0;
       flushRevenue(this);
     }
@@ -644,6 +649,15 @@ export class Game {
    * opts.auto: automatischer Einkauf aus Routen (Stop-Loss greift), opts.route: Routenvorlage für die Statistik
    */
   trade(ship, e, good, amount, dir, limit = 0, opts = {}) {
+    // Sondernachfrage: nur manuelle Verkäufe über den Handelsbefehl, Überschuss zum normalen Marktpreis
+    if (opts.manual && dir === 'sell' && ship.dockedAt === e.id) {
+      const ev = sellToEvent(this, ship, e, good, amount);
+      if (ev.n) {
+        const rest = amount - ev.n;
+        const more = rest > 0 && ship.cargo[good] > 0 && e.market?.goods[good] ? this.trade(ship, e, good, rest, dir, limit, { ...opts, manual: false }) : { n: 0 };
+        return { n: ev.n + (more.n || 0), total: ev.total + (more.total || 0) };
+      }
+    }
     const p = this.players.get(ship.owner);
     const slot = e.market?.goods[good];
     if (!slot || !GOODS[good]) return { n: 0, reason: 'Ware wird hier nicht gehandelt' };

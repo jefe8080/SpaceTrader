@@ -13,6 +13,7 @@ import { barChart, fmtNum, stockBar } from './charts.js';
 import { bus } from './bus.js';
 import { orderShips } from './orders.js';
 import { questBoardSection } from './quests.js';
+import { eventSection } from './events.js';
 
 const entName = (id) => esc(state.entities.get(id)?.name || 'unbekannter Ort');
 /** Sektorname an einer Position (oder "Leerraum") */
@@ -145,6 +146,7 @@ function shipDetails(s) {
     : `<div class="muted">leer</div>`;
   h += `</div>`;
 
+  if (docked?.kind === 'planet') h += eventSection(docked, s);
   if (docked?.market) h += `<div class="section"><div class="section-title">Markt: ${esc(docked.name)}</div>${marketTable(docked, s)}</div>`;
   if (docked?.market?.strategy === 'shipyard' || docked?.type === 'hub') h += `<div class="muted small-note">Werft- und Lizenzdienste: Station anklicken.</div>`;
   h += shipStatsSection(s);
@@ -318,6 +320,7 @@ function entityDetails(e) {
     h += `<div class="section"><div class="section-title">Markt${tradeShip ? ' · handelt mit ' + esc(tradeShip.name) : ''}</div>${marketTable(e, tradeShip)}</div>`;
   }
   const myDocked = dockedHere.find((s) => state.selected?.kind === 'ship' && s.id === state.selected.id) || dockedHere[0];
+  if (e.kind === 'planet') h += eventSection(e, dockedHere.find((s) => s.queue?.[0]?.t !== 'route') || myDocked);
   if (e.faction && e.kind === 'planet') h += `<div class="muted small-note">${repLine(e.faction)}</div>`;
   if (m && (e.kind === 'planet' || m.strategy === 'shipyard')) h += questBoardSection(e, myDocked);
   if (m?.strategy === 'shipyard') h += shipyardSection(e, myDocked);

@@ -626,9 +626,38 @@ function drawSectorView(now) {
     if (!s.hubPos || !inView(s.hubPos.x, s.hubPos.y, 1000)) continue;
     diamond(s.hubPos.x, s.hubPos.y, px(7), STATION_TYPES.hub.accent);
   }
+  drawEventMarkers(now, true);
   drawOrders(now);
   for (const s of state.ships.values()) if (inView(s.rx, s.ry, 100)) drawMarker(s, shipColor(s), now);
   for (const s of selectedShips()) ring(s.rx, s.ry, px(11), '#4fc3f7', now);
+}
+
+/** Sondernachfrage: pulsierender Marker am Planeten (Weltkoordinaten), r = Mindestradius */
+function drawEventMarkers(now, sector = false) {
+  const pulse = 0.5 + 0.5 * Math.sin(now / 250);
+  for (const ev of state.events || []) {
+    if (ev.x === undefined || ev.left <= 0 || !inView(ev.x, ev.y, 3000)) continue;
+    const e = state.entities.get(ev.entity);
+    const r = sector ? px(9) : Math.max((e?.radius || 80) * 1.6, px(14));
+    ctx.save();
+    ctx.strokeStyle = `rgba(255,213,79,${0.45 + 0.45 * pulse})`;
+    ctx.lineWidth = px(2.5);
+    ctx.beginPath(); ctx.arc(ev.x, ev.y, r + px(4) * pulse, 0, TAU); ctx.stroke();
+    if (sector) { ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.arc(ev.x, ev.y, px(4), 0, TAU); ctx.fill(); }
+    ctx.restore();
+  }
+}
+/** Beschriftung der Sondernachfrage (Bildschirmkoordinaten) */
+function drawEventLabels(sector = false) {
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  for (const ev of state.events || []) {
+    if (ev.x === undefined || ev.left <= 0 || !inView(ev.x, ev.y, 3000)) continue;
+    const e = state.entities.get(ev.entity);
+    const [sx, sy] = worldToScreen(ev.x, ev.y);
+    const r = sector ? 12 : Math.max((e?.radius || 80) * 1.6 * cam.zoom, 16);
+    label(`⚡ ${GOODS[ev.good].name} ${Math.round(ev.price)} Cr`, sx, sy - r - 4, '#ffd54f', '700 12px "Segoe UI", sans-serif');
+  }
 }
 
 function diamond(x, y, k, col) {
@@ -769,6 +798,7 @@ export function render(now, dt) {
     drawSectorView(now);
     ctx.restore();
     drawSectorLabels();
+    drawEventLabels(true);
     return;
   }
 
@@ -780,6 +810,7 @@ export function render(now, dt) {
   for (const e of ents) if (e.kind === 'wormhole') drawWormhole(e, t);
   for (const e of ents) if (e.kind === 'planet') drawPlanet(e);
   for (const e of ents) if (e.kind === 'station') drawStation(e, t);
+  drawEventMarkers(now);
 
   const hov = state.hover;
   if (hov?.kind === 'entity') { const e = state.entities.get(hov.id); if (e) ring(e.x, e.y, entitySelectRadius(e), 'rgba(255,255,255,0.35)', now, false); }
@@ -803,6 +834,7 @@ export function render(now, dt) {
   drawFog();
   ctx.restore();
   drawSystemLabels();
+  drawEventLabels();
 }
 
 function entitySelectRadius(e) {

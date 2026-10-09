@@ -326,3 +326,7 @@ select.small { padding: 1px 4px; font-size: 12px; }
 .cons-body { padding: 8px 10px; }
 textarea { background: rgba(0, 0, 0, 0.35); color: var(--text); border: 1px solid var(--panel-border); border-radius: 6px; font: inherit; }
 .cons-board { width: 100%; box-sizing: border-box; resize: vertical; padding: 6px; margin-bottom: 6px; }
+.events-menu { min-width: 280px; max-height: 60vh; overflow: auto; }
+.ev-row { padding: 5px 4px; border-radius: 6px; cursor: pointer; }
+.ev-row:hover { background: rgba(80, 120, 200, 0.18); }
+.event-sec { border-top-color: rgba(255, 213, 79, 0.5); }

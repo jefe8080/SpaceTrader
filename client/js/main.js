@@ -76,6 +76,10 @@ socket.on('props', (list) => {
   state.props = new Map(list.map((p) => [p.entity, p]));
   ui.scheduleRender(true);
 });
+socket.on('events', (list) => {
+  state.events = list;
+  ui.scheduleRender(true);
+});
 socket.on('consortium', (d) => {
   state.cons = d;
   ui.scheduleRender(true);

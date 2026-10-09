@@ -4,6 +4,7 @@ import { sectorSummary } from './game.js';
 import { sumWindow } from './stats.js';
 import { consortiumView, consortiumOf } from './consortium.js';
 import { offersView } from './offers.js';
+import { eventsView } from './events.js';
 
 const r1 = (v) => Math.round(v * 10) / 10;
 const MAX_MARKET_SUBS = 400;
@@ -42,6 +43,7 @@ export class Net {
         s.socket.emit('reveal', { entities: [serializeEntity(e)] });
       }
     });
+    game.on('events', () => { for (const s of this.sessions.values()) this.sendEvents(s); });
     io.on('connection', (socket) => this.onConnection(socket));
   }
 
@@ -137,7 +139,9 @@ export class Net {
     s.sentMe = null;
     s.sentRoutes = null;
     s.sentCons = null;
+    s.sentEvents = null;
     this.sendConsortium(s);
+    this.sendEvents(s);
     this.sendShipsTo(s);
     this.sendFleetStats();
   }
@@ -194,7 +198,16 @@ export class Net {
       });
       s.socket.emit('props', props);
       this.sendConsortium(s);
+      this.sendEvents(s);
     }
+  }
+
+  /** Sondernachfrage in bekannten Sektoren (nur bei Änderung) */
+  sendEvents(s) {
+    const v = JSON.stringify(eventsView(this.game, s.player));
+    if (v === s.sentEvents) return;
+    s.sentEvents = v;
+    s.socket.emit('events', JSON.parse(v));
   }
 
   /** Konsortiumsstand (nur bei Änderung) */
