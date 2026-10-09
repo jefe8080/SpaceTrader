@@ -318,3 +318,11 @@ select.small { padding: 1px 4px; font-size: 12px; }
 .ability { color: #ffd54f; font-size: 12px; }
 .badge.bonus { background: rgba(129, 199, 132, 0.2); color: var(--good); }
 .badge.neg { background: rgba(229, 115, 115, 0.2); }
+
+/* Konsortium (PRD-3) */
+.cons-sec { border: 1px solid var(--panel-border); border-radius: 8px; margin: 6px 0; background: rgba(0, 0, 0, 0.15); }
+.cons-sec > summary { cursor: pointer; padding: 6px 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); user-select: none; }
+.cons-sec[open] > summary { border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.cons-body { padding: 8px 10px; }
+textarea { background: rgba(0, 0, 0, 0.35); color: var(--text); border: 1px solid var(--panel-border); border-radius: 6px; font: inherit; }
+.cons-board { width: 100%; box-sizing: border-box; resize: vertical; padding: 6px; margin-bottom: 6px; }

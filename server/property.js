@@ -2,6 +2,8 @@ import { RECIPES, PLANET_TYPES, PROP_UPGRADES, FIXED, SHIP_TYPES, buyPrice, sell
   priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref } from '../shared/config.js';
 import { stat, applyLevel } from './markets.js';
 import { addToBuckets } from './stats.js';
+import { isConsortiumOwner } from '../shared/consortium.js';
+import { bookRevenue } from './consortium.js';
 
 /**
  * Besitz von Planeten und Stationen. Die Besitzdaten liegen in game.ownership (Entity-ID -> Eintrag)
@@ -14,12 +16,12 @@ export function newProperty(entityId, playerId, time) {
 /** Besitz auf Markt und Entity anwenden: Lager, Tempo, Ertrag, Zusatzproduktion, Anzeige */
 export function applyProperty(game, e, prop) {
   const m = e.market;
-  const p = game.players.get(prop.player);
   m.owner = prop.player;
   m.mode = prop.mode;
   m.customs = prop.customs || 0;
-  e.ownerName = p?.faction?.name || p?.name || '?';
-  e.ownerColor = p?.faction?.color || p?.color || null;
+  const label = game.ownerLabel(prop.player);
+  e.ownerName = label.name;
+  e.ownerColor = label.color;
   const u = prop.upg || {};
   m.storageMul = 1 + PROP_UPGRADES.storage.per * (u.storage || 0);
   m.boost = 1 + PROP_UPGRADES.speed.per * (u.speed || 0);
@@ -44,19 +46,35 @@ export function applyProperty(game, e, prop) {
   m.rev = (m.rev || 0) + 1; // Struktur geändert -> Clients bekommen den ganzen Markt neu
 }
 
-/** Buchung in der Besitzstatistik (inc = Einnahmen, exp = Ausgaben) */
+/**
+ * Besitz aufgeben: Markt wieder als NPC-Markt (Drift, Nachfrage-Schwankung), Besitz-Upgrades wirken nicht mehr.
+ * Zusatzwaren bleiben als Lagerplätze erhalten, eigene Schiffe im Werftbestand und ein laufender Bau verfallen.
+ */
+export function releaseMarket(game, e) {
+  const m = e.market;
+  for (const k of ['owner', 'mode', 'customs', 'extraRecipes', 'xprog', 'yardSale']) delete m[k];
+  m.storageMul = 1; m.boost = 1; m.yieldBoost = 1;
+  delete e.ownerName;
+  delete e.ownerColor;
+  if (m.forSale) { m.forSale = m.forSale.filter((it) => !it.own); m.building = null; }
+  if (e.kind === 'planet') applyLevel(e);
+  else for (const s of Object.values(m.goods)) { s.baseCap ??= s.cap; s.cap = s.baseCap; s.stock = Math.min(s.stock, s.cap); }
+  m.rev = (m.rev || 0) + 1;
+}
+
+/** Buchung in der Besitzstatistik (inc = Einnahmen, exp = Ausgaben). Erlöse von Konsortiumsbesitz kommen stündlich ins Log. */
 export function propBook(game, prop, field, n) {
   if (!n) return;
   prop.tot[field] = (prop.tot[field] || 0) + n;
   addToBuckets(prop.stats, game.time, field, n);
+  if (field === 'inc' && isConsortiumOwner(prop.player)) { const c = game.accountOf(prop.player); if (c) bookRevenue(game, c, prop.entity, n); }
 }
 
 /** Fixpreis-Verbrauch eigener Planeten: Verbrauch aus dem Lager, der Planet zahlt an den Besitzer */
 export function tickOwnedPlanet(game, e, prop, dt) {
   const m = e.market;
-  const owner = game.players.get(prop.player);
+  const owner = game.accountOf(prop.player);
   if (!owner) return;
-  const def = PLANET_TYPES[e.type];
   for (const [g, s] of Object.entries(m.goods)) {
     if (s.role !== 'consume') continue;
     const baseRate = s.rate; // enthält Größe und Planetenlevel
@@ -83,7 +101,7 @@ export function strangerBlocked(prop) {
  * Bei leerem Konto oder aktivem Stop-Loss nimmt der Markt nichts an. Liefert die angenommene Menge.
  */
 export function payForDelivery(game, e, prop, good, n) {
-  const owner = game.players.get(prop.player);
+  const owner = game.accountOf(prop.player);
   const slot = e.market.goods[good];
   if (!owner || !slot) return 0;
   const floor = owner.stopLoss || 0;
@@ -99,7 +117,7 @@ export function payForDelivery(game, e, prop, good, n) {
 
 /** NPC-Versorger holt Ware aus Spielerbesitz: Besitzer bekommt den Erlös */
 export function sellToSupplier(game, e, prop, good, n) {
-  const owner = game.players.get(prop.player);
+  const owner = game.accountOf(prop.player);
   const slot = e.market.goods[good];
   let money = 0;
   for (let i = 0; i < n; i++) { money += buyPrice(good, slot); slot.stock -= 1; }

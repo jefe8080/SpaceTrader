@@ -76,6 +76,10 @@ socket.on('props', (list) => {
   state.props = new Map(list.map((p) => [p.entity, p]));
   ui.scheduleRender(true);
 });
+socket.on('consortium', (d) => {
+  state.cons = d;
+  ui.scheduleRender(true);
+});
 socket.on('fleetStats', (d) => {
   state.fleetStats = d;
   ui.scheduleRender(true);
@@ -360,6 +364,8 @@ addEventListener('keydown', (e) => {
     ui.toggleModal('almanac');
   } else if (e.key === 'b' || e.key === 'B') {
     ui.toggleModal('propsModal');
+  } else if (e.key === 'k' || e.key === 'K') {
+    ui.toggleModal('consModal');
   }
 });
 

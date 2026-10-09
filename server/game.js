@@ -9,11 +9,13 @@ import { tickMarket, stat, missingInputs, applyLevel } from './markets.js';
 import { updateShip, setWarn } from './ships.js';
 import { Store } from './db.js';
 import { addToBuckets, bucketOf, summary, sumWindow, balance, SHIP_STATS } from './stats.js';
-import { applyProperty, tickOwnedPlanet, strangerBlocked, payForDelivery, sellToSupplier, propBook } from './property.js';
+import { applyProperty, releaseMarket, tickOwnedPlanet, strangerBlocked, payForDelivery, sellToSupplier, propBook } from './property.js';
+import { flushRevenue, trimLog, isMaster } from './consortium.js';
+import { isConsortiumOwner, consortiumIdOf } from '../shared/consortium.js';
 
 export const WORLD_GEN_VERSION = 3; // ändert sich die Generierung inkompatibel, wird die Welt neu erzeugt
 const ALL_TABLES = ['players', 'ships', 'sectors', 'entities', 'markets', 'routes', 'favorites', 'discoveries', 'ownership',
-  'market_stats', 'ship_stats', 'route_stats', 'meta'];
+  'market_stats', 'ship_stats', 'route_stats', 'meta', 'consortia', 'consortium_log', 'map_offers', 'ship_offers', 'planet_buildings', 'sector_events'];
 
 export class Game {
   /** dbFile: Pfad zur SQLite-Datei oder ':memory:' */
@@ -27,21 +29,23 @@ export class Game {
     this.shipStats = new Map();  // Schiff-ID -> Ringpuffer
     this.routeStats = new Map(); // Routen-ID -> Ringpuffer
     this.ownership = new Map();  // Entity-ID -> Besitz
-    this.counters = { player: 0, ship: 0, route: 0, group: 0, quest: 0 };
+    this.consortia = new Map();      // Konsortium-ID -> Konsortium (PRD-3)
+    this.consortiumLog = new Map();  // Konsortium-ID -> Logeinträge
+    this.counters = { player: 0, ship: 0, route: 0, group: 0, quest: 0, consortium: 0, offer: 0 };
     this.boardAcc = 0;
     this.econAcc = 0;
     this.npcBusy = new Set();    // "Markt:Ware", für die ein NPC-Schiff unterwegs ist (Ziel oder Quelle)
     this.activity = new Map();   // Sektor -> letzte Spielzeit mit einem fliegenden Spielerschiff
     this.newDiscoveries = []; // [player, kind, key] seit dem letzten Speichern
-    this.listeners = { reveal: [], log: [], routes: [], player: [], notice: [], entity: [], sfx: [] };
+    this.listeners = {};
     if (!this.load()) {
       this.world = new World(seed ?? ((Math.random() * 2 ** 31) | 0));
       this.world.ensureSector(0, 0);
     }
   }
 
-  on(ev, fn) { this.listeners[ev].push(fn); }
-  emit(ev, ...a) { for (const fn of this.listeners[ev]) fn(...a); }
+  on(ev, fn) { (this.listeners[ev] ||= []).push(fn); }
+  emit(ev, ...a) { for (const fn of this.listeners[ev] || []) fn(...a); }
 
   // ---------- Persistenz ----------
   load() {
@@ -82,6 +86,12 @@ export class Game {
     for (const r of st.loadAll('ships')) this.ships.set(r.id, r.data);
     for (const s of this.ships.values()) if (s.owner === NPC_OWNER) this.markNpc(s, true);
     for (const r of st.loadAll('routes')) this.routes.set(r.id, r.data);
+    for (const r of st.loadAll('consortia')) this.consortia.set(r.id, r.data);
+    for (const r of st.loadAll('consortium_log')) {
+      if (!this.consortiumLog.has(r.consortium)) this.consortiumLog.set(r.consortium, []);
+      this.consortiumLog.get(r.consortium).push(r.data);
+    }
+    for (const l of this.consortiumLog.values()) { l.sort((a, b) => a.seq - b.seq); trimLog(l); }
     for (const r of st.loadAll('ownership')) {
       const e = this.world.entities.get(r.entity);
       if (!e?.market) continue;
@@ -133,6 +143,10 @@ export class Game {
       n += st.sync('ships', [...this.ships.values()].map((s) => ({ key: [s.id], cols: [s.owner], data: s })));
       n += st.sync('routes', [...this.routes.values()].map((r) => ({ key: [r.id], cols: [r.owner], data: r })));
       n += st.sync('ownership', [...this.ownership.values()].map((p) => ({ key: [p.entity], cols: [p.player], data: p })));
+      n += st.sync('consortia', [...this.consortia.values()].map((c) => ({ key: [c.id], data: c })));
+      const clogRows = [];
+      for (const [cid, list] of this.consortiumLog) for (const e of list) clogRows.push({ key: [cid, e.seq], data: e });
+      n += st.sync('consortium_log', clogRows);
       n += st.sync('ship_stats', bucketRows(this.shipStats), false);
       n += st.sync('route_stats', bucketRows(this.routeStats), false);
       const minB = bucketOf(this.time) - SHIP_STATS.BUCKETS;
@@ -154,7 +168,8 @@ export class Game {
   playerList(online = new Set()) {
     return [...this.players.values()]
       .sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0))
-      .map((p) => ({ id: p.id, name: p.name, color: p.color, online: online.has(p.id), level: pilotLevel(p.xp), title: pilotTitle(p.xp) }));
+      .map((p) => ({ id: p.id, name: p.name, color: p.color, online: online.has(p.id), level: pilotLevel(p.xp), title: pilotTitle(p.xp),
+        cons: this.consortia.get(p.consortium)?.name || null }));
   }
 
   // ---------- Erfahrung, Level, Ruf ----------
@@ -185,7 +200,7 @@ export class Game {
     e.market.lvl = lvl;
     if (e.kind === 'planet') applyLevel(e);
     const prop = this.ownership.get(e.id);
-    if (prop) this.emit('notice', this.players.get(prop.player), `${e.name} erreicht Level ${lvl}`);
+    if (prop) this.notifyOwner(prop.player, `${e.name} erreicht Level ${lvl}`);
     this.emit('entity', e);
   }
 
@@ -499,6 +514,47 @@ export class Game {
     return undefined;
   }
 
+  // ---------- Konten: Spieler oder Konsortium ----------
+  /** Konto eines Besitzers (Spieler oder Konsortium-Pool); beide haben das Feld credits */
+  accountOf(ownerId) {
+    return isConsortiumOwner(ownerId) ? this.consortia.get(consortiumIdOf(ownerId)) || null : this.players.get(ownerId) || null;
+  }
+  /** Anzeige eines Besitzers: Fraktion bzw. Konsortium mit Farbe */
+  ownerLabel(ownerId) {
+    if (isConsortiumOwner(ownerId)) { const c = this.accountOf(ownerId); return { name: c?.name || '?', color: c?.color || null }; }
+    const p = this.players.get(ownerId);
+    return { name: p?.faction?.name || p?.name || '?', color: p?.faction?.color || p?.color || null };
+  }
+  /** Nachricht an den Besitzer: Spieler bzw. alle Mitglieder des Konsortiums */
+  notifyOwner(ownerId, msg) {
+    if (!isConsortiumOwner(ownerId)) return this.emit('notice', this.players.get(ownerId), msg);
+    const c = this.accountOf(ownerId);
+    for (const id of Object.keys(c?.members || {})) this.emit('notice', this.players.get(id), msg);
+  }
+  /** Gehört das Konto dem Spieler oder ist er Mitglied des besitzenden Konsortiums? */
+  isOwnerOrMember(ownerId, playerId) {
+    if (!ownerId) return false;
+    if (ownerId === playerId) return true;
+    return isConsortiumOwner(ownerId) && this.players.get(playerId)?.consortium === consortiumIdOf(ownerId);
+  }
+  /** Darf der Spieler das Lager nutzen? Eigener Besitz oder Besitz des eigenen Konsortiums (PRD-3 4.4) */
+  canUseStorage(prop, playerId) { return !!prop && this.isOwnerOrMember(prop.player, playerId); }
+  /** Darf der Spieler den Besitz verwalten? Eigener Besitz oder Handelsmeister des besitzenden Konsortiums */
+  canManage(prop, playerId) {
+    if (!prop) return false;
+    if (prop.player === playerId) return true;
+    return isConsortiumOwner(prop.player) && isMaster(this.accountOf(prop.player), playerId);
+  }
+
+  /** Besitz aufgeben: Das Objekt wird wieder ein NPC-Markt (z. B. bei Auflösung eines Konsortiums) */
+  releaseProperty(entityId) {
+    const e = this.world.entities.get(entityId);
+    this.ownership.delete(entityId);
+    if (!e?.market) return;
+    releaseMarket(this, e);
+    this.emit('entity', e);
+  }
+
   /** Besitz übernehmen */
   setOwner(e, player, prop) {
     this.ownership.set(e.id, prop);
@@ -555,6 +611,7 @@ export class Game {
         else if (e.market.strategy === 'planet' && (propSectors.has(e.sector) || this.time - (this.activity.get(e.sector) ?? -Infinity) < SUPPLY.ACTIVITY)) this.checkHaul(e);
       }
       this.econAcc = 0;
+      flushRevenue(this);
     }
     this.boardAcc += dt;
     if (this.boardAcc >= 10) {

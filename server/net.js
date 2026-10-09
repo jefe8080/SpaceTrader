@@ -2,6 +2,7 @@ import { NET, NPC_OWNER, cellKey, cellOf, pilotLevel } from '../shared/config.js
 import { runCommand } from './handlers/index.js';
 import { sectorSummary } from './game.js';
 import { sumWindow } from './stats.js';
+import { consortiumView } from './consortium.js';
 
 const r1 = (v) => Math.round(v * 10) / 10;
 const MAX_MARKET_SUBS = 400;
@@ -26,7 +27,12 @@ export class Net {
     game.on('log', (ship, msg) => this.sessions.get(ship.owner)?.socket.emit('log', { ship: ship.name, id: ship.id, msg }));
     game.on('sfx', (p, name) => this.sessions.get(p.id)?.socket.emit('sfx', name));
     game.on('player', () => this.broadcastPlayers()); // Level und Titel für die Tooltips der anderen
-    game.on('notice', (p, msg) => this.sessions.get(p.id)?.socket.emit('notice', msg));
+    game.on('notice', (p, msg) => p && this.sessions.get(p.id)?.socket.emit('notice', msg));
+    // Konsortium geändert: Mitglieder und Eingeladene bekommen den neuen Stand; (null, p): nur dieser Spieler
+    game.on('consortium', (c, p) => {
+      if (p) { const s = this.sessions.get(p.id); if (s) this.sendConsortium(s); return; }
+      for (const s of this.sessions.values()) if (c.members[s.player.id] || c.invites[s.player.id] || s.player.consortium === c.id) this.sendConsortium(s);
+    });
     // Geänderte Objekte (Besitzwechsel, Upgrades) an alle, die sie kennen
     game.on('entity', (e) => {
       for (const s of this.sessions.values()) {
@@ -129,6 +135,8 @@ export class Net {
     });
     s.sentMe = null;
     s.sentRoutes = null;
+    s.sentCons = null;
+    this.sendConsortium(s);
     this.sendShipsTo(s);
     this.sendFleetStats();
   }
@@ -182,7 +190,16 @@ export class Net {
         return { ...rest, h1: net(3600), d24: net(86400), inc24: Math.round(sumWindow(stats, this.game.time, 86400).inc || 0) };
       });
       s.socket.emit('props', props);
+      this.sendConsortium(s);
     }
+  }
+
+  /** Konsortiumsstand (nur bei Änderung) */
+  sendConsortium(s) {
+    const v = JSON.stringify(consortiumView(this.game, s.player, this.online()));
+    if (v === s.sentCons) return;
+    s.sentCons = v;
+    s.socket.emit('consortium', JSON.parse(v));
   }
 
   // ---------- Märkte ----------

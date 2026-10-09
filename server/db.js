@@ -30,6 +30,15 @@ export const MIGRATIONS = [
   (db) => db.exec(`
     CREATE TABLE route_stats (route TEXT NOT NULL, bucket INTEGER NOT NULL, data TEXT NOT NULL, PRIMARY KEY (route, bucket));
   `),
+  // 3: PRD-3 "Gemeinschaft": Konsortien, Karten- und Schiffsangebote, Planetengebäude, Sondernachfrage
+  (db) => db.exec(`
+    CREATE TABLE consortia (id TEXT PRIMARY KEY, data TEXT NOT NULL);
+    CREATE TABLE consortium_log (consortium TEXT NOT NULL, seq INTEGER NOT NULL, data TEXT NOT NULL, PRIMARY KEY (consortium, seq));
+    CREATE TABLE map_offers (id TEXT PRIMARY KEY, data TEXT NOT NULL);
+    CREATE TABLE ship_offers (ship TEXT PRIMARY KEY, data TEXT NOT NULL);
+    CREATE TABLE planet_buildings (entity TEXT PRIMARY KEY, data TEXT NOT NULL);
+    CREATE TABLE sector_events (sector TEXT PRIMARY KEY, data TEXT NOT NULL);
+  `),
 ];
 
 /** Tabellen mit (id, data) und optionalen Zusatzspalten */
@@ -45,6 +54,12 @@ const TABLES = {
   market_stats: { key: ['entity', 'bucket'], cols: [] },
   ship_stats: { key: ['ship', 'bucket'], cols: [] },
   route_stats: { key: ['route', 'bucket'], cols: [] },
+  consortia: { key: ['id'], cols: [] },
+  consortium_log: { key: ['consortium', 'seq'], cols: [] },
+  map_offers: { key: ['id'], cols: [] },
+  ship_offers: { key: ['ship'], cols: [] },
+  planet_buildings: { key: ['entity'], cols: [] },
+  sector_events: { key: ['sector'], cols: [] },
 };
 
 export class Store {
@@ -125,7 +140,7 @@ export class Store {
     if (prune) {
       for (const k of [...c.keys()]) {
         if (seen.has(k)) continue;
-        st.del.run(...k.split('\u0001').map((p, i) => (TABLES[table].key[i] === 'bucket' ? Number(p) : p)));
+        st.del.run(...k.split('\u0001').map((p, i) => (['bucket', 'seq'].includes(TABLES[table].key[i]) ? Number(p) : p)));
         c.delete(k);
         n++;
       }

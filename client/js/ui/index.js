@@ -12,6 +12,7 @@ import './almanac.js';
 import './almanacShips.js';
 import './property.js';
 import './audioMenu.js';
+import './consortium.js';
 
 export { renderLogin, loginError, enterGame, leaveGame, addLog, updateTooltip, renderTop } from './hud.js';
 export { toast, hint, closeTopModal, toggleModal, typing } from './dom.js';
@@ -60,4 +61,5 @@ document.getElementById('btnRoutes').onclick = () => toggleModalImpl('routesOver
 document.getElementById('btnFavs').onclick = () => toggleModalImpl('favorites');
 document.getElementById('btnAlmanac').onclick = () => toggleModalImpl('almanac');
 document.getElementById('btnProps').onclick = () => toggleModalImpl('propsModal');
+document.getElementById('btnCons').onclick = () => toggleModalImpl('consModal');
 import { toggleModal as toggleModalImpl } from './dom.js';
