@@ -3,11 +3,13 @@ import { socket } from './net.js';
 import { loadAssets } from './assets.js';
 import { initRenderer, render, screenToWorld, pickAt, viewMode, ZOOM_PRESETS, ZOOM_MIN, ZOOM_MAX } from './render.js';
 import * as ui from './ui/index.js';
-import { sfx } from './audio.js';
+import { sfx, planetTone } from './audio.js';
+import { initPlanetside, renderPlanetside, pickBuilding, scene, canLand } from './planetside.js';
 
 await loadAssets();
 const canvas = document.getElementById('view');
 initRenderer(canvas);
+initPlanetside(canvas);
 const cam = state.camera;
 
 // ---------------- Netzwerk ----------------
@@ -165,9 +167,10 @@ function sendSubscriptions() {
 setInterval(sendSubscriptions, 250);
 
 // ---------------- Eingabe ----------------
+const $tooltipHide = () => { document.getElementById('tooltip').hidden = true; };
 let drag = null;
 canvas.addEventListener('mousedown', (e) => {
-  if (e.button === 0) drag = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, moved: false };
+  if (e.button === 0) drag = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, scroll: scene.scroll, moved: false };
   else if (e.button === 1) e.preventDefault(); // kein Autoscroll
 });
 // Mittelklick: Befehl an die Queue anhängen (Firefox öffnet bei Shift+Rechtsklick immer sein Kontextmenü)
@@ -177,6 +180,17 @@ canvas.addEventListener('auxclick', (e) => {
   orderAt(e.clientX, e.clientY, true);
 });
 addEventListener('mousemove', (e) => {
+  if (state.landed) {
+    // Planetare Ansicht: horizontal ziehen, Gebäude hervorheben
+    if (drag) {
+      if (Math.abs(e.clientX - drag.x) > 4) drag.moved = true;
+      if (drag.moved) scene.scroll = drag.scroll - (e.clientX - drag.x);
+    }
+    scene.hover = e.target === canvas ? pickBuilding(e.clientX, e.clientY) : null;
+    canvas.style.cursor = drag?.moved ? 'grabbing' : scene.hover ? 'pointer' : 'default';
+    $tooltipHide();
+    return;
+  }
   if (drag) {
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     if (Math.hypot(dx, dy) > 4) drag.moved = true;
@@ -200,6 +214,11 @@ addEventListener('mouseup', (e) => {
 });
 /** Linksklick bzw. Tippen: auswählen, hineinzoomen oder Ziel wählen */
 function clickAt(sx, sy, multi) {
+  if (state.landed) {
+    const b = pickBuilding(sx, sy);
+    if (b) ui.openBuilding(b);
+    return;
+  }
   const hit = pickAt(sx, sy);
   if (state.pickMode) {
     if (hit?.kind === 'entity') state.pickMode(hit.id);
@@ -225,16 +244,20 @@ function clickAt(sx, sy, multi) {
     ui.select({ kind: 'ship', id: hit.id }, { keepSelection: true });
     return;
   }
+  // Planeten-Klang bei der Auswahl eines Planeten (System- oder Sektoransicht)
+  if (hit?.kind === 'entity' && viewMode() !== 'galaxy') { const pe = state.entities.get(hit.id); if (pe?.kind === 'planet') planetTone(pe); }
   ui.select(hit);
 }
 canvas.addEventListener('dblclick', (e) => {
+  if (state.landed) return;
   const hit = pickAt(e.clientX, e.clientY);
   if (hit?.kind === 'ship') state.follow = hit.id;
+  if (hit?.kind === 'entity' && state.entities.get(hit.id)?.kind === 'planet') ui.enterPlanet(hit.id);
 });
 canvas.addEventListener('contextmenu', (e) => {
   e.preventDefault();
   // Android meldet langes Drücken zusätzlich als contextmenu, das übernimmt die Touch-Steuerung
-  if (performance.now() - lastTouch < 1000) return;
+  if (performance.now() - lastTouch < 1000 || state.landed) return;
   orderAt(e.clientX, e.clientY, e.shiftKey);
 });
 /** Rechtsklick bzw. langes Drücken: gewählte Schiffe dorthin schicken */
@@ -253,6 +276,7 @@ function orderAt(sx, sy, append) {
 }
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
+  if (state.landed) { scene.scroll += (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY); return; }
   zoomAt(e.clientX, e.clientY, cam.zoom * Math.exp(-e.deltaY * 0.0015));
 }, { passive: false });
 /** Zoomen mit festem Bildschirmpunkt (sofern keinem Schiff gefolgt wird) */
@@ -306,6 +330,7 @@ canvas.addEventListener('touchmove', (e) => {
   if (touch.mode === 'one' && pts.length === 1) {
     const dx = pts[0].x - touch.x, dy = pts[0].y - touch.y;
     if (!touch.moved && Math.hypot(dx, dy) > TAP_SLOP && !touch.long) { touch.moved = true; clearTimeout(touch.timer); }
+    if (touch.moved && state.landed) { touch.scroll ??= scene.scroll; scene.scroll = touch.scroll - dx; return; }
     if (touch.moved) {
       camAnim = null;
       cam.x = touch.cx - dx / cam.zoom;
@@ -349,6 +374,11 @@ canvas.addEventListener('touchend', endTouch, { passive: false });
 canvas.addEventListener('touchcancel', endTouch, { passive: false });
 addEventListener('keydown', (e) => {
   if (!state.me || ui.typing()) return;
+  if (state.landed && (e.key === 'Escape' || ZOOM_PRESETS[e.key])) {
+    // Planetare Ansicht verlassen: Esc bzw. Taste 1/2/3 (die Zoomstufe greift dann wie gewohnt)
+    if (e.key === 'Escape') { ui.planetEscape(); return; }
+    ui.leavePlanet();
+  }
   if (e.key === 'Escape') {
     if (state.pickMode) state.pickMode(null);
     else if (!ui.closeTopModal()) ui.select(null);
@@ -410,7 +440,13 @@ function frame(now) {
       cam.y += (s.ry - cam.y) * k;
     } else state.follow = null;
   }
-  render(now, dt);
+  if (state.landed && !canLand(state.landed)) {
+    // Das letzte angedockte eigene Schiff ist abgeflogen
+    ui.leavePlanet();
+    ui.toast('Kein eigenes Schiff mehr angedockt: zurück ins All.', 'info');
+  }
+  if (state.landed) renderPlanetside(now);
+  else render(now, dt);
   const mode = viewMode();
   if (mode !== lastMode) {
     lastMode = mode;

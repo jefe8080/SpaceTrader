@@ -81,8 +81,10 @@ export { SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, 
 export * from './progression.js';
 export * from './consortium.js';
 export * from './events.js';
+export * from './planetside.js';
 export * from './consortium.js';
 export * from './events.js';
+export * from './planetside.js';
 
 // Preis = Basispreis × Standort-Modifier × Füllstandskurve(stock/cap) ± Spread
 import { PRICE, curveMax, curveMin } from './price.js';

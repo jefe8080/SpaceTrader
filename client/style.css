@@ -330,3 +330,8 @@ textarea { background: rgba(0, 0, 0, 0.35); color: var(--text); border: 1px soli
 .ev-row { padding: 5px 4px; border-radius: 6px; cursor: pointer; }
 .ev-row:hover { background: rgba(80, 120, 200, 0.18); }
 .event-sec { border-top-color: rgba(255, 213, 79, 0.5); }
+
+/* Planetare Ansicht (PRD-3 Kapitel 6) */
+#planetBar { top: 56px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; padding: 6px 12px; white-space: nowrap; }
+#planetPanel { bottom: 16px; left: 50%; transform: translateX(-50%); width: min(560px, calc(100vw - 32px)); max-height: 46vh; overflow: auto; }
+body.landed #details { display: none; }

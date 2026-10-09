@@ -7,6 +7,7 @@ import { renderDetails, requestStats } from './details.js';
 import { refreshModals } from './dom.js';
 import { renderQuestBox } from './quests.js';
 import { renderEventsButton } from './events.js';
+import { renderPlanetUi } from './planetPanel.js';
 import './routes.js';
 import './favorites.js';
 import './almanac.js';
@@ -24,6 +25,7 @@ export { openRoutesOverview, openRouteEditor } from './routes.js';
 export { openFavorites } from './favorites.js';
 export { openAlmanac, refreshAlmanac } from './almanac.js';
 export { orderShips } from './orders.js';
+export { enterPlanet, leavePlanet, openBuilding, planetEscape } from './planetPanel.js';
 
 export function renderAll() {
   renderTop();
@@ -31,6 +33,7 @@ export function renderAll() {
   renderDetails();
   renderQuestBox();
   renderEventsButton();
+  renderPlanetUi();
 }
 
 /**

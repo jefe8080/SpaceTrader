@@ -1,11 +1,11 @@
 import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, FUEL, GOVERNOR_LICENSES, shipStats, freeFor, holdOf, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
   cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, slotPrice, supplyLoad, targetOf,
-  XP, pilotLevel, pilotTitle, giverLevel, GIVER_TRADE_CR, factionRank, RANK_NAMES, FACTIONS, hasAbility, holdFor, priceWindow, fixedPrice, FIXED } from '../shared/config.js';
+  XP, pilotLevel, pilotTitle, giverLevel, GIVER_TRADE_CR, factionRank, RANK_NAMES, FACTIONS, hasAbility, holdFor, priceWindow, fixedPrice, FIXED, recipeOf } from '../shared/config.js';
 import { refreshBoards, boardSectors, isGiver, questProgress, exploreCells, exploreZone } from './quests.js';
 import { World } from './world.js';
 import { hexAt, hexKey } from '../shared/hex.js';
 import { planPath, zoneEffects } from '../shared/nav.js';
-import { tickMarket, stat, missingInputs, applyLevel } from './markets.js';
+import { tickMarket, stat, missingInputs, applyLevel, runRecipe } from './markets.js';
 import { updateShip, setWarn } from './ships.js';
 import { Store } from './db.js';
 import { addToBuckets, bucketOf, summary, sumWindow, balance, SHIP_STATS } from './stats.js';
@@ -36,6 +36,7 @@ export class Game {
     this.mapOffers = new Map();      // Angebots-ID -> Kartendaten-Angebot
     this.shipOffers = new Map();     // Schiff-ID -> Schiffsangebot (Schiff gesperrt)
     this.sectorEvents = new Map();   // Sektor -> { timer, event } (Sondernachfrage)
+    this.buildings = new Map();      // Planet-ID -> { lvl: { Ware: Level }, factories: [{ recipe, prog }] }
     this.counters = { player: 0, ship: 0, route: 0, group: 0, quest: 0, consortium: 0, offer: 0 };
     this.boardAcc = 0;
     this.econAcc = 0;
@@ -99,6 +100,12 @@ export class Game {
     for (const l of this.consortiumLog.values()) { l.sort((a, b) => a.seq - b.seq); trimLog(l); }
     for (const r of st.loadAll('map_offers')) this.mapOffers.set(r.id, r.data);
     for (const r of st.loadAll('sector_events')) this.sectorEvents.set(r.sector, r.data);
+    for (const r of st.loadAll('planet_buildings')) {
+      const e = this.world.entities.get(r.entity);
+      if (!e?.market) continue;
+      this.attachBuildings(e, r.data);
+      if (e.kind === 'planet') applyLevel(e);
+    }
     for (const r of st.loadAll('ship_offers')) if (this.ships.has(r.ship)) this.shipOffers.set(r.ship, r.data);
     for (const r of st.loadAll('ownership')) {
       const e = this.world.entities.get(r.entity);
@@ -158,6 +165,7 @@ export class Game {
       n += st.sync('map_offers', [...this.mapOffers.values()].map((o) => ({ key: [o.id], data: o })));
       n += st.sync('ship_offers', [...this.shipOffers.values()].map((o) => ({ key: [o.ship], data: o })));
       n += st.sync('sector_events', [...this.sectorEvents.values()].map((r) => ({ key: [r.sector], data: r })));
+      n += st.sync('planet_buildings', [...this.buildings.values()].map((b) => ({ key: [b.entity], data: b })));
       n += st.sync('ship_stats', bucketRows(this.shipStats), false);
       n += st.sync('route_stats', bucketRows(this.routeStats), false);
       const minB = bucketOf(this.time) - SHIP_STATS.BUCKETS;
@@ -567,6 +575,17 @@ export class Game {
     this.emit('entity', e);
   }
 
+  // ---------- Planetengebäude (PRD-3 Kapitel 6) ----------
+  /** Gebäude-Datensatz an den Markt hängen (nicht aufzählbar, damit er nicht doppelt im Markt gespeichert wird) */
+  attachBuildings(e, rec) {
+    this.buildings.set(e.id, rec);
+    Object.defineProperty(e.market, 'bld', { value: rec, enumerable: false, writable: true, configurable: true });
+  }
+  /** Gebäude eines Planeten, bei Bedarf neu angelegt */
+  buildingsOf(e) {
+    return this.buildings.get(e.id) || (this.attachBuildings(e, { entity: e.id, lvl: {}, factories: [] }), this.buildings.get(e.id));
+  }
+
   /** Besitz übernehmen */
   setOwner(e, player, prop) {
     this.ownership.set(e.id, prop);
@@ -613,7 +632,10 @@ export class Game {
     if (this.econAcc >= 1) {
       for (const prop of this.ownership.values()) {
         const e = this.world.entities.get(prop.entity);
-        if (e?.kind === 'planet') tickOwnedPlanet(this, e, prop, this.econAcc);
+        if (e?.kind !== 'planet') continue;
+        tickOwnedPlanet(this, e, prop, this.econAcc);
+        // Fabriken auf Bauplätzen laufen nur bei Besitz
+        for (const f of e.market.bld?.factories || []) f.prog = runRecipe(e.market, recipeOf(f.recipe), f.prog || 0, this.econAcc, this.time);
       }
       const propSectors = new Set([...this.ownership.keys()].map((id) => this.world.entities.get(id)?.sector));
       for (const e of this.world.entities.values()) {

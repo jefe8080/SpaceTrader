@@ -26,10 +26,10 @@ function licenseBlock(game, player, kind) {
   return null;
 }
 const ownedBy = (game, owner) => [...game.ownership.values()].filter((p) => p.player === owner).length;
-const dockedOwn = (game, player, e) => game.shipsOf(player.id).filter((s) => s.dockedAt === e.id);
+export const dockedOwn = (game, player, e) => game.shipsOf(player.id).filter((s) => s.dockedAt === e.id);
 
 /** Waren aus den Laderäumen der angedockten eigenen Schiffe abziehen (falls vollständig vorhanden) */
-function takeGoods(ships, goods) {
+export function takeGoods(ships, goods) {
   for (const [g, n] of Object.entries(goods)) {
     const have = ships.reduce((a, s) => a + (s.cargo[g] || 0), 0);
     if (have < n) return `Es fehlen ${n - have} ${GOODS[g].name} (an Bord der hier angedockten Schiffe).`;

@@ -108,6 +108,91 @@ export function sfx(name) {
   SFX[name](ctx.currentTime + 0.01);
 }
 
+// ---------------- Planeten-Klang (PRD-3 Kapitel 7) ----------------
+/** Klangfarbe je Planetentyp: Wellenform, Tiefpass, Obertöne (Glas), Anschlag */
+const TIMBRE = {
+  ice: { type: 'sine', filter: 6000, glass: true, attack: 0.005 },
+  volcanic: { type: 'sawtooth', filter: 600, attack: 0.02 },
+  gasgiant: { type: 'sine', filter: 900, attack: 0.12 },
+  ocean: { type: 'triangle', filter: 1500, attack: 0.06 },
+  desert: { type: 'square', filter: 1200, attack: 0.01 },
+  agrar: { type: 'triangle', filter: 2500, attack: 0.02 },
+  urban: { type: 'square', filter: 2600, attack: 0.005 },
+  resort: { type: 'sine', filter: 3000, attack: 0.04 },
+  jungle: { type: 'triangle', filter: 1800, attack: 0.03 },
+  mining: { type: 'sawtooth', filter: 1200, attack: 0.01 },
+  colony: { type: 'square', filter: 1800, attack: 0.02 },
+  industrial: { type: 'sawtooth', filter: 900, attack: 0.01 },
+};
+const PENTA = [0, 2, 4, 7, 9];
+function seededRandom(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+let lastTone = { id: null, at: 0 };
+/**
+ * Jeder Planet klingt immer gleich (für alle Spieler): Seed aus den gerundeten Koordinaten, 2 bis 3 Töne aus einer
+ * pentatonischen Skala über 2 Oktaven, Klangfarbe aus dem Planetentyp. Erneuter Klick binnen 1 s: kein Ton.
+ */
+export function planetTone(e) {
+  const now = performance.now();
+  if (lastTone.id === e.id && now - lastTone.at < 1000) { lastTone.at = now; return; }
+  lastTone = { id: e.id, at: now };
+  if (prefs.mute || !prefs.sfx || !ensure()) return;
+  let h = 2166136261;
+  for (const v of [Math.round(e.x / 100), Math.round(e.y / 100)]) h = Math.imul(h ^ (v | 0), 16777619);
+  const r = seededRandom(h);
+  const tb = TIMBRE[e.type] || TIMBRE.colony;
+  const n = 2 + (r() < 0.5 ? 1 : 0);
+  const vib = { rate: 3 + r() * 4, depth: r() < 0.5 ? 0 : 2 + r() * 6 };
+  const wet = r() * 0.6;
+  let idx = Math.floor(r() * 10); // Stufe in 2 Oktaven Pentatonik
+  let t = ctx.currentTime + 0.02;
+  for (let i = 0; i < n; i++) {
+    const semi = PENTA[idx % 5] + 12 * Math.floor(idx / 5);
+    const f = midi(60 + semi);
+    const dur = 0.3 + r() * 0.4;
+    planetNote(t, f, dur, tb, vib, wet);
+    t += dur * (0.55 + r() * 0.3);
+    idx = Math.max(0, Math.min(9, idx + [-3, -2, -1, 1, 2, 3][Math.floor(r() * 6)]));
+  }
+}
+function planetNote(t, f, dur, tb, vib, wet) {
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.22, t + tb.attack);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = tb.filter;
+  lp.connect(g);
+  g.connect(sfxBus);
+  if (wet > 0.05) { const w = ctx.createGain(); w.gain.value = wet; g.connect(w).connect(reverb); }
+  const lfo = ctx.createOscillator();
+  const lfoGain = ctx.createGain();
+  lfo.frequency.value = vib.rate;
+  lfoGain.gain.value = vib.depth;
+  lfo.connect(lfoGain);
+  for (const [mul, vol] of tb.glass ? [[1, 1], [2.76, 0.35], [5.4, 0.15]] : [[1, 1]]) {
+    const o = ctx.createOscillator();
+    const og = ctx.createGain();
+    o.type = tb.type;
+    o.frequency.value = f * mul;
+    lfoGain.connect(o.detune);
+    og.gain.value = vol * (tb.type === 'square' || tb.type === 'sawtooth' ? 0.35 : 1);
+    o.connect(og).connect(lp);
+    o.start(t);
+    o.stop(t + dur + 0.05);
+  }
+  lfo.start(t);
+  lfo.stop(t + dur + 0.05);
+}
+
 // ---------------- Musik ----------------
 // Moll-Tonleiter (natürlich) und Akkordstufen; Grundton wechselt gelegentlich
 const MINOR = [0, 2, 3, 5, 7, 8, 10];

@@ -35,8 +35,11 @@ function acceptBlock(q, ship) {
   return '';
 }
 
-/** Questtafel eines Planeten oder einer Werft */
-export function questBoardSection(e, dockedShip) {
+/**
+ * Questtafel eines Planeten oder einer Werft. An Planeten werden Quests nur im Questhaus der planetaren Ansicht
+ * angenommen (inHouse), im Detailpanel verweist der Knopf dorthin (PRD-3 6.2).
+ */
+export function questBoardSection(e, dockedShip, inHouse = false) {
   const m = e.market;
   const lvl = giverLevel(m.qxp || 0);
   const next = GIVER_LEVELS[lvl + 1];
@@ -48,7 +51,9 @@ export function questBoardSection(e, dockedShip) {
     h += `<div class="quest-offer"><div class="qo-head">${qTitle(q)}<span style="flex:1"></span>${rewardText(q)}</div>
       <div>${questText(q)}</div>
       <div class="qo-foot"><span class="muted">Aufwand ca. ${Math.max(1, Math.round(q.effort))} min bei Tempo 150</span><span style="flex:1"></span>
-      <button class="small primary" data-act="questAccept" data-ent="${e.id}" data-quest="${q.id}" data-ship="${dockedShip?.id || ''}" ${why ? 'disabled' : ''} title="${esc(why)}">Annehmen</button></div></div>`;
+      ${e.kind === 'planet' && !inHouse
+        ? `<button class="small" data-act="land" data-ent="${e.id}" ${dockedShip ? '' : 'disabled'} title="${dockedShip ? 'Landen und im Questhaus annehmen' : 'Ein eigenes Schiff muss hier angedockt sein'}">Im Questhaus annehmen (landen)</button>`
+        : `<button class="small primary" data-act="questAccept" data-ent="${e.id}" data-quest="${q.id}" data-ship="${dockedShip?.id || ''}" ${why ? 'disabled' : ''} title="${esc(why)}">Annehmen</button>`}</div></div>`;
   }
   if (lvl < MAX_GIVER_LEVEL) h += `<div class="muted small-note">${e.kind === 'planet' ? 'Höhere Level: mehr Produktion und Lager, neue Waren, schwierigere Quests.' : 'Höhere Level: bessere Schiffe (+5 % je Level), schwierigere Quests.'}</div>`;
   return h + '</div>';

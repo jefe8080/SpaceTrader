@@ -285,6 +285,7 @@ function extraOf(m) {
     if (m.strategy === 'shipyard' && !m.owner) out.order = m.order ? { type: m.order.type, player: m.order.player, name: m.order.name } : null;
   }
   if (m.progress !== undefined) out.progress = r1(m.progress);
+  if (m.bld) out.bld = { lvl: m.bld.lvl, fac: m.bld.factories.map((f) => f.recipe) };
   if (m.supply !== undefined) out.supply = m.supply && { state: m.supply.state, good: m.supply.good, sourceId: m.supply.sourceId, shipId: m.supply.shipId };
   return out;
 }

@@ -1,5 +1,6 @@
 import { GOODS, PLANET_TYPES, STATION_TYPES, RECIPES, STATION_FOOD, SHIP_TYPES, SHIPYARD, STORAGE, STATS, TRADER, ULTRA, MODULES, YARD_MARGIN,
-  ECON, SUPPLY, LEVEL_FX, PLANET_EXTRAS, EXTRA_STEPS, slotPrice, targetOf, driftDelta, giverLevel } from '../shared/config.js';
+  ECON, SUPPLY, LEVEL_FX, PLANET_EXTRAS, EXTRA_STEPS, slotPrice, targetOf, driftDelta, giverLevel,
+  effectiveLevel, buildingRateMul, buildingCapMul, recipeOf } from '../shared/config.js';
 
 /**
  * Märkte nach Rollen- und Strategie-Modell.
@@ -346,16 +347,25 @@ export function applyLevel(e) {
     if (s) Object.assign(s, { role, rate, baseRate: rate, baseCap, target, lvlExtra: true });
     else m.goods[g] = { role, rate, baseRate: rate, cap: baseCap, baseCap, stock: target * baseCap, mod: 1, target, lvlExtra: true };
   });
-  for (const s of Object.values(m.goods)) {
-    if (s.role !== 'trade') { s.baseRate ??= s.rate; s.rate = s.baseRate * (1 + LEVEL_FX.PLANET_RATE * L); }
+  // Fabriken auf Bauplätzen (PRD-3 6.4): Zutaten und Produkte bekommen Lagerplätze im Planetenlager.
+  // Eigene Plätze haben Rate 0, damit nur die Fabrik sie verbraucht bzw. füllt.
+  for (const f of m.bld?.factories || []) {
+    const r = recipeOf(f.recipe);
+    for (const [g, n] of Object.entries(r.in)) if (!m.goods[g]) m.goods[g] = { role: 'consume', rate: 0, baseRate: 0, cap: n * STORAGE.STATION_INPUT_PER_UNIT, baseCap: n * STORAGE.STATION_INPUT_PER_UNIT, stock: 0, mod: 1, fac: true };
+    for (const [g, n] of Object.entries(r.out)) if (!m.goods[g]) m.goods[g] = { role: 'produce', rate: 0, baseRate: 0, cap: n * STORAGE.STATION_OUTPUT_PER_UNIT, baseCap: n * STORAGE.STATION_OUTPUT_PER_UNIT, stock: 0, mod: 1, fac: true };
+  }
+  // Gebäude-Ausbau (PRD-3 6.3): Rate +20 % und Lager +15 % je Level der Ware, ohne Besitz höchstens Level 6 wirksam
+  for (const [g, s] of Object.entries(m.goods)) {
+    const b = effectiveLevel(m.bld?.lvl?.[g], !!m.owner);
+    if (s.role !== 'trade') { s.baseRate ??= s.rate; s.rate = s.baseRate * (1 + LEVEL_FX.PLANET_RATE * L) * buildingRateMul(b); }
     s.baseCap ??= s.cap;
-    s.cap = Math.max(1, Math.round(s.baseCap * (m.storageMul || 1) * (1 + LEVEL_FX.PLANET_STORAGE * L)));
+    s.cap = Math.max(1, Math.round(s.baseCap * (m.storageMul || 1) * (1 + LEVEL_FX.PLANET_STORAGE * L) * buildingCapMul(b)));
   }
   m.rev = (m.rev || 0) + 1;
 }
 
-/** Einfacher Rezeptlauf ohne Verpflegung (für Zusatzrezepte). Liefert neuen Fortschritt. */
-function runRecipe(m, r, prog, dt, now) {
+/** Einfacher Rezeptlauf ohne Verpflegung (für Zusatzrezepte und Fabriken auf Bauplätzen). Liefert neuen Fortschritt. */
+export function runRecipe(m, r, prog, dt, now) {
   const ready = () => Object.entries(r.in).every(([g, n]) => m.goods[g]?.stock >= n) && Object.entries(r.out).every(([g, n]) => m.goods[g] && m.goods[g].stock + n <= m.goods[g].cap);
   if (!ready()) return 0;
   prog += (dt * (m.boost || 1)) / r.time;

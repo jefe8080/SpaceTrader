@@ -14,8 +14,10 @@ import { bus } from './bus.js';
 import { orderShips } from './orders.js';
 import { questBoardSection } from './quests.js';
 import { eventSection } from './events.js';
+import { enterPlanet } from './planetPanel.js';
 
 const entName = (id) => esc(state.entities.get(id)?.name || 'unbekannter Ort');
+const dockedHereOwn = (id) => myShips().some((s) => s.dockedAt === id);
 /** Sektorname an einer Position (oder "Leerraum") */
 function sectorOfPoint(p) {
   for (const s of state.sectors.values()) if (Math.hypot(s.bh.x - p.x, s.bh.y - p.y) < 80000) return 'Sektor ' + s.name;
@@ -272,6 +274,7 @@ function entityDetails(e) {
   const fav = !!state.favorites[e.id];
   let h = `<div class="det-head"><img src="${entitySprite(e)}" alt=""><div style="flex:1">
     <div class="title">${esc(e.name)}</div><div class="type">${typeName(e)} · ${esc(systemName(e))} · ${esc(sectorName(e))}</div></div>
+    ${e.kind === 'planet' && e.market ? `<button class="small" data-act="land" data-ent="${e.id}" title="Planetare Ansicht (Doppelklick auf den Planeten)" ${dockedHereOwn(e.id) ? '' : 'disabled'}>🛬 Landen</button>` : ''}
     <button class="star${fav ? ' on' : ''}" data-act="fav" data-ent="${e.id}" title="${fav ? 'Aus Favoriten entfernen' : 'Zu Favoriten (F)'}">${fav ? '★' : '☆'}</button></div>`;
   const m = e.market;
   if (e.kind === 'planet') {
@@ -411,6 +414,7 @@ det.addEventListener('click', (ev) => {
     case 'qdown': cmd('queueMove', { ship: d.ship, qid: Number(d.qid), dir: 1 }); break;
     case 'qdel': cmd('queueRemove', { ship: d.ship, qid: Number(d.qid) }); break;
     case 'clearWarn': cmd('clearWarn', { ship: d.ship }); break;
+    case 'land': enterPlanet(d.ent); break;
     case 'cShipDelete': cmd('cShipDelete', { ship: d.ship }); break;
     case 'refuel': cmd('refuel', { ship: d.ship }); break;
     case 'questAccept': cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); break;
