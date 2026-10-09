@@ -40,6 +40,7 @@ export function leavePlanet() {
 }
 export function openBuilding(it) {
   current = it;
+  panelKinds[it.kind]?.open?.();
   sfx('click');
   renderPlanetUi();
 }

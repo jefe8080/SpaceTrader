@@ -91,6 +91,19 @@ export const MINIGAMES = {
 };
 export const EXTRAS_CHANCE = 0.2;
 
+/** Minispiele (PRD-3 6.5): Einsatz 10/20/50 × Pilotenlevel, Gewinn = Einsatz zurück plus derselbe Betrag */
+export const MG = {
+  STAKES: [10, 20, 50],
+  WIN: 0.6,           // Gewinnchance bzw. kalibrierte Erfolgsquote der Geschicklichkeitsspiele
+  WIN_DOG: 0.7,       // mit Hunde-Buff
+  LIMIT: 20,          // höchstens 20 Spiele je Spieler und Stunde, über alle Planeten
+  WINDOW: 3600,
+  SKILL_TIMEOUT: 180, // offene Geschicklichkeitsspiele verfallen nach 3 min
+};
+export const stakeOf = (i, level) => MG.STAKES[i] * level;
+/** Kleinigkeiten (PRD-3 6.6) */
+export const EXTRAS = { TIP_COST: 5000, BEG_COST: 10, BEG_FUEL: 0.05, DOG_SECS: 300, SMUG_REWARD: 2, SMUG_EVERY: [1800, 3600] };
+
 /** Ausstattung eines Planeten: Unterhaltung (0 bis 3, Kasino mit 1 bis 3 Spielen), Schmuggler, Bettler, Hund, Schule */
 export function planetFeatures(id) {
   const r = planetRng(id, 7);

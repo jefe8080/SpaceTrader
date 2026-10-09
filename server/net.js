@@ -43,6 +43,7 @@ export class Net {
         s.socket.emit('reveal', { entities: [serializeEntity(e)] });
       }
     });
+    game.on('mg', (p, d) => this.sessions.get(p.id)?.socket.emit('mg', d));
     game.on('events', () => { for (const s of this.sessions.values()) this.sendEvents(s); });
     io.on('connection', (socket) => this.onConnection(socket));
   }
@@ -285,6 +286,7 @@ function extraOf(m) {
     if (m.strategy === 'shipyard' && !m.owner) out.order = m.order ? { type: m.order.type, player: m.order.player, name: m.order.name } : null;
   }
   if (m.progress !== undefined) out.progress = r1(m.progress);
+  if (m.smug?.offer) out.smug = m.smug.offer;
   if (m.bld) out.bld = { lvl: m.bld.lvl, fac: m.bld.factories.map((f) => f.recipe) };
   if (m.supply !== undefined) out.supply = m.supply && { state: m.supply.state, good: m.supply.good, sourceId: m.supply.sourceId, shipId: m.supply.shipId };
   return out;
@@ -338,5 +340,5 @@ function shipDetail(s, game) {
 function playerDetail(p) {
   return { stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1, governor: p.governor || 0, faction: p.faction || null,
     flagshipAt: p.flagshipAt ?? null, xp: Math.floor(p.xp || 0), level: pilotLevel(p.xp), quest: p.quest || null, questLock: p.questLock || 0,
-    rep: p.rep || {}, questsDone: p.questsDone || 0 };
+    rep: p.rep || {}, questsDone: p.questsDone || 0, dogUntil: p.dogUntil || 0, mg: p.mg || null };
 }

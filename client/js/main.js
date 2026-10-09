@@ -67,7 +67,7 @@ socket.on('ships', (d) => {
 });
 socket.on('me', (d) => {
   Object.assign(state, { stopLoss: d.stopLoss, groups: d.groups, favorites: d.favorites, pilot: d.pilot, governor: d.governor, faction: d.faction, flagshipAt: d.flagshipAt,
-    xp: d.xp, level: d.level, quest: d.quest, questLock: d.questLock, rep: d.rep });
+    xp: d.xp, level: d.level, quest: d.quest, questLock: d.questLock, rep: d.rep, dogUntil: d.dogUntil, mg: d.mg });
   ui.scheduleRender(true);
 });
 socket.on('routes', (list) => {
@@ -374,6 +374,7 @@ canvas.addEventListener('touchend', endTouch, { passive: false });
 canvas.addEventListener('touchcancel', endTouch, { passive: false });
 addEventListener('keydown', (e) => {
   if (!state.me || ui.typing()) return;
+  if (ui.mgOpen()) { if (e.key === 'Escape') ui.closeGame(); return; }
   if (state.landed && (e.key === 'Escape' || ZOOM_PRESETS[e.key])) {
     // Planetare Ansicht verlassen: Esc bzw. Taste 1/2/3 (die Zoomstufe greift dann wie gewohnt)
     if (e.key === 'Escape') { ui.planetEscape(); return; }

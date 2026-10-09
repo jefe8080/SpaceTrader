@@ -82,9 +82,8 @@ export * from './progression.js';
 export * from './consortium.js';
 export * from './events.js';
 export * from './planetside.js';
-export * from './consortium.js';
-export * from './events.js';
-export * from './planetside.js';
+export { COMPLIMENTS } from './compliments.js';
+export { FACTS } from './facts.js';
 
 // Preis = Basispreis × Standort-Modifier × Füllstandskurve(stock/cap) ± Spread
 import { PRICE, curveMax, curveMin } from './price.js';

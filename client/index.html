@@ -31,6 +31,7 @@
       <div class="stat"><span class="label">Credits</span><span id="credits" class="value">0</span></div>
       <div class="stat"><span class="label">Schiffe</span><span id="shipCount" class="value">0</span></div>
       <div class="stat" id="levelStat" title="Pilotenlevel und Erfahrung"><span class="label">Level</span><span id="levelValue" class="value">1</span><span class="xpbar"><span id="xpFill"></span></span></div>
+      <span id="dogBuff" class="dog-buff" title="Hunde-Buff: bessere Chancen bei Minispielen" hidden></span>
       <div class="stat" title="Pilotenlizenz (Kauf am Handels-Hub, erfordert das gleiche Pilotenlevel)"><span class="label">Lizenz</span><span id="pilotLevel" class="value">P1</span></div>
       <button id="stopLossBtn" class="small">Stop-Loss aus</button>
       <div id="onlinePlayers"></div>
@@ -79,6 +80,9 @@
   </div>
   <div id="consModal" class="overlay" hidden>
     <div class="card wide-card" id="consCard"></div>
+  </div>
+  <div id="mgModal" class="overlay" hidden>
+    <div class="card mg-card" id="mgCard"></div>
   </div>
   <div id="popMenu" class="popmenu" hidden></div>
   <div id="audioMenu" class="popmenu audio-menu" hidden></div>

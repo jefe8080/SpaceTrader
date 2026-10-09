@@ -8,6 +8,7 @@ import { refreshModals } from './dom.js';
 import { renderQuestBox } from './quests.js';
 import { renderEventsButton } from './events.js';
 import { renderPlanetUi } from './planetPanel.js';
+import { renderDogBuff } from './minigames.js';
 import './routes.js';
 import './favorites.js';
 import './almanac.js';
@@ -26,6 +27,7 @@ export { openFavorites } from './favorites.js';
 export { openAlmanac, refreshAlmanac } from './almanac.js';
 export { orderShips } from './orders.js';
 export { enterPlanet, leavePlanet, openBuilding, planetEscape } from './planetPanel.js';
+export { mgOpen, closeGame } from './minigames.js';
 
 export function renderAll() {
   renderTop();
@@ -34,6 +36,7 @@ export function renderAll() {
   renderQuestBox();
   renderEventsButton();
   renderPlanetUi();
+  renderDogBuff();
 }
 
 /**

@@ -1,5 +1,5 @@
 import { WORLD, GOODS, BELT_TYPES, QUEST, QUEST_TYPES, REP, RANKS, factionRank, questReward, flightMinutes, canBuyFrom, shipStats,
-  giverLevel, giverXpOf } from '../shared/config.js';
+  giverLevel, giverXpOf, planetFeatures, EXTRAS } from '../shared/config.js';
 import { hexAt, hexKey, hexNeighbors } from '../shared/hex.js';
 import { missingInputs, stat } from './markets.js';
 
@@ -40,7 +40,21 @@ export function refreshBoards(game, sectors) {
       }
       b.next = game.time + rnd(...QUEST.EVERY);
     }
+    for (const e of game.world.sectorEntities(key)) if (e.kind === 'planet' && e.sector === key && e.market) refreshSmuggler(game, e);
   }
+}
+
+/**
+ * Schmugglerhöhle: eigener Slot mit Beschaffung oder Kurier, Belohnung ×2 Credits, 0 XP, kein Questgeber-Level,
+ * kein Fraktionsruf. Nach der Annahme kommt nach 30 bis 60 min ein neues Angebot.
+ */
+export function refreshSmuggler(game, e) {
+  if (!planetFeatures(e.id).smuggler) return;
+  const s = (e.market.smug ||= { offer: null, next: 0 });
+  if (s.offer || game.time < s.next) return;
+  const o = makeOffer(game, e, Math.random() < 0.5 ? 'procure' : 'courier') || makeOffer(game, e, 'courier');
+  if (!o) { s.next = game.time + 600; return; }
+  s.offer = { ...o, smuggler: true, faction: null, giverName: `Schmuggler (${e.name})`, reward: { cr: o.reward.cr * EXTRAS.SMUG_REWARD, xp: 0 } };
 }
 
 /** Neues Angebot eines Questgebers (oder null, wenn kein Typ passt) */
@@ -156,21 +170,22 @@ function deliveryQuest(game, e, level, g) {
 /** Objekte, die einer Quest gehören (für die Besitzprüfung) */
 const questEntities = (q) => [q.source, q.pickup, q.dest, ...(q.stops || []), ['procure', 'rush', 'mine'].includes(q.type) ? q.giver : null].filter(Boolean);
 
-export function acceptQuest(game, player, ship, e, questId) {
+/** offers: Angebotsliste (Questtafel oder Schmugglerslot) */
+export function acceptQuest(game, player, ship, e, questId, offers = null) {
   if (!isGiver(e)) return 'Hier gibt es keine Questtafel.';
   if (ship.dockedAt !== e.id) return 'Dein Schiff muss beim Questgeber angedockt sein.';
   if (player.quest) return 'Du hast schon eine aktive Quest.';
   const lock = (player.questLock || 0) - game.time;
   if (lock > 0) return `Nach dem Abbruch kannst du erst in ${Math.ceil(lock / 60)} min eine neue Quest annehmen.`;
-  const b = boardOf(e);
-  const i = b.offers.findIndex((o) => o.id === questId);
+  const list = offers || boardOf(e).offers;
+  const i = list.findIndex((o) => o.id === questId);
   if (i < 0) return 'Diese Quest ist nicht mehr verfügbar.';
-  const q = b.offers[i];
+  const q = list[i];
   if (questEntities(q).some((id) => game.canUseStorage(game.ownership.get(id), player.id))) return 'Diese Quest betrifft deinen eigenen Besitz oder den deines Konsortiums.';
   const st = shipStats(ship);
   if (q.type === 'tour' && st.passenger < q.tourists) return `Für ${q.tourists} Touristen braucht das Schiff Passagierkabinen mit ${q.tourists} Plätzen.`;
   if (q.type === 'mine' && !(st.mining.std > 0)) return 'Für diese Quest braucht das Schiff Abbaugeräte.';
-  b.offers.splice(i, 1);
+  list.splice(i, 1);
   const quest = { ...q, accepted: Math.round(game.time), ship: ship.id, progress: 0 };
   if (q.type === 'courier') quest.state = 'pickup';
   if (q.type === 'tour') { quest.state = 'tour'; quest.visited = []; }
@@ -183,7 +198,7 @@ export function acceptQuest(game, player, ship, e, questId) {
   }
   if (q.zone) game.discover(player, 'zone', q.zone);
   if (q.sector) game.discover(player, 'sector', q.sector);
-  game.emit('notice', player, `Quest angenommen: ${QUEST_TYPES[q.type].name} für ${e.name}`);
+  game.emit('notice', player, `${q.smuggler ? 'Schmuggelauftrag' : 'Quest'} angenommen: ${QUEST_TYPES[q.type].name} für ${e.name}`);
   game.emit('sfx', player, 'questAccept');
   game.emit('entity', e);
   questProgress(game, player, ship); // z.B. Ware schon an Bord
@@ -278,8 +293,9 @@ function completeQuest(game, player) {
   player.questsDone = (player.questsDone || 0) + 1;
   game.addXp(player, q.reward.xp);
   const giver = game.world.entities.get(q.giver);
-  if (giver) game.addGiverXp(giver, giverXpOf(q.reward.xp));
-  if (q.faction) game.addRep(player, q.faction, q.reward.xp * REP.PER_XP);
+  // Schmugglerquests: keine XP, kein Questgeber-Level, kein Fraktionsruf (PRD-3 6.6)
+  if (giver && !q.smuggler) game.addGiverXp(giver, giverXpOf(q.reward.xp));
+  if (q.faction && !q.smuggler) game.addRep(player, q.faction, q.reward.xp * REP.PER_XP);
   game.emit('notice', player, `Quest erfüllt: +${q.reward.cr.toLocaleString('de-DE')} Cr, +${q.reward.xp} XP`);
   game.emit('sfx', player, 'questDone');
 }

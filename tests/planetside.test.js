@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { BUILDING, buildingUpgradeCost, factorySlots, factoryCost, planetFeatures, RECIPE_CATS, RECIPES, LEVEL_FX } from '../shared/config.js';
+import { refreshSmuggler } from '../server/quests.js';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 import * as await_import from '../server/markets.js';
@@ -77,4 +78,78 @@ test('Fabrik-Bauplätze: nur eigene Planeten, Kategorie-Grenze, Fabrik läuft au
   assert.ok(planet.market.goods[out].stock > before, 'Fabrik produziert');
   assert.equal(cmd(g, p, 'facDemolish', { target: planet.id, index: 0 }), undefined);
   assert.equal(g.buildingsOf(planet).factories.length, slots[cat] - 1);
+});
+
+test('Minispiele: Stundenlimit 20, Einsatz × Pilotenlevel, Gewinn zahlt doppelt', () => {
+  const g = new Game(':memory:', { seed: 12 });
+  const p = g.createPlayer('Mia');
+  p.credits = 1e6;
+  // Planet mit Taverne suchen
+  const e = [...g.world.entities.values()].find((x) => x.kind === 'planet' && x.market && (planetFeatures(x.id).fun.includes('tavern')));
+  g.revealAround(p, e.x, e.y, 2000);
+  const s = g.shipsOf(p.id)[0];
+  Object.assign(s, { dockedAt: e.id, state: 'docked' });
+  const results = [];
+  g.on('mg', (pl, d) => results.push(d));
+  let cr = p.credits;
+  for (let i = 0; i < 20; i++) {
+    assert.equal(cmd(g, p, 'mgPlay', { target: e.id, building: 'tavern', game: 'dice', stake: 2 }), undefined);
+    const r = results.at(-1);
+    assert.equal(r.stake, 50 * 1);
+    assert.equal(p.credits, cr + (r.win ? 50 : -50));
+    const sum = (a) => a[0] + a[1];
+    assert.equal(sum(r.outcome.you) > sum(r.outcome.bank), r.win, 'Ablauf passt zum Ergebnis');
+    cr = p.credits;
+  }
+  assert.match(cmd(g, p, 'mgPlay', { target: e.id, building: 'tavern', game: 'dice', stake: 0 }), /Croupier macht Pause/);
+  g.time += 3601;
+  assert.equal(cmd(g, p, 'mgPlay', { target: e.id, building: 'tavern', game: 'highlow', stake: 0, choice: { first: 8, guess: 'higher' } }), undefined);
+  const r = results.at(-1);
+  assert.equal(r.outcome.next > 8, r.win);
+  assert.match(cmd(g, p, 'mgPlay', { target: e.id, building: 'casino', game: 'slots', stake: 0 }), /gibt es hier nicht/);
+});
+
+test('Hund, Bettler und Schmugglerauftrag', () => {
+  const g = new Game(':memory:', { seed: 12 });
+  const p = g.createPlayer('Uwe');
+  const find = (k) => [...g.world.entities.values()].find((x) => x.kind === 'planet' && x.market && planetFeatures(x.id)[k] && x.sector === '0,0');
+  const dock = (e) => { g.revealAround(p, e.x, e.y, 2000); Object.assign(g.shipsOf(p.id)[0], { dockedAt: e.id, state: 'docked', x: e.x + e.radius + 20, y: e.y }); };
+  const d = find('dog');
+  dock(d);
+  assert.equal(cmd(g, p, 'dogPet', { target: d.id }), undefined);
+  assert.equal(p.dogUntil, g.time + 300);
+  const b = find('beggar');
+  dock(b);
+  const s = g.shipsOf(p.id)[0];
+  s.fuel = 10;
+  const cr = p.credits;
+  assert.equal(cmd(g, p, 'beg', { target: b.id }), undefined);
+  assert.equal(p.credits, cr - 10);
+  assert.ok(Math.abs(s.fuel - 9.5) < 1e-9);
+  const sm = find('smuggler');
+  dock(sm);
+  refreshSmuggler(g, sm);
+  const o = sm.market.smug.offer;
+  assert.ok(o && o.smuggler && o.reward.xp === 0);
+  assert.equal(cmd(g, p, 'smugAccept', { target: sm.id, ship: s.id }), undefined);
+  assert.equal(p.quest.smuggler, true);
+  assert.equal(sm.market.smug.offer, null);
+});
+
+test('Schmuggler: Wurmloch-Tipp deckt unbekannten Eingang auf, ohne XP; danach nichts mehr', () => {
+  const g = new Game(':memory:', { seed: 12 });
+  const p = g.createPlayer('Ole');
+  p.credits = 1e6;
+  for (let q = -1; q <= 1; q++) for (let r = -1; r <= 1; r++) g.world.ensureSector(q, r);
+  const sm = [...g.world.entities.values()].find((x) => x.kind === 'planet' && x.market && planetFeatures(x.id).smuggler
+    && g.world.sectorEntities(x.sector).some((w) => w.kind === 'wormhole' && w.sector === x.sector));
+  assert.ok(sm, 'Planet mit Schmuggler und Wurmloch im Sektor');
+  g.revealAround(p, sm.x, sm.y, 2000);
+  Object.assign(g.shipsOf(p.id)[0], { dockedAt: sm.id, state: 'docked' });
+  const holes = g.world.sectorEntities(sm.sector).filter((w) => w.kind === 'wormhole' && w.sector === sm.sector);
+  const xp = p.xp || 0;
+  for (let i = 0; i < holes.length; i++) assert.equal(cmd(g, p, 'whTip', { target: sm.id }), undefined);
+  assert.ok(holes.every((w) => g.isKnown(p, w)));
+  assert.equal(p.xp || 0, xp, 'keine XP');
+  assert.match(cmd(g, p, 'whTip', { target: sm.id }), /nichts mehr zu holen/);
 });
