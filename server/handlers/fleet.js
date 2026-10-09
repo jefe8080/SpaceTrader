@@ -12,7 +12,7 @@ const ownGroup = () => (v, { player }) => {
 export default {
   /** Reihenfolge der Flottenliste (alle oder Teil der Schiffe, in neuer Reihenfolge) */
   fleetOrder: {
-    args: { ships: V.ownShips(200), group: V.opt((v, ctx) => (v === 'none' ? 'none' : ownGroup()(v, ctx).id), null) },
+    args: { ships: V.ownShips(200, true), group: V.opt((v, ctx) => (v === 'none' ? 'none' : ownGroup()(v, ctx).id), null) },
     run(ctx, { ships, group }) {
       ships.forEach((s, i) => {
         s.ord = i + 1;
@@ -21,7 +21,7 @@ export default {
     },
   },
   groupCreate: {
-    args: { name: V.str(24, 1), ships: V.opt(V.ownShips(200), []) },
+    args: { name: V.str(24, 1), ships: V.opt(V.ownShips(200, true), []) },
     run({ game, player }, { name, ships }) {
       if (player.groups.length >= MAX_GROUPS) return 'Zu viele Gruppen.';
       const g = { id: 'g' + ++game.counters.group, name, collapsed: false };
@@ -54,7 +54,7 @@ export default {
     },
   },
   shipGroup: {
-    args: { ships: V.ownShips(200), group: V.opt((v, ctx) => ownGroup()(v, ctx).id, null) },
+    args: { ships: V.ownShips(200, true), group: V.opt((v, ctx) => ownGroup()(v, ctx).id, null) },
     run(ctx, { ships, group }) { for (const s of ships) s.group = group; },
   },
   stopLoss: {

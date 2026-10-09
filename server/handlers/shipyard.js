@@ -26,14 +26,14 @@ export default {
       if (!item) return 'Schiff nicht mehr verfügbar.';
       if (item.faction) return 'Fraktionsschiffe gibt es nur über das Angebot der Fraktionswerft.';
       if (item.reservedFor && item.reservedFor !== player.id && game.time < item.reservedUntil) return `Dieses Schiff ist noch ${Math.ceil((item.reservedUntil - game.time) / 60)} min für den Besteller reserviert.`;
-      if (m.owner && m.owner !== player.id && !m.yardSale) return 'Diese Werft verkauft nicht an andere Spieler.';
+      if (m.owner && !game.isOwnerOrMember(m.owner, player.id) && !m.yardSale) return 'Diese Werft verkauft nicht an andere Spieler.';
       const lic = pilotLicense(player);
       const cls = SHIP_TYPES[item.type].cls;
       if (!lic.classes.includes(cls)) return `Für Klasse ${SHIP_CLASSES[cls].name} brauchst du Pilotenlizenz ${SHIP_CLASSES[cls].license}.`;
       if (game.shipsOf(player.id).length >= lic.maxShips) return `Pilotenlizenz ${lic.level} erlaubt höchstens ${lic.maxShips} Schiffe.`;
       if (player.credits < item.price) return 'Nicht genug Credits.';
       player.credits -= item.price;
-      if (m.owner && m.owner !== player.id) game.players.get(m.owner).credits += item.price; // Verkauf aus Spielerwerft
+      if (m.owner && m.owner !== player.id) game.accountOf(m.owner).credits += item.price; // Verkauf aus Spieler- oder Konsortiumswerft
       m.forSale.splice(index, 1);
       const s = game.spawnShip(player, item.type, target);
       if (item.bonus) Object.assign(s, { bonus: item.bonus, yardLvl: item.yardLvl, fuel: shipStats({ ...s, bonus: item.bonus }).tank });
@@ -129,7 +129,7 @@ export default {
       const max = pilotLicense(player).maxUpgrade;
       if (lvl > max) return `Pilotenlizenz ${player.pilot} erlaubt höchstens Stufe ${max}.`;
       // Eigene Werft: Einbau zum Selbstkostenpreis (halber Preis)
-      const own = e.market.owner === player.id;
+      const own = game.isOwnerOrMember(e.market.owner, player.id);
       const cost = Math.round(upgradeCost(ship.type, lvl) * (own ? 0.5 : 1));
       if (player.credits < cost) return 'Nicht genug Credits.';
       player.credits -= cost;
@@ -143,11 +143,11 @@ export default {
   buyModule: {
     args: { ship: V.ownShip(), module: V.key(MODULES) },
     run({ game, player }, { ship, module }) {
-      const e = dockedAt(game, ship, (x) => offersModule(x, module) || (x.market?.owner === player.id && isYard(x)));
+      const e = dockedAt(game, ship, (x) => offersModule(x, module) || (game.isOwnerOrMember(x.market?.owner, player.id) && isYard(x)));
       if (!e) return 'Dieses Modul wird hier nicht angeboten.';
       const st = shipStats(ship);
       if (st.cargo - holdUsage(ship).cargo < MODULE_SIZE) return `Ein Modul braucht ${MODULE_SIZE} freie Frachteinheiten.`;
-      const own = e.market.owner === player.id;
+      const own = game.isOwnerOrMember(e.market.owner, player.id);
       const cost = Math.round(MODULES[module].price * (own ? 0.5 : 1));
       if (player.credits < cost) return 'Nicht genug Credits.';
       player.credits -= cost;

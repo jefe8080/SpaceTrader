@@ -1,16 +1,31 @@
 import { GOODS, SHIP_TYPES, SHIPYARD, GOVERNOR_LICENSES, UNLOCK_NAMES, PROP_UPGRADES, FIXED, CUSTOMS_MAX, RECYCLE_SHARE, PILOT_LICENSES,
-  propertyKind, minGovernorFor, propertyPrice, propUpgradeCost, extraOptions, LEVEL_FX, giverLevel, shipStats } from '../../shared/config.js';
+  propertyKind, minGovernorFor, propertyPrice, propUpgradeCost, extraOptions, LEVEL_FX, giverLevel, shipStats,
+  CONSORTIUM_LEVELS, consortiumOwner, isConsortiumOwner } from '../../shared/config.js';
 import { V, CmdError } from './validate.js';
 import { newProperty, buildableTypes, propBook } from '../property.js';
+import { consortiumOf, isMaster, propCount, clog } from '../consortium.js';
 
-/** Eigener Besitz, liefert { e, prop } */
+/**
+ * Verwaltbarer Besitz: eigener oder (als Handelsmeister) Besitz des eigenen Konsortiums.
+ * Liefert { e, prop, cons, payer, maxLevel }: payer zahlt Ausbau (Spieler bzw. Pool), maxLevel aus Lizenz bzw. Konsortiumslevel.
+ */
 const ownProp = () => (v, ctx) => {
   const e = V.entity()(v, ctx);
-  const prop = ctx.game.ownership.get(e.id);
-  if (!prop || prop.player !== ctx.player.id) throw new CmdError('Das gehört dir nicht.');
-  return { e, prop };
+  const { game, player } = ctx;
+  const prop = game.ownership.get(e.id);
+  if (!game.canManage(prop, player.id)) throw new CmdError(prop && game.canUseStorage(prop, player.id) ? 'Verwalten dürfen nur Handelsmeister.' : 'Das gehört dir nicht.');
+  const cons = isConsortiumOwner(prop.player) ? game.accountOf(prop.player) : null;
+  return { e, prop, cons, payer: cons || player, maxLevel: cons ? CONSORTIUM_LEVELS[cons.level].maxLevel : governor(player)?.maxLevel || 0 };
 };
 const governor = (player) => GOVERNOR_LICENSES[player.governor || 0];
+/** Freier Platz in der eigenen Gouverneurslizenz und passende Freischaltung (Fehlertext oder null) */
+function licenseBlock(game, player, kind) {
+  const gov = governor(player);
+  if (!gov) return 'Dafür brauchst du eine Gouverneurslizenz (am Hub).';
+  if (!gov.unlocks.includes(kind)) return `${UNLOCK_NAMES[kind]} erfordern Gouverneurslizenz ${minGovernorFor(kind)}.`;
+  return null;
+}
+const ownedBy = (game, owner) => [...game.ownership.values()].filter((p) => p.player === owner).length;
 const dockedOwn = (game, player, e) => game.shipsOf(player.id).filter((s) => s.dockedAt === e.id);
 
 /** Waren aus den Laderäumen der angedockten eigenen Schiffe abziehen (falls vollständig vorhanden) */
@@ -61,8 +76,8 @@ export default {
 
   propCustoms: {
     args: { target: ownProp(), value: V.num(0, CUSTOMS_MAX) },
-    run({ game, player }, { target: { e, prop }, value }) {
-      if (!governor(player)?.unlocks.includes('customs')) return 'Zoll erfordert Gouverneurslizenz 3.';
+    run({ game, player }, { target: { e, prop, cons }, value }) {
+      if (!cons && !governor(player)?.unlocks.includes('customs')) return 'Zoll erfordert Gouverneurslizenz 3.';
       prop.customs = Math.round(value * 100) / 100;
       game.refreshProperty(e);
     },
@@ -78,10 +93,9 @@ export default {
 
   propUpgrade: {
     args: { target: ownProp(), line: V.key(PROP_UPGRADES), extra: V.opt(V.str(30)) },
-    run({ game, player }, { target: { e, prop }, line, extra }) {
+    run({ game, player }, { target: { e, prop, cons, payer, maxLevel: max }, line, extra }) {
       const lvl = (prop.upg[line] || 0) + 1;
-      const max = governor(player)?.maxLevel || 0;
-      if (lvl > max) return `Gouverneurslizenz ${player.governor} erlaubt höchstens Ausbaustufe ${max}.`;
+      if (lvl > max) return cons ? `Konsortiumslevel ${cons.level} erlaubt höchstens Ausbaustufe ${max}.` : `Gouverneurslizenz ${player.governor} erlaubt höchstens Ausbaustufe ${max}.`;
       if (line === 'extra') {
         const opts = extraOptions(e);
         if (e.market.strategy !== 'shipyard') {
@@ -90,15 +104,83 @@ export default {
         }
       }
       const cost = propUpgradeCost(e, line, lvl);
-      if (player.credits < cost.credits) return 'Nicht genug Credits.';
+      if (payer.credits < cost.credits) return cons ? 'Nicht genug Credits im Pool.' : 'Nicht genug Credits.';
       const err = takeGoods(dockedOwn(game, player, e), cost.goods);
       if (err) return err;
-      player.credits -= cost.credits;
+      payer.credits -= cost.credits;
       propBook(game, prop, 'exp', cost.credits);
       prop.upg[line] = lvl;
       if (line === 'extra' && extra) prop.extras.push(extra);
       game.refreshProperty(e);
+      if (cons) { clog(game, cons, player.id, 'upgrade', cost.credits, `${e.name}: ${PROP_UPGRADES[line].name} ${lvl}`); game.emit('consortium', cons); }
       game.emit('notice', player, `${e.name}: ${PROP_UPGRADES[line].name} Stufe ${lvl}`);
+    },
+  },
+
+  // ---------- Konsortiumsbesitz (PRD-3 4.4) ----------
+  /** Für das Konsortium kaufen: Handelsmeister, Schiff vor Ort, eigene Lizenz schaltet die Objektart frei, Limit und Pool */
+  cBuyProperty: {
+    args: { target: V.entity() },
+    run({ game, player }, { target: e }) {
+      const c = consortiumOf(game, player);
+      if (!isMaster(c, player.id)) return 'Für das Konsortium kaufen nur Handelsmeister.';
+      const kind = propertyKind(e);
+      if (!kind) return 'Dieses Objekt ist nicht käuflich (Hub, Fraktionscluster oder Startsystem).';
+      if (game.ownership.has(e.id)) return 'Das gehört schon jemandem.';
+      if (!dockedOwn(game, player, e).length) return 'Kauf nur vor Ort: ein eigenes Schiff muss angedockt sein.';
+      const lic = licenseBlock(game, player, kind);
+      if (lic) return lic;
+      const L = CONSORTIUM_LEVELS[c.level];
+      if (propCount(game, c) >= L.maxProps) return `Konsortiumslevel ${c.level} erlaubt höchstens ${L.maxProps} Besitztümer.`;
+      const price = propertyPrice(e);
+      if (c.credits < price) return 'Nicht genug Credits im Pool.';
+      c.credits -= price;
+      const prop = newProperty(e.id, consortiumOwner(c.id), game.time);
+      if (e.kind === 'planet') for (const [g, s] of Object.entries(e.market.goods)) if (s.role === 'consume') prop.fixed[g] = FIXED.DEFAULT;
+      game.setOwner(e, player, prop);
+      clog(game, c, player.id, 'buy', price, e.name);
+      game.notifyOwner(prop.player, `${e.name} gehört jetzt dem Konsortium ${c.name}.`);
+      game.emit('consortium', c);
+    },
+  },
+  /** Eigenen Besitz an das Konsortium verschenken (alle Mitglieder) */
+  cTransfer: {
+    args: { target: V.entity() },
+    run({ game, player }, { target: e }) {
+      const c = consortiumOf(game, player);
+      if (!c) return 'Du bist in keinem Konsortium.';
+      const prop = game.ownership.get(e.id);
+      if (prop?.player !== player.id) return 'Das gehört dir nicht.';
+      const L = CONSORTIUM_LEVELS[c.level];
+      if (propCount(game, c) >= L.maxProps) return `Konsortiumslevel ${c.level} erlaubt höchstens ${L.maxProps} Besitztümer.`;
+      prop.player = consortiumOwner(c.id);
+      game.setOwner(e, player, prop);
+      clog(game, c, player.id, 'transfer', 0, e.name);
+      game.notifyOwner(prop.player, `${player.name} hat ${e.name} an das Konsortium übertragen.`);
+      game.emit('consortium', c);
+    },
+  },
+  /** Herauskaufen: Handelsmeister kauft Konsortiumsbesitz zum aktuellen Preis (inkl. Ausbau) aus dem Privatgeld in den Pool */
+  cBuyOut: {
+    args: { target: V.entity() },
+    run({ game, player }, { target: e }) {
+      const c = consortiumOf(game, player);
+      if (!isMaster(c, player.id)) return 'Herauskaufen dürfen nur Handelsmeister.';
+      const prop = game.ownership.get(e.id);
+      if (prop?.player !== consortiumOwner(c.id)) return 'Das gehört nicht deinem Konsortium.';
+      const lic = licenseBlock(game, player, propertyKind(e));
+      if (lic) return lic;
+      const gov = governor(player);
+      if (ownedBy(game, player.id) >= gov.maxProps) return `Gouverneurslizenz ${gov.level} erlaubt höchstens ${gov.maxProps} Besitztümer.`;
+      const price = propertyPrice(e, prop.upg);
+      if (player.credits < price) return 'Nicht genug Credits.';
+      player.credits -= price;
+      c.credits += price;
+      prop.player = player.id;
+      game.setOwner(e, player, prop);
+      clog(game, c, player.id, 'buyout', price, e.name);
+      game.notifyOwner(consortiumOwner(c.id), `${player.name} hat ${e.name} für ${price.toLocaleString('de-DE')} Cr herausgekauft.`);
+      game.emit('consortium', c);
     },
   },
 
@@ -149,7 +231,7 @@ export default {
     run({ game, player }, { ship }) {
       const e = game.world.entities.get(ship.dockedAt);
       const prop = e && game.ownership.get(e.id);
-      if (!prop || prop.player !== player.id || e.market.strategy !== 'shipyard') return 'Recycling nur an einer eigenen Werft.';
+      if (!game.canUseStorage(prop, player.id) || e.market.strategy !== 'shipyard') return 'Recycling nur an einer eigenen Werft oder einer Werft deines Konsortiums.';
       const giveErr = game.canGiveAway(player, ship);
       if (giveErr) return giveErr;
       if (Object.keys(ship.cargo).length) return 'Erst den Laderaum leeren.';

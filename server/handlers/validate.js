@@ -32,16 +32,17 @@ export const V = {
     return parse(shape, v, ctx);
   },
   opt: (fn, dflt = undefined) => (v, ctx) => (v === undefined || v === null || v === '' ? dflt : fn(v, ctx)),
-  /** Eigenes Schiff, liefert das Schiffsobjekt */
-  ownShip: () => (v, { game, player }) => {
+  /** Eigenes Schiff, liefert das Schiffsobjekt. Im Konsortium angebotene Schiffe sind gesperrt (außer locked = true). */
+  ownShip: (locked = false) => (v, { game, player }) => {
     const s = game.ships.get(v);
     if (!s || s.owner !== player.id) fail('Unbekanntes Schiff.');
+    if (!locked && game.shipOffers?.has(s.id)) fail(`${s.name} ist im Konsortium angeboten und nimmt keine Befehle an.`);
     return s;
   },
   /** Liste eigener Schiffe */
-  ownShips: (max = 100) => (v, ctx) => {
+  ownShips: (max = 100, locked = false) => (v, ctx) => {
     if (!Array.isArray(v) || !v.length || v.length > max) fail('Keine Schiffe gewählt.');
-    return [...new Set(v)].map((id) => V.ownShip()(id, ctx));
+    return [...new Set(v)].map((id) => V.ownShip(locked)(id, ctx));
   },
   /** Dem Spieler bekanntes Objekt, liefert das Entity */
   entity: () => (v, { game, player }) => {

@@ -1,6 +1,7 @@
 // Besitz: Kauf, Verwaltung eigener Planeten und Stationen, eigene Werften, Besitzübersicht (Taste B)
 import { GOODS, SHIP_TYPES, RECIPES, GOVERNOR_LICENSES, UNLOCK_NAMES, PROP_UPGRADES, FIXED, CUSTOMS_MAX,
-  propertyKind, minGovernorFor, propertyPrice, propUpgradeCost, extraOptions, priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref, PLANET_TYPES } from '/shared/config.js';
+  propertyKind, minGovernorFor, propertyPrice, propUpgradeCost, extraOptions, priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref, PLANET_TYPES,
+  CONSORTIUM_LEVELS } from '/shared/config.js';
 import { state, fmt, fmtK, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import { shipSprite, typeName, systemName, sectorName, entitySprite } from '../util.js';
@@ -8,6 +9,14 @@ import { $, registerModal, openModal, closeModal, setHtml } from './dom.js';
 import { bus } from './bus.js';
 
 const gov = () => GOVERNOR_LICENSES[state.governor || 0];
+/** Eigenes Konsortium (oder null) und Rang */
+const cons = () => (state.cons && !state.cons.none ? state.cons : null);
+/** Fixpreis einer Ware im Konsortiumslager (Position aus dem Besitz, sonst 0,5) */
+export function storagePrice(e, g) {
+  const prop = state.props.get(e.id);
+  const { pmin, pmax } = priceWindow(g, e.market.goods[g]?.mod || 1);
+  return fixedPrice(pmin, pmax, prop?.fixed?.[g] ?? FIXED.DEFAULT);
+}
 const shipsHere = (e) => myShips().filter((s) => s.dockedAt === e.id);
 const onBoard = (e, g) => shipsHere(e).reduce((a, s) => a + (s.cargo?.[g] || 0), 0);
 
@@ -15,7 +24,13 @@ const onBoard = (e, g) => shipsHere(e).reduce((a, s) => a + (s.cargo?.[g] || 0),
 export function propertySection(e) {
   const kind = propertyKind(e);
   const prop = state.props.get(e.id);
-  if (prop) return manageSection(e, prop);
+  if (prop?.manage) return manageSection(e, prop);
+  if (prop?.cons) {
+    return `<div class="section own-prop"><div class="section-title">Besitz deines Konsortiums</div><div class="kv">
+      <span>Besitzer</span><span style="color:${e.ownerColor || '#ccc'}">${esc(e.ownerName || '?')}</span>
+      <span>Handel</span><span>${prop.mode === 'private' ? 'privat' : 'offen'}</span></div>
+      <div class="muted small-note">Konsortiumslager: Entnehmen und Einlagern zum Fixpreis, zollfrei. Entnahme zahlst du an den Pool, Einlagerung zahlt der Pool. Verwalten dürfen Handelsmeister.</div></div>`;
+  }
   if (e.owner) {
     return `<div class="section"><div class="section-title">Besitz</div><div class="kv">
       <span>Besitzer</span><span style="color:${e.ownerColor || '#ccc'}">${esc(e.ownerName || '?')}</span>
@@ -24,23 +39,39 @@ export function propertySection(e) {
   if (!kind) return '';
   const L = gov();
   const price = propertyPrice(e);
-  const owned = state.props.size;
+  const owned = [...state.props.values()].filter((p) => !p.cons).length;
   const why = !L ? 'Gouverneurslizenz nötig (am Hub)' : !L.unlocks.includes(kind) ? `${UNLOCK_NAMES[kind]} ab Gouverneurslizenz ${minGovernorFor(kind)}`
     : owned >= L.maxProps ? `Lizenz erlaubt max. ${L.maxProps} Besitztümer` : !shipsHere(e).length ? 'Ein eigenes Schiff muss hier angedockt sein' : state.credits < price ? 'Nicht genug Credits' : '';
-  return `<div class="section"><div class="section-title">Besitz</div>
+  let h = `<div class="section"><div class="section-title">Besitz</div>
     <div class="muted">Kaufbar: ${UNLOCK_NAMES[kind]} (ab Gouverneurslizenz ${minGovernorFor(kind)}).</div>
     <button class="small primary" data-act="buyProperty" data-ent="${e.id}" ${why ? 'disabled' : ''} title="${esc(why)}">Kaufen: ${fmt(price)} Cr</button>
-    ${why ? `<span class="muted small-note"> ${esc(why)}</span>` : ''}</div>`;
+    ${why ? `<span class="muted small-note"> ${esc(why)}</span>` : ''}`;
+  const c = cons();
+  if (c) {
+    const CL = CONSORTIUM_LEVELS[c.level];
+    const cwhy = c.rank !== 'master' ? 'Nur Handelsmeister' : !shipsHere(e).length ? 'Ein eigenes Schiff muss hier angedockt sein'
+      : !L ? 'Deine Gouverneurslizenz muss die Objektart freischalten' : !L.unlocks.includes(kind) ? `${UNLOCK_NAMES[kind]} ab deiner Gouverneurslizenz ${minGovernorFor(kind)}`
+      : c.props >= CL.maxProps ? `Konsortiumslevel ${c.level} erlaubt max. ${CL.maxProps} Besitztümer` : c.pool < price ? 'Nicht genug Credits im Pool' : '';
+    h += `<div class="btnrow" style="margin-top:6px"><button class="small" data-act="cBuyProperty" data-ent="${e.id}" ${cwhy ? 'disabled' : ''} title="${esc(cwhy)}">Für Konsortium kaufen</button>
+      <span class="muted small-note">Pool ${fmt(c.pool)} Cr${cwhy ? ' · ' + esc(cwhy) : ''}</span></div>`;
+  }
+  return h + '</div>';
 }
 
 function manageSection(e, prop) {
   const L = gov();
-  const max = L?.maxLevel || 0;
-  let h = `<div class="section own-prop"><div class="section-title">Dein Besitz · seit ${Math.floor((prop.since || 0) / 3600)} h Spielzeit</div>
+  const c = prop.cons ? cons() : null;
+  const max = c ? CONSORTIUM_LEVELS[c.level].maxLevel : L?.maxLevel || 0;
+  const funds = c ? c.pool : state.credits;
+  let h = `<div class="section own-prop"><div class="section-title">${c ? `Besitz des Konsortiums ${esc(c.name)}` : 'Dein Besitz'} · seit ${Math.floor((prop.since || 0) / 3600)} h Spielzeit</div>`;
+  if (c) h += `<div class="muted small-note">Verwaltung als Handelsmeister: Ausbau aus dem Pool (${fmt(c.pool)} Cr), Waren aus deinen hier angedockten Schiffen.
+    <button class="small" data-act="cBuyOut" data-ent="${e.id}" title="Zum aktuellen Preis inkl. Ausbau aus deinem Privatgeld in den Pool">Herauskaufen: ${fmt(propertyPrice(e, prop.upg))} Cr</button></div>`;
+  else if (cons()) h += `<div class="btnrow"><button class="small" data-act="cTransfer" data-ent="${e.id}" title="Schenkung an dein Konsortium, ohne Gegenleistung">An Konsortium übertragen</button></div>`;
+  h += `
     <div class="kv"><span>Saldo</span><span>1 h <b class="${prop.h1 < 0 ? 'neg' : 'pos'}">${fmtK(prop.h1)}</b> · 24 h <b class="${prop.d24 < 0 ? 'neg' : 'pos'}">${fmtK(prop.d24)}</b></span>
     <span>Handel</span><span><select class="small prop-mode" data-ent="${e.id}"><option value="open" ${prop.mode === 'open' ? 'selected' : ''}>offen</option><option value="private" ${prop.mode === 'private' ? 'selected' : ''}>privat</option></select>
       <span class="muted">${prop.mode === 'open' ? 'Fremde und NPC-Versorger handeln, du zahlst Lieferungen' : 'nur du, keine NPC-Versorger'}</span></span>
-    <span>Zoll</span><span>${L?.unlocks.includes('customs') ? `<select class="small prop-customs" data-ent="${e.id}">${[0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5].filter((v) => v <= CUSTOMS_MAX).map((v) => `<option value="${v}" ${Math.abs((prop.customs || 0) - v) < 0.001 ? 'selected' : ''}>${Math.round(v * 100)} %</option>`).join('')}</select> <span class="muted">auf Geschäfte von Fremden</span>` : '<span class="muted">ab Gouverneurslizenz 3</span>'}</span></div>
+    <span>Zoll</span><span>${c || L?.unlocks.includes('customs') ? `<select class="small prop-customs" data-ent="${e.id}">${[0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5].filter((v) => v <= CUSTOMS_MAX).map((v) => `<option value="${v}" ${Math.abs((prop.customs || 0) - v) < 0.001 ? 'selected' : ''}>${Math.round(v * 100)} %</option>`).join('')}</select> <span class="muted">auf Geschäfte von Fremden</span>` : '<span class="muted">ab Gouverneurslizenz 3</span>'}</span></div>
     <div class="muted small-note">Eigenes Lager: Laden und Einlagern kostenlos über die Markttabelle.</div>`;
 
   // Fixpreis-Verbrauch
@@ -63,8 +94,8 @@ function manageSection(e, prop) {
   const opts = extraOptions(e);
   for (const [line, u] of Object.entries(PROP_UPGRADES)) {
     const lvl = prop.upg[line] || 0;
-    const c = propUpgradeCost(e, line, lvl + 1);
-    const goods = Object.entries(c.goods).map(([g, n]) => `<span class="${onBoard(e, g) >= n ? '' : 'neg'}">${n} ${GOODS[g].name}</span>`).join(', ');
+    const cost = propUpgradeCost(e, line, lvl + 1);
+    const goods = Object.entries(cost.goods).map(([g, n]) => `<span class="${onBoard(e, g) >= n ? '' : 'neg'}">${n} ${GOODS[g].name}</span>`).join(', ');
     const isYard = e.market.strategy === 'shipyard';
     let extraSel = '';
     if (line === 'extra' && !isYard) {
@@ -73,8 +104,8 @@ function manageSection(e, prop) {
     }
     const done = lvl >= max;
     h += `<tr><td title="${esc(u.desc)}">${u.name}${line === 'extra' && prop.extras.length ? `<div class="muted small-note">${prop.extras.map((x) => RECIPES[x]?.name || GOODS[x]?.name).join(', ')}</div>` : ''}${line === 'extra' && isYard ? '<div class="muted small-note">schaltet die nächste Schiffsklasse frei</div>' : ''}</td><td>${lvl}</td>
-      <td>${done ? '<span class="muted">Lizenzgrenze</span>' : `${fmt(c.credits)} Cr + ${goods}`}</td>
-      <td>${extraSel}<button class="small" data-act="propUpgrade" data-ent="${e.id}" data-line="${line}" ${done || state.credits < c.credits ? 'disabled' : ''}>＋</button></td></tr>`;
+      <td>${done ? `<span class="muted">${c ? 'Konsortiumsgrenze' : 'Lizenzgrenze'}</span>` : `${fmt(cost.credits)} Cr + ${goods}`}</td>
+      <td>${extraSel}<button class="small" data-act="propUpgrade" data-ent="${e.id}" data-line="${line}" ${done || funds < cost.credits ? 'disabled' : ''}>＋</button></td></tr>`;
   }
   h += `</table><div class="muted small-note">Waren für den Ausbau kommen aus den Laderäumen deiner hier angedockten Schiffe.</div>`;
 
@@ -138,6 +169,9 @@ export function governorSection(dockedShip) {
 export function handlePropertyAction(d) {
   switch (d.act) {
     case 'buyProperty': if (confirm('Objekt kaufen?')) cmd('buyProperty', { target: d.ent }); return true;
+    case 'cBuyProperty': if (confirm('Objekt für das Konsortium kaufen (aus dem Pool)?')) cmd('cBuyProperty', { target: d.ent }); return true;
+    case 'cTransfer': if (confirm('Besitz ohne Gegenleistung an dein Konsortium übertragen?')) cmd('cTransfer', { target: d.ent }); return true;
+    case 'cBuyOut': if (confirm('Besitz aus dem Konsortium herauskaufen? Der Preis geht aus deinem Privatgeld in den Pool.')) cmd('cBuyOut', { target: d.ent }); return true;
     case 'propUpgrade': {
       const sel = document.getElementById('extraSel-' + d.ent);
       cmd('propUpgrade', { target: d.ent, line: d.line, extra: d.line === 'extra' ? sel?.value : undefined });
@@ -164,7 +198,7 @@ export function handlePropertyChange(el) {
 const card = $('propsCard');
 function renderProps() {
   const L = gov();
-  const list = [...state.props.values()].map((p) => ({ p, e: state.entities.get(p.entity) })).filter((x) => x.e);
+  const list = [...state.props.values()].filter((p) => !p.cons).map((p) => ({ p, e: state.entities.get(p.entity) })).filter((x) => x.e);
   let h = `<div class="modal-head"><h2>Besitz</h2><span class="muted">${list.length} / ${L?.maxProps || 0}${state.faction ? ` · <span style="color:${state.faction.color}">${esc(state.faction.name)}</span>` : ''}</span><span style="flex:1"></span><button data-p="close">✕</button></div>`;
   if (!L) h += `<div class="muted">Mit einer Gouverneurslizenz (am Hub) kannst du Stationen und Planeten kaufen.</div>`;
   if (L && !list.length) h += `<div class="muted">Noch kein Besitz. Wähle eine Station, dock ein Schiff an und kaufe sie im Detailpanel.</div>`;

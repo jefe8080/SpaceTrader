@@ -13,6 +13,7 @@ import './almanacShips.js';
 import './property.js';
 import './audioMenu.js';
 import './consortium.js';
+import './consortiumTrade.js';
 
 export { renderLogin, loginError, enterGame, leaveGame, addLog, updateTooltip, renderTop } from './hud.js';
 export { toast, hint, closeTopModal, toggleModal, typing } from './dom.js';

@@ -5,7 +5,7 @@ import { typeName, entitySprite, shipSprite, goodTag, playerPrice, cargoUsed, st
 import { ZONE_TYPES, ABILITIES } from '/shared/config.js';
 import { openAlmanac } from './almanac.js';
 import { shipyardSection, hubSection, factionYardSection, outpostSection, bonusBadge, repLine } from './shipyard.js';
-import { propertySection, governorSection, handlePropertyAction, handlePropertyChange } from './property.js';
+import { propertySection, governorSection, handlePropertyAction, handlePropertyChange, storagePrice } from './property.js';
 import { FACTIONS } from '/shared/factions.js';
 import { shipStats, holdUsage, countModules, MODULES as MODS, holdOf, FLAGSHIP } from '/shared/ships.js';
 import { $, setHtml, typing } from './dom.js';
@@ -80,6 +80,10 @@ function shipDetails(s) {
   if (!own) return h + `<div class="muted">${def.desc}</div>`;
   const used = cargoUsed(s);
   h += `<div class="status-line">${shipSymbol(s)} ${s.transit ? 'Im Wurmloch …' : statusText(s)}</div>`;
+  if (s.offer !== null && s.offer !== undefined) {
+    h += `<div class="warnbox">🤝 Im Konsortium für ${fmt(s.offer)} Cr angeboten, gesperrt.
+      <button class="small" data-act="cShipDelete" data-ship="${s.id}">Angebot zurückziehen</button></div>`;
+  }
   if (s.zone?.length) h += `<div class="zone-line">${s.zone.map((z) => `<span style="color:${ZONE_TYPES[z].color}">◌ ${ZONE_TYPES[z].name}: ${ZONE_TYPES[z].desc}</span>`).join('<br>')}</div>`;
   if (hasWarn(s)) {
     h += `<div class="warnbox">${Object.values(s.warn).map((w) => `<div>⚠ ${esc(w)}</div>`).join('')}
@@ -204,9 +208,11 @@ export function marketTable(e, ship) {
   const onRoute = ship?.queue?.[0]?.t === 'route';
   const canTrade = ship && ship.dockedAt === e.id && !onRoute;
   const mine = e.owner === state.me.id;
-  const customs = !mine && e.owner ? (e.market.customs || 0) : 0;
+  const member = !mine && state.props.get(e.id)?.cons;
+  const customs = !mine && !member && e.owner ? (e.market.customs || 0) : 0;
   const rows = Object.entries(e.market.goods).map(([g, sl]) => {
     if (mine) return ownRow(e, g, sl, canTrade ? ship : null);
+    if (member) return memberRow(e, g, sl, canTrade ? ship : null);
     const buy = canBuyFrom(sl), sell = canSellTo(sl);
     let act = '';
     if (canTrade) {
@@ -242,6 +248,20 @@ function ownRow(e, g, sl, ship) {
   return `<tr><td>${goodTag(g)} <span class="role role-${sl.role}">${ROLE_LABEL[sl.role]}</span></td>
     <td>${stockBar(sl.stock, sl.cap, '#81c784')} <span class="muted">${Math.floor(sl.stock)}/${sl.cap}</span></td>
     <td><span class="muted" title="Marktpreis für Fremde">${playerPrice(e, g, canBuyFrom(sl) ? 'buy' : 'sell').toFixed(1)}</span></td>
+    <td style="white-space:nowrap">${act}</td></tr>`;
+}
+
+/** Zeile im Konsortiumslager: Entnehmen und Einlagern zum Fixpreis */
+function memberRow(e, g, sl, ship) {
+  const pr = storagePrice(e, g);
+  let act = '';
+  if (ship) {
+    act = ['10', 'max'].map((a) => `<button class="small" data-act="trade" data-dir="buy" data-ship="${ship.id}" data-ent="${e.id}" data-good="${g}" data-amt="${a}" title="Entnehmen, du zahlst an den Pool">${a === 'max' ? '⇧ Max' : '⇧' + a}</button>`).join(' ');
+    if (ship.cargo?.[g]) act += ' ' + ['10', 'max'].map((a) => `<button class="small" data-act="trade" data-dir="sell" data-ship="${ship.id}" data-ent="${e.id}" data-good="${g}" data-amt="${a}" title="Einlagern, der Pool zahlt">${a === 'max' ? '⇩ Alle' : '⇩' + a}</button>`).join(' ');
+  }
+  return `<tr><td>${goodTag(g)} <span class="role role-${sl.role}">${ROLE_LABEL[sl.role]}</span></td>
+    <td>${stockBar(sl.stock, sl.cap, '#ffb74d')} <span class="muted">${Math.floor(sl.stock)}/${sl.cap}</span></td>
+    <td><span title="Fixpreis im Konsortiumslager">${pr.toFixed(1)}</span></td>
     <td style="white-space:nowrap">${act}</td></tr>`;
 }
 
@@ -388,6 +408,7 @@ det.addEventListener('click', (ev) => {
     case 'qdown': cmd('queueMove', { ship: d.ship, qid: Number(d.qid), dir: 1 }); break;
     case 'qdel': cmd('queueRemove', { ship: d.ship, qid: Number(d.qid) }); break;
     case 'clearWarn': cmd('clearWarn', { ship: d.ship }); break;
+    case 'cShipDelete': cmd('cShipDelete', { ship: d.ship }); break;
     case 'refuel': cmd('refuel', { ship: d.ship }); break;
     case 'questAccept': cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); break;
     case 'flagship':

@@ -166,7 +166,7 @@ export function acceptQuest(game, player, ship, e, questId) {
   const i = b.offers.findIndex((o) => o.id === questId);
   if (i < 0) return 'Diese Quest ist nicht mehr verfügbar.';
   const q = b.offers[i];
-  if (questEntities(q).some((id) => game.ownership.get(id)?.player === player.id)) return 'Diese Quest betrifft deinen eigenen Besitz.';
+  if (questEntities(q).some((id) => game.canUseStorage(game.ownership.get(id), player.id))) return 'Diese Quest betrifft deinen eigenen Besitz oder den deines Konsortiums.';
   const st = shipStats(ship);
   if (q.type === 'tour' && st.passenger < q.tourists) return `Für ${q.tourists} Touristen braucht das Schiff Passagierkabinen mit ${q.tourists} Plätzen.`;
   if (q.type === 'mine' && !(st.mining.std > 0)) return 'Für diese Quest braucht das Schiff Abbaugeräte.';

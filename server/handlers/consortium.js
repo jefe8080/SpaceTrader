@@ -1,6 +1,7 @@
 import { CONSORTIUM } from '../../shared/config.js';
 import { V, CmdError } from './validate.js';
 import { found, invite, answerInvite, setRank, kick, leave, deposit, withdraw, levelUp, setBoard } from '../consortium.js';
+import { offerMap, deleteMapOffer, buyMap, offerShip, deleteShipOffer, buyShipOffer } from '../offers.js';
 
 /** Mitglied des eigenen Konsortiums (Spieler-ID) */
 const member = () => (v, { game, player }) => {
@@ -50,6 +51,32 @@ export default {
     args: {},
     run({ game, player }) { return levelUp(game, player); },
   },
+  // ---------- Kartendaten und Schiffshandel ----------
+  cMapOffer: {
+    args: { sector: V.str(20, 1), price: V.int(0, 1e10) },
+    run({ game, player }, { sector, price }) { return offerMap(game, player, sector, price); },
+  },
+  cMapDelete: {
+    args: { id: V.str(20, 1) },
+    run({ game, player }, { id }) { return deleteMapOffer(game, player, id); },
+  },
+  cMapBuy: {
+    args: { id: V.str(20, 1) },
+    run({ game, player }, { id }) { return buyMap(game, player, id); },
+  },
+  cShipOffer: {
+    args: { ship: V.ownShip(true), price: V.int(0, 1e10) },
+    run({ game, player }, { ship, price }) { return offerShip(game, player, ship, price); },
+  },
+  cShipDelete: {
+    args: { ship: V.str(20, 1) },
+    run({ game, player }, { ship }) { return deleteShipOffer(game, player, ship); },
+  },
+  cShipBuy: {
+    args: { ship: V.str(20, 1) },
+    run({ game, player }, { ship }) { return buyShipOffer(game, player, ship); },
+  },
+
   /** Schwarzes Brett: Klartext, Zeilenumbrüche bleiben erhalten */
   cBoard: {
     args: { text: (v) => String(v ?? '').replace(/\r/g, '').slice(0, CONSORTIUM.BOARD_MAX) },

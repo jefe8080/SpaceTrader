@@ -2,7 +2,8 @@ import { NET, NPC_OWNER, cellKey, cellOf, pilotLevel } from '../shared/config.js
 import { runCommand } from './handlers/index.js';
 import { sectorSummary } from './game.js';
 import { sumWindow } from './stats.js';
-import { consortiumView } from './consortium.js';
+import { consortiumView, consortiumOf } from './consortium.js';
+import { offersView } from './offers.js';
 
 const r1 = (v) => Math.round(v * 10) / 10;
 const MAX_MARKET_SUBS = 400;
@@ -152,7 +153,7 @@ export class Net {
     for (const ship of this.game.ships.values()) {
       if (ship.owner === p.id) {
         const o = compactShip(ship);
-        const d = JSON.stringify(shipDetail(ship));
+        const d = JSON.stringify(shipDetail(ship, this.game));
         if (s.sentDetail.get(ship.id) !== d) {
           o.d = JSON.parse(d);
           s.sentDetail.set(ship.id, d);
@@ -184,10 +185,12 @@ export class Net {
       for (const r of this.game.routes.values()) if (r.owner === s.player.id) routes[r.id] = this.game.routeSummary(r);
       s.socket.emit('fleetStats', { ships, routes });
       // Eigener Besitz mit Einstellungen und Salden
-      const props = [...this.game.ownership.values()].filter((p) => p.player === s.player.id).map((p) => {
+      // Eigener Besitz und Besitz des eigenen Konsortiums (cons = true, manage = Handelsmeister)
+      const props = [...this.game.ownership.values()].filter((p) => this.game.canUseStorage(p, s.player.id)).map((p) => {
         const { stats, ...rest } = p;
         const net = (secs) => { const w = sumWindow(stats, this.game.time, secs); return Math.round((w.inc || 0) - (w.exp || 0)); };
-        return { ...rest, h1: net(3600), d24: net(86400), inc24: Math.round(sumWindow(stats, this.game.time, 86400).inc || 0) };
+        return { ...rest, h1: net(3600), d24: net(86400), inc24: Math.round(sumWindow(stats, this.game.time, 86400).inc || 0),
+          cons: p.player !== s.player.id, manage: this.game.canManage(p, s.player.id) };
       });
       s.socket.emit('props', props);
       this.sendConsortium(s);
@@ -196,7 +199,8 @@ export class Net {
 
   /** Konsortiumsstand (nur bei Änderung) */
   sendConsortium(s) {
-    const v = JSON.stringify(consortiumView(this.game, s.player, this.online()));
+    const c = consortiumOf(this.game, s.player);
+    const v = JSON.stringify({ ...consortiumView(this.game, s.player, this.online()), ...(c ? offersView(this.game, c, s.player.id) : {}) });
     if (v === s.sentCons) return;
     s.sentCons = v;
     s.socket.emit('consortium', JSON.parse(v));
@@ -306,8 +310,9 @@ function foreignInfo(s) {
   return o;
 }
 
-function shipDetail(s) {
+function shipDetail(s, game) {
   return {
+    offer: game?.shipOffers.get(s.id)?.price ?? null,
     owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, log: s.log, group: s.group, ord: s.ord,
     queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},
     nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,

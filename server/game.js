@@ -1,6 +1,6 @@
 import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, FUEL, GOVERNOR_LICENSES, shipStats, freeFor, holdOf, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
   cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, slotPrice, supplyLoad, targetOf,
-  XP, pilotLevel, pilotTitle, giverLevel, GIVER_TRADE_CR, factionRank, RANK_NAMES, FACTIONS, hasAbility, holdFor } from '../shared/config.js';
+  XP, pilotLevel, pilotTitle, giverLevel, GIVER_TRADE_CR, factionRank, RANK_NAMES, FACTIONS, hasAbility, holdFor, priceWindow, fixedPrice, FIXED } from '../shared/config.js';
 import { refreshBoards, boardSectors, isGiver, questProgress, exploreCells, exploreZone } from './quests.js';
 import { World } from './world.js';
 import { hexAt, hexKey } from '../shared/hex.js';
@@ -11,6 +11,7 @@ import { Store } from './db.js';
 import { addToBuckets, bucketOf, summary, sumWindow, balance, SHIP_STATS } from './stats.js';
 import { applyProperty, releaseMarket, tickOwnedPlanet, strangerBlocked, payForDelivery, sellToSupplier, propBook } from './property.js';
 import { flushRevenue, trimLog, isMaster } from './consortium.js';
+import { removeOffersOf } from './offers.js';
 import { isConsortiumOwner, consortiumIdOf } from '../shared/consortium.js';
 
 export const WORLD_GEN_VERSION = 3; // ändert sich die Generierung inkompatibel, wird die Welt neu erzeugt
@@ -31,6 +32,8 @@ export class Game {
     this.ownership = new Map();  // Entity-ID -> Besitz
     this.consortia = new Map();      // Konsortium-ID -> Konsortium (PRD-3)
     this.consortiumLog = new Map();  // Konsortium-ID -> Logeinträge
+    this.mapOffers = new Map();      // Angebots-ID -> Kartendaten-Angebot
+    this.shipOffers = new Map();     // Schiff-ID -> Schiffsangebot (Schiff gesperrt)
     this.counters = { player: 0, ship: 0, route: 0, group: 0, quest: 0, consortium: 0, offer: 0 };
     this.boardAcc = 0;
     this.econAcc = 0;
@@ -92,6 +95,8 @@ export class Game {
       this.consortiumLog.get(r.consortium).push(r.data);
     }
     for (const l of this.consortiumLog.values()) { l.sort((a, b) => a.seq - b.seq); trimLog(l); }
+    for (const r of st.loadAll('map_offers')) this.mapOffers.set(r.id, r.data);
+    for (const r of st.loadAll('ship_offers')) if (this.ships.has(r.ship)) this.shipOffers.set(r.ship, r.data);
     for (const r of st.loadAll('ownership')) {
       const e = this.world.entities.get(r.entity);
       if (!e?.market) continue;
@@ -147,6 +152,8 @@ export class Game {
       const clogRows = [];
       for (const [cid, list] of this.consortiumLog) for (const e of list) clogRows.push({ key: [cid, e.seq], data: e });
       n += st.sync('consortium_log', clogRows);
+      n += st.sync('map_offers', [...this.mapOffers.values()].map((o) => ({ key: [o.id], data: o })));
+      n += st.sync('ship_offers', [...this.shipOffers.values()].map((o) => ({ key: [o.ship], data: o })));
       n += st.sync('ship_stats', bucketRows(this.shipStats), false);
       n += st.sync('route_stats', bucketRows(this.routeStats), false);
       const minB = bucketOf(this.time) - SHIP_STATS.BUCKETS;
@@ -274,7 +281,8 @@ export class Game {
    */
   canGiveAway(player, ship) {
     if (ship.owner !== player.id) return 'Das ist nicht dein Schiff.';
-    if (this.shipsOf(player.id).length <= 1) return 'Dein letztes Schiff kannst du nicht abgeben.';
+    // Im Konsortium angebotene Schiffe zählen nicht: Sonst bliebe nach dem Verkauf keines übrig
+    if (!this.shipsOf(player.id).some((s) => s !== ship && !this.shipOffers.has(s.id))) return 'Dein letztes Schiff kannst du nicht abgeben.';
     return null;
   }
 
@@ -642,6 +650,7 @@ export class Game {
     if (ship.dockedAt !== e.id) return { n: 0, reason: 'Schiff ist nicht angedockt' };
     const prop = this.ownership.get(e.id);
     if (prop && prop.player === ship.owner) return this.ownerTransfer(ship, e, good, amount, dir);
+    if (prop && this.canUseStorage(prop, ship.owner)) return this.memberTransfer(ship, e, prop, good, amount, dir);
     if (prop) {
       const blocked = strangerBlocked(prop);
       if (blocked) return { n: 0, reason: blocked };
@@ -722,13 +731,57 @@ export class Game {
     return { n, total: 0 };
   }
 
+  /** Fixpreis des Objekts für eine Ware (Konsortiumslager): Fixpreis-Position des Besitzes, sonst 0,5 */
+  fixedPriceOf(e, prop, good) {
+    const s = e.market.goods[good];
+    const { pmin, pmax } = priceWindow(good, s?.mod || 1);
+    return fixedPrice(pmin, pmax, prop.fixed?.[good] ?? FIXED.DEFAULT);
+  }
+
+  /**
+   * Konsortiumslager (PRD-3 4.4): Mitglieder handeln zum Fixpreis, zollfrei und ohne Gebühr.
+   * Entnahme zahlt das Mitglied an den Pool, Einlagerung zahlt der Pool (nur so viel, wie er decken kann).
+   */
+  memberTransfer(ship, e, prop, good, amount, dir) {
+    const p = this.players.get(ship.owner);
+    const pool = this.accountOf(prop.player);
+    const slot = e.market.goods[good];
+    const price = this.fixedPriceOf(e, prop, good);
+    let n;
+    if (dir === 'buy') {
+      n = Math.min(amount, freeFor(ship, good), Math.floor(slot.stock), Math.floor(p.credits / price));
+      if (n <= 0) return { n: 0, reason: slot.stock < 1 ? 'kein Bestand' : p.credits < price ? 'zu wenig Credits' : 'Laderaum voll' };
+      slot.stock -= n;
+      ship.cargo[good] = (ship.cargo[good] || 0) + n;
+      p.credits -= n * price;
+      pool.credits += n * price;
+      this.recordShip(ship, 'buy', n * price);
+    } else {
+      const have = ship.cargo[good] || 0;
+      n = Math.min(amount, have, Math.floor(slot.cap - slot.stock), Math.floor(pool.credits / price));
+      if (n <= 0) return { n: 0, reason: !have ? 'nichts geladen' : slot.cap - slot.stock < 1 ? 'Lager voll' : 'Pool kann nicht zahlen' };
+      slot.stock += n;
+      ship.cargo[good] = have - n;
+      if (!ship.cargo[good]) delete ship.cargo[good];
+      p.credits += n * price;
+      pool.credits -= n * price;
+      this.recordShip(ship, 'inc', n * price);
+    }
+    // Einstandspreis mitführen, aber keine Handels-XP: Lagerhandel im Konsortium ist kein Markthandel
+    if (dir === 'buy') this.tradeBasis(ship, good, n, n * price, 'buy');
+    else if (!ship.cargo[good] && ship.basis) delete ship.basis[good];
+    stat(e.market, this.time, dir === 'buy' ? 'o' : 'i', good, n);
+    this.shipLog(ship, `${dir === 'buy' ? 'Entnommen' : 'Eingelagert'}: ${n} ${GOODS[good].name} für ${Math.round(n * price)} Cr (Konsortiumslager ${e.name})`);
+    return { n, total: n * price };
+  }
+
   /**
    * Handel eines Fremden mit Spielerbesitz: Käufe bringen dem Besitzer den Erlös, Verkäufe zahlt der Besitzer.
    * Zoll: Aufschlag auf alle Geschäfte von Fremden. Bei leerem Konto oder aktivem Stop-Loss nimmt der Markt nichts an.
    */
   tradeWithOwner(ship, e, prop, good, amount, dir, limit, opts) {
     const p = this.players.get(ship.owner);
-    const owner = this.players.get(prop.player);
+    const owner = this.accountOf(prop.player);
     const slot = e.market.goods[good];
     const trader = hasAbility(ship, 'trader');
     const c = trader ? 0 : prop.customs || 0;
@@ -876,8 +929,12 @@ export class Game {
     this.removeShip(ship);
   }
 
+  /** Offene Karten- und Schiffsangebote eines Spielers entfernen (Austritt aus dem Konsortium) */
+  removeOffersOf(pid) { removeOffersOf(this, pid); }
+
   removeShip(ship) {
     if (ship.owner === NPC_OWNER) this.markNpc(ship, false);
+    this.shipOffers.delete(ship.id);
     this.ships.delete(ship.id);
     this.shipStats.delete(ship.id);
   }
