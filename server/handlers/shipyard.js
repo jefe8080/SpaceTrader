@@ -110,7 +110,8 @@ export default {
     run({ game, player }, { ship }) {
       const e = dockedAt(game, ship, (x) => isYard(x) || isHub(x));
       if (!e) return 'Schiffe verkaufst du an einer Werft oder am Hub.';
-      if (game.shipsOf(player.id).length <= 1) return 'Dein letztes Schiff kannst du nicht verkaufen.';
+      const giveErr = game.canGiveAway(player, ship);
+      if (giveErr) return giveErr;
       if (Object.keys(ship.cargo).length) return 'Erst den Laderaum leeren.';
       const value = sellValue(ship);
       player.credits += value;

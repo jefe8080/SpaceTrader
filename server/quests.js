@@ -1,5 +1,5 @@
 import { WORLD, GOODS, BELT_TYPES, QUEST, QUEST_TYPES, REP, RANKS, factionRank, questReward, flightMinutes, canBuyFrom, shipStats,
-  giverLevel } from '../shared/config.js';
+  giverLevel, giverXpOf } from '../shared/config.js';
 import { hexAt, hexKey, hexNeighbors } from '../shared/hex.js';
 import { missingInputs, stat } from './markets.js';
 
@@ -54,7 +54,7 @@ export function makeOffer(game, e, onlyType = null) {
     const p = GEN[type](game, e, level);
     if (!p) continue;
     const { effort, value = 0, ...params } = p;
-    const reward = questReward(effort, level, value);
+    const reward = questReward(effort, level, value, type);
     return { id: 'q' + ++game.counters.quest, type, giver: e.id, giverName: e.name, level, created: Math.round(game.time),
       effort: Math.round(effort * 10) / 10, reward, faction: e.faction || null, ...params };
   }
@@ -278,7 +278,7 @@ function completeQuest(game, player) {
   player.questsDone = (player.questsDone || 0) + 1;
   game.addXp(player, q.reward.xp);
   const giver = game.world.entities.get(q.giver);
-  if (giver) game.addGiverXp(giver, q.reward.xp);
+  if (giver) game.addGiverXp(giver, giverXpOf(q.reward.xp));
   if (q.faction) game.addRep(player, q.faction, q.reward.xp * REP.PER_XP);
   game.emit('notice', player, `Quest erfüllt: +${q.reward.cr.toLocaleString('de-DE')} Cr, +${q.reward.xp} XP`);
   game.emit('sfx', player, 'questDone');

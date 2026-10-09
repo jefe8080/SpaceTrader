@@ -150,7 +150,8 @@ export default {
       const e = game.world.entities.get(ship.dockedAt);
       const prop = e && game.ownership.get(e.id);
       if (!prop || prop.player !== player.id || e.market.strategy !== 'shipyard') return 'Recycling nur an einer eigenen Werft.';
-      if (game.shipsOf(player.id).length <= 1) return 'Dein letztes Schiff kannst du nicht recyceln.';
+      const giveErr = game.canGiveAway(player, ship);
+      if (giveErr) return giveErr;
       if (Object.keys(ship.cargo).length) return 'Erst den Laderaum leeren.';
       const req = SHIP_TYPES[ship.type].build || {};
       for (const [g, n] of Object.entries(req)) {

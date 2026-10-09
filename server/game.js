@@ -253,6 +253,16 @@ export class Game {
 
   shipsOf(playerId) { return [...this.ships.values()].filter((s) => s.owner === playerId); }
 
+  /**
+   * Darf der Spieler dieses Schiff abgeben (Verkauf, Recycling, Angebot im Konsortium)?
+   * Das letzte Schiff nie, damit kein Spieler ohne Schiff dasteht (PRD-3 Kapitel 9). Liefert Fehlertext oder null.
+   */
+  canGiveAway(player, ship) {
+    if (ship.owner !== player.id) return 'Das ist nicht dein Schiff.';
+    if (this.shipsOf(player.id).length <= 1) return 'Dein letztes Schiff kannst du nicht abgeben.';
+    return null;
+  }
+
   /** Eindeutiger Schiffsname je Spieler */
   uniqueShipName(playerId, wanted, exceptId = null) {
     const taken = new Set(this.shipsOf(playerId).filter((s) => s.id !== exceptId).map((s) => s.name.toLowerCase()));

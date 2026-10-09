@@ -88,7 +88,7 @@ test('Beschaffung: Ware liefern bringt Credits, XP für Spieler und Questgeber',
   assert.equal(p.quest, null);
   assert.equal(p.credits - cr, o.reward.cr);
   assert.equal(p.xp - xp, o.reward.xp);
-  assert.equal(planet.market.qxp, o.reward.xp);
+  assert.equal(planet.market.qxp, o.reward.xp / QUEST.GIVER_XP_DIV, 'Questgeber erhält Quest-XP / 1,5');
   assert.ok(!ship.cargo[o.good]);
 });
 
@@ -202,4 +202,23 @@ test('Fraktionsruf: Quest bei Fraktionsplaneten bringt Ruf, Abbruch kostet Ruf, 
   p.quest = { type: 'courier', faction: 'miners', reward: { cr: 10, xp: 100 } };
   runCommand(g, p, { cmd: 'questAbort' });
   assert.equal(p.rep.miners, RANKS[1], 'fällt höchstens auf die Rangschwelle');
+});
+
+test('PRD-3 Kalibrierung: Erkundung halbe XP, Sektor-XP halbiert, Ruf 0,67 je XP', () => {
+  const a = questReward(10, 0), e = questReward(10, 0, 0, 'explore');
+  assert.equal(a.xp, 15, '1,5 XP je Aufwandsminute');
+  assert.equal(e.xp, Math.round(a.xp * QUEST.EXPLORE_XP));
+  assert.equal(e.cr, a.cr, 'Credits unverändert');
+  assert.equal(XP.SECTOR_FIRST, 30);
+  assert.equal(XP.SECTOR_VISIT, 10);
+});
+
+test('Letztes Schiff: Verkauf und Recycling zentral gesperrt', () => {
+  const g = new Game(':memory:', { seed: 5 });
+  const p = g.createPlayer('Solo');
+  const s = g.shipsOf(p.id)[0];
+  assert.match(g.canGiveAway(p, s), /letztes Schiff/);
+  assert.match(runCommand(g, p, { cmd: 'sellShip', ship: s.id }), /letztes Schiff/);
+  const s2 = g.spawnShip(p, 'spatz', g.world.entities.get('origin_yard'));
+  assert.equal(g.canGiveAway(p, s2), null);
 });

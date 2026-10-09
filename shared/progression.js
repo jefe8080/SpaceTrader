@@ -22,8 +22,8 @@ export const pilotTitle = (xp) => PILOT_LEVELS[pilotLevel(xp)].title || null;
 
 /** Nebenquellen der XP (Kapitel 17.2). Routenhandel bringt keine XP. */
 export const XP = {
-  SECTOR_FIRST: 60,   // erster Spieler weltweit im Sektor
-  SECTOR_VISIT: 20,   // Sektor erstmals selbst besucht
+  SECTOR_FIRST: 30,   // erster Spieler weltweit im Sektor (PRD-3 Kapitel 8: vorher 60)
+  SECTOR_VISIT: 10,   // Sektor erstmals selbst besucht (vorher 20)
   RECIPE: 5,          // neuer Almanach-Eintrag: Rezept, Planeten- oder Feldtyp
   SHIP: 10,           // neuer Almanach-Eintrag: Schiff
   MODULE: 10,         // neuer Almanach-Eintrag: Modul
@@ -78,8 +78,10 @@ export const QUEST = {
   BASE_CR: 60,
   DIFF: 1.7,
   VALUE_SHARE: 1.25,    // Erstattung: deckt den Einkauf bei mittlerem Füllstand plus Aufschlag
-  XP_PER_MIN: 1.0,      // XP je Aufwandsminute, × (1 + 0,1 × Questlevel); Kalibrierung: ca. 120 XP/h mit Hauptschiff
+  XP_PER_MIN: 1.5,      // XP je Aufwandsminute, × (1 + 0,1 × Questlevel); PRD-3: Ziel 125 bis 160 XP/h mit Hauptschiff
   XP_LEVEL: 0.1,
+  EXPLORE_XP: 0.5,      // Faktor auf die XP von Erkundungsquests (netto 0,75 XP je Minute)
+  GIVER_XP_DIV: 1.5,    // Questgeber-XP = Quest-XP / 1,5 (Planetenlevel steigen so schnell wie vor PRD-3)
   REF_SPEED: 150,       // Aufwand: Flugminuten bei Speed 150 ...
   STOP_MIN: 1,          // ... plus 1 min je Lade- oder Zwischenstopp
   MINE_RATE: 4,         // angenommene Abbaurate für die Aufwandsschätzung (Einheiten/s)
@@ -94,17 +96,20 @@ export const QUEST_TYPES = {
 };
 /** Aufwand in Minuten für eine Flugstrecke (Einheiten) */
 export const flightMinutes = (dist) => dist / QUEST.REF_SPEED / 60;
-export function questReward(effortMin, level, goodsValue = 0) {
+export function questReward(effortMin, level, goodsValue = 0, type = null) {
+  const xpMul = type === 'explore' ? QUEST.EXPLORE_XP : 1;
   return {
     cr: Math.round((QUEST.BASE_CR * effortMin * QUEST.DIFF ** level + goodsValue * QUEST.VALUE_SHARE) / 10) * 10,
-    xp: Math.max(1, Math.round(effortMin * QUEST.XP_PER_MIN * (1 + QUEST.XP_LEVEL * level))),
+    xp: Math.max(1, Math.round(effortMin * QUEST.XP_PER_MIN * xpMul * (1 + QUEST.XP_LEVEL * level))),
   };
 }
+/** Questgeber-XP aus einer erfüllten Quest */
+export const giverXpOf = (questXp) => questXp / QUEST.GIVER_XP_DIV;
 
 /** Fraktionsruf: Ränge 0 bis 3, Ruf proportional zu den Quest-XP, Verlust nur beim Abbruch (nie unter die Rangschwelle) */
 export const RANKS = [0, 100, 400, 1200];
 export const RANK_NAMES = ['Fremder', 'Partner', 'Vertrauter', 'Ehrenmitglied'];
-export const REP = { PER_XP: 1, ABORT: 0.25 }; // Abbruch kostet 25 % der Quest-XP als Ruf
+export const REP = { PER_XP: 0.67, ABORT: 0.25 }; // Ruf = 0,67 × Quest-XP (PRD-3), Abbruch kostet 25 % der Quest-XP als Ruf
 export function factionRank(rep = 0) {
   let r = 0;
   while (r < RANKS.length - 1 && rep >= RANKS[r + 1]) r++;
