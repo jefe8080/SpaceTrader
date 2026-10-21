@@ -16,4 +16,5 @@
 - Verwende aussagekräftige Commit-Nachrichten, aus denen die jeweilige Änderung hervorgeht.
 - Commits sind in diesem Projekt ausdrücklich ohne Rückfrage autorisiert. Informiere den Nutzer nach jedem Commit kurz über Inhalt und Commit-ID; hole dafür keine zusätzliche Bestätigung ein.
 - Nimm nur Änderungen auf, die zum jeweiligen Arbeitsschritt gehören. Bereits vorhandene, fremde oder sachfremde Änderungen dürfen nicht versehentlich mitcommittet werden.
-- Die Commit-Erlaubnis umfasst keine automatische Veröffentlichung, keinen Push und keine destruktiven Git-Aktionen.
+- Frage den Nutzer aktiv nach einem Push, wenn dies sinnvoll ist, insbesondere nach einem abgeschlossenen Arbeitspaket oder am Ende einer Aufgabe mit noch nicht gepushten Commits. Nenne dabei kurz, welche Änderungen und welcher Branch gepusht werden sollen. Führe den Push erst nach Zustimmung aus; eine bereits erteilte Zustimmung für denselben Push gilt weiterhin.
+- Die Commit-Erlaubnis umfasst keine automatische Veröffentlichung, keinen automatischen Push und keine destruktiven Git-Aktionen.
