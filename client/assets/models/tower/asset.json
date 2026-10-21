@@ -1,0 +1,23 @@
+{
+  "asset": "tower",
+  "label": "Wohngebäude",
+  "selector": {
+    "look": "tower"
+  },
+  "triangles": 8700,
+  "materials": 9,
+  "dimensions_m": [
+    10.0,
+    8.0,
+    9.18
+  ],
+  "origin": "ground center",
+  "units": "meters",
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "up_gltf": "+Y",
+  "textures": [],
+  "static": true,
+  "glb_bytes": 657324,
+  "validation": "model-only GLB, one scene/mesh/node, embedded materials, no external dependencies; consistent face normals"
+}

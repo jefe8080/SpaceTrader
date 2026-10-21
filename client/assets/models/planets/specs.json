@@ -1,0 +1,243 @@
+{
+  "agrar": {
+    "label": "Agrarwelt",
+    "produce": [
+      "grain",
+      "biomass",
+      "food"
+    ],
+    "consume": [
+      "water",
+      "fertilizer",
+      "machinery",
+      "consumer"
+    ],
+    "factory_categories": {
+      "bio": 3,
+      "chem": 1,
+      "heavy": 0,
+      "tech": 0
+    }
+  },
+  "ocean": {
+    "label": "Ozeanwelt",
+    "produce": [
+      "crude",
+      "biomass"
+    ],
+    "consume": [
+      "food",
+      "medicine",
+      "electronics"
+    ],
+    "factory_categories": {
+      "bio": 2,
+      "chem": 2,
+      "heavy": 0,
+      "tech": 0
+    }
+  },
+  "desert": {
+    "label": "Wüstenwelt",
+    "produce": [
+      "silicate",
+      "sulfur"
+    ],
+    "consume": [
+      "water",
+      "food",
+      "preserves",
+      "powercells"
+    ],
+    "factory_categories": {
+      "bio": 0,
+      "chem": 2,
+      "heavy": 1,
+      "tech": 1
+    }
+  },
+  "mining": {
+    "label": "Bergbauwelt",
+    "produce": [
+      "ore",
+      "crystals",
+      "rareearth"
+    ],
+    "consume": [
+      "food",
+      "preserves",
+      "machinery",
+      "robots",
+      "workers"
+    ],
+    "factory_categories": {
+      "bio": 0,
+      "chem": 1,
+      "heavy": 3,
+      "tech": 0
+    }
+  },
+  "ice": {
+    "label": "Eiswelt",
+    "produce": [
+      "ice"
+    ],
+    "consume": [
+      "food",
+      "medicine",
+      "powercells",
+      "clothing"
+    ],
+    "factory_categories": {
+      "bio": 1,
+      "chem": 2,
+      "heavy": 0,
+      "tech": 1
+    }
+  },
+  "urban": {
+    "label": "Metropole",
+    "produce": [
+      "tourists",
+      "workers"
+    ],
+    "consume": [
+      "food",
+      "water",
+      "consumer",
+      "luxury",
+      "medicine",
+      "clothing",
+      "computers",
+      "medtech"
+    ],
+    "factory_categories": {
+      "bio": 1,
+      "chem": 0,
+      "heavy": 0,
+      "tech": 3
+    }
+  },
+  "resort": {
+    "label": "Paradieswelt",
+    "produce": [
+      "food"
+    ],
+    "consume": [
+      "tourists",
+      "luxury",
+      "water",
+      "consumer",
+      "clothing"
+    ],
+    "factory_categories": {
+      "bio": 2,
+      "chem": 0,
+      "heavy": 0,
+      "tech": 1
+    }
+  },
+  "gasgiant": {
+    "label": "Gasriese",
+    "produce": [
+      "gas",
+      "helium3"
+    ],
+    "consume": [
+      "food",
+      "machinery",
+      "robots",
+      "workers"
+    ],
+    "factory_categories": {
+      "bio": 0,
+      "chem": 3,
+      "heavy": 1,
+      "tech": 0
+    }
+  },
+  "jungle": {
+    "label": "Dschungelwelt",
+    "produce": [
+      "biomass",
+      "crude"
+    ],
+    "consume": [
+      "medicine",
+      "machinery",
+      "preserves"
+    ],
+    "factory_categories": {
+      "bio": 3,
+      "chem": 1,
+      "heavy": 0,
+      "tech": 0
+    }
+  },
+  "volcanic": {
+    "label": "Vulkanwelt",
+    "produce": [
+      "sulfur",
+      "rareearth",
+      "ore",
+      "acid"
+    ],
+    "consume": [
+      "food",
+      "water",
+      "robots",
+      "coolant"
+    ],
+    "factory_categories": {
+      "bio": 0,
+      "chem": 2,
+      "heavy": 2,
+      "tech": 0
+    }
+  },
+  "colony": {
+    "label": "Kolonie",
+    "produce": [
+      "ore",
+      "crystals"
+    ],
+    "consume": [
+      "habitats",
+      "aicores",
+      "robots",
+      "medtech",
+      "food",
+      "workers",
+      "computers"
+    ],
+    "factory_categories": {
+      "bio": 1,
+      "chem": 0,
+      "heavy": 2,
+      "tech": 1
+    }
+  },
+  "industrial": {
+    "label": "Industriewelt",
+    "produce": [
+      "workers"
+    ],
+    "consume": [
+      "engines",
+      "reactorcores",
+      "machinery",
+      "robots",
+      "aicores",
+      "food",
+      "water",
+      "shipfuel",
+      "shipparts"
+    ],
+    "factory_categories": {
+      "bio": 0,
+      "chem": 1,
+      "heavy": 2,
+      "tech": 2
+    }
+  }
+}

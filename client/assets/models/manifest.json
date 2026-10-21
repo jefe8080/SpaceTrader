@@ -1,0 +1,300 @@
+{
+  "version": 1,
+  "style": "Questhouse low-poly colony",
+  "up": "+Y",
+  "front": "+Z",
+  "units": "meters",
+  "assets": [
+    {
+      "id": "questhouse",
+      "label": "Questhaus",
+      "selector": {
+        "kind": "questhouse"
+      },
+      "glb": "questhouse/questhouse.glb",
+      "blend": "questhouse/questhouse.blend",
+      "preview": "questhouse/preview.png",
+      "triangles": 3616,
+      "materials": 9,
+      "bytes": 266776,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "farm",
+      "label": "Agrarfarm",
+      "selector": {
+        "look": "farm"
+      },
+      "glb": "farm/farm.glb",
+      "blend": "farm/farm.blend",
+      "preview": "farm/preview.png",
+      "triangles": 3568,
+      "materials": 10,
+      "bytes": 255988,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "drill",
+      "label": "Bohranlage",
+      "selector": {
+        "look": "drill"
+      },
+      "glb": "drill/drill.glb",
+      "blend": "drill/drill.blend",
+      "preview": "drill/preview.png",
+      "triangles": 2332,
+      "materials": 8,
+      "bytes": 152040,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "silo",
+      "label": "Tanklager",
+      "selector": {
+        "look": "silo"
+      },
+      "glb": "silo/silo.glb",
+      "blend": "silo/silo.blend",
+      "preview": "silo/preview.png",
+      "triangles": 2028,
+      "materials": 6,
+      "bytes": 126840,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "mine",
+      "label": "Bergwerk",
+      "selector": {
+        "look": "mine"
+      },
+      "glb": "mine/mine.glb",
+      "blend": "mine/mine.blend",
+      "preview": "mine/preview.png",
+      "triangles": 2040,
+      "materials": 7,
+      "bytes": 139284,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "tower",
+      "label": "Wohngebäude",
+      "selector": {
+        "look": "tower"
+      },
+      "glb": "tower/tower.glb",
+      "blend": "tower/tower.blend",
+      "preview": "tower/preview.png",
+      "triangles": 8700,
+      "materials": 9,
+      "bytes": 657324,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "store",
+      "label": "Warenlager",
+      "selector": {
+        "look": "store"
+      },
+      "glb": "store/store.glb",
+      "blend": "store/store.blend",
+      "preview": "store/preview.png",
+      "triangles": 1906,
+      "materials": 8,
+      "bytes": 141772,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "hall",
+      "label": "Produktionshalle",
+      "selector": {
+        "look": "hall"
+      },
+      "glb": "hall/hall.glb",
+      "blend": "hall/hall.blend",
+      "preview": "hall/preview.png",
+      "triangles": 2000,
+      "materials": 8,
+      "bytes": 146312,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "factory",
+      "label": "Fabrik",
+      "selector": {
+        "kind": "factory"
+      },
+      "glb": "factory/factory.glb",
+      "blend": "factory/factory.blend",
+      "preview": "factory/preview.png",
+      "triangles": 2040,
+      "materials": 8,
+      "bytes": 146404,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "plot",
+      "label": "Bauplatz",
+      "selector": {
+        "kind": "plot"
+      },
+      "glb": "plot/plot.glb",
+      "blend": "plot/plot.blend",
+      "preview": "plot/preview.png",
+      "triangles": 1656,
+      "materials": 7,
+      "bytes": 118532,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "tavern",
+      "label": "Taverne",
+      "selector": {
+        "kind": "fun",
+        "building": "tavern"
+      },
+      "glb": "tavern/tavern.glb",
+      "blend": "tavern/tavern.blend",
+      "preview": "tavern/preview.png",
+      "triangles": 2176,
+      "materials": 8,
+      "bytes": 150264,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "casino",
+      "label": "Kasino",
+      "selector": {
+        "kind": "fun",
+        "building": "casino"
+      },
+      "glb": "casino/casino.glb",
+      "blend": "casino/casino.blend",
+      "preview": "casino/preview.png",
+      "triangles": 2060,
+      "materials": 9,
+      "bytes": 154816,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "fair",
+      "label": "Jahrmarktbude",
+      "selector": {
+        "kind": "fun",
+        "building": "fair"
+      },
+      "glb": "fair/fair.glb",
+      "blend": "fair/fair.blend",
+      "preview": "fair/preview.png",
+      "triangles": 1512,
+      "materials": 7,
+      "bytes": 97832,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "racetrack",
+      "label": "Rennbahn",
+      "selector": {
+        "kind": "fun",
+        "building": "racetrack"
+      },
+      "glb": "racetrack/racetrack.glb",
+      "blend": "racetrack/racetrack.blend",
+      "preview": "racetrack/preview.png",
+      "triangles": 5452,
+      "materials": 7,
+      "bytes": 343496,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "stollen",
+      "label": "Stollen",
+      "selector": {
+        "kind": "fun",
+        "building": "mine"
+      },
+      "glb": "stollen/stollen.glb",
+      "blend": "stollen/stollen.blend",
+      "preview": "stollen/preview.png",
+      "triangles": 1678,
+      "materials": 8,
+      "bytes": 129720,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "smuggler",
+      "label": "Schmugglerhöhle",
+      "selector": {
+        "kind": "smuggler"
+      },
+      "glb": "smuggler/smuggler.glb",
+      "blend": "smuggler/smuggler.blend",
+      "preview": "smuggler/preview.png",
+      "triangles": 1512,
+      "materials": 6,
+      "bytes": 125244,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "school",
+      "label": "Schule",
+      "selector": {
+        "kind": "school"
+      },
+      "glb": "school/school.glb",
+      "blend": "school/school.blend",
+      "preview": "school/preview.png",
+      "triangles": 2252,
+      "materials": 9,
+      "bytes": 168352,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "beggar",
+      "label": "Bettler",
+      "selector": {
+        "kind": "beggar"
+      },
+      "glb": "beggar/beggar.glb",
+      "blend": "beggar/beggar.blend",
+      "preview": "beggar/preview.png",
+      "triangles": 764,
+      "materials": 7,
+      "bytes": 62908,
+      "static": true,
+      "front": "+Z"
+    },
+    {
+      "id": "dog",
+      "label": "Hund",
+      "selector": {
+        "kind": "dog"
+      },
+      "glb": "dog/dog.glb",
+      "blend": "dog/dog.blend",
+      "preview": "dog/preview.png",
+      "triangles": 680,
+      "materials": 6,
+      "bytes": 61712,
+      "static": true,
+      "front": "+X"
+    }
+  ],
+  "planets_manifest": "planets/manifest.json"
+}

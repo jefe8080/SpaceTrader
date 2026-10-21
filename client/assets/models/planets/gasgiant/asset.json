@@ -1,0 +1,24 @@
+{
+  "planet_type": "gasgiant",
+  "label": "Gasriese",
+  "triangles": 11128,
+  "materials": 11,
+  "glb_bytes": 829816,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "width_m": 133.0,
+  "depth_m": 102.55,
+  "slot_elevation_m": 0.12,
+  "checks": [
+    "reserved lot clearance",
+    "exported anchors match layout.json",
+    "all materials embedded",
+    "unified deck surface, no overlapping deck faces"
+  ],
+  "layout": "layout.json",
+  "layout_nominal_extent_m": [
+    140,
+    105
+  ]
+}

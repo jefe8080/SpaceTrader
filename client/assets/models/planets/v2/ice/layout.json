@@ -1,0 +1,517 @@
+{
+  "planet_type": "ice",
+  "units": "meters",
+  "coordinate_system": "glTF, +Y up",
+  "terrain_root": "planet_ice",
+  "regular_pad_count": 24,
+  "large_pad_count": 1,
+  "prop_point_count": 4,
+  "factory_capacity": {
+    "bio": 1,
+    "chem": 2,
+    "heavy": 0,
+    "tech": 1
+  },
+  "slots": [
+    {
+      "id": "slot_01",
+      "role": "questhouse",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_01",
+      "rotation_y": 0,
+      "position": [
+        -60.0,
+        2.12,
+        36.5
+      ]
+    },
+    {
+      "id": "slot_02",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_02",
+      "rotation_y": 0,
+      "position": [
+        -37.3,
+        2.12,
+        35.0
+      ]
+    },
+    {
+      "id": "slot_03",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_03",
+      "rotation_y": 0,
+      "position": [
+        -16.0,
+        2.12,
+        33.5
+      ]
+    },
+    {
+      "id": "slot_04",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_04",
+      "rotation_y": 0,
+      "position": [
+        12.7,
+        2.12,
+        36.5
+      ]
+    },
+    {
+      "id": "slot_05",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_05",
+      "rotation_y": 0,
+      "position": [
+        34.0,
+        2.12,
+        35.0
+      ]
+    },
+    {
+      "id": "slot_06",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_06",
+      "rotation_y": 0,
+      "position": [
+        56.7,
+        2.12,
+        33.5
+      ]
+    },
+    {
+      "id": "slot_07",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_07",
+      "rotation_y": 0,
+      "position": [
+        -56.0,
+        5.12,
+        11.5
+      ]
+    },
+    {
+      "id": "slot_08",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_08",
+      "rotation_y": 0,
+      "position": [
+        -33.3,
+        5.12,
+        10.0
+      ]
+    },
+    {
+      "id": "slot_09",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_09",
+      "rotation_y": 0,
+      "position": [
+        -12.0,
+        5.12,
+        8.5
+      ]
+    },
+    {
+      "id": "slot_10",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_10",
+      "rotation_y": 0,
+      "position": [
+        16.7,
+        5.12,
+        11.5
+      ]
+    },
+    {
+      "id": "slot_11",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_11",
+      "rotation_y": 0,
+      "position": [
+        38.0,
+        5.12,
+        10.0
+      ]
+    },
+    {
+      "id": "slot_12",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_12",
+      "rotation_y": 0,
+      "position": [
+        60.7,
+        5.12,
+        8.5
+      ]
+    },
+    {
+      "id": "slot_13",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_13",
+      "rotation_y": 0,
+      "position": [
+        -60.0,
+        8.12,
+        -13.5
+      ]
+    },
+    {
+      "id": "slot_14",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_14",
+      "rotation_y": 0,
+      "position": [
+        -37.3,
+        8.12,
+        -15.0
+      ]
+    },
+    {
+      "id": "slot_15",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_15",
+      "rotation_y": 0,
+      "position": [
+        -16.0,
+        8.12,
+        -16.5
+      ]
+    },
+    {
+      "id": "slot_16",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_16",
+      "rotation_y": 0,
+      "position": [
+        12.7,
+        8.12,
+        -13.5
+      ]
+    },
+    {
+      "id": "slot_17",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_17",
+      "rotation_y": 0,
+      "position": [
+        34.0,
+        8.12,
+        -15.0
+      ]
+    },
+    {
+      "id": "slot_18",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_18",
+      "rotation_y": 0,
+      "position": [
+        56.7,
+        8.12,
+        -16.5
+      ]
+    },
+    {
+      "id": "slot_19",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_19",
+      "rotation_y": 0,
+      "position": [
+        -56.0,
+        11.12,
+        -39.5
+      ]
+    },
+    {
+      "id": "slot_20",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_20",
+      "rotation_y": 0,
+      "position": [
+        -33.3,
+        11.12,
+        -41.0
+      ]
+    },
+    {
+      "id": "slot_21",
+      "role": "factory",
+      "category": "bio",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_21",
+      "rotation_y": 0,
+      "position": [
+        16.7,
+        11.12,
+        -39.5
+      ]
+    },
+    {
+      "id": "slot_22",
+      "role": "factory",
+      "category": "chem",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_22",
+      "rotation_y": 0,
+      "position": [
+        38.0,
+        11.12,
+        -41.0
+      ]
+    },
+    {
+      "id": "slot_23",
+      "role": "factory",
+      "category": "chem",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_23",
+      "rotation_y": 0,
+      "position": [
+        -12.0,
+        11.12,
+        -42.5
+      ]
+    },
+    {
+      "id": "slot_24",
+      "role": "factory",
+      "category": "tech",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_24",
+      "rotation_y": 0,
+      "position": [
+        60.7,
+        11.12,
+        -42.5
+      ]
+    },
+    {
+      "id": "slot_large",
+      "role": "large",
+      "category": null,
+      "footprint": [
+        18,
+        13
+      ],
+      "clearance_height": 12,
+      "node": "planet_ice__slot_large",
+      "rotation_y": 0,
+      "position": [
+        0,
+        13.56,
+        -70
+      ]
+    },
+    {
+      "id": "prop_01",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_ice__prop_01",
+      "rotation_y": 0,
+      "position": [
+        -85,
+        0.82,
+        58
+      ]
+    },
+    {
+      "id": "prop_02",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_ice__prop_02",
+      "rotation_y": 0,
+      "position": [
+        85,
+        0.82,
+        58
+      ]
+    },
+    {
+      "id": "prop_03",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_ice__prop_03",
+      "rotation_y": 0,
+      "position": [
+        -85,
+        20.15,
+        -60
+      ]
+    },
+    {
+      "id": "prop_04",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_ice__prop_04",
+      "rotation_y": 0,
+      "position": [
+        85,
+        14.12,
+        -60
+      ]
+    }
+  ],
+  "layout_id": "landscape_v2_ice",
+  "ground_url": "v2/ice/ground.glb",
+  "description": "Glacier terraces, frozen river, ice cliffs and snow peaks",
+  "camera": {
+    "projection": "orthographic",
+    "front": "+Z"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "asset": "drill",
+  "label": "Bohranlage",
+  "selector": {
+    "look": "drill"
+  },
+  "triangles": 2332,
+  "materials": 8,
+  "dimensions_m": [
+    10.0,
+    8.0,
+    6.875
+  ],
+  "origin": "ground center",
+  "units": "meters",
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "up_gltf": "+Y",
+  "textures": [],
+  "static": true,
+  "glb_bytes": 152040,
+  "validation": "model-only GLB, one scene/mesh/node, embedded materials, no external dependencies; consistent face normals"
+}

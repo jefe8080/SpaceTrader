@@ -1,0 +1,517 @@
+{
+  "planet_type": "agrar",
+  "units": "meters",
+  "coordinate_system": "glTF, +Y up",
+  "terrain_root": "planet_agrar",
+  "regular_pad_count": 24,
+  "large_pad_count": 1,
+  "prop_point_count": 4,
+  "factory_capacity": {
+    "bio": 3,
+    "chem": 1,
+    "heavy": 0,
+    "tech": 0
+  },
+  "slots": [
+    {
+      "id": "slot_01",
+      "role": "questhouse",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_01",
+      "rotation_y": 0,
+      "position": [
+        -60.0,
+        2.47,
+        33.5
+      ]
+    },
+    {
+      "id": "slot_02",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_02",
+      "rotation_y": 0,
+      "position": [
+        -37.3,
+        3.04,
+        32.0
+      ]
+    },
+    {
+      "id": "slot_03",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_03",
+      "rotation_y": 0,
+      "position": [
+        -16.0,
+        1.77,
+        30.5
+      ]
+    },
+    {
+      "id": "slot_04",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_04",
+      "rotation_y": 0,
+      "position": [
+        12.7,
+        1.37,
+        33.5
+      ]
+    },
+    {
+      "id": "slot_05",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_05",
+      "rotation_y": 0,
+      "position": [
+        34.0,
+        2.86,
+        32.0
+      ]
+    },
+    {
+      "id": "slot_06",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_06",
+      "rotation_y": 0,
+      "position": [
+        56.7,
+        2.88,
+        30.5
+      ]
+    },
+    {
+      "id": "slot_07",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_07",
+      "rotation_y": 0,
+      "position": [
+        -56.0,
+        4.39,
+        8.5
+      ]
+    },
+    {
+      "id": "slot_08",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_08",
+      "rotation_y": 0,
+      "position": [
+        -33.3,
+        3.09,
+        7.0
+      ]
+    },
+    {
+      "id": "slot_09",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_09",
+      "rotation_y": 0,
+      "position": [
+        16.7,
+        4.13,
+        8.5
+      ]
+    },
+    {
+      "id": "slot_10",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_10",
+      "rotation_y": 0,
+      "position": [
+        38.0,
+        4.27,
+        7.0
+      ]
+    },
+    {
+      "id": "slot_11",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_11",
+      "rotation_y": 0,
+      "position": [
+        -12.0,
+        2.72,
+        5.5
+      ]
+    },
+    {
+      "id": "slot_12",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_12",
+      "rotation_y": 0,
+      "position": [
+        60.7,
+        2.88,
+        5.5
+      ]
+    },
+    {
+      "id": "slot_13",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_13",
+      "rotation_y": 0,
+      "position": [
+        -60.0,
+        5.06,
+        -17.5
+      ]
+    },
+    {
+      "id": "slot_14",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_14",
+      "rotation_y": 0,
+      "position": [
+        12.7,
+        5.86,
+        -17.5
+      ]
+    },
+    {
+      "id": "slot_15",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_15",
+      "rotation_y": 0,
+      "position": [
+        -37.3,
+        3.97,
+        -19.0
+      ]
+    },
+    {
+      "id": "slot_16",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_16",
+      "rotation_y": 0,
+      "position": [
+        -16.0,
+        4.95,
+        -20.5
+      ]
+    },
+    {
+      "id": "slot_17",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_17",
+      "rotation_y": 0,
+      "position": [
+        34.0,
+        4.78,
+        -19.0
+      ]
+    },
+    {
+      "id": "slot_18",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_18",
+      "rotation_y": 0,
+      "position": [
+        56.7,
+        4.09,
+        -20.5
+      ]
+    },
+    {
+      "id": "slot_19",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_19",
+      "rotation_y": 0,
+      "position": [
+        -56.0,
+        9.34,
+        -41.5
+      ]
+    },
+    {
+      "id": "slot_20",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_20",
+      "rotation_y": 0,
+      "position": [
+        16.7,
+        6.1,
+        -41.5
+      ]
+    },
+    {
+      "id": "slot_21",
+      "role": "factory",
+      "category": "bio",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_21",
+      "rotation_y": 0,
+      "position": [
+        -33.3,
+        6.1,
+        -43.0
+      ]
+    },
+    {
+      "id": "slot_22",
+      "role": "factory",
+      "category": "bio",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_22",
+      "rotation_y": 0,
+      "position": [
+        -12.0,
+        7.35,
+        -44.5
+      ]
+    },
+    {
+      "id": "slot_23",
+      "role": "factory",
+      "category": "bio",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_23",
+      "rotation_y": 0,
+      "position": [
+        38.0,
+        5.29,
+        -43.0
+      ]
+    },
+    {
+      "id": "slot_24",
+      "role": "factory",
+      "category": "chem",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_24",
+      "rotation_y": 0,
+      "position": [
+        60.7,
+        10.3,
+        -44.5
+      ]
+    },
+    {
+      "id": "slot_large",
+      "role": "large",
+      "category": null,
+      "footprint": [
+        18,
+        13
+      ],
+      "clearance_height": 12,
+      "node": "planet_agrar__slot_large",
+      "rotation_y": 0,
+      "position": [
+        0,
+        7.42,
+        -70
+      ]
+    },
+    {
+      "id": "prop_01",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_agrar__prop_01",
+      "rotation_y": 0,
+      "position": [
+        -85,
+        0.82,
+        58
+      ]
+    },
+    {
+      "id": "prop_02",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_agrar__prop_02",
+      "rotation_y": 0,
+      "position": [
+        85,
+        0.82,
+        58
+      ]
+    },
+    {
+      "id": "prop_03",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_agrar__prop_03",
+      "rotation_y": 0,
+      "position": [
+        -85,
+        16.9,
+        -60
+      ]
+    },
+    {
+      "id": "prop_04",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_agrar__prop_04",
+      "rotation_y": 0,
+      "position": [
+        85,
+        8.96,
+        -60
+      ]
+    }
+  ],
+  "layout_id": "landscape_v2_agrar",
+  "ground_url": "v2/agrar/ground.glb",
+  "description": "Rolling farmland, crop terraces, irrigation and a wooded ridge",
+  "camera": {
+    "projection": "orthographic",
+    "front": "+Z"
+  }
+}

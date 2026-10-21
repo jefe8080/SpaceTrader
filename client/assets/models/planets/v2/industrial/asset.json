@@ -1,0 +1,23 @@
+{
+  "planet_type": "industrial",
+  "label": "Industriewelt",
+  "description": "Stepped industrial yards, slag hills, tanks, pipes and a canal",
+  "triangles": 27172,
+  "materials": 9,
+  "glb_bytes": 1157604,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "elevation_range_m": [
+    1.0,
+    24.23
+  ],
+  "checks": [
+    "usable footprints flat at elevated anchors",
+    "reserved footprints separated",
+    "anchors match GLB",
+    "fronts +Z",
+    "connected roads avoid reserved footprints"
+  ],
+  "layout": "layout.json"
+}

@@ -1,0 +1,517 @@
+{
+  "planet_type": "mining",
+  "units": "meters",
+  "coordinate_system": "glTF, +Y up",
+  "terrain_root": "planet_mining",
+  "regular_pad_count": 24,
+  "large_pad_count": 1,
+  "prop_point_count": 4,
+  "factory_capacity": {
+    "bio": 0,
+    "chem": 1,
+    "heavy": 3,
+    "tech": 0
+  },
+  "slots": [
+    {
+      "id": "slot_01",
+      "role": "questhouse",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_01",
+      "rotation_y": 0,
+      "position": [
+        -70,
+        8.12,
+        38
+      ]
+    },
+    {
+      "id": "slot_02",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_02",
+      "rotation_y": 0,
+      "position": [
+        -50,
+        8.12,
+        38
+      ]
+    },
+    {
+      "id": "slot_03",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_03",
+      "rotation_y": 0,
+      "position": [
+        -30,
+        8.12,
+        38
+      ]
+    },
+    {
+      "id": "slot_04",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_04",
+      "rotation_y": 0,
+      "position": [
+        -10,
+        8.12,
+        38
+      ]
+    },
+    {
+      "id": "slot_05",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_05",
+      "rotation_y": 0,
+      "position": [
+        10,
+        8.12,
+        38
+      ]
+    },
+    {
+      "id": "slot_06",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_06",
+      "rotation_y": 0,
+      "position": [
+        30,
+        8.12,
+        38
+      ]
+    },
+    {
+      "id": "slot_07",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_07",
+      "rotation_y": 0,
+      "position": [
+        50,
+        8.12,
+        38
+      ]
+    },
+    {
+      "id": "slot_08",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_08",
+      "rotation_y": 0,
+      "position": [
+        70,
+        8.12,
+        38
+      ]
+    },
+    {
+      "id": "slot_09",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_09",
+      "rotation_y": 0,
+      "position": [
+        -70,
+        10.12,
+        -4
+      ]
+    },
+    {
+      "id": "slot_10",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_10",
+      "rotation_y": 0,
+      "position": [
+        -50,
+        10.12,
+        -4
+      ]
+    },
+    {
+      "id": "slot_11",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_11",
+      "rotation_y": 0,
+      "position": [
+        -30,
+        8.12,
+        -4
+      ]
+    },
+    {
+      "id": "slot_12",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_12",
+      "rotation_y": 0,
+      "position": [
+        -10,
+        2.12,
+        -4
+      ]
+    },
+    {
+      "id": "slot_13",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_13",
+      "rotation_y": 0,
+      "position": [
+        10,
+        2.12,
+        -4
+      ]
+    },
+    {
+      "id": "slot_14",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_14",
+      "rotation_y": 0,
+      "position": [
+        30,
+        8.12,
+        -4
+      ]
+    },
+    {
+      "id": "slot_15",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_15",
+      "rotation_y": 0,
+      "position": [
+        50,
+        10.12,
+        -4
+      ]
+    },
+    {
+      "id": "slot_16",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_16",
+      "rotation_y": 0,
+      "position": [
+        70,
+        10.12,
+        -4
+      ]
+    },
+    {
+      "id": "slot_17",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_17",
+      "rotation_y": 0,
+      "position": [
+        -70,
+        14.12,
+        -43
+      ]
+    },
+    {
+      "id": "slot_18",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_18",
+      "rotation_y": 0,
+      "position": [
+        -50,
+        14.12,
+        -43
+      ]
+    },
+    {
+      "id": "slot_19",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_19",
+      "rotation_y": 0,
+      "position": [
+        -30,
+        14.12,
+        -43
+      ]
+    },
+    {
+      "id": "slot_20",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_20",
+      "rotation_y": 0,
+      "position": [
+        -10,
+        14.12,
+        -43
+      ]
+    },
+    {
+      "id": "slot_21",
+      "role": "factory",
+      "category": "chem",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_21",
+      "rotation_y": 0,
+      "position": [
+        10,
+        14.12,
+        -43
+      ]
+    },
+    {
+      "id": "slot_22",
+      "role": "factory",
+      "category": "heavy",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_22",
+      "rotation_y": 0,
+      "position": [
+        30,
+        14.12,
+        -43
+      ]
+    },
+    {
+      "id": "slot_23",
+      "role": "factory",
+      "category": "heavy",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_23",
+      "rotation_y": 0,
+      "position": [
+        50,
+        14.12,
+        -43
+      ]
+    },
+    {
+      "id": "slot_24",
+      "role": "factory",
+      "category": "heavy",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_24",
+      "rotation_y": 0,
+      "position": [
+        70,
+        14.12,
+        -43
+      ]
+    },
+    {
+      "id": "slot_large",
+      "role": "large",
+      "category": null,
+      "footprint": [
+        18,
+        13
+      ],
+      "clearance_height": 12,
+      "node": "planet_mining__slot_large",
+      "rotation_y": 0,
+      "position": [
+        0,
+        42.12,
+        -70
+      ]
+    },
+    {
+      "id": "prop_01",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_mining__prop_01",
+      "rotation_y": 0,
+      "position": [
+        -85,
+        6.12,
+        58
+      ]
+    },
+    {
+      "id": "prop_02",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_mining__prop_02",
+      "rotation_y": 0,
+      "position": [
+        85,
+        6.12,
+        58
+      ]
+    },
+    {
+      "id": "prop_03",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_mining__prop_03",
+      "rotation_y": 0,
+      "position": [
+        -85,
+        16.12,
+        -60
+      ]
+    },
+    {
+      "id": "prop_04",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_mining__prop_04",
+      "rotation_y": 0,
+      "position": [
+        85,
+        16.12,
+        -60
+      ]
+    }
+  ],
+  "layout_id": "landscape_v2_mining",
+  "ground_url": "v2/mining/ground.glb",
+  "description": "Terraced quarry, mineral seams, mine roads and a mountain ridge",
+  "camera": {
+    "projection": "orthographic",
+    "front": "+Z"
+  }
+}

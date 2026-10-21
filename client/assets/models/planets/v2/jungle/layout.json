@@ -1,0 +1,517 @@
+{
+  "planet_type": "jungle",
+  "units": "meters",
+  "coordinate_system": "glTF, +Y up",
+  "terrain_root": "planet_jungle",
+  "regular_pad_count": 24,
+  "large_pad_count": 1,
+  "prop_point_count": 4,
+  "factory_capacity": {
+    "bio": 3,
+    "chem": 1,
+    "heavy": 0,
+    "tech": 0
+  },
+  "slots": [
+    {
+      "id": "slot_01",
+      "role": "questhouse",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_01",
+      "rotation_y": 0,
+      "position": [
+        -55,
+        1.31,
+        48
+      ]
+    },
+    {
+      "id": "slot_02",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_02",
+      "rotation_y": 0,
+      "position": [
+        -33,
+        2.28,
+        48
+      ]
+    },
+    {
+      "id": "slot_03",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_03",
+      "rotation_y": 0,
+      "position": [
+        32,
+        1.64,
+        43
+      ]
+    },
+    {
+      "id": "slot_04",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_04",
+      "rotation_y": 0,
+      "position": [
+        54,
+        2.55,
+        43
+      ]
+    },
+    {
+      "id": "slot_05",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_05",
+      "rotation_y": 0,
+      "position": [
+        -55,
+        2.9,
+        32
+      ]
+    },
+    {
+      "id": "slot_06",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_06",
+      "rotation_y": 0,
+      "position": [
+        -33,
+        2.85,
+        32
+      ]
+    },
+    {
+      "id": "slot_07",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_07",
+      "rotation_y": 0,
+      "position": [
+        32,
+        3.21,
+        27
+      ]
+    },
+    {
+      "id": "slot_08",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_08",
+      "rotation_y": 0,
+      "position": [
+        54,
+        3.09,
+        27
+      ]
+    },
+    {
+      "id": "slot_09",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_09",
+      "rotation_y": 0,
+      "position": [
+        -55,
+        4.04,
+        16
+      ]
+    },
+    {
+      "id": "slot_10",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_10",
+      "rotation_y": 0,
+      "position": [
+        -33,
+        3.01,
+        16
+      ]
+    },
+    {
+      "id": "slot_11",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_11",
+      "rotation_y": 0,
+      "position": [
+        32,
+        4.31,
+        11
+      ]
+    },
+    {
+      "id": "slot_12",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_12",
+      "rotation_y": 0,
+      "position": [
+        54,
+        3.23,
+        11
+      ]
+    },
+    {
+      "id": "slot_13",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_13",
+      "rotation_y": 0,
+      "position": [
+        -54,
+        4.63,
+        -14
+      ]
+    },
+    {
+      "id": "slot_14",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_14",
+      "rotation_y": 0,
+      "position": [
+        -32,
+        3.69,
+        -14
+      ]
+    },
+    {
+      "id": "slot_15",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_15",
+      "rotation_y": 0,
+      "position": [
+        -54,
+        4.81,
+        -30
+      ]
+    },
+    {
+      "id": "slot_16",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_16",
+      "rotation_y": 0,
+      "position": [
+        -32,
+        4.9,
+        -30
+      ]
+    },
+    {
+      "id": "slot_17",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_17",
+      "rotation_y": 0,
+      "position": [
+        31,
+        4.99,
+        -20
+      ]
+    },
+    {
+      "id": "slot_18",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_18",
+      "rotation_y": 0,
+      "position": [
+        53,
+        4.02,
+        -20
+      ]
+    },
+    {
+      "id": "slot_19",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_19",
+      "rotation_y": 0,
+      "position": [
+        31,
+        5.16,
+        -36
+      ]
+    },
+    {
+      "id": "slot_20",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_20",
+      "rotation_y": 0,
+      "position": [
+        53,
+        5.62,
+        -36
+      ]
+    },
+    {
+      "id": "slot_21",
+      "role": "factory",
+      "category": "bio",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_21",
+      "rotation_y": 0,
+      "position": [
+        -54,
+        9.89,
+        -46
+      ]
+    },
+    {
+      "id": "slot_22",
+      "role": "factory",
+      "category": "bio",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_22",
+      "rotation_y": 0,
+      "position": [
+        -32,
+        6.51,
+        -46
+      ]
+    },
+    {
+      "id": "slot_23",
+      "role": "factory",
+      "category": "bio",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_23",
+      "rotation_y": 0,
+      "position": [
+        31,
+        5.78,
+        -52
+      ]
+    },
+    {
+      "id": "slot_24",
+      "role": "factory",
+      "category": "chem",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_24",
+      "rotation_y": 0,
+      "position": [
+        53,
+        14.85,
+        -52
+      ]
+    },
+    {
+      "id": "slot_large",
+      "role": "large",
+      "category": null,
+      "footprint": [
+        18,
+        13
+      ],
+      "clearance_height": 12,
+      "node": "planet_jungle__slot_large",
+      "rotation_y": 0,
+      "position": [
+        0,
+        7.42,
+        -70
+      ]
+    },
+    {
+      "id": "prop_01",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_jungle__prop_01",
+      "rotation_y": 0,
+      "position": [
+        -85,
+        0.82,
+        58
+      ]
+    },
+    {
+      "id": "prop_02",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_jungle__prop_02",
+      "rotation_y": 0,
+      "position": [
+        85,
+        0.82,
+        58
+      ]
+    },
+    {
+      "id": "prop_03",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_jungle__prop_03",
+      "rotation_y": 0,
+      "position": [
+        -85,
+        19.72,
+        -60
+      ]
+    },
+    {
+      "id": "prop_04",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_jungle__prop_04",
+      "rotation_y": 0,
+      "position": [
+        85,
+        15.21,
+        -60
+      ]
+    }
+  ],
+  "layout_id": "landscape_v2_jungle",
+  "ground_url": "v2/jungle/ground.glb",
+  "description": "Forest clearings, winding river, overgrown ridges and canopy",
+  "camera": {
+    "projection": "orthographic",
+    "front": "+Z"
+  }
+}

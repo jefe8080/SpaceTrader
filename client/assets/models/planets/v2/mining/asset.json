@@ -1,0 +1,23 @@
+{
+  "planet_type": "mining",
+  "label": "Bergbauwelt",
+  "description": "Terraced quarry, mineral seams, mine roads and a mountain ridge",
+  "triangles": 26800,
+  "materials": 8,
+  "glb_bytes": 1234916,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "elevation_range_m": [
+    2,
+    42
+  ],
+  "checks": [
+    "usable footprints flat at elevated anchors",
+    "reserved footprints separated",
+    "anchors match GLB",
+    "fronts +Z",
+    "connected roads avoid reserved footprints"
+  ],
+  "layout": "layout.json"
+}

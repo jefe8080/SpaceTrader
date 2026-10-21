@@ -1,0 +1,126 @@
+{
+  "structural_checks": [
+    {
+      "planet_type": "agrar",
+      "status": "passed",
+      "mesh_count": 3,
+      "anchor_count": 29,
+      "positions_and_rotations": "passed",
+      "external_dependencies": 0
+    },
+    {
+      "planet_type": "ocean",
+      "status": "passed",
+      "mesh_count": 3,
+      "anchor_count": 29,
+      "positions_and_rotations": "passed",
+      "external_dependencies": 0
+    },
+    {
+      "planet_type": "desert",
+      "status": "passed",
+      "mesh_count": 3,
+      "anchor_count": 29,
+      "positions_and_rotations": "passed",
+      "external_dependencies": 0
+    },
+    {
+      "planet_type": "mining",
+      "status": "passed",
+      "mesh_count": 3,
+      "anchor_count": 29,
+      "positions_and_rotations": "passed",
+      "external_dependencies": 0
+    },
+    {
+      "planet_type": "ice",
+      "status": "passed",
+      "mesh_count": 3,
+      "anchor_count": 29,
+      "positions_and_rotations": "passed",
+      "external_dependencies": 0
+    },
+    {
+      "planet_type": "urban",
+      "status": "passed",
+      "mesh_count": 3,
+      "anchor_count": 29,
+      "positions_and_rotations": "passed",
+      "external_dependencies": 0
+    },
+    {
+      "planet_type": "resort",
+      "status": "passed",
+      "mesh_count": 3,
+      "anchor_count": 29,
+      "positions_and_rotations": "passed",
+      "external_dependencies": 0
+    },
+    {
+      "planet_type": "gasgiant",
+      "status": "passed",
+      "mesh_count": 3,
+      "anchor_count": 29,
+      "positions_and_rotations": "passed",
+      "external_dependencies": 0
+    },
+    {
+      "planet_type": "jungle",
+      "status": "passed",
+      "mesh_count": 3,
+      "anchor_count": 29,
+      "positions_and_rotations": "passed",
+      "external_dependencies": 0
+    },
+    {
+      "planet_type": "volcanic",
+      "status": "passed",
+      "mesh_count": 3,
+      "anchor_count": 29,
+      "positions_and_rotations": "passed",
+      "external_dependencies": 0
+    },
+    {
+      "planet_type": "colony",
+      "status": "passed",
+      "mesh_count": 3,
+      "anchor_count": 29,
+      "positions_and_rotations": "passed",
+      "external_dependencies": 0
+    },
+    {
+      "planet_type": "industrial",
+      "status": "passed",
+      "mesh_count": 3,
+      "anchor_count": 29,
+      "positions_and_rotations": "passed",
+      "external_dependencies": 0
+    }
+  ],
+  "blender_roundtrip": [
+    {
+      "planet_type": "agrar",
+      "status": "passed",
+      "mesh_count": 3,
+      "all_29_world_positions": "passed"
+    },
+    {
+      "planet_type": "ocean",
+      "status": "passed",
+      "mesh_count": 3,
+      "all_29_world_positions": "passed"
+    },
+    {
+      "planet_type": "gasgiant",
+      "status": "passed",
+      "mesh_count": 3,
+      "all_29_world_positions": "passed"
+    }
+  ],
+  "placement_tests": {
+    "passed": 38,
+    "failed": 0,
+    "maximum_load_scenarios": 240
+  },
+  "visual_review": "All 24 empty/populated previews reviewed"
+}

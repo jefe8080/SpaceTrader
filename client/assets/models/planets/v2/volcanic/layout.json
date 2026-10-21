@@ -1,0 +1,517 @@
+{
+  "planet_type": "volcanic",
+  "units": "meters",
+  "coordinate_system": "glTF, +Y up",
+  "terrain_root": "planet_volcanic",
+  "regular_pad_count": 24,
+  "large_pad_count": 1,
+  "prop_point_count": 4,
+  "factory_capacity": {
+    "bio": 0,
+    "chem": 2,
+    "heavy": 2,
+    "tech": 0
+  },
+  "slots": [
+    {
+      "id": "slot_01",
+      "role": "questhouse",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_01",
+      "rotation_y": 0,
+      "position": [
+        -60.0,
+        1.23,
+        45.5
+      ]
+    },
+    {
+      "id": "slot_02",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_02",
+      "rotation_y": 0,
+      "position": [
+        -37.3,
+        2.5,
+        44.0
+      ]
+    },
+    {
+      "id": "slot_03",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_03",
+      "rotation_y": 0,
+      "position": [
+        -16.0,
+        1.69,
+        42.5
+      ]
+    },
+    {
+      "id": "slot_04",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_04",
+      "rotation_y": 0,
+      "position": [
+        12.7,
+        0.82,
+        45.5
+      ]
+    },
+    {
+      "id": "slot_05",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_05",
+      "rotation_y": 0,
+      "position": [
+        34.0,
+        1.68,
+        44.0
+      ]
+    },
+    {
+      "id": "slot_06",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_06",
+      "rotation_y": 0,
+      "position": [
+        56.7,
+        2.55,
+        42.5
+      ]
+    },
+    {
+      "id": "slot_07",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_07",
+      "rotation_y": 0,
+      "position": [
+        -56.0,
+        3.56,
+        23.5
+      ]
+    },
+    {
+      "id": "slot_08",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_08",
+      "rotation_y": 0,
+      "position": [
+        -33.3,
+        3.0,
+        22.0
+      ]
+    },
+    {
+      "id": "slot_09",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_09",
+      "rotation_y": 0,
+      "position": [
+        -12.0,
+        1.84,
+        20.5
+      ]
+    },
+    {
+      "id": "slot_10",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_10",
+      "rotation_y": 0,
+      "position": [
+        16.7,
+        2.62,
+        23.5
+      ]
+    },
+    {
+      "id": "slot_11",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_11",
+      "rotation_y": 0,
+      "position": [
+        38.0,
+        3.71,
+        22.0
+      ]
+    },
+    {
+      "id": "slot_12",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_12",
+      "rotation_y": 0,
+      "position": [
+        60.7,
+        2.71,
+        20.5
+      ]
+    },
+    {
+      "id": "slot_13",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_13",
+      "rotation_y": 0,
+      "position": [
+        -60.0,
+        4.74,
+        1.5
+      ]
+    },
+    {
+      "id": "slot_14",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_14",
+      "rotation_y": 0,
+      "position": [
+        -37.3,
+        3.41,
+        -0.0
+      ]
+    },
+    {
+      "id": "slot_15",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_15",
+      "rotation_y": 0,
+      "position": [
+        -16.0,
+        3.14,
+        -1.5
+      ]
+    },
+    {
+      "id": "slot_16",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_16",
+      "rotation_y": 0,
+      "position": [
+        12.7,
+        4.56,
+        1.5
+      ]
+    },
+    {
+      "id": "slot_17",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_17",
+      "rotation_y": 0,
+      "position": [
+        34.0,
+        4.61,
+        -0.0
+      ]
+    },
+    {
+      "id": "slot_18",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_18",
+      "rotation_y": 0,
+      "position": [
+        56.7,
+        3.22,
+        -1.5
+      ]
+    },
+    {
+      "id": "slot_19",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_19",
+      "rotation_y": 0,
+      "position": [
+        -56.0,
+        4.8,
+        -20.5
+      ]
+    },
+    {
+      "id": "slot_20",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_20",
+      "rotation_y": 0,
+      "position": [
+        -33.3,
+        4.19,
+        -22.0
+      ]
+    },
+    {
+      "id": "slot_21",
+      "role": "factory",
+      "category": "chem",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_21",
+      "rotation_y": 0,
+      "position": [
+        -12.0,
+        5.54,
+        -23.5
+      ]
+    },
+    {
+      "id": "slot_22",
+      "role": "factory",
+      "category": "chem",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_22",
+      "rotation_y": 0,
+      "position": [
+        16.7,
+        5.86,
+        -20.5
+      ]
+    },
+    {
+      "id": "slot_23",
+      "role": "factory",
+      "category": "heavy",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_23",
+      "rotation_y": 0,
+      "position": [
+        38.0,
+        4.55,
+        -22.0
+      ]
+    },
+    {
+      "id": "slot_24",
+      "role": "factory",
+      "category": "heavy",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_24",
+      "rotation_y": 0,
+      "position": [
+        60.7,
+        4.46,
+        -23.5
+      ]
+    },
+    {
+      "id": "slot_large",
+      "role": "large",
+      "category": null,
+      "footprint": [
+        18,
+        13
+      ],
+      "clearance_height": 12,
+      "node": "planet_volcanic__slot_large",
+      "rotation_y": 0,
+      "position": [
+        0,
+        0.82,
+        65
+      ]
+    },
+    {
+      "id": "prop_01",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_volcanic__prop_01",
+      "rotation_y": 0,
+      "position": [
+        -85,
+        0.82,
+        58
+      ]
+    },
+    {
+      "id": "prop_02",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_volcanic__prop_02",
+      "rotation_y": 0,
+      "position": [
+        85,
+        0.82,
+        58
+      ]
+    },
+    {
+      "id": "prop_03",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_volcanic__prop_03",
+      "rotation_y": 0,
+      "position": [
+        -85,
+        7.03,
+        -60
+      ]
+    },
+    {
+      "id": "prop_04",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_volcanic__prop_04",
+      "rotation_y": 0,
+      "position": [
+        85,
+        7.68,
+        -60
+      ]
+    }
+  ],
+  "layout_id": "landscape_v2_volcanic",
+  "ground_url": "v2/volcanic/ground.glb",
+  "description": "Basalt terraces, a raised volcanic crater and flowing lava",
+  "camera": {
+    "projection": "orthographic",
+    "front": "+Z"
+  }
+}

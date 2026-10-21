@@ -1,0 +1,23 @@
+{
+  "planet_type": "desert",
+  "label": "Wüstenwelt",
+  "description": "Dune basin, oasis, sandstone mesas and winding caravan streets",
+  "triangles": 28198,
+  "materials": 10,
+  "glb_bytes": 1810796,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "elevation_range_m": [
+    1.0,
+    19.92
+  ],
+  "checks": [
+    "usable footprints flat at elevated anchors",
+    "reserved footprints separated",
+    "anchors match GLB",
+    "fronts +Z",
+    "connected roads avoid reserved footprints"
+  ],
+  "layout": "layout.json"
+}

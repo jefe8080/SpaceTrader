@@ -1,0 +1,23 @@
+{
+  "planet_type": "resort",
+  "label": "Paradieswelt",
+  "description": "Coastal terraces, lagoon, palm beaches and resort paths",
+  "triangles": 29282,
+  "materials": 11,
+  "glb_bytes": 1420784,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "elevation_range_m": [
+    0.7,
+    23.34
+  ],
+  "checks": [
+    "usable footprints flat at elevated anchors",
+    "reserved footprints separated",
+    "anchors match GLB",
+    "fronts +Z",
+    "connected roads avoid reserved footprints"
+  ],
+  "layout": "layout.json"
+}

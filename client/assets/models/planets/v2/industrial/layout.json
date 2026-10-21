@@ -1,0 +1,517 @@
+{
+  "planet_type": "industrial",
+  "units": "meters",
+  "coordinate_system": "glTF, +Y up",
+  "terrain_root": "planet_industrial",
+  "regular_pad_count": 24,
+  "large_pad_count": 1,
+  "prop_point_count": 4,
+  "factory_capacity": {
+    "bio": 0,
+    "chem": 1,
+    "heavy": 2,
+    "tech": 2
+  },
+  "slots": [
+    {
+      "id": "slot_01",
+      "role": "questhouse",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_01",
+      "rotation_y": 0,
+      "position": [
+        -60.0,
+        3.12,
+        39.5
+      ]
+    },
+    {
+      "id": "slot_02",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_02",
+      "rotation_y": 0,
+      "position": [
+        -37.3,
+        3.12,
+        38.0
+      ]
+    },
+    {
+      "id": "slot_03",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_03",
+      "rotation_y": 0,
+      "position": [
+        -16.0,
+        3.12,
+        36.5
+      ]
+    },
+    {
+      "id": "slot_04",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_04",
+      "rotation_y": 0,
+      "position": [
+        12.7,
+        3.12,
+        39.5
+      ]
+    },
+    {
+      "id": "slot_05",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_05",
+      "rotation_y": 0,
+      "position": [
+        34.0,
+        3.12,
+        38.0
+      ]
+    },
+    {
+      "id": "slot_06",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_06",
+      "rotation_y": 0,
+      "position": [
+        56.7,
+        3.12,
+        36.5
+      ]
+    },
+    {
+      "id": "slot_07",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_07",
+      "rotation_y": 0,
+      "position": [
+        -56.0,
+        5.12,
+        13.5
+      ]
+    },
+    {
+      "id": "slot_08",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_08",
+      "rotation_y": 0,
+      "position": [
+        -33.3,
+        5.12,
+        12.0
+      ]
+    },
+    {
+      "id": "slot_09",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_09",
+      "rotation_y": 0,
+      "position": [
+        -12.0,
+        5.12,
+        10.5
+      ]
+    },
+    {
+      "id": "slot_10",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_10",
+      "rotation_y": 0,
+      "position": [
+        16.7,
+        5.12,
+        13.5
+      ]
+    },
+    {
+      "id": "slot_11",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_11",
+      "rotation_y": 0,
+      "position": [
+        38.0,
+        5.12,
+        12.0
+      ]
+    },
+    {
+      "id": "slot_12",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_12",
+      "rotation_y": 0,
+      "position": [
+        60.7,
+        5.12,
+        10.5
+      ]
+    },
+    {
+      "id": "slot_13",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_13",
+      "rotation_y": 0,
+      "position": [
+        -60.0,
+        7.12,
+        -13.5
+      ]
+    },
+    {
+      "id": "slot_14",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_14",
+      "rotation_y": 0,
+      "position": [
+        -37.3,
+        7.12,
+        -15.0
+      ]
+    },
+    {
+      "id": "slot_15",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_15",
+      "rotation_y": 0,
+      "position": [
+        -16.0,
+        7.12,
+        -16.5
+      ]
+    },
+    {
+      "id": "slot_16",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_16",
+      "rotation_y": 0,
+      "position": [
+        12.7,
+        7.12,
+        -13.5
+      ]
+    },
+    {
+      "id": "slot_17",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_17",
+      "rotation_y": 0,
+      "position": [
+        34.0,
+        7.12,
+        -15.0
+      ]
+    },
+    {
+      "id": "slot_18",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_18",
+      "rotation_y": 0,
+      "position": [
+        56.7,
+        7.12,
+        -16.5
+      ]
+    },
+    {
+      "id": "slot_19",
+      "role": "general",
+      "category": null,
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_19",
+      "rotation_y": 0,
+      "position": [
+        -56.0,
+        9.12,
+        -40.5
+      ]
+    },
+    {
+      "id": "slot_20",
+      "role": "factory",
+      "category": "chem",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_20",
+      "rotation_y": 0,
+      "position": [
+        16.7,
+        9.12,
+        -40.5
+      ]
+    },
+    {
+      "id": "slot_21",
+      "role": "factory",
+      "category": "heavy",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_21",
+      "rotation_y": 0,
+      "position": [
+        -33.3,
+        9.12,
+        -42.0
+      ]
+    },
+    {
+      "id": "slot_22",
+      "role": "factory",
+      "category": "heavy",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_22",
+      "rotation_y": 0,
+      "position": [
+        -12.0,
+        9.12,
+        -43.5
+      ]
+    },
+    {
+      "id": "slot_23",
+      "role": "factory",
+      "category": "tech",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_23",
+      "rotation_y": 0,
+      "position": [
+        38.0,
+        9.12,
+        -42.0
+      ]
+    },
+    {
+      "id": "slot_24",
+      "role": "factory",
+      "category": "tech",
+      "footprint": [
+        13,
+        10
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_24",
+      "rotation_y": 0,
+      "position": [
+        60.7,
+        9.48,
+        -43.5
+      ]
+    },
+    {
+      "id": "slot_large",
+      "role": "large",
+      "category": null,
+      "footprint": [
+        18,
+        13
+      ],
+      "clearance_height": 12,
+      "node": "planet_industrial__slot_large",
+      "rotation_y": 0,
+      "position": [
+        0,
+        11.12,
+        -70
+      ]
+    },
+    {
+      "id": "prop_01",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_industrial__prop_01",
+      "rotation_y": 0,
+      "position": [
+        -85,
+        1.12,
+        58
+      ]
+    },
+    {
+      "id": "prop_02",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_industrial__prop_02",
+      "rotation_y": 0,
+      "position": [
+        85,
+        1.12,
+        58
+      ]
+    },
+    {
+      "id": "prop_03",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_industrial__prop_03",
+      "rotation_y": 0,
+      "position": [
+        -85,
+        24.35,
+        -60
+      ]
+    },
+    {
+      "id": "prop_04",
+      "role": "prop",
+      "category": null,
+      "footprint": [
+        3.6,
+        3.6
+      ],
+      "clearance_height": 3,
+      "node": "planet_industrial__prop_04",
+      "rotation_y": 0,
+      "position": [
+        85,
+        19.8,
+        -60
+      ]
+    }
+  ],
+  "layout_id": "landscape_v2_industrial",
+  "ground_url": "v2/industrial/ground.glb",
+  "description": "Stepped industrial yards, slag hills, tanks, pipes and a canal",
+  "camera": {
+    "projection": "orthographic",
+    "front": "+Z"
+  }
+}

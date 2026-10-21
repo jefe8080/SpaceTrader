@@ -1,0 +1,23 @@
+{
+  "planet_type": "jungle",
+  "label": "Dschungelwelt",
+  "description": "Forest clearings, winding river, overgrown ridges and canopy",
+  "triangles": 35452,
+  "materials": 11,
+  "glb_bytes": 2387700,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "elevation_range_m": [
+    0.7,
+    19.6
+  ],
+  "checks": [
+    "usable footprints flat at elevated anchors",
+    "reserved footprints separated",
+    "anchors match GLB",
+    "fronts +Z",
+    "connected roads avoid reserved footprints"
+  ],
+  "layout": "layout.json"
+}

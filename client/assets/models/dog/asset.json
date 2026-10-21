@@ -1,0 +1,23 @@
+{
+  "asset": "dog",
+  "label": "Hund",
+  "selector": {
+    "kind": "dog"
+  },
+  "triangles": 680,
+  "materials": 6,
+  "dimensions_m": [
+    2.157,
+    0.58,
+    1.56
+  ],
+  "origin": "ground center",
+  "units": "meters",
+  "front_blender": "+X",
+  "front_gltf": "+X",
+  "up_gltf": "+Y",
+  "textures": [],
+  "static": true,
+  "glb_bytes": 61712,
+  "validation": "model-only GLB, one scene/mesh/node, embedded materials, no external dependencies"
+}

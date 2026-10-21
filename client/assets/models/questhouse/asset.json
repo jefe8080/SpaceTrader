@@ -1,0 +1,26 @@
+{
+  "asset": "questhouse",
+  "game_kind": "questhouse",
+  "style": "stylized low-poly colony sci-fi",
+  "units": "meters",
+  "origin": "ground center",
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "up_gltf": "+Y",
+  "triangles": 3616,
+  "materials": 9,
+  "dimensions_m": [
+    10.0,
+    7.4,
+    4.805
+  ],
+  "textures": [],
+  "files": [
+    "questhouse.blend",
+    "questhouse.glb",
+    "preview.png",
+    "preview-back.png",
+    "generate.py"
+  ],
+  "notes": "GLB contains model only; preview ground/camera/lights only in blend. All materials are portable glTF PBR; no external textures."
+}

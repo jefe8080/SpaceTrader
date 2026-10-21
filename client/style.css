@@ -342,3 +342,23 @@ body.landed #details { display: none; }
 .bubble { position: relative; background: #fff; color: #222; border-radius: 12px; padding: 8px 12px; margin: 4px 0 12px; display: inline-block; }
 .bubble::after { content: ''; position: absolute; left: 18px; bottom: -8px; border: 8px solid transparent; border-top-color: #fff; border-bottom: 0; }
 .dog-buff { font-size: 12px; color: #ffcc80; border: 1px solid rgba(255, 204, 128, 0.4); border-radius: 10px; padding: 2px 8px; }
+
+/* The planetary WebGL canvas owns its input independently of the space map. */
+#planetView { position:fixed; inset:0; width:100vw; height:100vh; display:block; touch-action:none; }
+body.landed #view { visibility:hidden; }
+body.landed #questBox, body.landed #log { display:none; }
+body.landed #planetBar { top:56px; left:316px; right:16px; transform:none; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+#planetBuildingSelect { max-width:230px; padding:5px 8px; }
+body.landed #planetPanel { top:120px; bottom:auto; left:auto; right:16px; transform:none; width:350px; max-height:calc(100vh - 145px); overflow:auto; }
+#planetLabel { position:fixed; z-index:3; padding:5px 9px; border:1px solid #ffe2a080; border-radius:6px; background:#152337e8; color:#fff2c9; font-size:13px; pointer-events:none; transform:translateX(-50%); }
+#planetStatus { position:fixed; z-index:3; top:45%; left:50%; transform:translate(-50%,-50%); background:#152337ef; color:#f0f4ff; padding:16px 20px; border-radius:10px; display:flex; gap:12px; align-items:center; }
+@media (max-width:1100px) {
+  body.landed #fleet { display:none; }
+  body.landed #planetBar { left:12px; right:12px; top:56px; }
+  body.landed #planetBar .muted { display:none; }
+  body.landed #planetPanel { left:12px; right:12px; width:auto; top:auto; bottom:12px; max-height:38vh; }
+  #planetBuildingSelect { max-width:180px; }
+}
+
+.help-card { max-height:calc(100vh - 80px); overflow:auto; }
+body.landed #planetBar { white-space:normal; }

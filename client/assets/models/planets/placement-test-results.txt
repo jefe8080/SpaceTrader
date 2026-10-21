@@ -1,0 +1,46 @@
+✔ agrar: maximum facilities fit; no duplicate slots; categories and dimensions (39.1341ms)
+✔ agrar: deterministic and existing buildings keep position after additions/removals (2.5189ms)
+✔ agrar: reserved footprints are separated and face a street (0.5668ms)
+✔ ocean: maximum facilities fit; no duplicate slots; categories and dimensions (28.3962ms)
+✔ ocean: deterministic and existing buildings keep position after additions/removals (0.6092ms)
+✔ ocean: reserved footprints are separated and face a street (0.1956ms)
+✔ desert: maximum facilities fit; no duplicate slots; categories and dimensions (27.4005ms)
+✔ desert: deterministic and existing buildings keep position after additions/removals (0.4744ms)
+✔ desert: reserved footprints are separated and face a street (0.2155ms)
+✔ mining: maximum facilities fit; no duplicate slots; categories and dimensions (28.9683ms)
+✔ mining: deterministic and existing buildings keep position after additions/removals (0.526ms)
+✔ mining: reserved footprints are separated and face a street (0.3879ms)
+✔ ice: maximum facilities fit; no duplicate slots; categories and dimensions (24.1452ms)
+✔ ice: deterministic and existing buildings keep position after additions/removals (0.47ms)
+✔ ice: reserved footprints are separated and face a street (0.1586ms)
+✔ urban: maximum facilities fit; no duplicate slots; categories and dimensions (32.2943ms)
+✔ urban: deterministic and existing buildings keep position after additions/removals (0.5393ms)
+✔ urban: reserved footprints are separated and face a street (0.0762ms)
+✔ resort: maximum facilities fit; no duplicate slots; categories and dimensions (24.3079ms)
+✔ resort: deterministic and existing buildings keep position after additions/removals (0.4018ms)
+✔ resort: reserved footprints are separated and face a street (0.1016ms)
+✔ gasgiant: maximum facilities fit; no duplicate slots; categories and dimensions (26.0553ms)
+✔ gasgiant: deterministic and existing buildings keep position after additions/removals (0.6476ms)
+✔ gasgiant: reserved footprints are separated and face a street (0.0743ms)
+✔ jungle: maximum facilities fit; no duplicate slots; categories and dimensions (24.7844ms)
+✔ jungle: deterministic and existing buildings keep position after additions/removals (0.4064ms)
+✔ jungle: reserved footprints are separated and face a street (0.0681ms)
+✔ volcanic: maximum facilities fit; no duplicate slots; categories and dimensions (28.7131ms)
+✔ volcanic: deterministic and existing buildings keep position after additions/removals (0.655ms)
+✔ volcanic: reserved footprints are separated and face a street (0.0824ms)
+✔ colony: maximum facilities fit; no duplicate slots; categories and dimensions (28.7238ms)
+✔ colony: deterministic and existing buildings keep position after additions/removals (0.6546ms)
+✔ colony: reserved footprints are separated and face a street (0.1033ms)
+✔ industrial: maximum facilities fit; no duplicate slots; categories and dimensions (31.5258ms)
+✔ industrial: deterministic and existing buildings keep position after additions/removals (0.6106ms)
+✔ industrial: reserved footprints are separated and face a street (0.0827ms)
+✔ reports overflow, duplicate identities and missing assets (0.9109ms)
+✔ factory jobs with a known category precede unrestricted factory jobs (0.3135ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 450.2138

@@ -1,0 +1,23 @@
+{
+  "planet_type": "gasgiant",
+  "label": "Gasriese",
+  "description": "Floating platform archipelago at several heights with support towers",
+  "triangles": 11184,
+  "materials": 6,
+  "glb_bytes": 597860,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "elevation_range_m": [
+    5,
+    17
+  ],
+  "checks": [
+    "usable footprints flat at elevated anchors",
+    "reserved footprints separated",
+    "anchors match GLB",
+    "fronts +Z",
+    "connected roads avoid reserved footprints"
+  ],
+  "layout": "layout.json"
+}

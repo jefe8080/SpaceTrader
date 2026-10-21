@@ -1,0 +1,86 @@
+[
+  {
+    "type": "agrar",
+    "triangles": 28968,
+    "anchors": 29,
+    "degenerate_triangles": 0,
+    "invalid_normals": 0
+  },
+  {
+    "type": "ocean",
+    "triangles": 18160,
+    "anchors": 29,
+    "degenerate_triangles": 0,
+    "invalid_normals": 0
+  },
+  {
+    "type": "desert",
+    "triangles": 28198,
+    "anchors": 29,
+    "degenerate_triangles": 0,
+    "invalid_normals": 0
+  },
+  {
+    "type": "mining",
+    "triangles": 26800,
+    "anchors": 29,
+    "degenerate_triangles": 0,
+    "invalid_normals": 0
+  },
+  {
+    "type": "ice",
+    "triangles": 24556,
+    "anchors": 29,
+    "degenerate_triangles": 0,
+    "invalid_normals": 0
+  },
+  {
+    "type": "urban",
+    "triangles": 37648,
+    "anchors": 29,
+    "degenerate_triangles": 0,
+    "invalid_normals": 0
+  },
+  {
+    "type": "resort",
+    "triangles": 29282,
+    "anchors": 29,
+    "degenerate_triangles": 0,
+    "invalid_normals": 0
+  },
+  {
+    "type": "gasgiant",
+    "triangles": 11184,
+    "anchors": 29,
+    "degenerate_triangles": 0,
+    "invalid_normals": 0
+  },
+  {
+    "type": "jungle",
+    "triangles": 35452,
+    "anchors": 29,
+    "degenerate_triangles": 0,
+    "invalid_normals": 0
+  },
+  {
+    "type": "volcanic",
+    "triangles": 26818,
+    "anchors": 29,
+    "degenerate_triangles": 0,
+    "invalid_normals": 0
+  },
+  {
+    "type": "colony",
+    "triangles": 31246,
+    "anchors": 29,
+    "degenerate_triangles": 0,
+    "invalid_normals": 0
+  },
+  {
+    "type": "industrial",
+    "triangles": 27172,
+    "anchors": 29,
+    "degenerate_triangles": 0,
+    "invalid_normals": 0
+  }
+]

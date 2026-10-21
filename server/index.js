@@ -13,6 +13,8 @@ const DB_FILE = process.env.DB_FILE || path.join(root, 'data', 'spacetrader.db')
 
 const app = express();
 app.use(express.static(path.join(root, 'client')));
+app.use('/vendor/three/addons', express.static(path.join(root, 'node_modules/three/examples/jsm')));
+app.use('/vendor/three', express.static(path.join(root, 'node_modules/three/build')));
 app.use('/shared', express.static(path.join(root, 'shared')));
 
 const server = http.createServer(app);

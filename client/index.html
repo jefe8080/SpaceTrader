@@ -8,6 +8,9 @@
 </head>
 <body>
   <canvas id="view"></canvas>
+  <canvas id="planetView" hidden aria-label="3D-Planetenoberfläche"></canvas>
+  <div id="planetLabel" hidden></div>
+  <div id="planetStatus" role="status" hidden><span></span><button id="planetRetry" hidden>Erneut laden</button></div>
 
   <div id="login" class="overlay">
     <div class="card login-card">
@@ -116,6 +119,7 @@
         <li><b>Erfahrung</b> sammelst du mit Quests (Questtafeln an Planeten und Werften), beim Erkunden neuer Sektoren, mit neuen Almanach-Einträgen und beim manuellen Handel deines <b>Hauptschiffs</b> (♛, Tempo ×4). Routenhandel bringt keine Erfahrung.</li>
         <li><b>Pilotenlizenz</b> (am Hub, erfordert das gleiche Pilotenlevel) schaltet größere Schiffsklassen, mehr Schiffe und höhere Upgrade-Stufen frei. <b>Module</b> (Passagierkabine, Geschirmte Kammer, Abbaugeräte) gibt es an großen Werften.</li>
         <li><b>Konsortium</b> (K): gemeinsamer Geldpool, gemeinsamer Besitz, Karten- und Schiffshandel mit Freunden. Gründung am Hub ab Pilotenlevel 2.</li>
+        <li><b>Planetenoberfläche</b>: Gebäude anklicken zum Fokussieren; freier Boden, ✕ oder Esc stellt die Übersicht wieder her. Ziehen verschiebt die Ansicht begrenzt; Mausrad bzw. zwei Finger zoomen etwas. Die Kamerarotation erfolgt automatisch zur Gebäudefront bei der Auswahl.</li>
         <li><b>Landen</b> (Doppelklick auf einen Planeten mit angedocktem Schiff): Questhaus, Gebäude ausbauen, Fabriken auf eigenen Planeten, Minispiele, Schmuggler, Schule.</li>
         <li><b>⚡ Nachfrage</b>: Sondernachfrage zum Festpreis in Sektoren mit deinen Schiffen. Nur manuelle Verkäufe zählen.</li>
       </ul>
@@ -124,6 +128,7 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script type="importmap">{"imports":{"three":"/vendor/three/three.module.js","three/addons/":"/vendor/three/addons/"}}</script>
   <script type="module" src="/js/main.js"></script>
 </body>
 </html>

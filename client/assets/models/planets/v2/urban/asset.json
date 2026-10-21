@@ -1,0 +1,23 @@
+{
+  "planet_type": "urban",
+  "label": "Metropole",
+  "description": "Three stepped city districts, retaining walls, parks and a canal",
+  "triangles": 37648,
+  "materials": 12,
+  "glb_bytes": 1857928,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "elevation_range_m": [
+    0.7,
+    12.4
+  ],
+  "checks": [
+    "usable footprints flat at elevated anchors",
+    "reserved footprints separated",
+    "anchors match GLB",
+    "fronts +Z",
+    "connected roads avoid reserved footprints"
+  ],
+  "layout": "layout.json"
+}

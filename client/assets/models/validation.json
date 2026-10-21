@@ -1,0 +1,130 @@
+{
+  "glb_structural_checks": [
+    {
+      "asset": "questhouse",
+      "status": "passed",
+      "triangles": 3616
+    },
+    {
+      "asset": "farm",
+      "status": "passed",
+      "triangles": 3568
+    },
+    {
+      "asset": "drill",
+      "status": "passed",
+      "triangles": 2332
+    },
+    {
+      "asset": "silo",
+      "status": "passed",
+      "triangles": 2028
+    },
+    {
+      "asset": "mine",
+      "status": "passed",
+      "triangles": 2040
+    },
+    {
+      "asset": "tower",
+      "status": "passed",
+      "triangles": 8700
+    },
+    {
+      "asset": "store",
+      "status": "passed",
+      "triangles": 1906
+    },
+    {
+      "asset": "hall",
+      "status": "passed",
+      "triangles": 2000
+    },
+    {
+      "asset": "factory",
+      "status": "passed",
+      "triangles": 2040
+    },
+    {
+      "asset": "plot",
+      "status": "passed",
+      "triangles": 1656
+    },
+    {
+      "asset": "tavern",
+      "status": "passed",
+      "triangles": 2176
+    },
+    {
+      "asset": "casino",
+      "status": "passed",
+      "triangles": 2060
+    },
+    {
+      "asset": "fair",
+      "status": "passed",
+      "triangles": 1512
+    },
+    {
+      "asset": "racetrack",
+      "status": "passed",
+      "triangles": 5452
+    },
+    {
+      "asset": "stollen",
+      "status": "passed",
+      "triangles": 1678
+    },
+    {
+      "asset": "smuggler",
+      "status": "passed",
+      "triangles": 1512
+    },
+    {
+      "asset": "school",
+      "status": "passed",
+      "triangles": 2252
+    },
+    {
+      "asset": "beggar",
+      "status": "passed",
+      "triangles": 764
+    },
+    {
+      "asset": "dog",
+      "status": "passed",
+      "triangles": 680
+    }
+  ],
+  "blender_roundtrip": [
+    {
+      "asset": "farm",
+      "status": "passed",
+      "checks": [
+        "GLB import",
+        "triangle count",
+        "dimensions"
+      ]
+    },
+    {
+      "asset": "factory",
+      "status": "passed",
+      "checks": [
+        "GLB import",
+        "triangle count",
+        "dimensions"
+      ]
+    },
+    {
+      "asset": "dog",
+      "status": "passed",
+      "checks": [
+        "GLB import",
+        "triangle count",
+        "dimensions"
+      ]
+    }
+  ],
+  "preview_review": "All 19 previews reviewed",
+  "script_syntax": "passed"
+}

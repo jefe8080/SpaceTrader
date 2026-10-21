@@ -1,0 +1,23 @@
+{
+  "planet_type": "agrar",
+  "label": "Agrarwelt",
+  "description": "Rolling farmland, crop terraces, irrigation and a wooded ridge",
+  "triangles": 28968,
+  "materials": 12,
+  "glb_bytes": 1861340,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "elevation_range_m": [
+    0.7,
+    16.78
+  ],
+  "checks": [
+    "usable footprints flat at elevated anchors",
+    "reserved footprints separated",
+    "anchors match GLB",
+    "fronts +Z",
+    "connected roads avoid reserved footprints"
+  ],
+  "layout": "layout.json"
+}

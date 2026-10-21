@@ -1,0 +1,23 @@
+{
+  "planet_type": "ice",
+  "label": "Eiswelt",
+  "description": "Glacier terraces, frozen river, ice cliffs and snow peaks",
+  "triangles": 24556,
+  "materials": 9,
+  "glb_bytes": 1116124,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "elevation_range_m": [
+    0.7,
+    20.03
+  ],
+  "checks": [
+    "usable footprints flat at elevated anchors",
+    "reserved footprints separated",
+    "anchors match GLB",
+    "fronts +Z",
+    "connected roads avoid reserved footprints"
+  ],
+  "layout": "layout.json"
+}

@@ -26,7 +26,7 @@ export { openRoutesOverview, openRouteEditor } from './routes.js';
 export { openFavorites } from './favorites.js';
 export { openAlmanac, refreshAlmanac } from './almanac.js';
 export { orderShips } from './orders.js';
-export { enterPlanet, leavePlanet, openBuilding, planetEscape } from './planetPanel.js';
+export { enterPlanet, leavePlanet, openBuilding, closeBuilding, renderPlanetUi, planetEscape } from './planetPanel.js';
 export { mgOpen, closeGame } from './minigames.js';
 
 export function renderAll() {

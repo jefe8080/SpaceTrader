@@ -1,0 +1,94 @@
+[
+  {
+    "asset": "questhouse",
+    "slot": "slot_01"
+  },
+  {
+    "asset": "tower",
+    "slot": "slot_02"
+  },
+  {
+    "asset": "store",
+    "slot": "slot_03"
+  },
+  {
+    "asset": "store",
+    "slot": "slot_04"
+  },
+  {
+    "asset": "store",
+    "slot": "slot_05"
+  },
+  {
+    "asset": "store",
+    "slot": "slot_06"
+  },
+  {
+    "asset": "store",
+    "slot": "slot_07"
+  },
+  {
+    "asset": "store",
+    "slot": "slot_08"
+  },
+  {
+    "asset": "store",
+    "slot": "slot_09"
+  },
+  {
+    "asset": "store",
+    "slot": "slot_10"
+  },
+  {
+    "asset": "store",
+    "slot": "slot_11"
+  },
+  {
+    "asset": "tavern",
+    "slot": "slot_12"
+  },
+  {
+    "asset": "casino",
+    "slot": "slot_13"
+  },
+  {
+    "asset": "school",
+    "slot": "slot_14"
+  },
+  {
+    "asset": "smuggler",
+    "slot": "slot_15"
+  },
+  {
+    "asset": "factory",
+    "slot": "slot_19"
+  },
+  {
+    "asset": "factory",
+    "slot": "slot_20"
+  },
+  {
+    "asset": "factory",
+    "slot": "slot_21"
+  },
+  {
+    "asset": "factory",
+    "slot": "slot_22"
+  },
+  {
+    "asset": "factory",
+    "slot": "slot_23"
+  },
+  {
+    "asset": "racetrack",
+    "slot": "slot_large"
+  },
+  {
+    "asset": "beggar",
+    "slot": "prop_01"
+  },
+  {
+    "asset": "dog",
+    "slot": "prop_04"
+  }
+]

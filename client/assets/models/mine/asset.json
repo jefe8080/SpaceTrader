@@ -1,0 +1,23 @@
+{
+  "asset": "mine",
+  "label": "Bergwerk",
+  "selector": {
+    "look": "mine"
+  },
+  "triangles": 2040,
+  "materials": 7,
+  "dimensions_m": [
+    11.0,
+    8.0,
+    6.065
+  ],
+  "origin": "ground center",
+  "units": "meters",
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "up_gltf": "+Y",
+  "textures": [],
+  "static": true,
+  "glb_bytes": 139284,
+  "validation": "model-only GLB, one scene/mesh/node, embedded materials, no external dependencies; consistent face normals"
+}

@@ -7,7 +7,7 @@ import { goodTag } from '../util.js';
 import { $, setHtml, toast } from './dom.js';
 import { stockBar } from './charts.js';
 import { questBoardSection } from './quests.js';
-import { scene, canLand } from '../planetside.js';
+import { scene, canLand, resetPlanetside, selectBuilding, hidePlanetside } from '../planetside.js';
 import { sfx } from '../audio.js';
 
 const bar = $('planetBar');
@@ -25,8 +25,7 @@ export function enterPlanet(id) {
   if (e?.kind !== 'planet') return;
   if (!canLand(id)) { toast('Kein Schiff angedockt'); return; }
   state.landed = id;
-  scene.scroll = 0;
-  scene.key = '';
+  resetPlanetside(e);
   current = null;
   state.follow = null;
   sfx('dock');
@@ -35,32 +34,48 @@ export function enterPlanet(id) {
 export function leavePlanet() {
   if (!state.landed) return;
   state.landed = null;
+  selectBuilding(null);
+  hidePlanetside();
   current = null;
   renderPlanetUi();
 }
+export function closeBuilding(force = false) {
+  current = null;
+  selectBuilding(null, force);
+  renderPlanetUi();
+}
 export function openBuilding(it) {
+  if (current?.key === it.key) { closeBuilding(); return; }
   current = it;
+  selectBuilding(it);
   panelKinds[it.kind]?.open?.();
   sfx('click');
   renderPlanetUi();
 }
 /** Esc: erst das Panel schließen, dann die Ansicht verlassen */
 export function planetEscape() {
-  if (current) { current = null; renderPlanetUi(); return; }
+  if (current) { closeBuilding(); return; }
   leavePlanet();
 }
 
 export function renderPlanetUi() {
   const e = state.landed && state.entities.get(state.landed);
   bar.hidden = !e;
+  if (e && current) {
+    current = scene.items.find(x => x.key === current.key) ?? null;
+    if (!current) selectBuilding(null);
+  }
   panel.hidden = !e || !current;
   document.body.classList.toggle('landed', !!e);
   if (!e) return;
-  setHtml(bar, `<b>${esc(e.name)}</b> <span class="muted">${PLANET_TYPES[e.type].name} · Gebäude anklicken · ziehen oder Mausrad zum Scrollen</span>
+  setHtml(bar, `<b>${esc(e.name)}</b> <span class="muted">${PLANET_TYPES[e.type].name} · 2,5D · Ziehen: verschieben · Mausrad: Zoom</span>
+    <select id="planetBuildingSelect" aria-label="Gebäude auswählen"><option value="">Gebäude auswählen</option>${scene.items.map(it => `<option value="${esc(it.key)}">${esc(it.label)}</option>`).join('')}</select>
+    <button class="small" data-pp="overview">Übersicht</button>
     <button class="small" data-pp="leave">Zurück ins All <kbd>Esc</kbd></button>`);
+  bar.querySelector('select').value = current?.key ?? '';
   if (!current) return;
   // Gebäude kann nach Änderungen (Abriss, Bau) neu nummeriert sein
-  const it = scene.items.find((x) => x.kind === current.kind && x.good === current.good && x.recipe === current.recipe && x.index === current.index && x.cat === current.cat && x.building === current.building) || current;
+  const it = current;
   current = it;
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   let body = '';
@@ -131,11 +146,19 @@ panel.addEventListener('click', (ev) => {
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
-    case 'close': current = null; renderPlanetUi(); return;
+    case 'close': closeBuilding(); return;
     case 'bld': cmd('bldUpgrade', { target: e.id, good: current.good }); return;
     case 'facBuild': if (confirm(`${RECIPES[d.recipe].name} bauen?`)) cmd('facBuild', { target: e.id, recipe: d.recipe }); return;
-    case 'demolish': if (confirm('Fabrik abreißen? Es gibt keine Erstattung.')) { cmd('facDemolish', { target: e.id, index: current.index }); current = null; } return;
+    case 'demolish': if (confirm('Fabrik abreißen? Es gibt keine Erstattung.')) { cmd('facDemolish', { target: e.id, index: current.index }); closeBuilding(); } return;
   }
   if (panelKinds[current?.kind]?.click?.(d, current, e, ship, ev)) renderPlanetUi();
 });
-bar.addEventListener('click', (ev) => { if (ev.target.closest('[data-pp=leave]')) leavePlanet(); });
+bar.addEventListener('click', ev => {
+  if (ev.target.closest('[data-pp=leave]')) leavePlanet();
+  if (ev.target.closest('[data-pp=overview]')) closeBuilding(true);
+});
+bar.addEventListener('change', ev => {
+  if (ev.target.id !== 'planetBuildingSelect') return;
+  const it = scene.items.find(x => x.key === ev.target.value);
+  if (it) openBuilding(it); else closeBuilding();
+});

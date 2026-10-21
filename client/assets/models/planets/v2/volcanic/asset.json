@@ -1,0 +1,23 @@
+{
+  "planet_type": "volcanic",
+  "label": "Vulkanwelt",
+  "description": "Basalt terraces, a raised volcanic crater and flowing lava",
+  "triangles": 26818,
+  "materials": 8,
+  "glb_bytes": 1791268,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "elevation_range_m": [
+    0.7,
+    7.56
+  ],
+  "checks": [
+    "usable footprints flat at elevated anchors",
+    "reserved footprints separated",
+    "anchors match GLB",
+    "fronts +Z",
+    "connected roads avoid reserved footprints"
+  ],
+  "layout": "layout.json"
+}

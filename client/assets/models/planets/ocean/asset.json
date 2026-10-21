@@ -1,0 +1,24 @@
+{
+  "planet_type": "ocean",
+  "label": "Ozeanwelt",
+  "triangles": 9504,
+  "materials": 14,
+  "glb_bytes": 695796,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "width_m": 145.0,
+  "depth_m": 111.0,
+  "slot_elevation_m": 0.12,
+  "checks": [
+    "reserved lot clearance",
+    "exported anchors match layout.json",
+    "all materials embedded",
+    "unified deck surface, no overlapping deck faces"
+  ],
+  "layout": "layout.json",
+  "layout_nominal_extent_m": [
+    140,
+    105
+  ]
+}

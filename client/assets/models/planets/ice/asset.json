@@ -1,0 +1,23 @@
+{
+  "planet_type": "ice",
+  "label": "Eiswelt",
+  "triangles": 9940,
+  "materials": 12,
+  "glb_bytes": 764376,
+  "meshes": 3,
+  "placement_nodes": 29,
+  "buildings_in_glb": false,
+  "width_m": 140.0,
+  "depth_m": 105.0,
+  "slot_elevation_m": 0.12,
+  "checks": [
+    "reserved lot clearance",
+    "exported anchors match layout.json",
+    "all materials embedded"
+  ],
+  "layout": "layout.json",
+  "layout_nominal_extent_m": [
+    140,
+    105
+  ]
+}
