@@ -3,7 +3,7 @@ import { WORLD, GOODS, BELT_TYPES, QUEST, QUEST_TYPES, REP, RANKS, factionRank, 
 import { hexAt, hexKey, hexNeighbors } from '../shared/hex.js';
 import { missingInputs, stat } from './markets.js';
 import {homeStorageFree} from '../shared/homeworld.js';
-import {passengerTrade,updatePassengerOffers,peopleOf} from './population.js';
+import {passengerTrade,updatePassengerOffers,peopleOf,residentDepartureCapacity} from './population.js';
 
 /**
  * Quests (PRD-2 Kapitel 9): Questtafeln an Planeten und Werften, eine aktive Quest je Spieler, keine Fristen.
@@ -187,7 +187,7 @@ export function acceptQuest(game, player, ship, e, questId, offers = null) {
   const st = shipStats(ship);
   if (q.type === 'tour' && st.passenger < q.tourists) return `Für ${q.tourists} Touristen braucht das Schiff Passagierkabinen mit ${q.tourists} Plätzen.`;
   if(game.profile==='homeworld'&&q.type==='tour'){
-    const residents=peopleOf(e);if(!residents||residents.population-Object.values(residents.workers||{}).reduce((n,v)=>n+v,0)<q.tourists||freeFor(ship,'tourists')<q.tourists)return 'Nicht genügend reale Touristen oder freie Kabinenplätze.';
+    const residents=peopleOf(e);if(!residents||Math.min(residentDepartureCapacity(residents),residents.population-Object.values(residents.workers||{}).reduce((n,v)=>n+v,0))<q.tourists||freeFor(ship,'tourists')<q.tourists)return 'Nicht genügend reale Touristen oder freie Kabinenplätze.';
     const loaded=passengerTrade(game,ship,e,'tourists',q.tourists,'buy',0,true);
     if(loaded.n!==q.tourists){if(loaded.n)passengerTrade(game,ship,e,'tourists',loaded.n,'sell');return 'Nicht genügend reale Touristen oder freie Kabinenplätze.';}
     let left=q.tourists;

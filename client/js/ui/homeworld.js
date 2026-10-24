@@ -7,6 +7,7 @@ import {REFINEMENT_RECIPES} from '/shared/goods.js';
 import {populationPanel} from './population.js';
 import {QUEST_DELIVERIES,STUDY_FINDS} from '/shared/advanced-homequests.js';
 import {SHIP_TYPES,SHIPYARD} from '/shared/config.js';
+import {warpPanel} from './colonies.js';
 
 let dialog;
 export function renderHomeDialog() {
@@ -39,6 +40,7 @@ export function homePanel(entity, item, ship) {
   const home = entity.market.homeworld;
   if (home.owner !== state.me.id) return '<div class="muted">Persönliche Ruinenwelt eines anderen Kapitäns.</div>';
   if (item.kind === 'questhouse') {
+    if(entity.id!==state.homeworld)return `<p>Weiterer persönlicher Ruinenstandort. Dock und Infrastruktur stammen aus der bezahlten Expedition. Keine erneuten Einstiegspakete und kein zweites Tutorial.</p>`+homeBalance(entity)+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} nachgewiesene eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+warpPanel(entity);
     let html = `<div class="muted">Hauptquests laufen unabhängig von normalen Quests. Mehrere freigeschaltete Zweige können gleichzeitig fortschreiten.</div>`;
     html += `<div class="kv"><span>Einwohner / Wohnraum</span><span>${home.population} / ${home.housing}</span><span>Grundenergie</span><span>${home.power}</span><span>Leitstelle</span><span>Stufe ${home.controlLevel}</span>
       <span>Eigenproduktion</span><span>${fmt(home.produced.water || 0)} Wasser · ${fmt(home.produced.food || 0)} Nahrung · ${fmt(home.produced.ingots || 0)} Barren</span>
@@ -60,6 +62,9 @@ export function homePanel(entity, item, ship) {
     }
     for(const [module,find] of Object.entries(STUDY_FINDS))if(completed(find.quest))html+=`<p>${find.name}: ${state.homeQuest.finds?.[module]?'einmalige Vorlage geborgen':'Studienvorlage verfügbar'}</p><button class="small" data-pp="homeSite" data-id="${state.homeQuest.sites?.[module]||''}">Forschungsfund zeigen</button>`;
     html+=`<p>Volle Grundversorgung: ${Math.floor(home.fullSupplySeconds||0)} / 1.800 s · Selbst ausgebildete Fachkräfte: ${home.trained?.skilled||0}</p>`+orbitalPanel(entity);
+    html+='<h3>Eigene Welten und Expeditionen</h3>';
+    for(const world of [...state.entities.values()].filter(e=>e.ruinsSite||e.market?.homeworld?.owner===state.me.id))html+=`<p>${esc(world.name)} · ${world.ruinsSite?'unbewohnter Standort':`Leitstelle ${world.market.homeworld.controlLevel}`}</p><button class="small" data-pp="homeSite" data-id="${world.id}">Standort zeigen</button>`;
+    html+=warpPanel(entity);
     html += '<details><summary>Journal nachlesen</summary><button class="small" data-pp="homeReplay">Ankunftsszene erneut ansehen</button>' + (state.homeQuest?.journal || []).map((entry) => `<p><b>${esc(entry.speaker || entry.id)}</b> · ${esc(entry.text)}</p>`).join('') + '</details>';
     return html;
   }
@@ -174,13 +179,14 @@ function homeBalance(entity){
   const home=entity.market.homeworld,used=homeStorageUsage(entity.market),work=home.workforce;
   let html=`<div class="kv"><span>Einwohner / Wohnraum</span><span>${home.population} / ${home.housing}</span><span>Energie benutzt / verfügbar</span><span>${home.energy?.used||0} / ${home.energy?.generation||12}</span>
     <span>Normales Lager</span><span>${fmt(used.normal)} / ${home.storage}</span><span>Gefahrgutlager</span><span>${fmt(used.hazard)} / ${home.hazardStorage}</span>
-    <span>Personal frei: einfach / Fach / Spezial</span><span>${work?`${work.free.basic} / ${work.free.skilled} / ${work.free.specialist}`:'48 / 12 / 0'}</span>
+    <span>Unzugeordnet: einfach / Fach / Spezial</span><span>${work?`${work.free.basic} / ${work.free.skilled} / ${work.free.specialist}`:'48 / 12 / 0'} · höchstens ${work?.freeSlots??Math.floor(home.population*.6)} weitere Arbeitsplätze</span>
     <span>Grundversorgung</span><span>${Math.round((home.supply?.basic||0)*100)} % · Notversorgung erhält Einwohner und Fortschritt</span></div>`;
   if(home.civil)html+=`<details><summary>Bürger und Geld</summary><p>Brutto ${fmt(home.civil.incomePerHour||0)} Cr/h · Steuer ${Math.round(home.civil.taxRate*100)} % · Konsumkasse ${fmt(home.civil.budget)} Cr</p>
     <p>Bisher: ${fmt(home.civil.gross)} Cr Einkommen, davon ${fmt(home.civil.taxes)} Cr Steuern und ${fmt(home.civil.consumptionPayments)} Cr tatsächlich bezahlter Konsum.</p>
     <label>Steuer 0–40 % <input id="homeTaxPercent" type="number" min="0" max="40" value="${Math.round(home.civil.taxRate*100)}"></label><button class="small" data-pp="homeTax">Steuersatz setzen</button></details>`;
   html+='<table class="market"><tr><th>Ware</th><th>Verfügbar / geschützt</th><th>Zu- / Abfluss je h</th></tr>';
   for(const [g,slot] of Object.entries(entity.market.goods)){
+    if(GOODS[g].cls==='passenger')continue;
     const protectedAmount=slot.stock-availableHomeStock(entity.market,g),flow=home.flows?.[g];
     if(!slot.stock&&!protectedAmount&&!flow)continue;
     const drain=(flow?.consume||0)-(flow?.produce||0),duration=drain>0?`${(availableHomeStock(entity.market,g)/drain).toFixed(1)} h Vorrat`:'kein Nettoverbrauch';

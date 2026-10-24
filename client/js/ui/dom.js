@@ -58,3 +58,17 @@ export function closeTopModal() {
   closeModal(open[open.length - 1]);
   return true;
 }
+
+/** Nonblocking in-game confirmation, with ordinary keyboard and screen-reader controls. */
+export function confirmAction(message,onConfirm){
+  let overlay=$('gameConfirm');
+  if(!overlay){
+    overlay=document.createElement('div');overlay.id='gameConfirm';overlay.className='overlay';overlay.hidden=true;overlay.style.zIndex='100';
+    overlay.innerHTML='<div class="card" role="dialog" aria-modal="true" aria-labelledby="gameConfirmTitle" style="width:min(520px,calc(100vw - 32px))"><h2 id="gameConfirmTitle">Aktion bestätigen</h2><p id="gameConfirmMessage"></p><div class="btnrow"><button id="gameConfirmCancel">Abbrechen</button><button class="primary" id="gameConfirmAccept">Verbindlich bestätigen</button></div></div>';
+    document.body.append(overlay);registerModal('gameConfirm',()=>{},null,{live:false});
+  }
+  $('gameConfirmMessage').textContent=message;
+  $('gameConfirmCancel').onclick=()=>closeModal('gameConfirm');
+  $('gameConfirmAccept').onclick=()=>{closeModal('gameConfirm');onConfirm();};
+  openModal('gameConfirm');$('gameConfirmCancel').focus();
+}

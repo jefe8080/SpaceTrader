@@ -1,6 +1,6 @@
 # PRD 5: Heimatwelten, reale Wirtschaft und gezeichnete Planeten
 
-Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U14 abgeschlossen, U15–U17 offen
+Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U15 abgeschlossen, U16–U17 offen
 
 ## 1. Geltung, Ziel und Freigabe
 
@@ -518,7 +518,7 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | U12 | Bedarfsgesteuerte Disposition, Produktions- und Absatzaufträge | U8–U11 | Abgeschlossen |
 | U13 | Spezialisierungen, geänderte Questgeber-/Besitzprogression und Besucher | U7, U9 | Abgeschlossen |
 | U14 | Vollständige Hauptquestzweige, Orbitalringe, Forschung und Reliktverbesserungen | U10–U13 | Abgeschlossen; H13-Gründung/Standortnachweise in U15 angebunden |
-| U15 | Weitere Ruinenwelten, gemeinsames eigenes Netz, Warpservice | U8, U12–U14 | Offen |
+| U15 | Weitere Ruinenwelten, gemeinsames eigenes Netz, Warpservice | U8, U12–U14 | Abgeschlossen |
 | U16 | Gezeichnete Assets/Bilddialoge und sichtbare Entwicklungsstände vollständig | Stilprobe ab U5; begleitet alle Fachschritte | Offen |
 | U17 | Gesamtsimulation, Mehrspieler- und visuelle Abnahme, Balance, frischer Weltstart | U1–U16 | Offen |
 
@@ -561,6 +561,8 @@ Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehen
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: U15 umgesetzt: unbewohnte vorhandene Ruinenplaneten ohne Produktions-/Beutevorräte, persönliche Erkundung, reale Teillieferungen, 20 eigene Auswanderer mit erhaltenen Qualifikationen, dauerhafte bestätigte Expeditionsspatzabgabe und weiteres Rückreiseschiff. H13/H16 nutzen wirkliche Gründung und getrennte eigene Leitstellen. Weitere Standorte beginnen mit leerem Lager, 20/100 Einwohnern, acht Plätzen und ohne erneute Einstiegshilfen. Skalierende reguläre Gründungskosten und gespeicherter Material-/Personennachweis. Warp bewertet feste tatsächliche Investitionen und physische Bestände, reserviert ein freies erschlossenes Ziel, zeigt Preis/Netz-/Routenfolgen und friert den Standort 300 s ein. Derselbe Planet wird mit stabiler ID und korrekten Raumindizes versetzt; Schiffe bleiben zurück, Anflüge enden sicher, eigene Aufträge warten auf erneute Freigabe. Vorbereitung und 24-h-Serversperre bleiben über Neustarts erhalten. Gemeinsame Arbeitsplatzgrenze berücksichtigt Baureservierungen und Auswanderung. Alle 279 Tests erfolgreich, 15 neue Integrationsprüfungen. Browser bestätigt weitere Siedlung, Preisvorschau, Bestätigungsdialog und tatsächliche Warpvorbereitung; Nachweise unter docs/qa/prd5-u15/. Gesamte Fortschrittsdauer und frischer Hauptstart bleiben U17.
 
 - 2026-10-24: U14 umgesetzt: vollständiger Katalog H00–H17, getrennte parallele Hauptquestzweige, dauerhaft gespeicherte Teillieferungen und Eigenproduktions-/Ausbildungs-/Versorgungsnachweise. Persönliche reale Archivstellen mit manueller Anflugprüfung, einmalige registrierte physische Studienvorlagen für Säureextraktor/Sensorphalanx nach H09 und Kollektor/Bohrer nach H10. Kleine Orbitalstufe mit tatsächlicher ausdrücklich bestätigter dauerhafter Spatzabgabe und 600-s-Aufbau; große Stufe in zwei getrennten 600-s-Abschnitten ohne doppelte Materialbindung. Eigener auswählbarer Orbitalanker, kein Bodenplatz. Getrennte reale S/M- und L/XL-Bauplätze, gebundene Schiffbaumaterialien, Energie-/Personalpausen, reservierte Ausgabe und endliche Rümpfe mit leerem Tank. Fraktions-L/XL zusätzlich mit Ruf und Produktwährung; Klasse F bleibt den Fraktionswerften vorbehalten. H14/H17 verbessern dasselbe Reliktexemplar auf ×5/×6. H13-Gründung und H16-Standortnachweis nutzen die anschließende U15-Standortmechanik. Alle 264 Tests erfolgreich, 13 neue Quest-/Archiv-/Orbitalprüfungen einschließlich echtem Archivflug, paralleler Fertigung und Neustart. Browser bestätigt gebaute Infrastruktur, materiellen 40-s-Spatzbau, genau einen neuen Rumpf ohne Gratis-Tank und H08-Abschluss. Isolierte QA/Einrichtungsannahmen unter docs/qa/prd5-u14/. Gezeichnete Szenen und Entwicklungsstände bleiben U16, vollständige Fortschritts-/Zeitabnahme U17.
 

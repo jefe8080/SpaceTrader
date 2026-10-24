@@ -18,6 +18,8 @@ import { checkWorldFile, worldProfile } from './world-profile.js';
 import { createHomeworld, tickHomeworld, tickHomeResource } from './homeworld.js';
 import {passengerTrade} from './population.js';
 import {handlingAllowance,recordHandling} from './handling.js';
+import {tickColonies} from './colonies.js';
+import {tickWarps} from './warp.js';
 import { tickRelics } from './relic.js';
 import { homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { coveredPath, pointCovered } from './coverage.js';
@@ -480,6 +482,7 @@ export class Game {
    * Rückgabe { ok, n, cost } oder { ok: false, reason }
    */
   refuel(ship, e, route = null) {
+    if(e.market?.homeworld?.warp)return {ok:false,reason:'Standort für Warp gesperrt.'};
     if (ship.relicSpeed) return { ok: false, reason: 'Der Reliktantrieb benötigt keinen Treibstoff' };
     const p = this.players.get(ship.owner);
     const tank = this.shipTank(ship);
@@ -641,6 +644,7 @@ export class Game {
   // ---------- Simulation ----------
   tick(dt) {
     this.time += dt;
+    if(this.profile==='homeworld'){tickColonies(this,dt);tickWarps(this,dt);}
     tickRelics(this);
     for (const s of this.ships.values()) {
       updateShip(s, dt, this);
@@ -700,6 +704,7 @@ export class Game {
    * opts.auto: automatischer Einkauf aus Routen (Stop-Loss greift), opts.route: Routenvorlage für die Statistik
    */
   trade(ship, e, good, amount, dir, limit = 0, opts = {}) {
+    if(e.market?.homeworld?.warp)return {n:0,reason:'Standort für Warp gesperrt.'};
     if(opts.handling||this.profile!=='homeworld')return this.tradeImpl(ship,e,good,amount,dir,limit,opts);
     const allowed=handlingAllowance(this,e,ship);
     if(allowed<1)return {n:0,reason:'Abfertigung oder Umschlagbudget belegt; nächstes Zeitfenster abwarten.'};
@@ -788,6 +793,7 @@ export class Game {
 
   /** Eigenes Lager: kostenlos laden und einlagern */
   ownerTransfer(ship, e, good, amount, dir) {
+    if(e.market?.homeworld?.warp)return {n:0,reason:'Standort für Warp gesperrt.'};
     if(this.profile==='homeworld'&&GOODS[good]?.cls==='passenger')return passengerTrade(this,ship,e,good,amount,dir);
     if (e.type === 'ruins' && e.market.homeworld?.facilities.dock.status !== 'ready') return { n: 0, reason: 'Zuerst das Dock reparieren' };
     const slot = e.market.goods[good];

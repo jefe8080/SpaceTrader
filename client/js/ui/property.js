@@ -10,6 +10,7 @@ import { bus } from './bus.js';
 import {populationPanel,handlePopulationAction} from './population.js';
 import {WORLD_FOCI,FOCUS_NAMES,specializationSpec} from '/shared/specializations.js';
 import {HOME_BUILDINGS} from '/shared/homeworld.js';
+import {handleColonyAction} from './colonies.js';
 
 const gov = () => GOVERNOR_LICENSES[state.governor || 0];
 /** Eigenes Konsortium (oder null) und Rang */
@@ -188,6 +189,7 @@ export function governorSection(dockedShip) {
 
 // ---------- Ereignisse (im Detailpanel) ----------
 export function handlePropertyAction(d) {
+  if(handleColonyAction(d))return true;
   if(handlePopulationAction(d))return true;
   switch (d.act) {
     case 'worldSpecialize':cmd('worldSpecialize',{target:d.ent,focus:d.focus});return true;

@@ -6,7 +6,7 @@ import {initializePopulation,updatePassengerOffers} from './population.js';
 import {stat} from './markets.js';
 
 const INFRASTRUCTURE=['solar','gasGenerator','reactor','housing','school','academy'];
-const freeBuilders=h=>h.workers.basic-(h.workforce?.used?.basic||0)-(h.projects||[]).reduce((n,j)=>n+(j.kind==='training'?(j.from==='basic'?j.count:0):2),0);
+const freeBuilders=h=>Math.min(h.workers.basic-(h.workforce?.used?.basic||0)-(h.projects||[]).reduce((n,j)=>n+(j.kind==='training'?(j.from==='basic'?j.count:0):2),0),Math.floor(h.population*.6)-Object.values(h.workforce?.used||{}).reduce((a,b)=>a+b,0)-(h.projects||[]).reduce((n,j)=>n+(j.kind==='training'?j.count:2),0));
 function initialize(e){
   initializePopulation(e);const h=e.market.economy;h.infrastructure||=[];h.projects||=[];h.nextProject||=0;h.reserves||={};
   h.baseHousing??=h.housing;

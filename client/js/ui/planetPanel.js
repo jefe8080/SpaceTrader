@@ -4,7 +4,7 @@ import { GOODS, RECIPES, RECIPE_CATS, BUILDING, PLANET_TYPES, buildingUpgradeCos
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import { goodTag } from '../util.js';
-import { $, setHtml, toast } from './dom.js';
+import { $, setHtml, toast,confirmAction } from './dom.js';
 import { stockBar } from './charts.js';
 import { questBoardSection } from './quests.js';
 import { scene, canLand, resetPlanetside, selectBuilding, hidePlanetside } from '../planetside.js';
@@ -14,6 +14,7 @@ import {handleModuleAction} from './modules.js';
 import { bus } from './bus.js';
 import {handlePopulationAction} from './population.js';
 import {propertySection,handlePropertyAction,specializationPanel} from './property.js';
+import {handleColonyAction} from './colonies.js';
 
 const bar = $('planetBar');
 const panel = $('planetPanel');
@@ -151,6 +152,7 @@ panel.addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-pp], [data-act]');
   if (!b || b.disabled) return;
   if(handlePopulationAction(b.dataset))return;
+  if(handleColonyAction(b.dataset))return;
   if(b.dataset.act&&handlePropertyAction(b.dataset))return;
   const d = b.dataset;
   if(handleModuleAction(d))return;
@@ -165,7 +167,8 @@ panel.addEventListener('click', (ev) => {
     }
     case 'homeOrbital':{
       const large=d.large==='true',ship=document.getElementById('orbitalSurrender')?.value;
-      if(large||confirm('Dieser Spatz wird dauerhaft aus der steuerbaren Flotte entfernt und als Orbitalinfrastruktur erhalten. Fracht und Module müssen vorher entladen sein. Jetzt endgültig abgeben?'))cmd('homeOrbital',{target:e.id,large,ship:large?undefined:ship,confirmed:!large});return;
+      const perform=()=>cmd('homeOrbital',{target:e.id,large,ship:large?undefined:ship,confirmed:!large});
+      if(large)perform();else confirmAction('Dieser Spatz wird dauerhaft aus der steuerbaren Flotte entfernt und als Orbitalinfrastruktur erhalten. Fracht und Module müssen vorher entladen sein. Jetzt endgültig abgeben?',perform);return;
     }
     case 'homeOrbitalBuild':cmd('homeOrbitalBuild',{target:e.id,type:d.type});return;
     case 'homeOrbitalClaim':cmd('homeOrbitalClaim',{target:e.id,id:d.id});return;
@@ -176,7 +179,7 @@ panel.addEventListener('click', (ev) => {
     case 'homeLogisticsCancel':cmd('homeLogisticsCancel',{target:e.id,id:d.id});return;
     case 'homeRecipeChange':{
       const recipe=document.getElementById('homeRefiningRecipe')?.value;
-      if(recipe&&confirm(`Zu ${RECIPES[recipe].name} wechseln? Laufender Zyklusfortschritt wird zurückgesetzt; keine Materialerstattung.`))cmd('homeRecipeChange',{target:e.id,id:d.id,recipe});return;
+      if(recipe)confirmAction(`Zu ${RECIPES[recipe].name} wechseln? Laufender Zyklusfortschritt wird zurückgesetzt; keine Materialerstattung.`,()=>cmd('homeRecipeChange',{target:e.id,id:d.id,recipe}));return;
     }
     case 'homeModuleCraft':cmd('homeModuleCraft',{target:e.id,module:d.module,study:d.study==='true'});return;
     case 'homeTax':cmd('homeTax',{target:e.id,percent:Number(document.getElementById('homeTaxPercent')?.value)});return;

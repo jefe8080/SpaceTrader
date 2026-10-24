@@ -1,4 +1,4 @@
-import { GOODS, RECIPES, PILOT_LICENSES } from '../shared/config.js';
+import { GOODS, RECIPES, PILOT_LICENSES,propertyBasePrice } from '../shared/config.js';
 import { HOMEWORLD, HOME_QUESTS, availableHomeStock } from '../shared/homeworld.js';
 import { hexAt, hexKey } from '../shared/hex.js';
 import { rng, hashN } from './worldgen.js';
@@ -38,8 +38,8 @@ function clearPosition(world, system, center, r, minRadius, maxRadius, extra = [
 
 function selectSite(game, player) {
   const random = rng(hashN(game.world.seed, Number(player.id.slice(1)), 501));
-  const homes = [...game.world.entities.values()].filter((e) => e.type === 'ruins');
-  const used = new Set(homes.map((e) => e.system));
+  const homes = [...game.world.entities.values()].filter((e) => e.type==='ruins'&&!e.ruinsSite||e.colony?.owner);
+  const used = new Set(homes.flatMap(e=>[e.system,e.market?.homeworld?.warp?.target.system].filter(Boolean)));
   for (let outer = 2; outer < 1000; outer++) {
     const coordinates = outer === 2 ? [...ringCoordinates(1), ...ringCoordinates(2)] : ringCoordinates(outer);
     // Fisher–Yates keeps the preferred two rings random and reproducible.
@@ -50,7 +50,7 @@ function selectSite(game, player) {
       for (const system of sector.systems) {
         if (used.has(system.id) || system.faction || system.start) continue;
         const point = clearPosition(game.world, system, system, random, 1000, 3000);
-        if (!point || homes.some((other) => distance(point, other) < HOMEWORLD.placement.minDistance)) continue;
+        if (!point || homes.some((other) => distance(point, other) < HOMEWORLD.placement.minDistance||other.market?.homeworld?.warp&&distance(point,other.market.homeworld.warp.target)<HOMEWORLD.placement.minDistance)) continue;
         const resources = [];
         let suitable = true;
         for (const good of HOMEWORLD.placement.resources) {
@@ -81,6 +81,7 @@ export function createHomeworld(game, player) {
   const entity = { id, name: `${player.name}s Heimat`, kind: 'planet', type: 'ruins', radius: 100, size: 1, noBuy: true,
     ...site.point, sector: site.system.sector, system: site.system.id,
     market: { strategy: 'homeworld', goods, owner: player.id, mode: 'private', eff: 1, homeworld: home } };
+  home.fixedSiteBase=propertyBasePrice(entity);
   player.homeworld = id;
   player.homeQuest = { completed: {}, landed: false, journal: [{ id: 'H00', at: game.time,
     speaker: 'Mira', text: 'Wir sehen dein Signal. Der alte Landeplatz hält noch – wenn du uns herunterfindest.' }] };

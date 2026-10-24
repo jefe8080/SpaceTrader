@@ -28,13 +28,14 @@ function reservedWorkers(h){
   if(h.workforce?.used)for(const q of Object.keys(r))r[q]+=h.workforce.used[q]||0;
   return r;
 }
+export const residentDepartureCapacity=h=>Math.max(0,Math.floor(h.population-Math.ceil(total(reservedWorkers(h))/.6)));
 export function updatePassengerOffers(e){
   const h=peopleOf(e);if(!h?.workers)return;
-  const reserved=reservedWorkers(h),available=Object.keys(reserved).reduce((n,q)=>n+Math.max(0,h.workers[q]-reserved[q]),0);
+  const reserved=reservedWorkers(h),available=Object.keys(reserved).reduce((n,q)=>n+Math.max(0,h.workers[q]-reserved[q]),0),leave=residentDepartureCapacity(h);
   for(const g of ['workers','tourists']){
     const s=e.market.goods[g];if(!s)continue;
     s.rate=0;s.role='trade';s.cap=h.population;
-    s.stock=g==='workers'?Math.floor(available):Math.floor(h.visitors.filter(v=>v.ready).reduce((n,v)=>n+v.n,0)+Math.max(0,h.population-total(h.workers)));
+    s.stock=g==='workers'?Math.floor(Math.min(available,leave)):Math.floor(h.visitors.filter(v=>v.ready).reduce((n,v)=>n+v.n,0)+Math.min(leave,Math.max(0,h.population-total(h.workers))));
   }
 }
 function takeWorkers(h,n){
@@ -62,7 +63,7 @@ export function passengerTrade(game,ship,e,good,amount,dir,limit=0,free=false){
     updatePassengerOffers(e);
     const own=prop?.player===p.id,fee=own||free?0:GOODS[good].base;
     if(limit&&fee>limit)return {n:0,reason:'Preisgrenze'};
-    const offer=free&&good==='tourists'?Math.max(0,h.population-total(h.workers)):e.market.goods[good].stock;
+    const offer=free&&good==='tourists'?Math.min(residentDepartureCapacity(h),Math.max(0,h.population-total(h.workers))):e.market.goods[good].stock;
     let n=Math.floor(Math.min(amount,freeFor(ship,good),offer,fee?Math.floor(p.credits/fee):Infinity));
     if(!n)return {n:0,reason:'Keine verfügbaren Personen, Passagierplätze oder Credits.'};
     const loaded=n;
@@ -74,7 +75,7 @@ export function passengerTrade(game,ship,e,good,amount,dir,limit=0,free=false){
     h.visitors=h.visitors.filter(v=>v.n>0);
     if(n){
       const workers=good==='workers'?takeWorkers(h,n):{basic:0,skilled:0,specialist:0};h.population-=n;
-      ship.passengers.push({id:`${e.id}:passengers:${++h.nextPassenger}`,kind:good,origin:e.id,n,workers,wallet:0});
+      ship.passengers.push({id:`${e.id}:passengers:${++h.nextPassenger}`,kind:good,origin:e.id,ownerAtDeparture:prop?.player||null,n,workers,wallet:0});
     }
     p.credits-=loaded*fee;
     const recipient=prop&&game.accountOf(prop.player);if(recipient)recipient.credits+=loaded*fee;else if(e.market.economy)e.market.economy.cash+=loaded*fee;

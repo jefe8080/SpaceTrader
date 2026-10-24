@@ -134,4 +134,4 @@ export function buildItems(e) {
 }
 
 const dockedHere = (id) => myShips().filter((s) => s.dockedAt === id);
-export const canLand = (id) => dockedHere(id).length > 0;
+export const canLand = (id) => !state.entities.get(id)?.ruinsSite&&dockedHere(id).length > 0;

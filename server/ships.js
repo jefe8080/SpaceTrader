@@ -40,6 +40,7 @@ function flyTo(ship, tx, ty, dt, game) {
     setWarn(ship,'coverage',null);
     if(dt>0&&!begun)ship.coverageLeg={x:tx,y:ty};
   }
+  if(game.profile==='homeworld'&&dt>0)ship.flightLeg={x:tx,y:ty};
   const fx = zoneEffects(game.world.zonesNear(ship.x, ship.y), ship.x, ship.y, { void: hasAbility(ship, 'void') });
   ship.zone = fx.zones ? fx.zones.map((z) => z.type) : null;
   let speed = game.shipSpeed(ship) * fx.speed;
@@ -57,6 +58,7 @@ function flyTo(ship, tx, ty, dt, game) {
   }
   if (d <= step) {
     delete ship.coverageLeg;
+    delete ship.flightLeg;
     ship.x = tx; ship.y = ty;
     game.recordShip(ship, 'dist', d);
     return true;
@@ -315,6 +317,13 @@ const EXEC = {
 export function updateShip(ship, dt, game) {
   ship.vx = 0;
   ship.vy = 0;
+  if(ship.relocationHold&&ship.queue.length){
+    const hold=ship.relocationHold;
+    if(ship.transit){runTransit(ship,game);if(ship.transit)return;hold.x=ship.x;hold.y=ship.y;}
+    if(hold.state==='finishing'&&(Math.hypot(ship.x-hold.x,ship.y-hold.y)<1||flyTo(ship,hold.x,hold.y,dt,game))){hold.state='waiting';ship.nav=null;delete ship.coverageLeg;}
+    ship.state=hold.state==='waiting'?'waiting':ship.state;
+    setWarn(ship,'relocation','Standorttransfer: begonnener Abschnitt endet sicher; danach Fortsetzung ausdrücklich freigeben.');return;
+  }
   const q = ship.queue;
   // Mehrere sofort erledigte Befehle (z.B. Handel am selben Ort) in einem Tick abarbeiten
   for (let guard = 0; guard < 8; guard++) {

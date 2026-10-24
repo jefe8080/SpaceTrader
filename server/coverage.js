@@ -11,7 +11,7 @@ export function coverageAreas(game,player) {
     if (state.controlLevel === 1) {
       const system = game.world.systems.get(home.system);
       if (!system) continue;
-      const radius = Math.max(1000, ...game.world.sectorEntities(home.sector).filter(e=>e.system===system.id)
+      const radius = Math.max(1000,Math.hypot(home.x-system.x,home.y-system.y)+(home.radius||0), ...game.world.sectorEntities(home.sector).filter(e=>e.system===system.id)
         .map(e=>Math.hypot(e.x-system.x,e.y-system.y)+(e.radius||0))) + 1000;
       areas.push({kind:'circle',x:system.x,y:system.y,radius,home:home.id});
     } else {

@@ -48,6 +48,7 @@ export function orderError(game, ship, cmd, append, routeOverride) {
     if (player?.relic?.operation?.ship === ship.id) return 'Das Schiff ist für die laufende Reliktarbeit gesperrt.';
     if (ship.relicSpeed && (cmd.t === 'route' || cmd.t === 'harvest' || append || (cmd.t === 'dock' && cmd.actions?.length > 1))) return 'Der Reliktträger unterstützt keine Automatisierung oder Befehlsfolgen.';
     const target = cmd.target ? game.world.entities.get(cmd.target) : cmd.x !== undefined ? cmd : ship;
+    if(target?.market?.homeworld?.warp)return 'Standort während Warpvorbereitung für Anlieferungen gesperrt.';
     const error = manualActionError(game, player, ship, target);
     if (error) return error;
     if (!pointCovered(game, player, ship) || !pointCovered(game, player, target)) {
@@ -83,6 +84,8 @@ export function giveOrder(game, ship, cmd, append) {
   if(game.profile==='homeworld')cmd={...cmd,manualDirect:isDirect(game.players.get(ship.owner),ship,cmd,append)};
   const c = { ...cmd, qid: ++ship.qid };
   if (!append) {
+    delete ship.relocationHold;
+    delete ship.flightLeg;
     ship.nav=null;delete ship.coverageLeg;delete ship.coverageTransit;
     ship.queue = [c];
     ship.fails = {};
@@ -124,7 +127,7 @@ export default {
   },
   stop: {
     args: { ships: V.ownShips() },
-    run(ctx, { ships }) { for (const s of ships) { s.queue = []; s.warn = {}; s.fails = {}; } },
+    run(ctx, { ships }) { for (const s of ships) { s.queue = []; s.warn = {}; s.fails = {}; delete s.relocationHold;delete s.coverageLeg;delete s.flightLeg;s.nav=null; } },
   },
   shipSettings: {
     args: { ship: V.ownShip(), marker: V.opt(V.color()), autoRefuel: V.opt(V.num(0, 0.95)) },

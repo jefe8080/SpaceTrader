@@ -160,6 +160,7 @@ export function loadRealSupply(game,ship,source,order){
 }
 
 export function finishRealSupply(game,ship,station){
+  if(station.market?.homeworld?.warp){ship.state='waiting';return false;}
   const order=ship.queue[0],market=station.market,primary=game.world.entities.get(order.stationId);
   if(!primary){ship.state='waiting';return false;}
   if(order.cash&&primary){ensureCash(primary).cash+=order.cash;order.cash=0;}

@@ -52,6 +52,7 @@ export default {
     run({ game, player }, { id: route, name, stops, minBalance, assign }) {
       if (!stops.length) return 'Eine Route braucht mindestens einen Stopp.';
       if(game.profile==='homeworld'){
+        if(stops.some(stop=>game.world.entities.get(stop.targetId)?.market?.homeworld?.warp))return 'Eine Routenstation bereitet einen Warptransfer vor.';
         for(const stop of stops){const error=remoteManagementError(game,player,game.world.entities.get(stop.targetId));if(error)return error;}
         const error=batchOrderError(game,[...new Set([...assign,...(route?shipsOnRoute(game,route.id):[])])],{t:'route',route:route?.id},false,{stops});if(error)return error;
       }

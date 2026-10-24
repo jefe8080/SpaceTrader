@@ -123,6 +123,7 @@ socket.on('markets', (upd) => {
   }
   ui.scheduleRender(true);
 });
+socket.on('vanish',({id})=>{state.entities.delete(id);if(state.selected?.kind==='entity'&&state.selected.id===id)state.selected=null;ui.scheduleRender(true);});
 socket.on('log', ({ ship, id, msg }) => {
   ui.addLog(ship, msg);
   // Geräusche nur für gewählte Schiffe und das Hauptschiff, sonst klingelt jede Route

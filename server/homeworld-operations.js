@@ -74,7 +74,8 @@ function trainingReserved(home) {
 export function homeConstructionError(home) {
   initializeHomeOperations(home);
   const reserved=trainingReserved(home);
-  return home.workers.basic-reserved.basic-buildTeams(home)-(home.workforce?.used?.basic||0)<2
+  const occupied=QUALIFICATIONS.reduce((n,q)=>n+reserved[q]+(home.workforce?.used?.[q]||0),0)+buildTeams(home)+Math.max(0,(home.workforce?.reserved?.skilled||0)-reserved.skilled);
+  return home.workers.basic-reserved.basic-buildTeams(home)-(home.workforce?.used?.basic||0)<2||Math.floor(home.population*.6)-occupied<2
     ? 'Zwei freie einfache Kräfte für ein weiteres Bauteam erforderlich. Ggf. eine Anlage pausieren.' : null;
 }
 
@@ -181,12 +182,14 @@ function completeConstruction(game,entity,now) {
   const home=entity.market.homeworld;
   for(const [id,building] of Object.entries(home.facilities))if(building.status==='building'&&now>=building.readyAt){
     building.status='ready';building.completedAt=building.readyAt;delete building.readyAt;
+    home.capitalCosts||=[];home.capitalCosts.push({id:`${id}:repair`,cost:structuredClone(building.bound||{credits:0,goods:{}})});
     if(id==='control')home.controlLevel=1;
     notify(game,entity);
   }
   const pending=[];
   for(const project of home.projects){
     if(['training','module','study'].includes(project.kind)||now<project.until){pending.push(project);continue;}
+    home.capitalCosts||=[];home.capitalCosts.push({id:project.id,cost:structuredClone(project.bound||{credits:0,goods:{}})});
     if(project.kind==='construction'){
       const building=home.structures.find(s=>s.id===project.target);building.status='ready';building.completedAt=project.until;delete building.readyAt;building.bound=project.bound;
     }else if(project.kind==='upgrade'){
@@ -259,7 +262,7 @@ function populationStep(entity,dt,now) {
 function operationStep(game,entity,dt,now) {
   const market=entity.market,home=market.homeworld;
   completeConstruction(game,entity,now);
-  home.storage=HOMEWORLD.start.storage;home.hazardStorage=completed(game.players.get(home.owner),'H06')?HOMEWORLD.start.hazardStorage:0;home.housing=HOMEWORLD.start.housing;
+  home.storage=HOMEWORLD.start.storage;home.hazardStorage=home.certifiedHazardStorage??(completed(game.players.get(home.owner),'H06')?HOMEWORLD.start.hazardStorage:0);home.housing=home.baseHousing??HOMEWORLD.start.housing;
   for(const building of home.structures.filter(ready)){
     const spec=structureSpec(building);home.storage+=spec.storage||0;home.hazardStorage+=spec.hazardStorage||0;home.housing+=spec.housing||0;
   }
@@ -341,7 +344,7 @@ function operationStep(game,entity,dt,now) {
   }
   home.projects=pending;
   home.energy={generation,used:powerUsed,free:Math.max(0,generation-powerUsed)};
-  home.workforce={total:{...home.workers},used,reserved:{...reserved,basic:reserved.basic+buildTeams(home),skilled:reserved.skilled+(relicWork?2:0)},free:remaining};
+  home.workforce={total:{...home.workers},used,reserved:{...reserved,basic:reserved.basic+buildTeams(home),skilled:reserved.skilled+(relicWork?2:0)},free:remaining,freeSlots:Math.max(0,Math.floor(home.population*.6)-QUALIFICATIONS.reduce((n,q)=>n+used[q]+reserved[q],0)-buildTeams(home)-(relicWork?2:0))};
   home.allocations=allocations;
   tickModuleProjects(game,entity,dt);
   tickOrbital(game,entity,dt);
@@ -353,6 +356,8 @@ function operationStep(game,entity,dt,now) {
 
 export function tickHomeOperations(game,entity,dt) {
   const home=entity.market.homeworld;initializeHomeOperations(home);
+  if(home.warp)return;
+  dt=Math.min(dt,Math.max(0,game.time-(home.warpResumedAt??-Infinity)));if(dt<=0)return;
   initializePopulation(entity);
   let remaining=dt;
   while(remaining>0){const step=Math.min(10,remaining),now=game.time-remaining+step;operationStep(game,entity,step,now);remaining-=step;}

@@ -16,6 +16,7 @@ import { questBoardSection } from './quests.js';
 import { eventSection } from './events.js';
 import { enterPlanet } from './planetPanel.js';
 import {moduleStockPanel,handleModuleAction} from './modules.js';
+import {colonyPanel,warpPanel} from './colonies.js';
 
 const entName = (id) => esc(state.entities.get(id)?.name || 'unbekannter Ort');
 const dockedHereOwn = (id) => myShips().some((s) => s.dockedAt === id);
@@ -89,6 +90,7 @@ function shipDetails(s) {
       <button class="small" data-act="cShipDelete" data-ship="${s.id}">Angebot zurückziehen</button></div>`;
   }
   if (s.zone?.length) h += `<div class="zone-line">${s.zone.map((z) => `<span style="color:${ZONE_TYPES[z].color}">◌ ${ZONE_TYPES[z].name}: ${ZONE_TYPES[z].desc}</span>`).join('<br>')}</div>`;
+  if(s.relocationHold)h+=`<div class="warnbox">Standorttransfer: ${s.relocationHold.state==='waiting'?'sicher angehalten':'begonnener Abschnitt wird beendet'}.<button class="small" data-act="relocationResume" data-ship="${s.id}">Relokationspause aufheben</button></div>`;
   if (hasWarn(s)) {
     h += `<div class="warnbox">${Object.values(s.warn).map((w) => `<div>⚠ ${esc(w)}</div>`).join('')}
       <button class="small" data-act="clearWarn" data-ship="${s.id}">Quittieren</button></div>`;
@@ -283,7 +285,7 @@ function entityDetails(e) {
     <button class="star${fav ? ' on' : ''}" data-act="fav" data-ent="${e.id}" title="${fav ? 'Aus Favoriten entfernen' : 'Zu Favoriten (F)'}">${fav ? '★' : '☆'}</button></div>`;
   const m = e.market;
   if (e.kind === 'planet') {
-    h += e.type === 'ruins' ? `<p>Persönliche, unverkäufliche Ruinenwelt. Lande für Heimatjournal, Reparaturen und Bauverwaltung.</p><div class="kv"><span>Einwohner / Wohnraum</span><span>${m.homeworld.population} / ${m.homeworld.housing}</span><span>Leitstelle</span><span>Stufe ${m.homeworld.controlLevel}</span><span>Reguläre Bauplätze</span><span>${m.homeworld.plots}</span></div>` : `<div class="muted">${PLANET_TYPES[e.type].desc}</div>
+    h += e.ruinsSite?colonyPanel(e):e.type === 'ruins' ? `<p>Persönliche, unverkäufliche Ruinenwelt. Lande für Heimatjournal, Reparaturen und Bauverwaltung.</p><div class="kv"><span>Einwohner / Wohnraum</span><span>${m.homeworld.population} / ${m.homeworld.housing}</span><span>Leitstelle</span><span>Stufe ${m.homeworld.controlLevel}</span><span>Reguläre Bauplätze</span><span>${m.homeworld.plots}</span></div>` : `<div class="muted">${PLANET_TYPES[e.type].desc}</div>
       <div class="kv" style="margin-top:6px"><span>Versorgung</span><span>${Math.round(m.eff * 100)} % Produktionsleistung</span></div>`;
   } else if (e.kind === 'station') {
     const def = STATION_TYPES[e.type];
@@ -336,6 +338,7 @@ function entityDetails(e) {
   if (m?.strategy === 'shipyard') h += shipyardSection(e, myDocked);
   if (e.type === 'hub') h += hubSection(e, myDocked) + governorSection(myDocked);
   if (m && e.type !== 'ruins') h += propertySection(e);
+  if(m?.homeworld)h+=warpPanel(e);
   if(e.archiveOwner===state.me.id)h+=`<div class="section"><p>Persönliche Archiv-/Forschungsstelle. Das aktive manuelle Schiff muss hier persönlich anfliegen. Studienvorlagen benötigen 30 freie normale Frachteinheiten und werden einmalig geborgen.</p><button class="primary" data-act="homeArchiveVisit" data-ent="${e.id}" data-ship="${state.manualShip||''}" ${dockedHere.some(s=>s.id===state.manualShip)?'':'disabled'}>Archiv untersuchen / Vorlage bergen</button></div>`;
   if (m?.strategy === 'factionyard') h += factionYardSection(e, myDocked);
   if (e.type === 'outpost') h += outpostSection(e, myDocked);

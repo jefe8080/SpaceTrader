@@ -2,6 +2,7 @@ import { WORLD, STATION_TYPES, cellKey, cellOf } from '../shared/config.js';
 import { preparePublicEntity } from './real-economy.js';
 import { hexAt, hexCenter, hexKey, hexNeighbors } from '../shared/hex.js';
 import { generateSector,applyLocationMods,rng,hashN } from './worldgen.js';
+import {seedRuinSite} from './ruin-sites.js';
 
 /**
  * Die Welt: unendliches Hex-Raster aus Sektoren, die bei Annäherung vollständig erzeugt werden.
@@ -51,6 +52,7 @@ export class World {
     // Wurmloch-Enden können schon von einem Nachbarsektor angelegt sein
     const fresh = entities.filter((e) => !this.entities.has(e.id)&&(this.profile!=='homeworld'||!STATION_TYPES[e.type]?.recipe));
     if(this.profile==='homeworld'){
+      seedRuinSite(sector,fresh);
       for(const entity of fresh)preparePublicEntity(entity);
       // Distance premiums must use the actual public producers after removal
       // of factories and synthetic planetary products, not discarded objects.

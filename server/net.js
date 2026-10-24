@@ -44,6 +44,11 @@ export class Net {
         s.socket.emit('reveal', { entities: [serializeEntity(e)] });
       }
     });
+    game.on('relocated',(e,old)=>{
+      for(const s of this.sessions.values())if(!game.isKnown(s.player,e)&&game.isKnown(s.player,{...e,...old})){
+        s.sentMarket.delete(e.id);s.socket.emit('vanish',{id:e.id});
+      }
+    });
     game.on('mg', (p, d) => this.sessions.get(p.id)?.socket.emit('mg', d));
     game.on('events', () => { for (const s of this.sessions.values()) this.sendEvents(s); });
     io.on('connection', (socket) => this.onConnection(socket));
@@ -264,6 +269,7 @@ export function serializeEntity(e) {
   if (e.faction) o.faction = e.faction;
   if (e.salvageOwner) o.salvageOwner = e.salvageOwner;
   if(e.archiveOwner)Object.assign(o,{archiveOwner:e.archiveOwner,archiveKey:e.archiveKey});
+  if(e.ruinsSite)Object.assign(o,{ruinsSite:true,colony:e.colony||null});
   if (e.market?.owner) Object.assign(o, { owner: e.market.owner, ownerName: e.ownerName, ownerColor: e.ownerColor });
   return o;
 }
@@ -338,7 +344,7 @@ function shipDetail(s, game) {
   return {
     offer: game?.shipOffers.get(s.id)?.price ?? null,
     owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, passengers:s.passengers||[],moduleCargo:s.moduleCargo||{}, log: s.log, group: s.group, ord: s.ord,
-    queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},
+    queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},relocationHold:s.relocationHold||null,
     nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,
     transit: s.transit ? s.transit.exit : null, zone: s.zone || null, marker: s.marker || null,
     fuel: Math.round((s.fuel || 0) * 10) / 10, autoRefuel: s.autoRefuel ?? 0, upg: s.upg || {}, modules: s.modules || [], upgValue: s.upgValue || 0, main: !!s.main, relicSpeed: s.relicSpeed || 0, mined: s.mined || {}, bonus: s.bonus || 0, yardLvl: s.yardLvl || 0,
