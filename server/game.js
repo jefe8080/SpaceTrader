@@ -14,15 +14,17 @@ import { flushRevenue, trimLog, isMaster } from './consortium.js';
 import { removeOffersOf } from './offers.js';
 import { tickEvents, sellToEvent } from './events.js';
 import { isConsortiumOwner, consortiumIdOf } from '../shared/consortium.js';
+import { checkWorldFile, worldProfile } from './world-profile.js';
 
-export const WORLD_GEN_VERSION = 3; // ändert sich die Generierung inkompatibel, wird die Welt neu erzeugt
-const ALL_TABLES = ['players', 'ships', 'sectors', 'entities', 'markets', 'routes', 'favorites', 'discoveries', 'ownership',
-  'market_stats', 'ship_stats', 'route_stats', 'meta', 'consortia', 'consortium_log', 'map_offers', 'ship_offers', 'planet_buildings', 'sector_events'];
+export const WORLD_GEN_VERSION = 3; // Bestandswelt; Versionskonflikte lösen niemals einen Reset aus
 
 export class Game {
   /** dbFile: Pfad zur SQLite-Datei oder ':memory:' */
-  constructor(dbFile, { seed, verbose = false } = {}) {
+  constructor(dbFile, { seed, verbose = false, profile = 'legacy' } = {}) {
     this.verbose = verbose;
+    this.profile = profile;
+    this.worldVersion = worldProfile(profile).version;
+    checkWorldFile(dbFile, profile);
     this.store = new Store(dbFile);
     this.time = 0;
     this.players = new Map();
@@ -58,12 +60,7 @@ export class Game {
     const st = this.store;
     const gen = st.getMeta('worldGen');
     if (gen === undefined) return false;
-    if (gen !== WORLD_GEN_VERSION) {
-      console.log(`Weltgenerierung ${gen} ist veraltet (aktuell ${WORLD_GEN_VERSION}). Neue Welt wird erzeugt.`);
-      st.transaction(() => { for (const t of ALL_TABLES) st.db.prepare(`DELETE FROM ${t}`).run(); });
-      for (const c of st.cache.values()) c.clear();
-      return false;
-    }
+    if (gen !== this.worldVersion) throw new Error('Inkompatible Weltversion; automatischer Reset ist gesperrt.');
     this.time = st.getMeta('time');
     this.counters = { ...this.counters, ...st.getMeta('counters') };
     this.world = new World(st.getMeta('seed'));
@@ -129,7 +126,8 @@ export class Game {
       return rows;
     };
     st.transaction(() => {
-      st.setMeta('worldGen', WORLD_GEN_VERSION);
+      st.setMeta('worldGen', this.worldVersion);
+      st.setMeta('worldProfile', this.profile);
       st.setMeta('seed', this.world.seed);
       st.setMeta('time', this.time);
       st.setMeta('counters', this.counters);

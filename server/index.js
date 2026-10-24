@@ -6,10 +6,11 @@ import { Server } from 'socket.io';
 import { NET } from '../shared/config.js';
 import { Game } from './game.js';
 import { Net } from './net.js';
+import { runtimeOptions } from './world-profile.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.env.PORT) || 3000;
-const DB_FILE = process.env.DB_FILE || path.join(root, 'data', 'spacetrader.db');
+const { dbFile: DB_FILE, profile } = runtimeOptions(root);
 
 const app = express();
 app.use(express.static(path.join(root, 'client')));
@@ -19,7 +20,7 @@ app.use('/shared', express.static(path.join(root, 'shared')));
 
 const server = http.createServer(app);
 const io = new Server(server);
-const game = new Game(DB_FILE, { verbose: true });
+const game = new Game(DB_FILE, { verbose: true, profile });
 const net = new Net(io, game);
 
 let last = Date.now();

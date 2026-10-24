@@ -1,6 +1,6 @@
 # PRD 5: Heimatwelten, reale Wirtschaft und gezeichnete Planeten
 
-Stand: 2026-10-24 · Status: Konzeptklärung abgeschlossen; konkrete Ausgangswerte für Umsetzung und Kalibrierung
+Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U3 abgeschlossen, U4–U17 offen
 
 ## 1. Geltung, Ziel und Freigabe
 
@@ -8,7 +8,7 @@ Dieses Dokument konsolidiert [PRD 4](PRD-4.md) einschließlich sämtlicher ansch
 
 Ziel ist ein persönliches, später aus mehreren Standorten bestehendes Industrieimperium: natürliche Rohstoffe beschaffen, auf eigenen Ruinenwelten verarbeiten, Bevölkerung versorgen und tatsächliche Nachfrage bedienen. Anspruch entsteht aus Entscheidungen und abgestimmten Warenflüssen, nicht aus langen Pflichtwartezeiten oder dem Verlust eines Imperiums während der Abwesenheit.
 
-Der aktuelle Auftrag umfasst Prüfung, Konzeptklärung, Erstellung und Commit dieses PRD. Jetzt werden weder Spielcode geändert noch Spielstände zurückgesetzt. Die tatsächliche Umsetzung folgt als anschließendes Arbeitspaket. Der vereinbarte gemeinsame Neustart wird erst bei der Umstellung auf die fertig geprüfte neue Wirtschaft ausgeführt, nach Sicherung des alten Stands. Ein Push bleibt gesondert zustimmungspflichtig.
+Der ursprüngliche Dokumentationsauftrag umfasste Prüfung, Konzeptklärung, Erstellung und Commit dieses PRD. Der Nutzer hat anschließend die Umsetzung beauftragt. Diese läuft schrittweise mit getrennten Testwelten. Der vereinbarte gemeinsame Neustart wird erst bei der Umstellung auf die fertig geprüfte neue Wirtschaft ausgeführt, nach Sicherung des alten Stands. Ein Push bleibt gesondert zustimmungspflichtig.
 
 Die Spielregeln sind verbindlich. Mit **Ausgangswert** bezeichnete Zahlen sind ausdrücklich zur Ausarbeitung delegierte, nachvollziehbare Startwerte. Sie dürfen anhand von Simulation und Spieltests angepasst werden, solange dadurch keine bestätigte Grundregel geändert wird. Änderungen werden im Fortschrittsprotokoll mit Begründung festgehalten.
 
@@ -503,10 +503,10 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 
 | Schritt | Ergebnis | Voraussetzungen | Status |
 |---|---|---|---|
-| D0 | Review, Interview, konkretes PRD 5 | Q34–Q66 | Abgeschlossen; Dokumentationscommit folgt |
+| D0 | Review, Interview, konkretes PRD 5 | Q34–Q66 | Abgeschlossen (`4d41b19`) |
 | U1 | Zielbestandskäufe auf Routen, klare Texte, Null-/Teilkaufregeln | Umsetzungsbeginn | Abgeschlossen |
 | U2 | Geschirmter Frachtüberlauf, konsistente Belegung und Modulabbauprüfung | U1 unabhängig möglich | Abgeschlossen (verpackte Module folgen U10) |
-| U3 | Neue Weltversion, getrennte Testwelt, Bestands-/Warenquelleninventar, zentrale Werte | Vor großen Systemänderungen | Offen |
+| U3 | Neue Weltversion, getrennte Testwelt, Bestands-/Warenquelleninventar, zentrale Werte | Vor großen Systemänderungen | Abgeschlossen |
 | U4 | Bildschirmfüllendes Umfeld für vorhandene Planeten und zusätzliche visuelle Abnahme | U3; keine Wirtschaftsabhängigkeit | Offen |
 | U5 | Neue Ruinenwelt, Startverteilung, Hauptquestkanal und sicherer Anfang H00–H06 | U3, erste Stilprobe | Offen |
 | U6 | Reliktzustand, Werkstatt, manuelle Präsenz und Handels-XP | U5 | Offen |
@@ -561,6 +561,8 @@ Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehen
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: U3 umgesetzt: explizite Profile `legacy` (Version 3) und `homeworld` (Version 5), isolierter Entwicklungsstart auf Port 3005 mit `data/prd5/spacetrader.db`. Read-only-Prüfung vor Store/Migrationen weist Versions-/Profilkonflikte ohne Reset ab; aktiver Standardpfad ist im Testprofil gesperrt. SHA-256-/SQLite-Tests prüfen unveränderte Altbestände und Schemas. Start-, Bevölkerungs-, Wirtschafts-, Baugruppen-, Relikt- und Warp-Ausgangswerte in `shared/homeworld.js`; alle 40 Rezepte auf vollständige, kreislauffreie Baugruppenzuordnung geprüft. Warenquelleninventar in `docs/PRD-5-warenquellen.md`. Neue Wirtschaftsregeln folgen U5–U15; öffentliche Fabriken wurden noch nicht abgeschaltet. U1 `34a2c22`, U2 `abd536b` committed.
 
 - 2026-10-24: Zwischenstand nach U1/U2: alle 132 Tests erfolgreich, `git diff --check` erfolgreich. Git-Identität nach Nutzerangabe eingerichtet. U1 mit Commit `34a2c22` abgeschlossen; U2 wird mit diesem Fortschrittsstand separat committed. U3–U17 unverändert offen; aktiver Datenbestand wurde nicht geöffnet oder zurückgesetzt.
 

@@ -21,7 +21,19 @@ Dann http://localhost:3000 öffnen. Entwicklung mit automatischem Neustart: `npm
 | `npm run sprites` | Schiffsgrafiken neu erzeugen |
 
 Der Spielstand liegt in `data/spacetrader.db` (SQLite, alle 15 s und beim Beenden mit Strg+C gespeichert).
-Ändert sich die Weltgenerierung inkompatibel (`WORLD_GEN_VERSION` in `server/game.js`), wird die Welt neu erzeugt.
+Inkompatible Weltversionen werden vor Migrationen lesend geprüft und mit Fehlermeldung abgewiesen. Es gibt keinen automatischen Reset.
+
+Die Umsetzung von [PRD 5](docs/PRD-5.md) läuft getrennt vom aktiven Spielstand:
+
+```bash
+npm run dev:prd5
+```
+
+Dieser Entwicklungsserver verwendet Port 3005 und `data/prd5/spacetrader.db` (Profil `homeworld`, Weltversion 5).
+Ein eigener Pfad lässt sich über `DB_FILE` wählen; der aktive Standardpfad ist für dieses Profil gesperrt.
+`npm start` verwendet weiterhin die Bestandswelt. Das Entwicklungsprofil ist noch keine abgenommene neue Wirtschaft.
+Warenquellen und geplante Umstellungen stehen im [Warenquelleninventar](docs/PRD-5-warenquellen.md).
+Der gemeinsame Neustart erfolgt erst nach U17 mit geprüfter Sicherung und Wiederherstellung.
 
 **Sicherheit:** Es gibt keine Authentifizierung. Wer einen Spielernamen kennt, übernimmt das Konto.
 Nur im Freundeskreis betreiben. Vor einem öffentlichen Betrieb sind Authentifizierung und HTTPS zwingend.
