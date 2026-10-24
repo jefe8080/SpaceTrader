@@ -6,9 +6,9 @@ import { createMarket, tickMarket } from '../server/markets.js';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 
-test('Warenkatalog: ca. 60 Waren, jede mit Produzent und Abnehmer, Stufen bis 5', () => {
+test('Warenkatalog: 66 Waren einschließlich Veredelungen, jede mit Produzent und Abnehmer, Stufen bis 5', () => {
   const n = Object.keys(GOODS).length;
-  assert.ok(n >= 55 && n <= 65, `${n} Waren`);
+  assert.equal(n,66);
   assert.equal(ULTRA.length, 6);
   const prod = new Set(), cons = new Set();
   for (const r of Object.values(RECIPES)) { Object.keys(r.out).forEach((g) => prod.add(g)); Object.keys(r.in).forEach((g) => cons.add(g)); }
@@ -142,7 +142,7 @@ test('Händlerrolle: Planeten 5-10 Händler-Waren, Ultraselten nur am Hub', () =
     const trade = Object.entries(e.market.goods).filter(([, s]) => s.role === 'trade');
     if (e.kind === 'planet') assert.ok(trade.length >= 5 && trade.length <= 10, `${e.name}: ${trade.length}`);
     for (const [g, s] of Object.entries(e.market.goods)) {
-      if (GOODS[g].ultra && canSellTo(s)) assert.equal(e.type, 'hub', `${g} angekauft bei ${e.name}`);
+      if (GOODS[g].ultra && canSellTo(s)) assert(e.type==='hub'||STATION_TYPES[e.type]?.recipe?.in[g]||e.faction,`${g}: kein zulässiger Abnehmer bei ${e.name}`);
       if (GOODS[g].ultra) assert.notEqual(s.role, 'trade');
     }
   }

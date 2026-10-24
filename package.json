@@ -11,6 +11,7 @@
     "reset": "node scripts/reset.js",
     "sim": "node sim/simulate.js",
     "sim:homeworld": "node sim/homeworld-onboarding.js",
+    "prices:prd5": "node scripts/generate-prd5-prices.js",
     "sprites": "node scripts/gen-ship-sprites.js"
   },
   "keywords": [],

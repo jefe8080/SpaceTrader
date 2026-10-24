@@ -3,9 +3,13 @@ import { GOODS, RECIPES } from '../../shared/goods.js';
 import { ownHome, homePresent, repairHome, completeHomeQuest } from '../homeworld.js';
 import { V } from './validate.js';
 import { relicSalvage, relicDeliver, relicWork } from '../relic.js';
-import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess } from '../homeworld-operations.js';
+import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess,changeRefinement } from '../homeworld-operations.js';
 
 export default {
+  homeRecipeChange:{
+    args:{target:V.entity(),id:V.str(40,1),recipe:V.key(RECIPES)},
+    run({game,player},{target,id,recipe}){return changeRefinement(game,player,target,id,recipe);},
+  },
   homeTax:{
     args:{target:V.entity(),percent:V.num(0,40)},
     run({game,player},{target,percent}){

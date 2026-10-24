@@ -1,0 +1,697 @@
+{
+  "formula": "round((sum(input amount × base) × 1.3 / sum(output amount) + 2 × tier + seconds × 0.6) × 10) / 10",
+  "goods": [
+    {
+      "id": "acid",
+      "name": "Säure",
+      "base": 20,
+      "tier": 0,
+      "cls": "hazard",
+      "recipe": null
+    },
+    {
+      "id": "antimatter",
+      "name": "Unstabile Antimaterie",
+      "base": 1900,
+      "tier": 0,
+      "cls": "hazard",
+      "recipe": null
+    },
+    {
+      "id": "biomass",
+      "name": "Biomasse",
+      "base": 10,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "crude",
+      "name": "Rohöl",
+      "base": 14,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "crystals",
+      "name": "Kristalle",
+      "base": 22,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "diamond",
+      "name": "Rohdiamanten",
+      "base": 650,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "exocrystals",
+      "name": "Exotische Rohkristalle",
+      "base": 880,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "gas",
+      "name": "Rohgas",
+      "base": 9,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "gold",
+      "name": "Rohgold",
+      "base": 420,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "grain",
+      "name": "Getreide",
+      "base": 9,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "helium3",
+      "name": "Helium-3",
+      "base": 18,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "ice",
+      "name": "Eis",
+      "base": 8,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "nebulagas",
+      "name": "Rohes Nebelgas",
+      "base": 310,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "ore",
+      "name": "Erz",
+      "base": 10,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "rareearth",
+      "name": "Seltene Erden",
+      "base": 28,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "silicate",
+      "name": "Silikat",
+      "base": 9,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "sulfur",
+      "name": "Schwefel",
+      "base": 12,
+      "tier": 0,
+      "cls": "normal",
+      "recipe": null
+    },
+    {
+      "id": "tourists",
+      "name": "Touristen",
+      "base": 28,
+      "tier": 0,
+      "cls": "passenger",
+      "recipe": null
+    },
+    {
+      "id": "uranium",
+      "name": "Uranerz",
+      "base": 520,
+      "tier": 0,
+      "cls": "hazard",
+      "recipe": null
+    },
+    {
+      "id": "workers",
+      "name": "Arbeiter",
+      "base": 24,
+      "tier": 0,
+      "cls": "passenger",
+      "recipe": null
+    },
+    {
+      "id": "chemicals",
+      "name": "Chemikalien",
+      "base": 31.1,
+      "tier": 1,
+      "cls": "hazard",
+      "recipe": "chemplant"
+    },
+    {
+      "id": "fertilizer",
+      "name": "Dünger",
+      "base": 18.1,
+      "tier": 1,
+      "cls": "normal",
+      "recipe": "fertilizerplant"
+    },
+    {
+      "id": "fuel",
+      "name": "Brennstoff",
+      "base": 39.9,
+      "tier": 1,
+      "cls": "normal",
+      "recipe": "refinery"
+    },
+    {
+      "id": "hydraulicoil",
+      "name": "Hydrauliköl",
+      "base": 40.2,
+      "tier": 1,
+      "cls": "normal",
+      "recipe": "oilworks"
+    },
+    {
+      "id": "plastics",
+      "name": "Kunststoff",
+      "base": 33.7,
+      "tier": 1,
+      "cls": "normal",
+      "recipe": "chemworks"
+    },
+    {
+      "id": "raremetals",
+      "name": "Seltenmetalle",
+      "base": 103.8,
+      "tier": 1,
+      "cls": "normal",
+      "recipe": "refinery2"
+    },
+    {
+      "id": "shipfuel",
+      "name": "Schiffstreibstoff",
+      "base": 21.4,
+      "tier": 1,
+      "cls": "normal",
+      "recipe": "fueldepot"
+    },
+    {
+      "id": "silicon",
+      "name": "Silizium",
+      "base": 56.4,
+      "tier": 1,
+      "cls": "normal",
+      "recipe": "siliconworks"
+    },
+    {
+      "id": "textiles",
+      "name": "Textilien",
+      "base": 29.8,
+      "tier": 1,
+      "cls": "normal",
+      "recipe": "weavery"
+    },
+    {
+      "id": "water",
+      "name": "Wasser",
+      "base": 14.2,
+      "tier": 1,
+      "cls": "normal",
+      "recipe": "waterworks"
+    },
+    {
+      "id": "chips",
+      "name": "Mikrochips",
+      "base": 131.9,
+      "tier": 2,
+      "cls": "normal",
+      "recipe": "chipfab"
+    },
+    {
+      "id": "clothing",
+      "name": "Kleidung",
+      "base": 67,
+      "tier": 2,
+      "cls": "normal",
+      "recipe": "tailor"
+    },
+    {
+      "id": "coolant",
+      "name": "Kühlmittel",
+      "base": 45.1,
+      "tier": 2,
+      "cls": "normal",
+      "recipe": "coolantworks"
+    },
+    {
+      "id": "finegold",
+      "name": "Feingold",
+      "base": 1143.6,
+      "tier": 2,
+      "cls": "normal",
+      "recipe": "goldpurifier"
+    },
+    {
+      "id": "food",
+      "name": "Nahrung",
+      "base": 26.7,
+      "tier": 2,
+      "cls": "normal",
+      "recipe": "foodplant"
+    },
+    {
+      "id": "glass",
+      "name": "Glas",
+      "base": 43.7,
+      "tier": 2,
+      "cls": "normal",
+      "recipe": "glassworks"
+    },
+    {
+      "id": "ingots",
+      "name": "Barren",
+      "base": 45,
+      "tier": 2,
+      "cls": "normal",
+      "recipe": "smelter"
+    },
+    {
+      "id": "medicine",
+      "name": "Medikamente",
+      "base": 49.4,
+      "tier": 2,
+      "cls": "normal",
+      "recipe": "pharma"
+    },
+    {
+      "id": "alloys",
+      "name": "Legierungen",
+      "base": 135,
+      "tier": 3,
+      "cls": "normal",
+      "recipe": "alloyworks"
+    },
+    {
+      "id": "batteries",
+      "name": "Akkus",
+      "base": 125.9,
+      "tier": 3,
+      "cls": "normal",
+      "recipe": "batteryplant"
+    },
+    {
+      "id": "cutters",
+      "name": "Fräser",
+      "base": 231,
+      "tier": 3,
+      "cls": "normal",
+      "recipe": "toolworks"
+    },
+    {
+      "id": "enricheduranium",
+      "name": "Angereichertes Uran",
+      "base": 1467.9,
+      "tier": 3,
+      "cls": "hazard",
+      "recipe": "uraniumrefiner"
+    },
+    {
+      "id": "luxury",
+      "name": "Luxusgüter",
+      "base": 182.1,
+      "tier": 3,
+      "cls": "normal",
+      "recipe": "jeweler"
+    },
+    {
+      "id": "optics",
+      "name": "Optiken",
+      "base": 151.2,
+      "tier": 3,
+      "cls": "normal",
+      "recipe": "opticsworks"
+    },
+    {
+      "id": "plates",
+      "name": "Platten",
+      "base": 93,
+      "tier": 3,
+      "cls": "normal",
+      "recipe": "rollingmill"
+    },
+    {
+      "id": "preserves",
+      "name": "Konserven",
+      "base": 82.4,
+      "tier": 3,
+      "cls": "normal",
+      "recipe": "cannery"
+    },
+    {
+      "id": "refinednebulagas",
+      "name": "Raffiniertes Nebelgas",
+      "base": 647,
+      "tier": 3,
+      "cls": "normal",
+      "recipe": "nebulagasrefiner"
+    },
+    {
+      "id": "wires",
+      "name": "Kabel",
+      "base": 59.6,
+      "tier": 3,
+      "cls": "normal",
+      "recipe": "cableworks"
+    },
+    {
+      "id": "cutdiamonds",
+      "name": "Geschliffene Diamanten",
+      "base": 2007.3,
+      "tier": 4,
+      "cls": "normal",
+      "recipe": "diamondcutter"
+    },
+    {
+      "id": "electronics",
+      "name": "Elektronik",
+      "base": 174.8,
+      "tier": 4,
+      "cls": "normal",
+      "recipe": "electronicsworks"
+    },
+    {
+      "id": "gears",
+      "name": "Zahnräder",
+      "base": 192.3,
+      "tier": 4,
+      "cls": "normal",
+      "recipe": "gearworks"
+    },
+    {
+      "id": "hullparts",
+      "name": "Rumpfsegmente",
+      "base": 550.4,
+      "tier": 4,
+      "cls": "normal",
+      "recipe": "hullworks"
+    },
+    {
+      "id": "powercells",
+      "name": "Energiezellen",
+      "base": 214,
+      "tier": 4,
+      "cls": "normal",
+      "recipe": "cellworks"
+    },
+    {
+      "id": "reactorcores",
+      "name": "Reaktorkerne",
+      "base": 645.3,
+      "tier": 4,
+      "cls": "hazard",
+      "recipe": "reactorworks"
+    },
+    {
+      "id": "refinedexocrystals",
+      "name": "Veredelte Exokristalle",
+      "base": 2504.6,
+      "tier": 4,
+      "cls": "normal",
+      "recipe": "exocrystalrefiner"
+    },
+    {
+      "id": "sensors",
+      "name": "Sensoren",
+      "base": 379.6,
+      "tier": 4,
+      "cls": "normal",
+      "recipe": "sensorworks"
+    },
+    {
+      "id": "aicores",
+      "name": "KI-Kerne",
+      "base": 3407.6,
+      "tier": 5,
+      "cls": "normal",
+      "recipe": "aiforge"
+    },
+    {
+      "id": "computers",
+      "name": "Computer",
+      "base": 685.2,
+      "tier": 5,
+      "cls": "normal",
+      "recipe": "computerworks"
+    },
+    {
+      "id": "consumer",
+      "name": "Konsumgüter",
+      "base": 311.3,
+      "tier": 5,
+      "cls": "normal",
+      "recipe": "consumerworks"
+    },
+    {
+      "id": "engines",
+      "name": "Triebwerke",
+      "base": 895.2,
+      "tier": 5,
+      "cls": "normal",
+      "recipe": "engineworks"
+    },
+    {
+      "id": "habitats",
+      "name": "Habitatmodule",
+      "base": 2283.4,
+      "tier": 5,
+      "cls": "normal",
+      "recipe": "habitatworks"
+    },
+    {
+      "id": "machinery",
+      "name": "Maschinen",
+      "base": 688.5,
+      "tier": 5,
+      "cls": "normal",
+      "recipe": "machineworks"
+    },
+    {
+      "id": "medtech",
+      "name": "Medizintechnik",
+      "base": 503.4,
+      "tier": 5,
+      "cls": "normal",
+      "recipe": "medtechworks"
+    },
+    {
+      "id": "robots",
+      "name": "Roboter",
+      "base": 1236.7,
+      "tier": 5,
+      "cls": "normal",
+      "recipe": "robotics"
+    },
+    {
+      "id": "shipparts",
+      "name": "Schiffsbauteile",
+      "base": 1017.4,
+      "tier": 5,
+      "cls": "normal",
+      "recipe": "shippartsworks"
+    },
+    {
+      "id": "stableantimatter",
+      "name": "Stabilisierte Antimaterie",
+      "base": 3110,
+      "tier": 5,
+      "cls": "hazard",
+      "recipe": "antimatterstabilizer"
+    }
+  ],
+  "currencies": [
+    {
+      "ship": "fl_miners",
+      "raw": "diamond",
+      "oldAmount": 100,
+      "oldValue": 65000,
+      "product": "cutdiamonds",
+      "amount": 33,
+      "newValue": 66240.9
+    },
+    {
+      "ship": "fx_miners",
+      "raw": "diamond",
+      "oldAmount": 250,
+      "oldValue": 162500,
+      "product": "cutdiamonds",
+      "amount": 81,
+      "newValue": 162591.3
+    },
+    {
+      "ship": "f_miners",
+      "raw": "diamond",
+      "oldAmount": 500,
+      "oldValue": 325000,
+      "product": "cutdiamonds",
+      "amount": 162,
+      "newValue": 325182.6
+    },
+    {
+      "ship": "fl_tech",
+      "raw": "exocrystals",
+      "oldAmount": 60,
+      "oldValue": 52800,
+      "product": "refinedexocrystals",
+      "amount": 22,
+      "newValue": 55101.2
+    },
+    {
+      "ship": "fx_tech",
+      "raw": "exocrystals",
+      "oldAmount": 150,
+      "oldValue": 132000,
+      "product": "refinedexocrystals",
+      "amount": 53,
+      "newValue": 132743.8
+    },
+    {
+      "ship": "f_tech",
+      "raw": "exocrystals",
+      "oldAmount": 300,
+      "oldValue": 264000,
+      "product": "refinedexocrystals",
+      "amount": 106,
+      "newValue": 265487.6
+    },
+    {
+      "ship": "fl_nomads",
+      "raw": "nebulagas",
+      "oldAmount": 120,
+      "oldValue": 37200,
+      "product": "refinednebulagas",
+      "amount": 58,
+      "newValue": 37526
+    },
+    {
+      "ship": "fx_nomads",
+      "raw": "nebulagas",
+      "oldAmount": 300,
+      "oldValue": 93000,
+      "product": "refinednebulagas",
+      "amount": 144,
+      "newValue": 93168
+    },
+    {
+      "ship": "f_nomads",
+      "raw": "nebulagas",
+      "oldAmount": 600,
+      "oldValue": 186000,
+      "product": "refinednebulagas",
+      "amount": 288,
+      "newValue": 186336
+    },
+    {
+      "ship": "fl_order",
+      "raw": "antimatter",
+      "oldAmount": 25,
+      "oldValue": 47500,
+      "product": "stableantimatter",
+      "amount": 16,
+      "newValue": 49760
+    },
+    {
+      "ship": "fx_order",
+      "raw": "antimatter",
+      "oldAmount": 60,
+      "oldValue": 114000,
+      "product": "stableantimatter",
+      "amount": 37,
+      "newValue": 115070
+    },
+    {
+      "ship": "f_order",
+      "raw": "antimatter",
+      "oldAmount": 120,
+      "oldValue": 228000,
+      "product": "stableantimatter",
+      "amount": 74,
+      "newValue": 230140
+    },
+    {
+      "ship": "fl_league",
+      "raw": "gold",
+      "oldAmount": 80,
+      "oldValue": 33600,
+      "product": "finegold",
+      "amount": 30,
+      "newValue": 34308
+    },
+    {
+      "ship": "fx_league",
+      "raw": "gold",
+      "oldAmount": 200,
+      "oldValue": 84000,
+      "product": "finegold",
+      "amount": 74,
+      "newValue": 84626.4
+    },
+    {
+      "ship": "f_league",
+      "raw": "gold",
+      "oldAmount": 400,
+      "oldValue": 168000,
+      "product": "finegold",
+      "amount": 147,
+      "newValue": 168109.19999999998
+    },
+    {
+      "ship": "fl_syndicate",
+      "raw": "uranium",
+      "oldAmount": 70,
+      "oldValue": 36400,
+      "product": "enricheduranium",
+      "amount": 25,
+      "newValue": 36697.5
+    },
+    {
+      "ship": "fx_syndicate",
+      "raw": "uranium",
+      "oldAmount": 175,
+      "oldValue": 91000,
+      "product": "enricheduranium",
+      "amount": 62,
+      "newValue": 91009.8
+    },
+    {
+      "ship": "f_syndicate",
+      "raw": "uranium",
+      "oldAmount": 350,
+      "oldValue": 182000,
+      "product": "enricheduranium",
+      "amount": 124,
+      "newValue": 182019.6
+    }
+  ]
+}

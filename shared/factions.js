@@ -1,4 +1,5 @@
 // NPC-Fraktionen: Archetypen mit Namensschema, Farbe, Spezialisierung, Schiffswährung und Fraktionsschiff.
+import {GOODS,REFINED_FOR_RAW,refinedAmountFor} from './goods.js';
 
 export const FACTION = {
   CLUSTER_EVERY: 3,     // ca. 1 Fraktionscluster je 3 Sektoren
@@ -90,6 +91,13 @@ export const FACTION_SHIPS = {
   f_syndicate: { faction: 'syndicate', cls: 'F', rank: 3, name: 'Stahlkoloss', size: 82, cargo: 4200, speed: 100, mining: 6, price: 25000000, tank: 650,
                  currency: { good: 'uranium', n: 350 }, ability: 'hazard', desc: 'Gepanzerter Schwerlastfrachter, fährt Gefahrgut ohne Kammer.' },
 };
+for(const faction of Object.values(FACTIONS)){
+  faction.rawCurrency=faction.currency;faction.currency=REFINED_FOR_RAW[faction.currency];
+  faction.desc=faction.desc.replace(/Diamanten/g,'geschliffenen Diamanten').replace(/Exotischen Kristallen/g,'veredelten Exokristallen').replace(/Nebelgas/g,'raffiniertes Nebelgas').replace(/Antimaterie/g,'stabilisierte Antimaterie').replace(/Gold/g,'Feingold').replace(/Uran/g,'angereichertem Uran');
+}
+for(const ship of Object.values(FACTION_SHIPS)){
+  ship.rawCurrency={...ship.currency};ship.currency={good:REFINED_FOR_RAW[ship.currency.good],n:refinedAmountFor(ship.currency.good,ship.currency.n)};
+}
 /** Fähigkeiten der Spezialschiffe */
 export const ABILITIES = {
   drill: 'Baut ultraseltene Vorkommen ohne Tiefbohrer-Modul ab',

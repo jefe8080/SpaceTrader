@@ -1,4 +1,4 @@
-import { GOODS } from './goods.js';
+import { GOODS, RECIPES } from './goods.js';
 // PRD 5 starting values. Rates use server seconds, costs use actual goods IDs.
 const freeze = (value) => {
   for (const child of Object.values(value)) if (child && typeof child === 'object') freeze(child);
@@ -35,16 +35,21 @@ export const INDUSTRY_GROUPS = freeze({
     credits: 5000, goods: { ingots: 10 }, seconds: 60, power: 4, workers: { basic: 6, skilled: 0, specialist: 0 }, quest: 'H02' },
   II: { recipes: ['rollingmill', 'cableworks', 'chemplant', 'toolworks', 'refinery2', 'alloyworks', 'chipfab', 'pharma', 'coolantworks', 'tailor', 'cannery', 'opticsworks', 'batteryplant', 'jeweler'],
     credits: 15000, goods: { ingots: 12, hydraulicoil: 4 }, seconds: 90, power: 8, workers: { basic: 6, skilled: 2, specialist: 0 }, quest: 'H06' },
-  III: { recipes: ['gearworks', 'electronicsworks', 'hullworks', 'sensorworks', 'reactorworks', 'cellworks'],
+  III: { recipes: ['gearworks', 'electronicsworks', 'hullworks', 'sensorworks', 'reactorworks', 'cellworks','goldpurifier','diamondcutter','nebulagasrefiner'],
     credits: 40000, goods: { plates: 12, wires: 8 }, seconds: 120, power: 12, workers: { basic: 6, skilled: 4, specialist: 0 }, quest: 'H07' },
-  IV: { recipes: ['robotics', 'machineworks', 'engineworks', 'shippartsworks', 'consumerworks', 'medtechworks', 'computerworks'],
+  IV: { recipes: ['robotics', 'machineworks', 'engineworks', 'shippartsworks', 'consumerworks', 'medtechworks', 'computerworks','uraniumrefiner','exocrystalrefiner'],
     credits: 100000, goods: { alloys: 12, electronics: 8, gears: 6 }, seconds: 180, power: 20, workers: { basic: 8, skilled: 6, specialist: 2 }, quest: 'H09', facility: 'researchWorkshop' },
-  V: { recipes: ['aiforge', 'habitatworks'],
+  V: { recipes: ['aiforge', 'habitatworks','antimatterstabilizer'],
     credits: 250000, goods: { machinery: 6, computers: 4, robots: 2 }, seconds: 180, power: 32, workers: { basic: 8, skilled: 8, specialist: 4 }, quest: 'H12', facility: 'researchCenter' },
 });
 
 export function industryGroup(recipe) {
   return Object.entries(INDUSTRY_GROUPS).find(([, group]) => group.recipes.includes(recipe))?.[0];
+}
+
+export function industrySpec(recipe){
+  const group=INDUSTRY_GROUPS[industryGroup(recipe)];if(!group)return null;
+  return {...group,power:RECIPES[recipe].power??group.power,workers:RECIPES[recipe].workers||group.workers};
 }
 
 export function controlUpgradeCost(level) {

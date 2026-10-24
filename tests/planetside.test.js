@@ -19,9 +19,9 @@ function setup() {
   return { g, p, planet, ship };
 }
 
-test('Rezeptkategorien decken alle 40 Rezepte genau einmal ab', () => {
+test('Rezeptkategorien decken alle 46 Rezepte genau einmal ab', () => {
   const all = Object.values(RECIPE_CATS).flatMap((c) => c.recipes);
-  assert.equal(all.length, 40);
+  assert.equal(all.length, 46);
   assert.deepEqual(new Set(all), new Set(Object.keys(RECIPES)));
   assert.deepEqual(factorySlots('urban'), { bio: 1, chem: 0, heavy: 0, tech: 3 });
 });

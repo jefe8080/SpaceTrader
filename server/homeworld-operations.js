@@ -1,5 +1,5 @@
-import { GOODS, RECIPES } from '../shared/goods.js';
-import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, homeStorageUsage, homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
+import { GOODS, RECIPES,REFINEMENT_RECIPES } from '../shared/goods.js';
+import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { pointCovered } from './coverage.js';
 import {tickCivilMoney} from './real-economy.js';
 import {stat} from './markets.js';
@@ -76,7 +76,7 @@ export function homeConstructionError(home) {
 }
 
 function structureSpec(structure) {
-  const base=structure.kind==='plant'?INDUSTRY_GROUPS[industryGroup(structure.recipe)]:HOME_BUILDINGS[structure.kind];
+  const base=structure.kind==='plant'?industrySpec(structure.recipe):HOME_BUILDINGS[structure.kind];
   const spec={...base,workers:{...base.workers}};
   for(const id of structure.upgrades||[]){const upgrade=HOME_BUILDINGS[id];spec.power+=upgrade.power;for(const q of QUALIFICATIONS)spec.workers[q]=(spec.workers[q]||0)+(upgrade.workers[q]||0);}
   return spec;
@@ -87,7 +87,7 @@ export function homeBuild(game,player,entity,kind,recipe,parentId,requestedPlot)
   const home=entity.market.homeworld;initializeHomeOperations(home);
   let spec=HOME_BUILDINGS[kind], parent=null;
   if(kind==='plant'){
-    const group=INDUSTRY_GROUPS[industryGroup(recipe)];
+    const group=industrySpec(recipe);
     if(!group)return 'Unbekanntes Industrierezept.';
     spec={...group,name:RECIPES[recipe].name};
     if(group.facility&&!home.structures.some(s=>ready(s)&&(s.kind===group.facility||s.upgrades?.includes(group.facility))))return 'Die erforderliche Forschungsinfrastruktur fehlt.';
@@ -114,10 +114,21 @@ export function homeBuild(game,player,entity,kind,recipe,parentId,requestedPlot)
   if(parent){parent.upgrading=id;home.projects.push({id,kind:'upgrade',target:parent.id,upgrade:kind,until,bound:{credits:spec.credits,goods:structuredClone(spec.goods)}});}
   else if(kind==='land')home.projects.push({id,kind:'land',until,bound:{credits:spec.credits,goods:structuredClone(spec.goods)}});
   else{
-    const structure={id,kind,recipe:kind==='plant'?recipe:null,plot,status:'building',readyAt:until,enabled:true,priority:50,progress:0};
+    const structure={id,kind,recipe:kind==='plant'?recipe:null,buildGroup:kind==='plant'?industryGroup(recipe):null,plot,status:'building',readyAt:until,enabled:true,priority:50,progress:0};
     home.structures.push(structure);home.projects.push({id:'build_'+id,kind:'construction',target:id,until,bound:{credits:spec.credits,goods:structuredClone(spec.goods)}});
   }
   notify(game,entity);
+}
+
+export function changeRefinement(game,player,entity,id,recipe){
+  const error=homeAccess(game,player,entity);if(error)return error;
+  const home=entity.market.homeworld,building=home.structures?.find(s=>s.id===id&&s.status==='ready'&&s.kind==='plant');
+  if(!building||!REFINEMENT_RECIPES.includes(building.recipe)||!REFINEMENT_RECIPES.includes(recipe))return 'Eine vorhandene Veredelungsanlage und ein Sonderveredelungsrezept auswählen.';
+  const ranks=['I','II','III','IV','V'],spec=industrySpec(recipe),grade=building.buildGroup||industryGroup(building.recipe);
+  if(ranks.indexOf(industryGroup(recipe))>ranks.indexOf(grade))return 'Für die höhere Baugruppe ist eine entsprechend gebaute neue Anlage erforderlich.';
+  if(!completed(player,spec.quest))return `Zuerst ${spec.quest} abschließen.`;
+  if(spec.facility&&!home.structures.some(s=>ready(s)&&(s.kind===spec.facility||s.upgrades?.includes(spec.facility))))return 'Die erforderliche Forschungsinfrastruktur fehlt.';
+  building.buildGroup=grade;building.recipe=recipe;building.progress=0;notify(game,entity);
 }
 
 export function restoreBasicPlant(game,player,entity,facility) {

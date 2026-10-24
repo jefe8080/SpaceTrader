@@ -69,9 +69,9 @@ test('Veraltete Welt wird vor Migration und ohne Löschung geöffnet/abgewiesen'
   });
 });
 
-test('Zentrale PRD-5-Werte decken alle 40 Rezepte genau einmal und nur gültige Waren ab', () => {
+test('Zentrale PRD-5-Werte decken alle 46 Rezepte genau einmal und nur gültige Waren ab', () => {
   const recipes = Object.values(INDUSTRY_GROUPS).flatMap((group) => group.recipes);
-  assert.equal(new Set(recipes).size, 40);
+  assert.equal(new Set(recipes).size, 46);
   assert.deepEqual([...recipes].sort(), Object.keys(RECIPES).sort());
   const rank = Object.keys(INDUSTRY_GROUPS);
   const outputGroup = new Map();

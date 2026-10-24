@@ -2,6 +2,7 @@ import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, ZONE_TYPES, TAG_FACTOR,
   FACTIONS, FACTION, MODULES, STORAGE, SHIP_TYPES, factionShips } from '../shared/config.js';
 import { hexCenter, hexKey, hexNeighbors } from '../shared/hex.js';
 import { createMarket } from './markets.js';
+import {refinedAmountFor} from '../shared/goods.js';
 
 /**
  * Deterministische Sektorgenerierung aus Weltseed und Hex-Koordinate.
@@ -390,9 +391,10 @@ function populateFactionSystem(sys, r, nextId, withYard) {
   }
   // Dauerhafte Nachfrage nach der Schiffswährung
   const g = F.currency;
+  const cap=refinedAmountFor(F.rawCurrency,STORAGE.ULTRA_HUB);
   for (const e of out) {
     if (!e.market) continue;
-    e.market.goods[g] = { role: 'consume', rate: FACTION.CURRENCY_DEMAND * (300 / GOODS[g].base), cap: STORAGE.ULTRA_HUB, stock: STORAGE.ULTRA_HUB * 0.1 * r(), mod: 1 };
+    e.market.goods[g] = { role: 'consume', rate: FACTION.CURRENCY_DEMAND * (300 / GOODS[g].base), cap, stock: cap * 0.1 * r(), mod: 1 };
   }
   return out;
 }

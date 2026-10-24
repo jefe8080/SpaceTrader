@@ -153,6 +153,10 @@ panel.addEventListener('click', (ev) => {
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'homeRecipeChange':{
+      const recipe=document.getElementById('homeRefiningRecipe')?.value;
+      if(recipe&&confirm(`Zu ${RECIPES[recipe].name} wechseln? Laufender Zyklusfortschritt wird zurückgesetzt; keine Materialerstattung.`))cmd('homeRecipeChange',{target:e.id,id:d.id,recipe});return;
+    }
     case 'homeModuleCraft':cmd('homeModuleCraft',{target:e.id,module:d.module,study:d.study==='true'});return;
     case 'homeTax':cmd('homeTax',{target:e.id,percent:Number(document.getElementById('homeTaxPercent')?.value)});return;
     case 'homeControlUpgrade': cmd('homeControlUpgrade',{target:e.id,module:d.module});return;
@@ -196,4 +200,10 @@ bar.addEventListener('change', ev => {
   if (ev.target.id !== 'planetBuildingSelect') return;
   const it = scene.items.find(x => x.key === ev.target.value);
   if (it) openBuilding(it); else closeBuilding();
+});
+panel.addEventListener('change',event=>{
+  if(event.target.id==='homeRecipe'){
+    const recipe=RECIPES[event.target.value],preview=document.getElementById('homeRecipePreview');
+    if(recipe&&preview)preview.innerHTML=recipeText(recipe)+` · ${recipe.time} s je Zyklus`;
+  }
 });

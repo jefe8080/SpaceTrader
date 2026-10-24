@@ -22,16 +22,22 @@ const RAW = {
   acid:        { name: 'Säure',            base: 20,  color: '#c6ff00', cls: 'hazard', mine: 'acid' },
   tourists:    { name: 'Touristen',        base: 28,  color: '#ffcc80', cls: 'passenger' },
   workers:     { name: 'Arbeiter',         base: 24,  color: '#a1887f', cls: 'passenger' },
-  gold:        { name: 'Gold',             base: 420, color: '#ffd54f', ultra: true, mine: 'drill' },
-  diamond:     { name: 'Diamant',          base: 650, color: '#e1f5fe', ultra: true, mine: 'drill' },
-  uranium:     { name: 'Uran',             base: 520, color: '#76ff03', ultra: true, mine: 'drill', cls: 'hazard' },
-  antimatter:  { name: 'Antimaterie',      base: 1900, color: '#ea80fc', ultra: true, cls: 'hazard' },
-  exocrystals: { name: 'Exotische Kristalle', base: 880, color: '#18ffff', ultra: true, mine: 'drill' },
-  nebulagas:   { name: 'Nebelgas',         base: 310, color: '#f48fb1', ultra: true, mine: 'gas' },
+  gold:        { name: 'Rohgold',          base: 420, color: '#ffd54f', ultra: true, mine: 'drill' },
+  diamond:     { name: 'Rohdiamanten',     base: 650, color: '#e1f5fe', ultra: true, mine: 'drill' },
+  uranium:     { name: 'Uranerz',          base: 520, color: '#76ff03', ultra: true, mine: 'drill', cls: 'hazard' },
+  antimatter:  { name: 'Unstabile Antimaterie',base:1900,color:'#ea80fc',ultra:true,cls:'hazard' },
+  exocrystals: { name: 'Exotische Rohkristalle',base:880,color:'#18ffff',ultra:true,mine:'drill' },
+  nebulagas:   { name: 'Rohes Nebelgas',    base: 310, color: '#f48fb1', ultra: true, mine: 'gas' },
 };
 
 /** Verarbeitete Waren: Name, Farbe, Frachtklasse */
 const MADE = {
+  finegold: {name:'Feingold',color:'#ffd54f',ultra:true},
+  cutdiamonds: {name:'Geschliffene Diamanten',color:'#e1f5fe',ultra:true},
+  enricheduranium: {name:'Angereichertes Uran',color:'#76ff03',ultra:true,cls:'hazard'},
+  stableantimatter: {name:'Stabilisierte Antimaterie',color:'#ea80fc',ultra:true,cls:'hazard'},
+  refinedexocrystals: {name:'Veredelte Exokristalle',color:'#18ffff',ultra:true},
+  refinednebulagas: {name:'Raffiniertes Nebelgas',color:'#f48fb1',ultra:true},
   water:        { name: 'Wasser',            color: '#4fc3f7' },
   food:         { name: 'Nahrung',           color: '#8bc34a' },
   shipfuel:     { name: 'Schiffstreibstoff', color: '#ff7043' },
@@ -119,6 +125,12 @@ export const RECIPES = {
   computerworks:  { name: 'Computerwerk',       in: { electronics: 2, chips: 1, plastics: 1 }, out: { computers: 1 }, time: 9 },
   aiforge:        { name: 'KI-Schmiede',        in: { computers: 2, robots: 1 }, out: { aicores: 1 }, time: 14 },
   habitatworks:   { name: 'Habitatwerk',        in: { hullparts: 1, machinery: 1, medtech: 1 }, out: { habitats: 1 }, time: 14 },
+  goldpurifier:{name:'Edelmetallwerk',in:{gold:2,chemicals:1},out:{finegold:1},time:12,power:12,workers:{basic:4,skilled:4,specialist:0}},
+  diamondcutter:{name:'Kristallschleiferei',in:{diamond:2,cutters:1},out:{cutdiamonds:1},time:15,power:12,workers:{basic:4,skilled:4,specialist:0}},
+  uraniumrefiner:{name:'Isotopenwerk',in:{uranium:2,chemicals:1,coolant:1},out:{enricheduranium:1},time:18,power:20,workers:{basic:4,skilled:6,specialist:2}},
+  antimatterstabilizer:{name:'Feldstabilisator',in:{antimatter:1,powercells:2,coolant:1},out:{stableantimatter:1},time:25,power:32,workers:{basic:2,skilled:6,specialist:4}},
+  exocrystalrefiner:{name:'Resonanzwerk',in:{exocrystals:2,optics:1},out:{refinedexocrystals:1},time:20,power:20,workers:{basic:2,skilled:6,specialist:2}},
+  nebulagasrefiner:{name:'Gasfraktionierer',in:{nebulagas:3,coolant:1},out:{refinednebulagas:2},time:12,power:12,workers:{basic:4,skilled:4,specialist:0}},
 };
 
 // ---------- Abgeleitete Werte: Stufe und Basispreis ----------
@@ -149,7 +161,11 @@ for (const [g, d] of Object.entries(MADE)) GOODS[g] = { cls: 'normal', mine: nul
 export const TIER_NAMES = ['Rohstoff', 'Grundstoff', 'Zwischenprodukt', 'Bauteil', 'Endprodukt', 'Hochtechnologie'];
 export const CARGO_CLASSES = { normal: 'Normal', hazard: 'Gefahrgut', passenger: 'Passagiere' };
 export const MINE_CLASSES = { std: 'Standard (Bergbaulaser)', drill: 'Tiefbohrer', acid: 'Säureextraktor', gas: 'Gaskollektor' };
-export const ULTRA = Object.keys(GOODS).filter((g) => GOODS[g].ultra);
+export const REFINED_FOR_RAW={gold:'finegold',diamond:'cutdiamonds',uranium:'enricheduranium',antimatter:'stableantimatter',exocrystals:'refinedexocrystals',nebulagas:'refinednebulagas'};
+export const RAW_FOR_REFINED=Object.fromEntries(Object.entries(REFINED_FOR_RAW).map(([raw,product])=>[product,raw]));
+export const refinedAmountFor=(raw,amount)=>Math.max(1,Math.ceil(amount*GOODS[raw].base/GOODS[REFINED_FOR_RAW[raw]].base));
+export const ULTRA = Object.values(REFINED_FOR_RAW);
+export const REFINEMENT_RECIPES=Object.keys(RECIPES).filter(id=>Object.keys(RECIPES[id].out).some(g=>ULTRA.includes(g)));
 
 // ---------- Planeten ----------
 // Raten in Einheiten pro Sekunde (bei Größe 1)

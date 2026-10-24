@@ -17,7 +17,7 @@ export function preparePublicEntity(entity){
     if(slot.role==='produce'&&!natural){slot.role=good==='shipfuel'?'trade':'consume';slot.rate=good==='shipfuel'?0:slot.rate;}
     if(GOODS[good].cls==='passenger'){slot.stock=0;slot.rate=0;}
     if(entity.id.startsWith('origin_'))slot.rate/=WORLD.START_SLOW;
-    if(entity.type==='hub'&&GOODS[good].ultra)delete market.goods[good];
+    if(entity.type==='hub'&&GOODS[good].ultra&&GOODS[good].tier===0)delete market.goods[good];
     if(natural&&slot.stock>0)market.provenance.push({id:`${entity.id}:${good}:natural`,source:'natural_reserve',good,amount:slot.stock});
     slot.baseRate=slot.rate;slot.baseCap=slot.cap;
   }

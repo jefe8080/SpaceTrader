@@ -34,10 +34,10 @@ export const buildingCapMul = (lvl) => 1 + BUILDING.STORAGE * lvl;
 // ---------- Fabrik-Bauplätze ----------
 export const RECIPE_CATS = {
   bio: { name: 'Bio', recipes: ['waterworks', 'foodplant', 'weavery', 'fertilizerplant', 'pharma', 'cannery', 'tailor'] },
-  chem: { name: 'Chemie', recipes: ['refinery', 'oilworks', 'chemworks', 'chemplant', 'coolantworks', 'fueldepot', 'glassworks', 'siliconworks'] },
-  heavy: { name: 'Schwer', recipes: ['smelter', 'rollingmill', 'alloyworks', 'refinery2', 'toolworks', 'gearworks', 'hullworks', 'machineworks', 'engineworks', 'reactorworks'] },
+  chem: { name: 'Chemie', recipes: ['refinery', 'oilworks', 'chemworks', 'chemplant', 'coolantworks', 'fueldepot', 'glassworks', 'siliconworks','nebulagasrefiner'] },
+  heavy: { name: 'Schwer', recipes: ['smelter', 'rollingmill', 'alloyworks', 'refinery2', 'toolworks', 'gearworks', 'hullworks', 'machineworks', 'engineworks', 'reactorworks','goldpurifier','diamondcutter','uraniumrefiner'] },
   tech: { name: 'Hightech', recipes: ['chipfab', 'cableworks', 'electronicsworks', 'opticsworks', 'batteryplant', 'cellworks', 'sensorworks', 'robotics',
-    'computerworks', 'aiforge', 'medtechworks', 'consumerworks', 'shippartsworks', 'habitatworks', 'jeweler'] },
+    'computerworks', 'aiforge', 'medtechworks', 'consumerworks', 'shippartsworks', 'habitatworks', 'jeweler','antimatterstabilizer','exocrystalrefiner'] },
 };
 export const recipeCat = (id) => Object.keys(RECIPE_CATS).find((k) => RECIPE_CATS[k].recipes.includes(id)) || null;
 /** Bauplätze je Planetentyp: [Bio, Chemie, Schwer, Hightech] */

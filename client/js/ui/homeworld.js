@@ -1,8 +1,9 @@
-import { GOODS, RECIPES } from '/shared/config.js';
-import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, homeStorageUsage, availableHomeStock } from '/shared/homeworld.js';
+import { GOODS, RECIPES,recipeText } from '/shared/config.js';
+import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock } from '/shared/homeworld.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import {moduleStockPanel,moduleCraftPanel} from './modules.js';
+import {REFINEMENT_RECIPES} from '/shared/goods.js';
 
 let dialog;
 export function renderHomeDialog() {
@@ -144,10 +145,15 @@ function operationPanel(entity,id,building){
 
 function structurePanel(entity,id){
   const home=entity.market.homeworld,building=home.structures.find(s=>s.id===id);if(!building)return '';
-  const spec=building.recipe?INDUSTRY_GROUPS[industryGroup(building.recipe)]:HOME_BUILDINGS[building.kind];
+  const spec=building.recipe?industrySpec(building.recipe):HOME_BUILDINGS[building.kind];
   let html=`<p>${building.status==='building'?`Bau läuft · ${Math.max(0,Math.ceil(building.readyAt-state.time))} s · Material und zwei einfache Kräfte gebunden`:'Betriebsbereite Anlage'}</p>
     <p>${spec.power} Energie · ${spec.workers.basic||0} einfach / ${spec.workers.skilled||0} Fach / ${spec.workers.specialist||0} Spezial</p>`;
+  if(building.recipe)html+=`<p>${recipeText(RECIPES[building.recipe])} · ${RECIPES[building.recipe].time} s je vollständigem Zyklus</p>`;
   if(building.status==='ready')html+=operationPanel(entity,id,building);
+  if(building.status==='ready'&&REFINEMENT_RECIPES.includes(building.recipe)){
+    html+='<p>Rezeptwechsel setzt den laufenden Zyklusfortschritt zurück. Bereits verarbeitete Ware wird nicht erstattet.</p><select id="homeRefiningRecipe" aria-label="Veredelungsrezept">'+REFINEMENT_RECIPES.map(recipe=>`<option value="${recipe}" ${recipe===building.recipe?'selected':''}>${RECIPES[recipe].name} · Gruppe ${industryGroup(recipe)}</option>`).join('')+'</select>';
+    html+=`<button class="small" data-pp="homeRecipeChange" data-id="${id}">Rezeptwechsel bestätigen</button>`;
+  }
   if(building.kind==='school'&&building.status==='ready'){
     html+='<p>Ausbildung reserviert zehn tatsächlich vorhandene freie Einwohner. Fehlende Versorgung oder Schulbetrieb pausieren den Fortschritt.</p><button class="small" data-pp="homeTrain" data-qualification="skilled">10 Fachkräfte ausbilden · 120 s</button>';
     if(building.upgrades?.includes('academy'))html+='<button class="small" data-pp="homeTrain" data-qualification="specialist">10 Spezialisten ausbilden · 180 s</button>';
@@ -162,10 +168,10 @@ function homeBuildPanel(entity){
   const home=entity.market.homeworld;
   let html=homeBalance(entity)+'<h3>Industrie bauen</h3><select id="homeRecipe" aria-label="Industrierezept">';
   for(const [id,recipe] of Object.entries(RECIPES)){
-    const group=INDUSTRY_GROUPS[industryGroup(id)];
+    const group=industrySpec(id);
     html+=`<option value="${id}" ${completed(group.quest)?'':'disabled'}>${recipe.name} · Gruppe ${industryGroup(id)} · ${costLabel(group)} · ${group.power} Energie · ${group.workers.basic}/${group.workers.skilled}/${group.workers.specialist} Personal</option>`;
   }
-  html+='</select><button class="primary" data-pp="homeBuild" data-kind="plant">Industrieanlage bauen</button><h3>Infrastruktur</h3>';
+  html+=`</select><p id="homeRecipePreview">${recipeText(Object.values(RECIPES)[0])} · ${Object.values(RECIPES)[0].time} s je Zyklus</p><button class="primary" data-pp="homeBuild" data-kind="plant">Industrieanlage bauen</button><h3>Infrastruktur</h3>`;
   for(const [kind,spec] of Object.entries(HOME_BUILDINGS)){
     if(spec.parent)continue;
     const cost=kind==='land'?{...spec,credits:Math.round(spec.credits*1.4**(home.expansions||0))}:spec;

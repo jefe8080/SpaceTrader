@@ -2,6 +2,7 @@ import { GOODS, PLANET_TYPES, STATION_TYPES, RECIPES, STATION_FOOD, SHIP_TYPES, 
   ECON, SUPPLY, LEVEL_FX, PLANET_EXTRAS, EXTRA_STEPS, slotPrice, targetOf, driftDelta, giverLevel,
   effectiveLevel, buildingRateMul, buildingCapMul, recipeOf } from '../shared/config.js';
 import {tickRealMarket} from './real-economy.js';
+import {RAW_FOR_REFINED,refinedAmountFor} from '../shared/goods.js';
 
 /**
  * Märkte nach Rollen- und Strategie-Modell.
@@ -96,7 +97,7 @@ function buildMarket(kind, type, r, scale = 1, { slow = 1, traders = true } = {}
   } else if (type === 'hub') {
     // Hub: verkauft Schiffstreibstoff, kauft alle ultraseltenen Waren, handelt eine breite Auswahl
     produce('shipfuel', 1.2, STORAGE.HUB_FUEL);
-    for (const g of ULTRA) consume(g, 0.02 * (300 / GOODS[g].base), STORAGE.ULTRA_HUB);
+    for (const g of ULTRA) consume(g, 0.02 * (300 / GOODS[g].base), refinedAmountFor(RAW_FOR_REFINED[g],STORAGE.ULTRA_HUB));
     addTraders(goods, r, [14, 18]);
     for (const s of Object.values(goods)) if (s.role === 'trade') { s.cap = Math.round(s.cap * 3); s.stock *= 3; }
     return { strategy: 'hub', goods, eff: 1 };

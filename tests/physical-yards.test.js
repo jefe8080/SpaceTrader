@@ -54,6 +54,8 @@ test('Fraktionswerften bauen mit derselben konkreten Materialformel und verliere
   assert.equal(command(f,'yardOrder',{type}),undefined);advance(f,1000);assert.equal(f.yard.market.forSale.length,0);
   supply(f,type);advance(f,1);assert.equal(f.yard.market.building.remaining,SHIPYARD.BUILD_TIME[d.cls]);advance(f,SHIPYARD.BUILD_TIME[d.cls]);
   assert.equal(f.yard.market.forSale.length,1);assert.equal(f.yard.market.forSale[0].source,'materials');
+  f.ship.cargo={[d.rawCurrency.good]:d.rawCurrency.n};const beforeRaw=structuredClone(f.ship.cargo),credits=f.player.credits;
+  assert.match(command(f,'buyFactionShip',{index:0}),/Es fehlen/);assert.equal(f.yard.market.forSale.length,1);assert.deepEqual(f.ship.cargo,beforeRaw);assert.equal(f.player.credits,credits);
   f.ship.cargo={[d.currency.good]:d.currency.n};assert.equal(command(f,'buyFactionShip',{index:0}),undefined);
   assert.equal(f.yard.market.forSale.length,0);assert.equal(f.ship.cargo[d.currency.good],undefined);assert.equal(f.yard.market.factionPayments[d.currency.good],d.currency.n);
   assert.match(command(f,'buyFactionShip',{index:0}),/Unbekanntes Schiff/);close(f);
