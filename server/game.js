@@ -17,6 +17,7 @@ import { isConsortiumOwner, consortiumIdOf } from '../shared/consortium.js';
 import { checkWorldFile, worldProfile } from './world-profile.js';
 import { createHomeworld, tickHomeworld, tickHomeResource } from './homeworld.js';
 import { tickRelics } from './relic.js';
+import { homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 
 export const WORLD_GEN_VERSION = 3; // Bestandswelt; Versionskonflikte lösen niemals einen Reset aus
 
@@ -481,8 +482,9 @@ export class Game {
     if (!slot || !canBuyFrom(slot)) return { ok: false, reason: 'kein Treibstoff im Angebot' };
     const missing = tank - ship.fuel;
     if (missing < 0.05) return { ok: false, reason: 'voll' };
-    const price = buyPrice('shipfuel', slot);
-    const n = Math.min(missing, slot.stock, p.credits / price);
+    const own = e.type === 'ruins' && e.market.owner === ship.owner;
+    const price = own ? 0 : buyPrice('shipfuel', slot);
+    const n = Math.min(missing, availableHomeStock(e.market, 'shipfuel'), own ? Infinity : p.credits / price);
     if (n < 0.05) return { ok: false, reason: slot.stock < 0.05 ? 'kein Bestand' : 'zu wenig Credits' };
     const cost = n * price;
     p.credits -= cost;
@@ -764,13 +766,13 @@ export class Game {
     const slot = e.market.goods[good];
     let n;
     if (dir === 'buy') {
-      n = Math.min(amount, freeFor(ship, good), Math.floor(slot.stock));
+      n = Math.min(amount, freeFor(ship, good), Math.floor(availableHomeStock(e.market, good)));
       if (n <= 0) return { n: 0, reason: slot.stock < 1 ? 'kein Bestand' : 'Laderaum voll' };
       slot.stock -= n;
       ship.cargo[good] = (ship.cargo[good] || 0) + n;
     } else {
       const have = ship.cargo[good] || 0;
-      n = Math.min(amount, have, Math.floor(slot.cap - slot.stock));
+      n = Math.min(amount, have, Math.floor(homeStorageFree(e.market, good)));
       if (n <= 0) return { n: 0, reason: have ? 'Lager voll' : 'nichts geladen' };
       slot.stock += n;
       ship.cargo[good] = have - n;
@@ -839,7 +841,7 @@ export class Game {
     if (dir === 'buy') {
       if (!canBuyFrom(slot)) return { n: 0, reason: 'Ware wird hier nicht verkauft' };
       const floor = opts.auto ? this.stopLossFor(p, opts.route) : 0;
-      const max = Math.min(amount, freeFor(ship, good), Math.floor(slot.stock));
+      const max = Math.min(amount, freeFor(ship, good), Math.floor(availableHomeStock(e.market, good)));
       while (n < max) {
         const pr = buyPrice(good, slot) * (1 + c);
         if ((limit && pr > limit) || p.credits - pr < floor || p.credits < pr) break;
@@ -849,7 +851,7 @@ export class Game {
     } else {
       if (!canSellTo(slot)) return { n: 0, reason: 'Ware wird hier nicht angekauft' };
       const have = ship.cargo[good] || 0;
-      const max = Math.min(amount, have, Math.floor(slot.cap - slot.stock));
+      const max = Math.min(amount, have, Math.floor(homeStorageFree(e.market, good)));
       const floor = owner.stopLoss || 0;
       while (n < max) {
         const pr = sellPrice(good, slot) * (1 - c) * (trader ? 1.05 : 1);
@@ -967,7 +969,7 @@ export class Game {
     for (const [g, n] of Object.entries(ship.cargo)) {
       const slot = m.goods[g];
       if (!slot) continue;
-      let k = Math.min(n, Math.floor(slot.cap - slot.stock));
+      let k = Math.min(n, Math.floor(homeStorageFree(m, g)));
       if (prop) k = payForDelivery(this, station, prop, g, k); // Besitzer zahlt den Marktpreis
       else slot.stock += k;
       delivered += k;

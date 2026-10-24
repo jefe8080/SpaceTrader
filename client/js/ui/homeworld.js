@@ -1,5 +1,5 @@
 import { GOODS, RECIPES } from '/shared/config.js';
-import { HOME_QUESTS, HOMEWORLD } from '/shared/homeworld.js';
+import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, industryGroup, homeStorageUsage, availableHomeStock } from '/shared/homeworld.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 
@@ -48,7 +48,8 @@ export function homePanel(entity, item, ship) {
     html += '<details><summary>Journal nachlesen</summary><button class="small" data-pp="homeReplay">Ankunftsszene erneut ansehen</button>' + (state.homeQuest?.journal || []).map((entry) => `<p><b>${esc(entry.speaker || entry.id)}</b> · ${esc(entry.text)}</p>`).join('') + '</details>';
     return html;
   }
-  if (item.kind === 'plot') return `<div class="muted">Freier Bauplatz ${item.plotIndex + 1}. Aktuell ${home.plots} von maximal ${HOMEWORLD.start.maxPlots} Plätzen erschlossen. Grundruinen und zentrale Infrastruktur besitzen eigene Anker.</div>`;
+  if (item.homeStructure) return structurePanel(entity,item.homeStructure);
+  if (item.kind === 'plot') return `<div class="muted">Freier Bauplatz ${item.plotIndex + 1}. Aktuell ${home.plots} von maximal ${HOMEWORLD.start.maxPlots} Plätzen erschlossen.</div>`+homeBuildPanel(entity);
   const facility = item.homeFacility, building = home.facilities[facility];
   if (!building) return '';
   const cost = facility === 'dock' ? { credits: 0, seconds: 15, goods: { ingots: 4 } }
@@ -75,15 +76,80 @@ export function homePanel(entity, item, ship) {
   }
   if (RECIPES[facility]) {
     const recipe = RECIPES[facility];
-    html += `<p>${Object.entries(recipe.in).map(([g,n]) => `${n} ${GOODS[g].name}`).join(' + ')} → ${Object.entries(recipe.out).map(([g,n]) => `${n} ${GOODS[g].name}`).join(' + ')}</p><div class="muted">Reparierter Grundbetrieb: 10 % Geschwindigkeit. ${esc(building.blocked || '')}</div>`;
+    html += `<p>${Object.entries(recipe.in).map(([g,n]) => `${n} ${GOODS[g].name}`).join(' + ')} → ${Object.entries(recipe.out).map(([g,n]) => `${n} ${GOODS[g].name}`).join(' + ')}</p><div class="muted">${building.restored?'Normalbetrieb: 100 %':'Reparierter Grundbetrieb: 10 %'} Geschwindigkeit. ${esc(building.blocked || '')}</div>`;
+    if(building.status==='ready'){
+      html+=operationPanel(entity,facility,building);
+      if(!building.restored)html+=`<p>Normalanlage: 4 Energie, 6 einfache Kräfte · ${costLabel(HOMEWORLD.industry.restore)}</p><button class="small" data-pp="homeRestore" data-facility="${facility}" ${building.upgrading?'disabled':''}>Zur Normalanlage ausbauen</button>`;
+    }
   }
   if (facility === 'dock' && building.status === 'ready') {
     const goods = Object.entries(entity.market.goods).filter(([g, slot]) => slot.stock > 0 || ship?.cargo?.[g]);
-    html += '<p>Eigene Transfers sind kostenlos. Reparaturmaterial und Starthilfen werden einmalig vergeben.</p><table class="market"><tr><th>Ware</th><th>Lager / Schiff</th><th></th></tr>';
+    html += homeBalance(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market"><tr><th>Ware</th><th>Lager / Schiff</th><th></th></tr>';
     for (const [good, slot] of goods) html += `<tr><td>${GOODS[good].name}</td><td>${fmt(slot.stock)} / ${fmt(ship?.cargo?.[good] || 0)}</td><td>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${ship && slot.stock >= 1 ? '' : 'disabled'}>Laden</button>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Einlagern</button></td></tr>`;
     html += '</table>';
+    html += `<label>Reserve für <select id="homeReserveGood" aria-label="Ware für Reserve">${Object.keys(entity.market.goods).filter(g=>GOODS[g].cls!=='passenger').map(g=>`<option value="${g}">${GOODS[g].name}</option>`).join('')}</select></label>
+      <input id="homeReserveAmount" type="number" min="0" max="1000000000" value="0" aria-label="Geschützte Reservemenge"><button class="small" data-pp="homeReserve">Reserve setzen / freigeben</button>
+      <p class="muted">Zwei Stunden Grundbedarf: ${Math.ceil(home.population*.4)} Wasser und ${Math.ceil(home.population*.2)} Nahrung. Reserven sind Teil des Lagerbestands, kein zusätzliches Lager.</p>`;
+  }
+  return html;
+}
+
+const costLabel=cost=>`${fmt(cost.credits)} Cr · ${Object.entries(cost.goods).map(([g,n])=>`${n} ${GOODS[g]?.name||g}`).join(', ')} · ${cost.seconds||60} s`;
+function homeBalance(entity){
+  const home=entity.market.homeworld,used=homeStorageUsage(entity.market),work=home.workforce;
+  let html=`<div class="kv"><span>Einwohner / Wohnraum</span><span>${home.population} / ${home.housing}</span><span>Energie benutzt / verfügbar</span><span>${home.energy?.used||0} / ${home.energy?.generation||12}</span>
+    <span>Normales Lager</span><span>${fmt(used.normal)} / ${home.storage}</span><span>Gefahrgutlager</span><span>${fmt(used.hazard)} / ${home.hazardStorage}</span>
+    <span>Personal frei: einfach / Fach / Spezial</span><span>${work?`${work.free.basic} / ${work.free.skilled} / ${work.free.specialist}`:'48 / 12 / 0'}</span>
+    <span>Grundversorgung</span><span>${Math.round((home.supply?.basic||0)*100)} % · Notversorgung erhält Einwohner und Fortschritt</span></div>`;
+  html+='<table class="market"><tr><th>Ware</th><th>Verfügbar / geschützt</th><th>Zu- / Abfluss je h</th></tr>';
+  for(const [g,slot] of Object.entries(entity.market.goods)){
+    const protectedAmount=slot.stock-availableHomeStock(entity.market,g),flow=home.flows?.[g];
+    if(!slot.stock&&!protectedAmount&&!flow)continue;
+    const drain=(flow?.consume||0)-(flow?.produce||0),duration=drain>0?`${(availableHomeStock(entity.market,g)/drain).toFixed(1)} h Vorrat`:'kein Nettoverbrauch';
+    html+=`<tr><td>${GOODS[g].name}<div class="muted">${duration}</div></td><td>${fmt(availableHomeStock(entity.market,g))} / ${fmt(protectedAmount)}</td><td>+${fmt(flow?.produce||0)} / −${fmt(flow?.consume||0)}</td></tr>`;
+  }
+  html+='</table><details><summary>Belegung und Engpässe</summary>'+(home.allocations||[]).map(a=>`<p>${esc(names[a.id]||RECIPES[a.id]?.name||home.structures?.find(s=>s.id===a.id)?.kind||a.id)}: ${a.state==='active'?'Betrieb':esc(a.reason||'Pausiert')} · ${a.power} Energie</p>`).join('')+'</details>';
+  html+='<details><summary>Bau- und Ausbildungsaufträge</summary>'+(home.projects||[]).map(p=>`<p>${esc(({training:'Ausbildung',construction:'Neubau',upgrade:'Ausbau',restore:'Wiederherstellung',land:'Flächenerschließung'})[p.kind]||p.kind)} · ${p.kind==='training'?`${p.count} Einwohner: ${Math.ceil(p.remaining)} s ${p.paused?'(pausiert)':''}`:`${Math.max(0,Math.ceil(p.until-state.time))} s · 2 einfache Kräfte im Bauteam · Material gebunden`}</p>`).join('')+'</details>';
+  return html;
+}
+
+function operationPanel(entity,id,building){
+  const assignment=entity.market.homeworld.allocations?.find(a=>a.id===id);
+  return `<p>${assignment?.state==='active'?'Betrieb aktiv':esc(assignment?.reason||building.blocked||'Wartet')}</p>
+    <button class="small" data-pp="homeOperation" data-id="${id}" data-enabled="${building.enabled===false}">${building.enabled===false?'Betrieb fortsetzen':'Betrieb pausieren'}</button>
+    <button class="small" data-pp="homePriority" data-id="${id}">Priorität ${building.priority??50} ändern</button>`;
+}
+
+function structurePanel(entity,id){
+  const home=entity.market.homeworld,building=home.structures.find(s=>s.id===id);if(!building)return '';
+  const spec=building.recipe?INDUSTRY_GROUPS[industryGroup(building.recipe)]:HOME_BUILDINGS[building.kind];
+  let html=`<p>${building.status==='building'?`Bau läuft · ${Math.max(0,Math.ceil(building.readyAt-state.time))} s · Material und zwei einfache Kräfte gebunden`:'Betriebsbereite Anlage'}</p>
+    <p>${spec.power} Energie · ${spec.workers.basic||0} einfach / ${spec.workers.skilled||0} Fach / ${spec.workers.specialist||0} Spezial</p>`;
+  if(building.status==='ready')html+=operationPanel(entity,id,building);
+  if(building.kind==='school'&&building.status==='ready'){
+    html+='<p>Ausbildung reserviert zehn tatsächlich vorhandene freie Einwohner. Fehlende Versorgung oder Schulbetrieb pausieren den Fortschritt.</p><button class="small" data-pp="homeTrain" data-qualification="skilled">10 Fachkräfte ausbilden · 120 s</button>';
+    if(building.upgrades?.includes('academy'))html+='<button class="small" data-pp="homeTrain" data-qualification="specialist">10 Spezialisten ausbilden · 180 s</button>';
+    else html+=`<p>Akademie: ${costLabel(HOME_BUILDINGS.academy)}</p><button class="small" data-pp="homeBuild" data-kind="academy" data-parent="${id}">Akademieausbau</button>`;
+  }
+  if(building.kind==='researchWorkshop'&&!building.upgrades?.includes('researchCenter'))html+=`<p>Forschungszentrum: ${costLabel(HOME_BUILDINGS.researchCenter)}</p><button class="small" data-pp="homeBuild" data-kind="researchCenter" data-parent="${id}">Forschungszentrum ausbauen</button>`;
+  return html;
+}
+
+function homeBuildPanel(entity){
+  const home=entity.market.homeworld;
+  let html=homeBalance(entity)+'<h3>Industrie bauen</h3><select id="homeRecipe" aria-label="Industrierezept">';
+  for(const [id,recipe] of Object.entries(RECIPES)){
+    const group=INDUSTRY_GROUPS[industryGroup(id)];
+    html+=`<option value="${id}" ${completed(group.quest)?'':'disabled'}>${recipe.name} · Gruppe ${industryGroup(id)} · ${costLabel(group)} · ${group.power} Energie · ${group.workers.basic}/${group.workers.skilled}/${group.workers.specialist} Personal</option>`;
+  }
+  html+='</select><button class="primary" data-pp="homeBuild" data-kind="plant">Industrieanlage bauen</button><h3>Infrastruktur</h3>';
+  for(const [kind,spec] of Object.entries(HOME_BUILDINGS)){
+    if(spec.parent)continue;
+    const cost=kind==='land'?{...spec,credits:Math.round(spec.credits*1.4**(home.expansions||0))}:spec;
+    html+=`<div class="quest-offer"><b>${spec.name}</b><p>${costLabel(cost)}</p><div class="muted">${spec.generation?`+${spec.generation} Energie`:spec.power+' Energie'} · ${spec.workers.basic||0}/${spec.workers.skilled||0}/${spec.workers.specialist||0} Personal · ${kind==='land'?'+4 Bauplätze':'1 Bauplatz'}</div>
+      <button class="small" data-pp="homeBuild" data-kind="${kind}" ${completed(spec.quest)?'':'disabled'}>${completed(spec.quest)?'Bauen':'Freischaltung '+spec.quest}</button></div>`;
   }
   return html;
 }

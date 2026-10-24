@@ -1,9 +1,10 @@
 import { GOODS, RECIPES, PILOT_LICENSES } from '../shared/config.js';
-import { HOMEWORLD, HOME_QUESTS } from '../shared/homeworld.js';
+import { HOMEWORLD, HOME_QUESTS, availableHomeStock } from '../shared/homeworld.js';
 import { hexAt, hexKey } from '../shared/hex.js';
 import { rng, hashN } from './worldgen.js';
 import { newProperty } from './property.js';
 import { grantRelic } from './relic.js';
+import { tickHomeOperations, homeAccess, homeConstructionError } from './homeworld-operations.js';
 
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const done = (player, id) => !!player.homeQuest?.completed[id];
@@ -115,7 +116,7 @@ export function homePresent(game, player, entity) {
 
 function availableGoods(game, player, entity, good) {
   const home = entity.market.homeworld;
-  return (home.bootstrap[good] || 0) + (entity.market.goods[good]?.stock || 0)
+  return (home.bootstrap[good] || 0) + availableHomeStock(entity.market, good)
     + game.shipsOf(player.id).filter((ship) => ship.dockedAt === entity.id).reduce((sum, ship) => sum + (ship.cargo[good] || 0), 0);
 }
 
@@ -126,7 +127,7 @@ function takeGoods(game, player, entity, costs) {
     const fromBootstrap = Math.min(remaining, home.bootstrap[good] || 0);
     home.bootstrap[good] = (home.bootstrap[good] || 0) - fromBootstrap; remaining -= fromBootstrap;
     const slot = entity.market.goods[good];
-    const fromStock = Math.min(remaining, slot?.stock || 0);
+    const fromStock = Math.min(remaining, availableHomeStock(entity.market, good));
     if (slot) slot.stock -= fromStock; remaining -= fromStock;
     for (const ship of game.shipsOf(player.id)) {
       if (ship.dockedAt !== entity.id || !remaining) continue;
@@ -138,14 +139,14 @@ function takeGoods(game, player, entity, costs) {
 }
 
 export function repairHome(game, player, entity, facility) {
-  if (!ownHome(game, player, entity)) return 'Nur auf deiner eigenen Ruinenwelt.';
-  if (!homePresent(game, player, entity)) return 'Ein eigenes Schiff muss hier angedockt sein.';
+  const accessError=homeAccess(game,player,entity);if(accessError)return accessError;
   const home = entity.market.homeworld, building = home.facilities[facility];
   if (!building) return 'Unbekannte Grundanlage.';
   if (building.status !== 'ruined') return 'Diese Anlage ist bereits repariert oder im Bau.';
   const required = facility === 'dock' ? 'H00' : ['waterworks', 'foodplant'].includes(facility) ? 'H01' : ['control', 'fueldepot'].includes(facility) ? 'H02' : 'H03';
   if (!done(player, required)) return `Zuerst ${required} abschließen.`;
   if (facility === 'workshop') return 'Die erste Antriebswerkstatt wird durch H04 freigeschaltet.';
+  const teamError=homeConstructionError(home);if(teamError)return teamError;
   const cost = facility === 'dock' ? { credits: 0, goods: { ingots: 4 }, seconds: 15 }
     : facility === 'control' ? { credits: 500, goods: { ingots: 4 }, seconds: 30 } : HOMEWORLD.industry.repair;
   if (player.credits < cost.credits) return 'Nicht genug Credits.';
@@ -209,39 +210,8 @@ export function completeHomeQuest(game, player, entity, id) {
   emitHome(game, entity);
 }
 
-function produce(home, market, facility, dt) {
-  const recipe = RECIPES[facility], building = home.facilities[facility];
-  const available = () => Object.entries(recipe.in).every(([g, n]) => market.goods[g].stock >= n)
-    && Object.entries(recipe.out).every(([g, n]) => market.goods[g].stock + n <= market.goods[g].cap);
-  if (!available()) { building.blocked = 'Zutaten fehlen oder Lager voll'; return; }
-  building.blocked = null;
-  const cycles = Math.min(Math.floor(((building.progress || 0) + dt * HOMEWORLD.industry.repairedSpeed) / recipe.time),
-    ...Object.entries(recipe.in).map(([g, n]) => Math.floor(market.goods[g].stock / n)),
-    ...Object.entries(recipe.out).map(([g, n]) => Math.floor((market.goods[g].cap - market.goods[g].stock) / n)));
-  building.progress = Math.min(recipe.time, (building.progress || 0) + dt * HOMEWORLD.industry.repairedSpeed - cycles * recipe.time);
-  if (!cycles) return;
-  for (const [g, n] of Object.entries(recipe.in)) market.goods[g].stock -= n * cycles;
-  for (const [g, n] of Object.entries(recipe.out)) { market.goods[g].stock += n * cycles; home.produced[g] = (home.produced[g] || 0) + n * cycles; }
-}
-
 export function tickHomeworld(game, entity, dt) {
-  const market = entity.market, home = market.homeworld;
-  for (const [id, building] of Object.entries(home.facilities)) {
-    let activeSeconds = dt;
-    if (building.status === 'building' && game.time >= building.readyAt) {
-      activeSeconds = Math.min(dt, game.time - building.readyAt);
-      building.status = 'ready'; delete building.readyAt;
-      if (id === 'control') home.controlLevel = 1;
-      emitHome(game, entity);
-    }
-    if (building.status === 'ready' && RECIPES[id]) produce(home, market, id, activeSeconds);
-  }
-  if (plantDone(home, 'dock')) {
-    const need = Object.entries(HOMEWORLD.population.needPerHour).map(([g, n]) => [g, home.population * n * dt / 3600]);
-    const supplied = need.every(([g, n]) => market.goods[g].stock >= n);
-    if (supplied && done(game.players.get(home.owner), 'H03')) home.suppliedSeconds += dt;
-    for (const [g, n] of need) market.goods[g].stock = Math.max(0, market.goods[g].stock - n);
-  }
+  tickHomeOperations(game, entity, dt);
 }
 
 export function tickHomeResource(entity, dt) {

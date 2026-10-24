@@ -1,3 +1,4 @@
+import { GOODS } from './goods.js';
 // PRD 5 starting values. Rates use server seconds, costs use actual goods IDs.
 const freeze = (value) => {
   for (const child of Object.values(value)) if (child && typeof child === 'object') freeze(child);
@@ -55,3 +56,45 @@ export const HOME_QUESTS = freeze({
   H05: { title: 'Ein zweites Paar Hände', requires: ['H03'], goal: 'Zehn Minuten Wasser und Nahrung bereitstellen (angesammelte Betriebszeit).', credits: 500, xp: 15 },
   H06: { title: 'Feuer und Metall', requires: ['H03'], goal: 'Raffinerie und Schmelzwerk reparieren; 40 Barren selbst produzieren.', credits: 3000, xp: 35 },
 });
+
+export const HOME_BUILDINGS = freeze({
+  housing: { name: 'Wohnblock', credits: 2000, goods: { ingots: 8 }, seconds: 60, power: 1, workers: {}, housing: 200, quest: 'H02' },
+  solar: { name: 'Solarfeld', credits: 3000, goods: { ingots: 10, glass: 4 }, seconds: 60, power: 0, workers: { basic: 2 }, generation: 20, quest: 'H02' },
+  gasGenerator: { name: 'Gasgenerator', credits: 8000, goods: { plates: 12, electronics: 4 }, seconds: 90, power: 0, workers: { basic: 4, skilled: 2 }, generation: 80, fuelPerHour: { gas: 20 }, quest: 'H06' },
+  reactor: { name: 'Reaktor', credits: 100000, goods: { alloys: 12, reactorcores: 2, machinery: 6 }, seconds: 180, power: 0, workers: { skilled: 6, specialist: 2 }, generation: 500, fuelPerHour: { enricheduranium: 2, coolant: 10 }, quest: 'H12' },
+  silo: { name: 'Lagersilo', credits: 3000, goods: { ingots: 10 }, seconds: 60, power: 1, workers: { basic: 1 }, storage: 2000, quest: 'H02' },
+  safeStorage: { name: 'Sicherheitslager', credits: 5000, goods: { plates: 10, electronics: 4 }, seconds: 60, power: 2, workers: { skilled: 2 }, hazardStorage: 500, quest: 'H06' },
+  spaceport: { name: 'Raumhafenmodul', credits: 10000, goods: { plates: 20, electronics: 6 }, seconds: 90, power: 4, workers: { basic: 4 }, docks: 2, throughput: 500, quest: 'H06' },
+  school: { name: 'Schule', credits: 10000, goods: { plates: 12, electronics: 6 }, seconds: 90, power: 4, workers: { skilled: 2 }, quest: 'H06' },
+  academy: { name: 'Akademieausbau', credits: 30000, goods: { chips: 10, medicine: 4, electronics: 4 }, seconds: 120, power: 4, workers: { skilled: 2 }, parent: 'school', quest: 'H07' },
+  moduleBench: { name: 'Einfache Modulwerkbank', credits: 3000, goods: { ingots: 12, glass: 4, plastics: 4 }, seconds: 60, power: 2, workers: { basic: 2 }, quest: 'H06' },
+  researchWorkshop: { name: 'Forschungswerkstatt', credits: 20000, goods: { plates: 12, electronics: 10 }, seconds: 120, power: 6, workers: { skilled: 4 }, quest: 'H07' },
+  researchCenter: { name: 'Forschungszentrum', credits: 100000, goods: { computers: 10, robots: 4, sensors: 4 }, seconds: 180, power: 10, workers: { specialist: 4 }, parent: 'researchWorkshop', quest: 'H09' },
+  workshop: { name: 'Antriebswerkstatt', credits: 15000, goods: { plates: 12, electronics: 8 }, seconds: 60, power: 2, workers: { skilled: 2 }, quest: 'H04' },
+  land: { name: 'Fläche erschließen', credits: 5000, goods: { ingots: 10 }, seconds: 60, power: 0, workers: {}, quest: 'H02' },
+});
+
+export function homeStorageUsage(market) {
+  const used = { normal: 0, hazard: 0 };
+  for (const [good, slot] of Object.entries(market.goods)) {
+    const cls = GOODS[good]?.cls;
+    if (cls === 'normal' || cls === 'hazard') used[cls] += slot.stock;
+  }
+  // Physical modules are stored separately from installed ship modules (U10).
+  used.normal += Object.values(market.moduleInventory || {}).reduce((sum, n) => sum + n * 30, 0);
+  return used;
+}
+
+export function homeStorageFree(market, good) {
+  if (!market.homeworld) return Math.max(0, (market.goods[good]?.cap || 0) - (market.goods[good]?.stock || 0));
+  const cls = GOODS[good]?.cls;
+  if (cls !== 'normal' && cls !== 'hazard') return 0;
+  const capacity = cls === 'normal' ? market.homeworld.storage : market.homeworld.hazardStorage;
+  return Math.max(0, capacity - homeStorageUsage(market)[cls]);
+}
+
+export function availableHomeStock(market, good) {
+  const home = market.homeworld;
+  const reserved = home ? (home.reserves?.[good] || 0) + Object.values(home.reservations || {}).reduce((sum, reservation) => sum + (reservation.goods[good] || 0), 0) : 0;
+  return Math.max(0, (market.goods[good]?.stock || 0) - reserved);
+}

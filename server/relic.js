@@ -28,9 +28,15 @@ export function relicWork(game, player, ship, home, kind) {
   const relic = player.relic;
   if (!relic) return 'Der Antrieb wird erst durch H04 freigeschaltet.';
   if (relic.operation) return 'Am einzigartigen Antrieb wird bereits gearbeitet.';
-  if (home.market?.homeworld?.owner !== player.id || home.market.homeworld.facilities.workshop.status !== 'ready') return 'Dafür brauchst du eine betriebsbereite Werkstatt auf einer eigenen Ruinenwelt.';
+  const site=home.market?.homeworld;
+  const hasWorkshop=site&&(site.facilities.workshop.status==='ready'&&site.facilities.workshop.enabled!==false
+    ||site.structures?.some(building=>building.kind==='workshop'&&building.status==='ready'&&building.enabled!==false));
+  if (site?.owner !== player.id || !hasWorkshop) return 'Dafür brauchst du eine betriebsbereite Werkstatt auf einer eigenen Ruinenwelt.';
   if (ship.dockedAt !== home.id) return 'Das betreffende Schiff muss an dieser Werkstatt angedockt sein.';
   if (ship.queue.length || ship.transit) return 'Vor der Werkstattarbeit alle Schiffsaufträge beenden.';
+  const population=home.market.homeworld;
+  const reserved=(population.projects||[]).filter(job=>job.kind==='training'&&job.from==='skilled').reduce((sum,job)=>sum+job.count,0);
+  if(population.workers.skilled-reserved<2)return 'Für die Antriebsarbeit werden zwei nicht in Ausbildung gebundene Fachkräfte benötigt.';
   if (kind === 'install' && !(relic.location.kind === 'world' && relic.location.id === home.id)) return 'Der eingelagerte Antrieb befindet sich nicht an dieser Werkstatt.';
   if (kind === 'remove' && !(relic.location.kind === 'ship' && relic.location.id === ship.id)) return 'Dieser Antrieb ist nicht in diesem Schiff eingebaut.';
   relic.operation = { kind, ship: ship.id, world: home.id, until: game.time + HOMEWORLD.relic.workshopSeconds };

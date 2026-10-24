@@ -2,6 +2,7 @@ import { SHIP_TYPES, BELT_TYPES, WORLD, GOODS, FUEL, ZONE_TYPES, slotPrice, fuel
 import { stat } from './markets.js';
 import { sellToSupplier as sellToSupplierImpl } from './property.js';
 import { zoneEffects, inZone } from '../shared/nav.js';
+import { availableHomeStock } from '../shared/homeworld.js';
 
 const inZoneAt = (z, p) => inZone(z, p.x, p.y);
 
@@ -361,7 +362,7 @@ function runSupply(ship, o, dt, game) {
       if (!mineStep(ship, src, dt, o.amount ?? Infinity)) return false;
     } else {
       const slot = src.market?.goods[o.good];
-      const n = slot ? Math.min(freeFor(ship, o.good), Math.floor(slot.stock), o.amount ?? Infinity) : 0;
+      const n = slot ? Math.min(freeFor(ship, o.good), Math.floor(availableHomeStock(src.market, o.good)), o.amount ?? Infinity) : 0;
       const prop = game.ownership.get(src.id);
       if (n > 0 && prop) {
         sellToSupplierImpl(game, src, prop, o.good, n);

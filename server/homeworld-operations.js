@@ -1,0 +1,305 @@
+import { GOODS, RECIPES } from '../shared/goods.js';
+import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, industryGroup, homeStorageUsage, homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
+import { pointCovered } from './coverage.js';
+
+const QUALIFICATIONS = ['basic', 'skilled', 'specialist'];
+const qualified = () => ({ basic: 0, skilled: 0, specialist: 0 });
+const completed = (player, quest) => !!player?.homeQuest?.completed[quest];
+const ready = (object) => object.status === 'ready';
+const notify = (game, entity) => { entity.market.rev = (entity.market.rev || 0) + 1; game.emit('entity', entity); };
+const shipsHere = (game, player, entity) => game.shipsOf(player.id).filter(ship => ship.dockedAt === entity.id);
+
+export function initializeHomeOperations(home) {
+  home.structures ||= []; home.projects ||= []; home.reserves ||= {}; home.reservations ||= {};
+  home.trained ||= { skilled: 0, specialist: 0 }; home.nextProject ||= 0; home.expansions ||= 0;
+  home.productionCycles ||= {}; home.growthProgress ||= 0;
+}
+
+export function homeAccess(game, player, entity) {
+  if (entity.type !== 'ruins' || entity.market?.homeworld?.owner !== player.id) return 'Nur auf deiner eigenen Ruinenwelt.';
+  if (!pointCovered(game,player,entity) && game.ships.get(player.manualShip)?.dockedAt !== entity.id) return 'Dafür brauchst du eigene Abdeckung oder dein manuelles Schiff vor Ort.';
+  if (entity.market.homeworld.warp) return 'Der Standort ist für den Warptransfer gesperrt.';
+  return null;
+}
+
+function charge(game, player, entity, cost) {
+  if (player.credits < cost.credits) return 'Nicht genug Credits.';
+  const ships=shipsHere(game,player,entity), market=entity.market;
+  for(const [good,n] of Object.entries(cost.goods)){
+    const available=availableHomeStock(market,good)+ships.reduce((sum,ship)=>sum+(ship.cargo[good]||0),0);
+    if(available<n)return `Es fehlen ${Math.ceil(n-available)} ${GOODS[good].name} außerhalb geschützter Reserven.`;
+  }
+  player.credits-=cost.credits;
+  for(const [good,n] of Object.entries(cost.goods)){
+    let remaining=n,stored=Math.min(remaining,availableHomeStock(market,good));
+    market.goods[good].stock-=stored;remaining-=stored;
+    for(const ship of ships){const take=Math.min(remaining,ship.cargo[good]||0);if(!take)continue;ship.cargo[good]-=take;remaining-=take;if(!ship.cargo[good])delete ship.cargo[good];}
+  }
+}
+
+function buildTeams(home) {
+  return Object.values(home.facilities).filter(building=>building.status==='building').length*2
+    +home.projects.filter(project=>project.kind!=='training').length*2;
+}
+
+function trainingReserved(home) {
+  const reserved=qualified();
+  for(const project of home.projects)if(project.kind==='training')reserved[project.from]+=project.count;
+  return reserved;
+}
+
+export function homeConstructionError(home) {
+  initializeHomeOperations(home);
+  const reserved=trainingReserved(home);
+  return home.workers.basic-reserved.basic-buildTeams(home)-(home.workforce?.used?.basic||0)<2
+    ? 'Zwei freie einfache Kräfte für ein weiteres Bauteam erforderlich. Ggf. eine Anlage pausieren.' : null;
+}
+
+function structureSpec(structure) {
+  const base=structure.kind==='plant'?INDUSTRY_GROUPS[industryGroup(structure.recipe)]:HOME_BUILDINGS[structure.kind];
+  const spec={...base,workers:{...base.workers}};
+  for(const id of structure.upgrades||[]){const upgrade=HOME_BUILDINGS[id];spec.power+=upgrade.power;for(const q of QUALIFICATIONS)spec.workers[q]=(spec.workers[q]||0)+(upgrade.workers[q]||0);}
+  return spec;
+}
+
+export function homeBuild(game,player,entity,kind,recipe,parentId,requestedPlot) {
+  const error=homeAccess(game,player,entity);if(error)return error;
+  const home=entity.market.homeworld;initializeHomeOperations(home);
+  let spec=HOME_BUILDINGS[kind], parent=null;
+  if(kind==='plant'){
+    const group=INDUSTRY_GROUPS[industryGroup(recipe)];
+    if(!group)return 'Unbekanntes Industrierezept.';
+    spec={...group,name:RECIPES[recipe].name};
+    if(group.facility&&!home.structures.some(s=>ready(s)&&(s.kind===group.facility||s.upgrades?.includes(group.facility))))return 'Die erforderliche Forschungsinfrastruktur fehlt.';
+  }
+  if(!spec)return 'Unbekanntes Bauvorhaben.';
+  if(!completed(player,spec.quest))return `Zuerst ${spec.quest} abschließen.`;
+  if(spec.parent){
+    parent=home.structures.find(s=>s.id===parentId&&s.kind===spec.parent&&ready(s));
+    if(!parent)return 'Eine betriebsbereite passende Grundanlage auswählen.';
+    if(parent.upgrading||parent.upgrades?.includes(kind))return 'Diese Anlage wird bereits erweitert oder besitzt diesen Ausbau.';
+  }
+  if(kind==='land'){
+    if(home.plots>=HOMEWORLD.start.maxPlots)return 'Alle 48 regulären Plätze sind bereits erschlossen.';
+    if(home.projects.some(p=>p.kind==='land'))return 'Eine Flächenerweiterung läuft bereits.';
+    spec={...spec,credits:Math.round(spec.credits*1.4**home.expansions)};
+  }
+  const teamError=homeConstructionError(home);if(teamError)return teamError;
+  const occupied=new Set(home.structures.map(s=>s.plot).filter(p=>p!==null&&p!==undefined));
+  const plot=parent||kind==='land'?null:requestedPlot??Array.from({length:home.plots},(_,i)=>i).find(i=>!occupied.has(i));
+  if(plot===undefined)return 'Keine freien erschlossenen Bauplätze.';
+  if(plot!==null&&(plot>=home.plots||occupied.has(plot)))return 'Dieser Bauplatz ist nicht erschlossen oder bereits belegt.';
+  const costError=charge(game,player,entity,spec);if(costError)return costError;
+  const id=`project_${++home.nextProject}`,until=game.time+spec.seconds;
+  if(parent){parent.upgrading=id;home.projects.push({id,kind:'upgrade',target:parent.id,upgrade:kind,until,bound:{credits:spec.credits,goods:structuredClone(spec.goods)}});}
+  else if(kind==='land')home.projects.push({id,kind:'land',until,bound:{credits:spec.credits,goods:structuredClone(spec.goods)}});
+  else{
+    const structure={id,kind,recipe:kind==='plant'?recipe:null,plot,status:'building',readyAt:until,enabled:true,priority:50,progress:0};
+    home.structures.push(structure);home.projects.push({id:'build_'+id,kind:'construction',target:id,until,bound:{credits:spec.credits,goods:structuredClone(spec.goods)}});
+  }
+  notify(game,entity);
+}
+
+export function restoreBasicPlant(game,player,entity,facility) {
+  const error=homeAccess(game,player,entity);if(error)return error;
+  const home=entity.market.homeworld;initializeHomeOperations(home);
+  const building=home.facilities[facility];
+  if(!HOMEWORLD.start.basicPlants.includes(facility)||!ready(building))return 'Eine reparierte Grundanlage auswählen.';
+  if(building.restored||building.upgrading)return 'Diese Anlage ist bereits ausgebaut oder wird erweitert.';
+  const teamError=homeConstructionError(home);if(teamError)return teamError;
+  const errorCost=charge(game,player,entity,HOMEWORLD.industry.restore);if(errorCost)return errorCost;
+  const id=`project_${++home.nextProject}`;building.upgrading=id;
+  home.projects.push({id,kind:'restore',target:facility,until:game.time+60,bound:structuredClone(HOMEWORLD.industry.restore)});
+  notify(game,entity);
+}
+
+export function trainHome(game,player,entity,to) {
+  const error=homeAccess(game,player,entity);if(error)return error;
+  const home=entity.market.homeworld;initializeHomeOperations(home);
+  const schools=home.structures.filter(s=>s.kind==='school'&&ready(s)&&s.enabled!==false&&(to!=='specialist'||s.upgrades?.includes('academy')));
+  const available=schools.filter(s=>!home.projects.some(p=>p.kind==='training'&&p.school===s.id));
+  if(!available.length)return 'Keine freie geeignete Schule oder Akademie.';
+  const spec=HOMEWORLD.population.training[to],from=to==='skilled'?'basic':'skilled',reserved=trainingReserved(home);
+  if(home.workers[from]-reserved[from]-(home.workforce?.used?.[from]||0)-(from==='basic'?buildTeams(home):0)<spec.count)return 'Nicht genügend freie Einwohner dieser Qualifikation.';
+  home.projects.push({id:`training_${++home.nextProject}`,kind:'training',school:available[0].id,from,to,count:spec.count,remaining:spec.seconds});
+  notify(game,entity);
+}
+
+export function setHomeReserve(game,player,entity,good,amount) {
+  const error=homeAccess(game,player,entity);if(error)return error;
+  initializeHomeOperations(entity.market.homeworld);
+  entity.market.homeworld.reserves[good]=amount;
+  notify(game,entity);
+}
+
+export function setHomeOperation(game,player,entity,id,enabled,priority) {
+  const error=homeAccess(game,player,entity);if(error)return error;
+  const home=entity.market.homeworld;initializeHomeOperations(home);
+  const building=(Object.hasOwn(home.facilities,id)?home.facilities[id]:null)||home.structures.find(s=>s.id===id);
+  if(!building)return 'Unbekannte Anlage.';
+  if((id==='workshop'||building.kind==='workshop')&&!enabled&&player.relic?.operation?.world===entity.id)return 'Während der Antriebsarbeit bleibt die Werkstatt reserviert.';
+  if(['dock','control'].includes(id)&&!enabled)return 'Grundlegender Lager- und Leitstellenbetrieb bleibt durch Notversorgung erhalten.';
+  building.enabled=enabled;building.priority=priority;
+  notify(game,entity);
+}
+
+function completeConstruction(game,entity,now) {
+  const home=entity.market.homeworld;
+  for(const [id,building] of Object.entries(home.facilities))if(building.status==='building'&&now>=building.readyAt){
+    building.status='ready';building.completedAt=building.readyAt;delete building.readyAt;
+    if(id==='control')home.controlLevel=1;
+    notify(game,entity);
+  }
+  const pending=[];
+  for(const project of home.projects){
+    if(project.kind==='training'||now<project.until){pending.push(project);continue;}
+    if(project.kind==='construction'){
+      const building=home.structures.find(s=>s.id===project.target);building.status='ready';building.completedAt=project.until;delete building.readyAt;building.bound=project.bound;
+    }else if(project.kind==='upgrade'){
+      const building=home.structures.find(s=>s.id===project.target);building.upgrades||=[];building.upgrades.push(project.upgrade);delete building.upgrading;
+    }else if(project.kind==='restore'){
+      const building=home.facilities[project.target];building.restored=true;delete building.upgrading;
+    }else if(project.kind==='land'){home.plots=Math.min(48,home.plots+4);home.expansions++;}
+    notify(game,entity);
+  }
+  home.projects=pending;
+}
+
+function productionAvailable(market,recipe) {
+  if(!Object.entries(recipe.in).every(([g,n])=>availableHomeStock(market,g)>=n))return false;
+  const delta={normal:0,hazard:0};
+  for(const [g,n] of Object.entries(recipe.out)){const cls=GOODS[g]?.cls;if(cls in delta)delta[cls]+=n;}
+  for(const [g,n] of Object.entries(recipe.in)){const cls=GOODS[g]?.cls;if(cls in delta)delta[cls]-=n;}
+  const used=homeStorageUsage(market),home=market.homeworld;
+  return used.normal+delta.normal<=home.storage+1e-8&&used.hazard+delta.hazard<=home.hazardStorage+1e-8;
+}
+
+function runProduction(market,building,recipe,dt,speed) {
+  if(!productionAvailable(market,recipe))return;
+  building.progress=(building.progress||0)+dt*speed;
+  let cycles=Math.floor((building.progress+1e-9)/recipe.time);
+  // Each iteration is a full physical recipe cycle; no partial inputs or outputs.
+  let completedCycles=0;
+  while(cycles-->0&&productionAvailable(market,recipe)){
+    for(const [g,n] of Object.entries(recipe.in))market.goods[g].stock-=n;
+    for(const [g,n] of Object.entries(recipe.out)){market.goods[g].stock+=n;market.homeworld.produced[g]=(market.homeworld.produced[g]||0)+n;}
+    building.progress-=recipe.time;completedCycles++;
+  }
+  building.progress=Math.min(recipe.time,Math.max(0,building.progress));
+  const id=building.recipe||building.facility;
+  market.homeworld.productionCycles[id]=(market.homeworld.productionCycles[id]||0)+completedCycles;
+}
+
+function populationStep(entity,dt) {
+  const market=entity.market,home=market.homeworld;
+  const consume=(good,amount)=>{
+    const reserved=Object.values(home.reservations).reduce((sum,item)=>sum+(item.goods[good]||0),0);
+    const taken=Math.min(Math.max(0,(market.goods[good]?.stock||0)-reserved),amount);
+    if(market.goods[good])market.goods[good].stock-=taken;
+    return amount>0?taken/amount:1;
+  };
+  const supply={};
+  for(const [good,amount] of Object.entries(HOMEWORLD.population.needPerHour))supply[good]=consume(good,home.population*amount*dt/3600);
+  const basic=Math.min(supply.water,supply.food),comfortScale=Math.min(1,home.population/1000);
+  let comfort=0;
+  for(const [good,amount] of Object.entries(HOMEWORLD.population.comfortPerHour))comfort+=consume(good,home.population*amount*comfortScale*dt/3600)/3;
+  home.supply={...supply,basic,comfort};home.supplyFactor=.25+.75*basic+.25*basic*comfort;
+  if(basic>=1-1e-8){
+    home.growthProgress+=Math.min(home.population*HOMEWORLD.population.growthPerHour,HOMEWORLD.population.maxGrowthPerHour)*dt/3600;
+    const growth=Math.min(Math.floor(home.growthProgress+1e-9),Math.max(0,home.housing-home.population));
+    if(growth>0){home.population+=growth;home.growthProgress-=growth;home.workers.basic+=Math.max(0,Math.floor(home.population*.6)-QUALIFICATIONS.reduce((sum,q)=>sum+home.workers[q],0));}
+    if(home.population>=home.housing)home.growthProgress=Math.min(home.growthProgress,1);
+  }
+  return basic>=1-1e-8;
+}
+
+function operationStep(game,entity,dt,now) {
+  const market=entity.market,home=market.homeworld;
+  completeConstruction(game,entity,now);
+  home.storage=HOMEWORLD.start.storage;home.hazardStorage=completed(game.players.get(home.owner),'H06')?HOMEWORLD.start.hazardStorage:0;home.housing=HOMEWORLD.start.housing;
+  for(const building of home.structures.filter(ready)){
+    const spec=structureSpec(building);home.storage+=spec.storage||0;home.hazardStorage+=spec.hazardStorage||0;home.housing+=spec.housing||0;
+  }
+  for(const [good,slot] of Object.entries(market.goods))slot.cap=GOODS[good].cls==='normal'?home.storage:GOODS[good].cls==='hazard'?home.hazardStorage:0;
+  const fullySupplied=ready(home.facilities.dock)?populationStep(entity,dt):false;
+  if(fullySupplied&&completed(game.players.get(home.owner),'H03'))home.suppliedSeconds+=dt;
+  const reserved=trainingReserved(home),remaining={...home.workers},used=qualified();
+  for(const q of QUALIFICATIONS)remaining[q]-=reserved[q];remaining.basic-=buildTeams(home);
+  const relicWork=game.players.get(home.owner)?.relic?.operation?.world===entity.id;
+  if(relicWork)remaining.skilled-=2;
+  const allocations=[];
+  const flows={};
+  const flow=(good,field,amount)=>{flows[good]||={produce:0,consume:0};flows[good][field]+=amount;};
+  for(const [good,n] of Object.entries(HOMEWORLD.population.needPerHour))flow(good,'consume',home.population*n);
+  let generation=HOMEWORLD.start.power,powerUsed=0;
+  const staffAvailable=(spec)=>QUALIFICATIONS.every(q=>remaining[q]>=(spec.workers[q]||0));
+  const assign=(id,spec,reason=null)=>{
+    if(reason){allocations.push({id,state:'paused',reason,power:0,workers:qualified()});return false;}
+    if(!staffAvailable(spec)){allocations.push({id,state:'paused',reason:'Personal fehlt',power:0,workers:qualified()});return false;}
+    for(const q of QUALIFICATIONS){remaining[q]-=spec.workers[q]||0;used[q]+=spec.workers[q]||0;}
+    powerUsed+=spec.power||0;allocations.push({id,state:'active',power:spec.power||0,workers:{...spec.workers}});return true;
+  };
+  const structures=home.structures.filter(ready).sort((a,b)=>(b.priority??50)-(a.priority??50)||a.id.localeCompare(b.id));
+  for(const building of structures){
+    const spec=structureSpec(building);if(!spec.generation)continue;
+    const fueled=Object.entries(spec.fuelPerHour||{}).every(([g,n])=>availableHomeStock(market,g)+1e-8>=n*dt/3600);
+    if(assign(building.id,spec,building.enabled===false?'Pausiert':!fueled?'Betriebsmittel fehlen':null)){
+      generation+=spec.generation;
+      for(const [g,n] of Object.entries(spec.fuelPerHour||{})){market.goods[g].stock=Math.max(0,market.goods[g].stock-n*dt/3600);flow(g,'consume',n);}
+    }
+  }
+  const units=[];
+  for(const [id,building] of Object.entries(home.facilities)){
+    if(!ready(building))continue;
+    let spec;
+    if(RECIPES[id])spec=building.restored?INDUSTRY_GROUPS.I:{power:1,workers:{basic:4}};
+    else if(id==='dock')spec={power:2,workers:{basic:2}};
+    else if(id==='control')spec={power:2+home.controlLevel,workers:{basic:2,skilled:home.controlLevel>=2?2:0,specialist:home.controlLevel>=4?Math.floor(home.controlLevel/4):0}};
+    else if(id==='workshop'&&relicWork&&building.enabled!==false)spec={power:2,workers:{skilled:2}};
+    else continue;
+    units.push({id,building,spec,recipe:RECIPES[id],relicWorkshop:id==='workshop',priority:id==='workshop'?110:building.priority??(['dock','control'].includes(id)?100:['waterworks','foodplant','fueldepot'].includes(id)?80:50)});
+  }
+  for(const building of structures){
+    const spec=structureSpec(building);if(spec.generation)continue;
+    if(building.kind==='workshop'&&(!relicWork||units.some(unit=>unit.relicWorkshop)||building.enabled===false))continue;
+    units.push({id:building.id,building,spec,recipe:building.kind==='plant'?RECIPES[building.recipe]:null,relicWorkshop:building.kind==='workshop',priority:building.kind==='workshop'?110:building.priority??50});
+  }
+  units.sort((a,b)=>b.priority-a.priority||a.id.localeCompare(b.id));
+  for(const unit of units){
+    const {id,building,spec,recipe}=unit;
+    if(unit.relicWorkshop&&relicWork)remaining.skilled+=2;
+    const reason=building.enabled===false?'Pausiert':recipe&&!productionAvailable(market,recipe)?'Zutaten fehlen, Reserve geschützt oder Lager voll':powerUsed+(spec.power||0)>generation?'Energie fehlt':null;
+    const emergency=['dock','control'].includes(id)&&reason==='Energie fehlt';
+    if(emergency){allocations.push({id,state:'emergency',reason:'Unabhängige Notversorgung erhält Lagerzugang und Reichweite',power:0,workers:qualified()});continue;}
+    if(!assign(id,spec,reason)){building.blocked=reason||'Personal fehlt';continue;}
+    building.blocked=null;
+    if(recipe){
+      const speed=building.kind==='plant'||building.restored?1:HOMEWORLD.industry.repairedSpeed;
+      for(const [g,n] of Object.entries(recipe.in))flow(g,'consume',n*speed*3600/recipe.time);
+      for(const [g,n] of Object.entries(recipe.out))flow(g,'produce',n*speed*3600/recipe.time);
+      building.facility=id;runProduction(market,building,recipe,Math.min(dt,Math.max(0,now-(building.completedAt??-Infinity))),speed);
+    }
+  }
+  const pending=[];
+  for(const project of home.projects){
+    if(project.kind!=='training'){pending.push(project);continue;}
+    const schoolActive=allocations.some(item=>item.id===project.school&&item.state==='active');
+    if(fullySupplied&&schoolActive)project.remaining=Math.max(0,project.remaining-dt);
+    project.paused=!(fullySupplied&&schoolActive);
+    if(project.remaining>0){pending.push(project);continue;}
+    home.workers[project.from]-=project.count;home.workers[project.to]+=project.count;reserved[project.from]-=project.count;remaining[project.to]+=project.count;home.trained[project.to]+=project.count;notify(game,entity);
+  }
+  home.projects=pending;
+  home.energy={generation,used:powerUsed,free:Math.max(0,generation-powerUsed)};
+  home.workforce={total:{...home.workers},used,reserved:{...reserved,basic:reserved.basic+buildTeams(home)},free:remaining};
+  home.allocations=allocations;
+  home.flows=flows;
+  home.employmentFactor=.5+.5*QUALIFICATIONS.reduce((sum,q)=>sum+used[q],0)/Math.max(1,QUALIFICATIONS.reduce((sum,q)=>sum+home.workers[q],0));
+  home.power=generation;
+}
+
+export function tickHomeOperations(game,entity,dt) {
+  const home=entity.market.homeworld;initializeHomeOperations(home);
+  let remaining=dt;
+  while(remaining>0){const step=Math.min(10,remaining),now=game.time-remaining+step;operationStep(game,entity,step,now);remaining-=step;}
+}

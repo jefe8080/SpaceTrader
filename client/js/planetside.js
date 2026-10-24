@@ -1,6 +1,7 @@
 // Surface state stays separate from the space map and its camera.
 import { GOODS, RECIPES, ENTERTAINMENT, RECIPE_CATS, planetFeatures, planetRng, factorySlots, recipeCat } from '/shared/config.js';
 import { state, myShips } from './state.js';
+import { HOME_BUILDINGS } from '/shared/homeworld.js';
 export const scene = { scroll: 0, width: 0, items: [], hover: null, key: '', selected: null };
 const LOOK = {
   farm: ['grain', 'biomass', 'food', 'fertilizer', 'textiles', 'preserves'],
@@ -61,7 +62,7 @@ export function renderPlanetside(now, dt) {
   const e = state.entities.get(state.landed);
   if (!e) return;
   canvas.hidden = false;
-  const key = JSON.stringify([e.id, e.type, Object.entries(e.market.goods).map(([g,s]) => [g,s.role,s.fac]), e.market.bld?.fac, e.market.homeworld?.plots, !!state.props.get(e.id)?.manage]);
+  const key = JSON.stringify([e.id, e.type, Object.entries(e.market.goods).map(([g,s]) => [g,s.role,s.fac]), e.market.bld?.fac, e.market.homeworld?.plots, e.market.homeworld?.structures?.map(s=>[s.id,s.kind,s.recipe,s.plot,s.status]), !!state.props.get(e.id)?.manage]);
   if (key !== scene.key) {
     const factoriesChanged = JSON.stringify(scene.items.filter(it => it.kind === 'factory').map(it => it.recipe)) !== JSON.stringify(e.market.bld?.fac ?? []);
     Object.assign(scene, buildItems(e), { key });
@@ -94,7 +95,12 @@ export function buildItems(e) {
       ['refinery', 'produce', 'drill', 'Raffinerie'], ['smelter', 'produce', 'mine', 'Schmelzwerk'],
     ];
     const items = [{ kind: 'questhouse', key: 'questhouse', label: 'Heimatjournal' }, ...basic.map(([homeFacility, kind, look, label]) => ({ kind, look, homeFacility, key: `home:${homeFacility}`, label }))];
-    for (let i = 0; i < (e.market.homeworld?.plots || 8); i++) items.push({ kind: 'plot', cat: 'bio', plotIndex: i, key: `home:plot_${i}`, label: `Bauplatz ${i + 1}` });
+    for (let i = 0; i < (e.market.homeworld?.plots || 8); i++) {
+      const structure=e.market.homeworld?.structures?.find(s=>s.plot===i);
+      items.push(structure ? {kind:structure.status==='ready'?'factory':'plot',cat:'bio',plotIndex:i,homeStructure:structure.id,
+        key:`home:structure:${structure.id}`,label:structure.recipe?RECIPES[structure.recipe].name:HOME_BUILDINGS[structure.kind]?.name||structure.kind}
+        :{ kind: 'plot', cat: 'bio', plotIndex: i, key: `home:plot_${i}`, label: `Bauplatz ${i + 1}` });
+    }
     return { items, width: 240, feat: {} };
   }
   const m = e.market;

@@ -62,6 +62,7 @@ export function planetEscape() {
 }
 
 export function renderPlanetUi() {
+  if (panel.contains(document.activeElement) && document.activeElement.matches('input,select,textarea')) return;
   const e = state.landed && state.entities.get(state.landed);
   bar.hidden = !e;
   if (e && current) {
@@ -150,6 +151,20 @@ panel.addEventListener('click', (ev) => {
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'homeBuild': cmd('homeBuild', { target:e.id, kind:d.kind, recipe:d.kind==='plant'?document.getElementById('homeRecipe')?.value:undefined, parent:d.parent, plot:current?.plotIndex }); return;
+    case 'homeRestore': cmd('homeRestore', { target:e.id, facility:d.facility }); return;
+    case 'homeTrain': cmd('homeTrain', { target:e.id, qualification:d.qualification }); return;
+    case 'homeReserve': cmd('homeReserve', { target:e.id, good:document.getElementById('homeReserveGood')?.value, amount:Number(document.getElementById('homeReserveAmount')?.value) }); return;
+    case 'homeOperation': {
+      const building=e.market.homeworld.facilities[d.id]||e.market.homeworld.structures.find(s=>s.id===d.id);
+      cmd('homeOperation',{target:e.id,id:d.id,enabled:d.enabled==='true',priority:building?.priority??50});return;
+    }
+    case 'homePriority': {
+      const building=e.market.homeworld.facilities[d.id]||e.market.homeworld.structures.find(s=>s.id===d.id);
+      const value=prompt('Priorität von 0 bis 100 (höhere Zahl zuerst):',String(building?.priority??50));
+      if(value!==null&&Number.isFinite(Number(value))&&Number(value)>=0&&Number(value)<=100)cmd('homeOperation',{target:e.id,id:d.id,enabled:building?.enabled!==false,priority:Math.floor(Number(value))});
+      return;
+    }
     case 'relicDeliver': cmd('relicDeliver', { ship: d.ship, target: e.id }); return;
     case 'relicWork': cmd('relicWork', { ship: document.getElementById('homeRelicShip')?.value, target: e.id, kind: d.kind }); return;
     case 'homeWreck': {

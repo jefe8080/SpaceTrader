@@ -1,9 +1,31 @@
-import { HOME_QUESTS } from '../../shared/homeworld.js';
+import { HOME_QUESTS, HOME_BUILDINGS } from '../../shared/homeworld.js';
+import { GOODS, RECIPES } from '../../shared/goods.js';
 import { ownHome, homePresent, repairHome, completeHomeQuest } from '../homeworld.js';
 import { V } from './validate.js';
 import { relicSalvage, relicDeliver, relicWork } from '../relic.js';
+import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation } from '../homeworld-operations.js';
 
 export default {
+  homeBuild: {
+    args: { target: V.entity(), kind: V.oneOf(...Object.keys(HOME_BUILDINGS), 'plant'), recipe: V.opt(V.key(RECIPES)), parent: V.opt(V.str(40)), plot: V.opt(V.int(0, 47)) },
+    run({ game, player }, { target, kind, recipe, parent, plot }) { return homeBuild(game, player, target, kind, recipe, parent, plot); },
+  },
+  homeRestore: {
+    args: { target: V.entity(), facility: V.str(40, 1) },
+    run({ game, player }, { target, facility }) { return restoreBasicPlant(game, player, target, facility); },
+  },
+  homeTrain: {
+    args: { target: V.entity(), qualification: V.oneOf('skilled', 'specialist') },
+    run({ game, player }, { target, qualification }) { return trainHome(game, player, target, qualification); },
+  },
+  homeReserve: {
+    args: { target: V.entity(), good: V.key(GOODS), amount: V.int(0, 1e9) },
+    run({ game, player }, { target, good, amount }) { return setHomeReserve(game, player, target, good, amount); },
+  },
+  homeOperation: {
+    args: { target: V.entity(), id: V.str(40, 1), enabled: V.bool(), priority: V.int(0, 100) },
+    run({ game, player }, { target, id, enabled, priority }) { return setHomeOperation(game, player, target, id, enabled, priority); },
+  },
   manualShip: {
     args: { ship: V.ownShip() },
     run({ player }, { ship }) { player.manualShip = ship.id; },
