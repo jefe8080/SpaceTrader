@@ -4,6 +4,7 @@ import { sellToSupplier as sellToSupplierImpl } from './property.js';
 import { zoneEffects, inZone } from '../shared/nav.js';
 import { availableHomeStock } from '../shared/homeworld.js';
 import { segmentCovered, pointCovered } from './coverage.js';
+import {loadRealSupply} from './real-economy.js';
 
 const inZoneAt = (z, p) => inZone(z, p.x, p.y);
 
@@ -377,13 +378,15 @@ function runRoute(ship, c, dt, game) {
 
 /** NPC-Versorger bzw. -Abholer: Quelle anfliegen, die bemessene Menge laden/abbauen, zum Ziel, entladen. */
 function runSupply(ship, o, dt, game) {
-  const station = game.world.entities.get(o.stationId);
+  const station = game.world.entities.get(o.deliveryTargetId||o.stationId);
+  if(!station&&o.real){ship.state='waiting';setWarn(ship,'delivery','Lieferziel fehlt; bezahlte Fracht bleibt an Bord.');return false;}
   if (!station) { game.removeShip(ship); return true; }
   if (o.phase === 'toSource') {
     const src = game.world.entities.get(o.sourceId);
     if (!src) { o.phase = 'toStation'; return false; }
     if (!flyToEntity(ship, src, dt, game)) return false;
-    if (src.kind === 'belt') {
+    if(o.real){loadRealSupply(game,ship,src,o);o.phase='toStation';}
+    else if (src.kind === 'belt') {
       if (!mineStep(ship, src, dt, o.amount ?? Infinity)) return false;
     } else {
       const slot = src.market?.goods[o.good];
@@ -402,6 +405,6 @@ function runSupply(ship, o, dt, game) {
     o.phase = 'toStation';
   }
   if (!flyToEntity(ship, station, dt, game)) return false;
-  game.finishSupply(ship, station);
-  return true;
+  const result=game.finishSupply(ship, station);
+  return result!==false;
 }

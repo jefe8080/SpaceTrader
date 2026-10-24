@@ -4,6 +4,7 @@ import { hexAt, hexKey } from '../shared/hex.js';
 import { rng, hashN } from './worldgen.js';
 import { newProperty } from './property.js';
 import { grantRelic } from './relic.js';
+import {stat} from './markets.js';
 import { tickHomeOperations, homeAccess, homeConstructionError } from './homeworld-operations.js';
 
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -93,11 +94,12 @@ export function createHomeworld(game, player) {
     const good = resource.good;
     game.world.addEntity({ id: `${id}_source_${good}`, name: `${GOODS[good].name} – ${site.system.name}`, kind: 'planet',
       type: resourceTypes[good], radius: 80, size: 1, ...resource.point, sector: entity.sector, system: entity.system,
-      market: { strategy: 'homeResource', eff: 0.25, goods: { [good]: { role: 'produce', rate: rates[good], cap: 600, stock: 150, mod: 1 },
+      market: { strategy: 'homeResource', eff: 0.25, provenance:[{id:`${id}_source_${good}:natural`,source:'natural_reserve',good,amount:150}], goods: { [good]: { role: 'produce', rate: rates[good], cap: 600, stock: 150, mod: 1 },
         food: { role: 'consume', rate: 0.02, cap: 100, stock: 0, mod: 1 } } } });
   }
   player.credits = HOMEWORLD.start.credits;
   const ship = game.spawnShip(player, HOMEWORLD.start.ship, entity);
+  home.grants.push({id:`${entity.id}:start-ship`,source:'start_exception',recipient:player.id,ship:ship.id,fuel:ship.fuel});
   ship.dockedAt = null; ship.state = 'idle';
   player.manualShip = ship.id;
   game.revealAround(player, entity.x, entity.y, HOMEWORLD.placement.maxResourceDistance + 1000);
@@ -200,7 +202,7 @@ export function completeHomeQuest(game, player, entity, id) {
   if (id === 'H04') { grantRelic(game, player, entity); player.homeQuest.salvage.phase = 'complete'; }
   if (id === 'H05') {
     const ship = game.spawnShip(player, 'spatz', entity);
-    home.grants.push({ id: `${entity.id}:second-ship`, source: 'quest_H05', recipient: player.id, ship: ship.id });
+    home.grants.push({ id: `${entity.id}:second-ship`, source: 'quest_H05', recipient: player.id, ship: ship.id, fuel:ship.fuel });
   }
   if (id === 'H06') {
     home.hazardStorage = HOMEWORLD.start.hazardStorage;
@@ -214,10 +216,10 @@ export function tickHomeworld(game, entity, dt) {
   tickHomeOperations(game, entity, dt);
 }
 
-export function tickHomeResource(entity, dt) {
+export function tickHomeResource(entity, dt, now=0) {
   const market = entity.market, food = market.goods.food;
   const supplied = food.stock >= food.rate * dt;
   market.eff = supplied ? 1 : HOMEWORLD.industry.unsuppliedExtraction;
-  food.stock = Math.max(0, food.stock - food.rate * dt);
-  for (const slot of Object.values(market.goods)) if (slot.role === 'produce') slot.stock = Math.min(slot.cap, slot.stock + slot.rate * market.eff * dt);
+  const consumed=Math.min(food.stock,food.rate*dt);food.stock-=consumed;stat(market,now,'c','food',consumed);
+  for (const [good,slot] of Object.entries(market.goods)) if (slot.role === 'produce') {const amount=Math.max(0,Math.min(slot.cap-slot.stock,slot.rate*market.eff*dt));slot.stock+=amount;stat(market,now,'p',good,amount);}
 }

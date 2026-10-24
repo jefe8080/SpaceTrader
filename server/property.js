@@ -22,7 +22,7 @@ export function applyProperty(game, e, prop) {
   const label = game.ownerLabel(prop.player);
   e.ownerName = label.name;
   e.ownerColor = label.color;
-  if (e.type === 'ruins') { m.rev = (m.rev || 0) + 1; return; }
+  if (e.type === 'ruins'||m.realEconomy) { m.rev = (m.rev || 0) + 1; return; }
   const u = prop.upg || {};
   m.storageMul = 1 + PROP_UPGRADES.storage.per * (u.storage || 0);
   m.boost = 1 + PROP_UPGRADES.speed.per * (u.speed || 0);

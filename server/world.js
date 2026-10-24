@@ -1,4 +1,5 @@
-import { WORLD, cellKey, cellOf } from '../shared/config.js';
+import { WORLD, STATION_TYPES, cellKey, cellOf } from '../shared/config.js';
+import { preparePublicEntity } from './real-economy.js';
 import { hexAt, hexCenter, hexKey, hexNeighbors } from '../shared/hex.js';
 import { generateSector } from './worldgen.js';
 
@@ -6,8 +7,9 @@ import { generateSector } from './worldgen.js';
  * Die Welt: unendliches Hex-Raster aus Sektoren, die bei Annäherung vollständig erzeugt werden.
  */
 export class World {
-  constructor(seed) {
+  constructor(seed,profile='legacy') {
     this.seed = seed;
+    this.profile=profile;
     this.sectors = new Map();   // "q,r" -> Sektor
     this.systems = new Map();   // System-ID -> System
     this.entities = new Map();  // ID -> Planet, Station, Asteroidenfeld, Wurmloch
@@ -47,7 +49,8 @@ export class World {
     const { sector, entities } = generateSector(this.seed, q, r);
     this.addSector(sector);
     // Wurmloch-Enden können schon von einem Nachbarsektor angelegt sein
-    const fresh = entities.filter((e) => !this.entities.has(e.id));
+    const fresh = entities.filter((e) => !this.entities.has(e.id)&&(this.profile!=='homeworld'||!STATION_TYPES[e.type]?.recipe));
+    if(this.profile==='homeworld')for(const entity of fresh)preparePublicEntity(entity);
     for (const e of fresh) this.addEntity(e);
     return { sector, entities: fresh };
   }

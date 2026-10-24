@@ -118,6 +118,9 @@ function homeBalance(entity){
     <span>Normales Lager</span><span>${fmt(used.normal)} / ${home.storage}</span><span>Gefahrgutlager</span><span>${fmt(used.hazard)} / ${home.hazardStorage}</span>
     <span>Personal frei: einfach / Fach / Spezial</span><span>${work?`${work.free.basic} / ${work.free.skilled} / ${work.free.specialist}`:'48 / 12 / 0'}</span>
     <span>Grundversorgung</span><span>${Math.round((home.supply?.basic||0)*100)} % · Notversorgung erhält Einwohner und Fortschritt</span></div>`;
+  if(home.civil)html+=`<details><summary>Bürger und Geld</summary><p>Brutto ${fmt(home.civil.incomePerHour||0)} Cr/h · Steuer ${Math.round(home.civil.taxRate*100)} % · Konsumkasse ${fmt(home.civil.budget)} Cr</p>
+    <p>Bisher: ${fmt(home.civil.gross)} Cr Einkommen, davon ${fmt(home.civil.taxes)} Cr Steuern und ${fmt(home.civil.consumptionPayments)} Cr tatsächlich bezahlter Konsum.</p>
+    <label>Steuer 0–40 % <input id="homeTaxPercent" type="number" min="0" max="40" value="${Math.round(home.civil.taxRate*100)}"></label><button class="small" data-pp="homeTax">Steuersatz setzen</button></details>`;
   html+='<table class="market"><tr><th>Ware</th><th>Verfügbar / geschützt</th><th>Zu- / Abfluss je h</th></tr>';
   for(const [g,slot] of Object.entries(entity.market.goods)){
     const protectedAmount=slot.stock-availableHomeStock(entity.market,g),flow=home.flows?.[g];

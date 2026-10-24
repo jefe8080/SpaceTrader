@@ -1,6 +1,6 @@
 # Warenquelleninventar für PRD 5
 
-Stand: 2026-10-24, U3. Diese Liste beschreibt die bisherigen Quellen und den verbindlichen Umbau. Das Testprofil `homeworld` ist zunächst eine isolierte Entwicklungswelt; es erklärt die alte Wirtschaft ausdrücklich noch nicht zur realen PRD-5-Wirtschaft. Die öffentlichen Fabriken bleiben bis zum geprüften Einstieg verfügbar.
+Stand: 2026-10-24, U9. Die Tabelle dokumentiert das ursprüngliche Quelleninventar und seine Umsetzungsschritte. Nach geprüftem Einstieg erzeugt das Profil `homeworld` jetzt ausschließlich Rohstoffförderer, Abnehmer, Händler und Dienstleister; öffentliche Rezeptfabriken und zufällige Fertigwarenbestände entfallen. Die neue Generierung wird an frischen Welten geprüft.
 
 | Quelle / Senke | Bestehender Code und Verhalten | Ziel / Umsetzungsschritt |
 |---|---|---|
@@ -38,4 +38,6 @@ Stand: 2026-10-24, U3. Diese Liste beschreibt die bisherigen Quellen und den ver
 - Spielerbeitritt, neue Sektoren, Wiederanmeldung und Neustart dürfen keine zweite Einstiegshilfe auslösen.
 - Alle 40 vorhandenen Rezepte und sechs Module bleiben im Katalogaudit; sechs neue Veredelungen werden in U11 ergänzt.
 
-Die Liste ist ein Umbauinventar, kein bestandener Nachweis A03. Erst U9–U17 schließen diese Nachweise ab.
+U9-Nachweise unter `docs/qa/prd5-u9/`: 25 generierte Sektoren ohne öffentliche Verarbeitung/Fertigwaren, natürliche Anfangsvorräte mit Quellen-ID, einmalige Startschiffe samt Tank, echte Förderung/Verbrauch statt Drift, getrennte Kassen und reservierte NPC-Einkäufe, verlustfreie Transport-/Weiterverkaufsbilanz, begrenzte Bürgerzahlungen und vollständige Questübergaben. Einkaufs-/Verkaufszahlungen besitzen Gegenkassen; lokale Produktionszutaten erzeugen keine Auszahlung. Generierte Nachfragebudgets sind einschließlich ungenutzter Transportkasse auf zwei Stunden begrenzt; tatsächlich erwirtschaftete Erlöse bleiben erhalten.
+
+Das Inventar ist noch keine vollständige A03-Gesamtabnahme: Module und Schiffswiederverkauf/-bau werden in U10, Sonderwährungen in U11, Personenbestände in U13 und registrierte spätere Questfunde in U14 ergänzt. U17 führt die Nachweise zusammen.

@@ -114,6 +114,8 @@ test('Handels-XP: persönliche manuelle Transaktion ohne Relikt, nie automatisch
     const f=fixture(),market=f.game.world.entities.get('origin_hub');
     f.ship.dockedAt=market.id;f.ship.cargo={ore:20};f.ship.basis={ore:0};
     market.market.goods.ore={role:'trade',rate:0,stock:0,cap:1000,mod:100};
+    market.market.economy.cash=1e6; // Explicit counterparty funds for this isolated XP test.
+    f.game.world.addEntity({id:'xp-buyer',sector:market.sector,x:market.x+500,y:market.y,market:{goods:{ore:{role:'consume',rate:0,stock:0,cap:1000,mod:1}},economy:{cash:1e6}}});
     const xp=f.player.xp;
     assert.ok(f.game.trade(f.ship,market,'ore',20,'sell',0,opts).n>0);
     if(opts.manual&&!opts.auto)assert.ok(f.player.xp>xp);else assert.equal(f.player.xp,xp);

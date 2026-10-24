@@ -1,6 +1,8 @@
 import { GOODS, RECIPES } from '../shared/goods.js';
 import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, homeStorageUsage, homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { pointCovered } from './coverage.js';
+import {tickCivilMoney} from './real-economy.js';
+import {stat} from './markets.js';
 
 const QUALIFICATIONS = ['basic', 'skilled', 'specialist'];
 const qualified = () => ({ basic: 0, skilled: 0, specialist: 0 });
@@ -195,15 +197,15 @@ function productionAvailable(market,recipe) {
   return used.normal+delta.normal<=home.storage+1e-8&&used.hazard+delta.hazard<=home.hazardStorage+1e-8;
 }
 
-function runProduction(market,building,recipe,dt,speed) {
+function runProduction(market,building,recipe,dt,speed,now) {
   if(!productionAvailable(market,recipe))return;
   building.progress=(building.progress||0)+dt*speed;
   let cycles=Math.floor((building.progress+1e-9)/recipe.time);
   // Each iteration is a full physical recipe cycle; no partial inputs or outputs.
   let completedCycles=0;
   while(cycles-->0&&productionAvailable(market,recipe)){
-    for(const [g,n] of Object.entries(recipe.in))market.goods[g].stock-=n;
-    for(const [g,n] of Object.entries(recipe.out)){market.goods[g].stock+=n;market.homeworld.produced[g]=(market.homeworld.produced[g]||0)+n;}
+    for(const [g,n] of Object.entries(recipe.in)){market.goods[g].stock-=n;stat(market,now,'c',g,n);}
+    for(const [g,n] of Object.entries(recipe.out)){market.goods[g].stock+=n;market.homeworld.produced[g]=(market.homeworld.produced[g]||0)+n;stat(market,now,'p',g,n);}
     building.progress-=recipe.time;completedCycles++;
   }
   building.progress=Math.min(recipe.time,Math.max(0,building.progress));
@@ -211,12 +213,15 @@ function runProduction(market,building,recipe,dt,speed) {
   market.homeworld.productionCycles[id]=(market.homeworld.productionCycles[id]||0)+completedCycles;
 }
 
-function populationStep(entity,dt) {
+function populationStep(entity,dt,now) {
   const market=entity.market,home=market.homeworld;
+  home.civilConsumption={};
   const consume=(good,amount)=>{
     const reserved=Object.values(home.reservations).reduce((sum,item)=>sum+(item.goods[good]||0),0);
     const taken=Math.min(Math.max(0,(market.goods[good]?.stock||0)-reserved),amount);
     if(market.goods[good])market.goods[good].stock-=taken;
+    home.civilConsumption[good]=(home.civilConsumption[good]||0)+taken;
+    stat(market,now,'c',good,taken);
     return amount>0?taken/amount:1;
   };
   const supply={};
@@ -242,7 +247,7 @@ function operationStep(game,entity,dt,now) {
     const spec=structureSpec(building);home.storage+=spec.storage||0;home.hazardStorage+=spec.hazardStorage||0;home.housing+=spec.housing||0;
   }
   for(const [good,slot] of Object.entries(market.goods))slot.cap=GOODS[good].cls==='normal'?home.storage:GOODS[good].cls==='hazard'?home.hazardStorage:0;
-  const fullySupplied=ready(home.facilities.dock)?populationStep(entity,dt):false;
+  const fullySupplied=ready(home.facilities.dock)?populationStep(entity,dt,now):false;
   if(fullySupplied&&completed(game.players.get(home.owner),'H03'))home.suppliedSeconds+=dt;
   const reserved=trainingReserved(home),remaining={...home.workers},used=qualified();
   for(const q of QUALIFICATIONS)remaining[q]-=reserved[q];remaining.basic-=buildTeams(home);
@@ -266,7 +271,7 @@ function operationStep(game,entity,dt,now) {
     const fueled=Object.entries(spec.fuelPerHour||{}).every(([g,n])=>availableHomeStock(market,g)+1e-8>=n*dt/3600);
     if(assign(building.id,spec,building.enabled===false?'Pausiert':!fueled?'Betriebsmittel fehlen':null)){
       generation+=spec.generation;
-      for(const [g,n] of Object.entries(spec.fuelPerHour||{})){market.goods[g].stock=Math.max(0,market.goods[g].stock-n*dt/3600);flow(g,'consume',n);}
+      for(const [g,n] of Object.entries(spec.fuelPerHour||{})){market.goods[g].stock=Math.max(0,market.goods[g].stock-n*dt/3600);flow(g,'consume',n);stat(market,now,'c',g,n*dt/3600);}
     }
   }
   const units=[];
@@ -299,7 +304,7 @@ function operationStep(game,entity,dt,now) {
       const speed=building.kind==='plant'||building.restored?1:HOMEWORLD.industry.repairedSpeed;
       for(const [g,n] of Object.entries(recipe.in))flow(g,'consume',n*speed*3600/recipe.time);
       for(const [g,n] of Object.entries(recipe.out))flow(g,'produce',n*speed*3600/recipe.time);
-      building.facility=id;runProduction(market,building,recipe,Math.min(dt,Math.max(0,now-(building.completedAt??-Infinity))),speed);
+      building.facility=id;runProduction(market,building,recipe,Math.min(dt,Math.max(0,now-(building.completedAt??-Infinity))),speed,now);
     }
   }
   const pending=[];
@@ -317,6 +322,7 @@ function operationStep(game,entity,dt,now) {
   home.allocations=allocations;
   home.flows=flows;
   home.employmentFactor=.5+.5*QUALIFICATIONS.reduce((sum,q)=>sum+used[q],0)/Math.max(1,QUALIFICATIONS.reduce((sum,q)=>sum+home.workers[q],0));
+  tickCivilMoney(game,entity,dt,ready(home.facilities.dock)?home.civilConsumption:{});
   home.power=generation;
 }
 

@@ -79,7 +79,7 @@ test('H00–H06 ohne fremde Industrie: echte Transfers, Eigenproduktion, getrenn
   begin(f);
   assert.equal(f.player.quest.id,'normal');
   assert.equal(f.entity.market.goods.ingots.stock,76);
-  assert.equal(f.home.grants.length,2);
+  assert.equal(f.home.grants.length,3); // Materials, supplies and the registered initial ship/tank.
   repair(f,'waterworks');repair(f,'foodplant');
   deliver(f,'ice',30);deliver(f,'grain',20);advance(f,350);claim(f,'H02');
   repair(f,'control');repair(f,'fueldepot');
@@ -125,7 +125,7 @@ test('Neustart erhält Reparaturtimer, Starthilfen und Heimatidentität ohne neu
     const game=new Game(db,{profile:'homeworld'}),player=game.players.get(id),entity=game.world.entities.get(homeId);
     f={game,player,entity,home:entity.market.homeworld};
     assert.equal(createHomeworld(game,player),entity);
-    assert.equal(player.credits,credits);assert.equal(f.home.grants.length,2);
+    assert.equal(player.credits,credits);assert.equal(f.home.grants.length,3);
     assert.equal(f.home.facilities.waterworks.status,'building');advance(f,18);
     assert.equal(f.home.facilities.waterworks.status,'ready');
     assert.match(command(f,'homeQuestComplete',{quest:'H01'}),/bereits abgeholt/);

@@ -1,6 +1,7 @@
 import { GOODS, PLANET_TYPES, STATION_TYPES, RECIPES, STATION_FOOD, SHIP_TYPES, SHIPYARD, STORAGE, STATS, TRADER, ULTRA, MODULES, YARD_MARGIN,
   ECON, SUPPLY, LEVEL_FX, PLANET_EXTRAS, EXTRA_STEPS, slotPrice, targetOf, driftDelta, giverLevel,
   effectiveLevel, buildingRateMul, buildingCapMul, recipeOf } from '../shared/config.js';
+import {tickRealMarket} from './real-economy.js';
 
 /**
  * Märkte nach Rollen- und Strategie-Modell.
@@ -334,7 +335,7 @@ const yardBonusOf = (b) => (b.bonus ? { bonus: b.bonus, yardLvl: b.yardLvl } : {
  */
 export function applyLevel(e) {
   const m = e.market;
-  if (e.kind !== 'planet' || !m || e.type === 'ruins') return;
+  if (e.kind !== 'planet' || !m || e.type === 'ruins' || m.realEconomy) return;
   const L = m.lvl || 0;
   EXTRA_STEPS.forEach(([lv, role], i) => {
     const g = PLANET_EXTRAS[e.type]?.[i];
@@ -448,7 +449,7 @@ const NOMINAL = {
 };
 /** Strategien mit Drift (Werften bauen aus echtem Material und haben keine Drift) */
 export const DRIFTING = new Set(Object.keys(NOMINAL));
-export const drifts = (m) => !m.owner && DRIFTING.has(m.strategy);
+export const drifts = (m) => !m.realEconomy && !m.owner && DRIFTING.has(m.strategy);
 
 /** Nachfrage-Schwankung: Ziel-Füllstand eines Planeten springt je Ware alle 2 bis 6 h */
 function swing(m, now) {
@@ -478,7 +479,8 @@ function npcTick(e, m, dt, now) {
 export function tickMarket(e, dt, now, game) {
   const m = e.market;
   if (!m) return;
-  if (drifts(m)) npcTick(e, m, dt, now);
+  if(m.realEconomy&&game)tickRealMarket(game,e,dt);
+  else if (drifts(m)) npcTick(e, m, dt, now);
   else STRATEGIES[m.strategy].tick(e, m, dt, now, game);
   // Preisverlauf: letzter Mittelpreis je 5-Minuten-Block (für Sparklines)
   const cur = bucketFor(m, now);

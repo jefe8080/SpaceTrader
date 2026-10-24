@@ -151,6 +151,7 @@ panel.addEventListener('click', (ev) => {
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'homeTax':cmd('homeTax',{target:e.id,percent:Number(document.getElementById('homeTaxPercent')?.value)});return;
     case 'homeControlUpgrade': cmd('homeControlUpgrade',{target:e.id,module:d.module});return;
     case 'homeBuild': cmd('homeBuild', { target:e.id, kind:d.kind, recipe:d.kind==='plant'?document.getElementById('homeRecipe')?.value:undefined, parent:d.parent, plot:current?.plotIndex }); return;
     case 'homeRestore': cmd('homeRestore', { target:e.id, facility:d.facility }); return;

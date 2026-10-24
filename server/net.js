@@ -276,6 +276,8 @@ export function serializeMarket(m) {
 
 function extraOf(m) {
   const out = { eff: r1(m.eff ?? 1) };
+  if(m.economy)out.economy={cash:r1(m.economy.cash),rate:r1(m.economy.rate),granted:r1(m.economy.granted),spent:r1(m.economy.spent)};
+  if(m.realEconomy)out.realEconomy=true;
   if (m.homeworld) out.homeworld = m.homeworld;
   if (m.qxp) out.qxp = Math.floor(m.qxp);
   if (m.lvl) out.lvl = m.lvl;

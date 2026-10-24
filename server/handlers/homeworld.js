@@ -3,9 +3,16 @@ import { GOODS, RECIPES } from '../../shared/goods.js';
 import { ownHome, homePresent, repairHome, completeHomeQuest } from '../homeworld.js';
 import { V } from './validate.js';
 import { relicSalvage, relicDeliver, relicWork } from '../relic.js';
-import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl } from '../homeworld-operations.js';
+import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess } from '../homeworld-operations.js';
 
 export default {
+  homeTax:{
+    args:{target:V.entity(),percent:V.num(0,40)},
+    run({game,player},{target,percent}){
+      const error=homeAccess(game,player,target);if(error)return error;
+      const home=target.market.homeworld;home.civil||={budget:0,gross:0,taxes:0,consumptionPayments:0};home.civil.taxRate=percent/100;
+    },
+  },
   homeControlUpgrade:{
     args:{target:V.entity(),module:V.opt(V.key(CONTROL_MODULES))},
     run({game,player},{target,module}){return upgradeControl(game,player,target,module);},

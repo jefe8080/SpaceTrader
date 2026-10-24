@@ -96,6 +96,7 @@ export default {
   propUpgrade: {
     args: { target: ownProp(), line: V.key(PROP_UPGRADES), extra: V.opt(V.str(30)) },
     run({ game, player }, { target: { e, prop, cons, payer, maxLevel: max }, line, extra }) {
+      if(game.profile==='homeworld')return 'In der neuen Welt werden konkrete Infrastruktur und Spezialisierungen ausgebaut.';
       const lvl = (prop.upg[line] || 0) + 1;
       if (lvl > max) return cons ? `Konsortiumslevel ${cons.level} erlaubt höchstens Ausbaustufe ${max}.` : `Gouverneurslizenz ${player.governor} erlaubt höchstens Ausbaustufe ${max}.`;
       if (line === 'extra') {

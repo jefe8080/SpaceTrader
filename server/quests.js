@@ -2,6 +2,7 @@ import { WORLD, GOODS, BELT_TYPES, QUEST, QUEST_TYPES, REP, RANKS, factionRank, 
   giverLevel, giverXpOf, planetFeatures, EXTRAS } from '../shared/config.js';
 import { hexAt, hexKey, hexNeighbors } from '../shared/hex.js';
 import { missingInputs, stat } from './markets.js';
+import {homeStorageFree} from '../shared/homeworld.js';
 
 /**
  * Quests (PRD-2 Kapitel 9): Questtafeln an Planeten und Werften, eine aktive Quest je Spieler, keine Fristen.
@@ -236,6 +237,8 @@ export function questProgress(game, player, ship) {
     case 'mine': {
       if (at !== q.giver || (ship.cargo[q.good] || 0) < q.amount) return false;
       if (q.type === 'mine' && minedBy(game, player, q.good) - q.minedBase < q.amount) return false;
+      const destination=game.world.entities.get(q.giver);
+      if(game.profile==='homeworld'&&(!destination?.market?.goods[q.good]||homeStorageFree(destination.market,q.good)<q.amount))return false;
       ship.cargo[q.good] -= q.amount;
       if (!ship.cargo[q.good]) delete ship.cargo[q.good];
       const e = game.world.entities.get(q.giver);

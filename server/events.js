@@ -69,6 +69,7 @@ export function startEvent(game, sector, players) {
   const total = demandAmount(good, Number.isFinite(L) ? L : 1);
   const ev = { entity: planet.id, good, price: Math.round(demandPrice(good, planet.market.goods[good]?.mod || 1) * 10) / 10,
     total, left: total, started: Math.round(game.time), ends: Math.round(game.time + DEMAND.DURATION) };
+  if(game.profile==='homeworld'){ev.budget=ev.price*total;ev.spent=0;ev.consumed=0;}
   for (const id of players) {
     const p = game.players.get(id);
     if (p) game.emit('notice', p, `Sondernachfrage: ${planet.name} kauft ${total} ${GOODS[good].name} zu ${ev.price.toLocaleString('de-DE')} Cr (30 min).`);
@@ -84,11 +85,12 @@ export function sellToEvent(game, ship, e, good, amount) {
   const ev = eventAt(game, e.id);
   if (!ev || ev.good !== good || ev.left <= 0 || game.time >= ev.ends) return { n: 0 };
   const have = ship.cargo[good] || 0;
-  const n = Math.min(amount, have, ev.left);
+  const n = Math.min(amount, have, ev.left,game.profile==='homeworld'?Math.floor((ev.budget??0)/ev.price):Infinity);
   if (n <= 0) return { n: 0 };
   const p = game.players.get(ship.owner);
   const total = n * ev.price;
   p.credits += total;
+  if(game.profile==='homeworld'){ev.budget-=total;ev.spent+=total;ev.consumed+=n;}
   ev.left -= n;
   ship.cargo[good] = have - n;
   if (!ship.cargo[good]) { delete ship.cargo[good]; if (ship.basis) delete ship.basis[good]; }

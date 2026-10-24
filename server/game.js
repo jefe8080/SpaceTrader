@@ -19,6 +19,7 @@ import { createHomeworld, tickHomeworld, tickHomeResource } from './homeworld.js
 import { tickRelics } from './relic.js';
 import { homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { coveredPath, pointCovered } from './coverage.js';
+import {dispatchRealSupply,finishRealSupply,receiveMarketCash,spendMarketCash,downstreamDemand} from './real-economy.js';
 
 export const WORLD_GEN_VERSION = 3; // Bestandswelt; Versionskonflikte lösen niemals einen Reset aus
 
@@ -51,7 +52,7 @@ export class Game {
     this.newDiscoveries = []; // [player, kind, key] seit dem letzten Speichern
     this.listeners = {};
     if (!this.load()) {
-      this.world = new World(seed ?? ((Math.random() * 2 ** 31) | 0));
+      this.world = new World(seed ?? ((Math.random() * 2 ** 31) | 0),this.profile);
       this.world.ensureSector(0, 0);
     }
   }
@@ -67,7 +68,7 @@ export class Game {
     if (gen !== this.worldVersion) throw new Error('Inkompatible Weltversion; automatischer Reset ist gesperrt.');
     this.time = st.getMeta('time');
     this.counters = { ...this.counters, ...st.getMeta('counters') };
-    this.world = new World(st.getMeta('seed'));
+    this.world = new World(st.getMeta('seed'),this.profile);
     const markets = new Map(st.loadAll('markets').map((r) => [r.id, r.data]));
     const stats = groupRows(st.loadAll('market_stats'), 'entity');
     for (const r of st.loadAll('sectors')) this.world.addSector(r.data);
@@ -484,12 +485,15 @@ export class Game {
     if (!slot || !canBuyFrom(slot)) return { ok: false, reason: 'kein Treibstoff im Angebot' };
     const missing = tank - ship.fuel;
     if (missing < 0.05) return { ok: false, reason: 'voll' };
-    const own = e.type === 'ruins' && e.market.owner === ship.owner;
+    const prop=this.ownership.get(e.id);
+    if(prop&&prop.player!==ship.owner&&!this.canUseStorage(prop,ship.owner)&&strangerBlocked(prop))return {ok:false,reason:'Privater Handel'};
+    const own = e.market.owner === ship.owner;
     const price = own ? 0 : buyPrice('shipfuel', slot);
     const n = Math.min(missing, availableHomeStock(e.market, 'shipfuel'), own ? Infinity : p.credits / price);
     if (n < 0.05) return { ok: false, reason: slot.stock < 0.05 ? 'kein Bestand' : 'zu wenig Credits' };
     const cost = n * price;
     p.credits -= cost;
+    if(this.profile==='homeworld'&&cost){if(prop){const owner=this.accountOf(prop.player);if(owner)owner.credits+=cost;}else receiveMarketCash(e,cost);}
     slot.stock -= n;
     ship.fuel = Math.min(tank, ship.fuel + n);
     stat(e.market, this.time, 'o', 'shipfuel', n);
@@ -647,7 +651,7 @@ export class Game {
     if (this.econAcc >= 1) {
       for (const prop of this.ownership.values()) {
         const e = this.world.entities.get(prop.entity);
-        if (e?.kind !== 'planet' || e.type === 'ruins') continue;
+        if (e?.kind !== 'planet' || e.type === 'ruins' || this.profile==='homeworld') continue;
         tickOwnedPlanet(this, e, prop, this.econAcc);
         // Fabriken auf Bauplätzen laufen nur bei Besitz
         for (const f of e.market.bld?.factories || []) f.prog = runRecipe(e.market, recipeOf(f.recipe), f.prog || 0, this.econAcc, this.time);
@@ -655,7 +659,12 @@ export class Game {
       const propSectors = new Set([...this.ownership.keys()].map((id) => this.world.entities.get(id)?.sector));
       for (const e of this.world.entities.values()) {
         if (e.market?.strategy === 'homeworld') { tickHomeworld(this, e, this.econAcc); continue; }
-        if (e.market?.strategy === 'homeResource') { tickHomeResource(e, this.econAcc); continue; }
+        if (e.market?.strategy === 'homeResource') { tickHomeResource(e, this.econAcc,this.time); continue; }
+        if(this.profile==='homeworld'&&e.market){
+          tickMarket(e,this.econAcc,this.time,this);
+          if(propSectors.has(e.sector)||this.time-(this.activity.get(e.sector)??-Infinity)<SUPPLY.ACTIVITY)dispatchRealSupply(this,e);
+          continue;
+        }
         tickMarket(e, this.econAcc, this.time, this);
         if (!e.market) continue;
         if (SUPPLIED.has(e.market.strategy)) this.checkSupply(e);
@@ -724,6 +733,7 @@ export class Game {
         if (limit && pr > limit) break;
         if (p.credits - pr < floor) { blocked = floor > 0; break; }
         p.credits -= pr; slot.stock -= 1; total += pr; n++;
+        if(this.profile==='homeworld')receiveMarketCash(e,pr);
       }
       if (opts.auto) setWarn(ship, 'stoploss', blocked ? `Stop-Loss: Einkauf ${GOODS[good].name} gestoppt` : null);
       if (n) ship.cargo[good] = (ship.cargo[good] || 0) + n;
@@ -737,18 +747,20 @@ export class Game {
       }
     } else {
       if (!canSellTo(slot)) return { n: 0, reason: 'Ware wird hier nicht angekauft' };
+      if(this.profile==='homeworld'&&slot.role==='trade'&&!downstreamDemand(this,e,good))return {n:0,reason:'Händler hat keine zahlungsfähige Zielnachfrage'};
       const have = ship.cargo[good] || 0;
-      const max = Math.min(amount, have, Math.floor(slot.cap - slot.stock));
+      const max = Math.min(amount, have, Math.floor(slot.cap - slot.stock),this.profile==='homeworld'&&slot.role==='trade'?downstreamDemand(this,e,good):Infinity);
       const bonus = hasAbility(ship, 'trader') ? 1.05 : 1;
       while (n < max) {
         const pr = sellPrice(good, slot) * bonus;
         if (limit && pr < limit) break;
+        if(this.profile==='homeworld'&&!spendMarketCash(e,pr))break;
         p.credits += pr; slot.stock += 1; total += pr; n++;
       }
       ship.cargo[good] = have - n;
       if (!ship.cargo[good]) delete ship.cargo[good];
       if (n) this.recordShip(ship, 'inc', total, opts.route);
-      if (!n) return { n: 0, reason: slot.cap - slot.stock < 1 ? 'Lager voll' : limit ? 'Preisgrenze' : 'nicht möglich' };
+      if (!n) return { n: 0, reason: slot.cap - slot.stock < 1 ? 'Lager voll' : this.profile==='homeworld'&&e.market.economy?.cash<sellPrice(good,slot)?'Marktkasse reicht nicht aus':limit ? 'Preisgrenze' : 'nicht möglich' };
     }
     stat(e.market, this.time, dir === 'buy' ? 'o' : 'i', good, n);
     this.shipLog(ship, `${dir === 'buy' ? 'Gekauft' : 'Verkauft'}: ${n} ${GOODS[good].name} für ${Math.round(total)} Cr bei ${e.name}`);
@@ -964,6 +976,7 @@ export class Game {
 
   /** Ablieferung: nur, was ins Lager passt (die Ladung wurde passend bemessen) */
   finishSupply(ship, station) {
+    if(ship.queue[0]?.real)return finishRealSupply(this,ship,station);
     const m = station.market;
     const c = ship.queue[0];
     let delivered = 0;

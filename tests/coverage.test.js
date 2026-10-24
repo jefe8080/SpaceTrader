@@ -114,7 +114,7 @@ test('Neustart erhält Freigabe für begonnenen Abschnitt und laufenden Leitstel
   const game=new Game(file,{profile:'homeworld'}),ship=game.ships.get(f.ship.id);
   for(let i=0;i<20;i++)updateShip(ship,1,game);assert.equal(ship.queue.length,0);assert.equal(ship.x,f.ship.coverageLeg.x);
   const home=game.world.entities.get(f.home.id);assert.equal(home.market.homeworld.projects[0].until,60);
-  game.time=60;tickHomeworld(game,home,60);assert.equal(home.market.homeworld.controlLevel,2);assert.equal(game.players.get(f.player.id).credits,2000);
+  game.time=60;tickHomeworld(game,home,60);assert.equal(home.market.homeworld.controlLevel,2);assert.ok(Math.abs(game.players.get(f.player.id).credits-home.market.homeworld.civil.taxes-home.market.homeworld.civil.consumptionPayments-2000)<1e-7);
   game.store.close();fs.rmSync(folder,{recursive:true,force:true});
 });
 

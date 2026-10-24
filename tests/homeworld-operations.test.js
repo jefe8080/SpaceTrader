@@ -28,7 +28,7 @@ test('Bau bindet Material, Geld, gewählten Platz und Team; unabhängige Projekt
   const f=fixture(),credits=f.player.credits,ingots=f.entity.market.goods.ingots.stock;
   assert.equal(command(f,'homeBuild',{kind:'solar',plot:3}),undefined);
   assert.equal(command(f,'homeBuild',{kind:'school',plot:4}),undefined);
-  assert.equal(f.player.credits,credits-13000);
+  assert.ok(Math.abs(f.player.credits-(f.home.civil?.taxes||0)-(f.home.civil?.consumptionPayments||0)-(credits-13000))<1e-7);
   assert.equal(f.entity.market.goods.ingots.stock,ingots-10);
   assert.equal(f.home.structures[0].plot,3);
   assert.match(command(f,'homeBuild',{kind:'housing',plot:3}),/bereits belegt/);
@@ -37,7 +37,7 @@ test('Bau bindet Material, Geld, gewählten Platz und Team; unabhängige Projekt
   assert.equal(f.home.workforce.reserved.basic,4);
   advance(f,1);assert.equal(f.home.structures[0].status,'ready');assert.equal(f.home.energy.generation,32);
   advance(f,30);assert.equal(f.home.structures[1].status,'ready');assert.equal(f.home.projects.length,0);
-  assert.equal(f.player.credits,credits-13000);
+  assert.ok(Math.abs(f.player.credits-(f.home.civil?.taxes||0)-(f.home.civil?.consumptionPayments||0)-(credits-13000))<1e-7);
   assert.ok(Object.values(HOME_BUILDINGS).every(spec=>spec.seconds<=600));
   f.game.store.close();
 });
@@ -167,11 +167,11 @@ test('Neustart erhält Baukosten und Ausbildungsrestzeit ohne Offlinefortschritt
   try{
     f=fixture(file);add(f,'school','school');add(f,'solar','solar');advance(f,1);
     command(f,'homeTrain',{qualification:'skilled'});command(f,'homeBuild',{kind:'housing'});advance(f,30);
-    const id=f.player.id,homeId=f.entity.id,credits=f.player.credits;f.game.close();
+    const id=f.player.id,homeId=f.entity.id,credits=f.player.credits,civilIncome=f.home.civil.taxes+f.home.civil.consumptionPayments;f.game.close();
     const game=new Game(file,{profile:'homeworld'}),player=game.players.get(id),entity=game.world.entities.get(homeId);
     f={game,player,entity,home:entity.market.homeworld};
     assert.equal(f.home.projects.find(p=>p.kind==='training').remaining,90);assert.equal(player.credits,credits);
-    advance(f,30);assert.equal(f.home.structures.find(s=>s.kind==='housing').status,'ready');assert.equal(player.credits,credits);
+    advance(f,30);assert.equal(f.home.structures.find(s=>s.kind==='housing').status,'ready');assert.ok(Math.abs(player.credits-credits-(f.home.civil.taxes+f.home.civil.consumptionPayments-civilIncome))<1e-7);
     advance(f,60);assert.equal(f.home.workers.skilled,22);assert.equal(f.home.projects.length,0);
   }finally{if(f?.game.store.db.open)f.game.store.close();fs.rmSync(directory,{recursive:true,force:true});}
 });

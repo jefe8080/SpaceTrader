@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 import { rng } from '../server/worldgen.js';
+import {GOODS} from '../shared/goods.js';
 
 export function simulateOnboarding({ seed = 42, dbFile = ':memory:', name = 'Heimat Simulation' } = {}) {
   if (dbFile !== ':memory:' && fs.existsSync(dbFile)) throw new Error('Für die Simulation einen neuen Datenpfad wählen.');
@@ -52,7 +53,10 @@ export function simulateOnboarding({ seed = 42, dbFile = ':memory:', name = 'Hei
     until(()=>home.market.homeworld.produced.ingots>=40,'Barrenproduktion');claim('H06');
     const result = { seed, stages, serverSeconds: game.time, credits: Math.round(player.credits),
       produced: home.market.homeworld.produced, stock: Object.fromEntries(Object.entries(home.market.goods).filter(([,s])=>s.stock>0).map(([g,s])=>[g,Math.round(s.stock*100)/100])),
-      grants: home.market.homeworld.grants, relic: player.relic, population: home.market.homeworld.population };
+      grants: home.market.homeworld.grants, relic: player.relic, population: home.market.homeworld.population,
+      civilianMoney:home.market.homeworld.civil,
+      publicMarkets:[...game.world.entities.values()].filter(e=>e.market&&!e.market.homeworld).length,
+      publicManufacturedStock:Object.fromEntries(Object.keys(home.market.goods).filter(g=>GOODS[g].tier>0).map(g=>[g,[...game.world.entities.values()].filter(e=>e.market&&!e.market.homeworld).reduce((sum,e)=>sum+(e.market.goods[g]?.stock||0),0)]).filter(([,n])=>n>0)) };
     game.save();
     return result;
   } finally { if (game?.store.db.open) game.store.close(); Math.random = originalRandom; }
