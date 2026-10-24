@@ -1,6 +1,7 @@
 import { GOODS, FLAGSHIP } from '../../shared/config.js';
 import { V, CmdError } from './validate.js';
 import { tradeAction } from './route.js';
+import { pointCovered, manualActionError } from '../coverage.js';
 
 const MAX_QUEUE = 30;
 
@@ -32,6 +33,18 @@ const queueCmd = (v, ctx) => {
 
 /** Befehl an Schiff übergeben: ersetzen oder anhängen */
 export function giveOrder(game, ship, cmd, append) {
+  const player = game.players.get(ship.owner);
+  if (game.profile === 'homeworld') {
+    if (player?.relic?.operation?.ship === ship.id) return 'Das Schiff ist für die laufende Reliktarbeit gesperrt.';
+    if (ship.relicSpeed && (cmd.t === 'route' || cmd.t === 'harvest' || append || (cmd.t === 'dock' && cmd.actions?.length > 1))) return 'Der Reliktträger unterstützt keine Automatisierung oder Befehlsfolgen.';
+    const target = cmd.target ? game.world.entities.get(cmd.target) : cmd.x !== undefined ? cmd : ship;
+    const error = manualActionError(game, player, ship, target);
+    if (error) return error;
+    if (!pointCovered(game, player, ship) || !pointCovered(game, player, target)) {
+      if (append || cmd.t === 'route' || cmd.t === 'harvest' || (cmd.t === 'dock' && cmd.actions?.length > 1)) return 'Außerhalb der Abdeckung sind nur einzelne manuelle Direktbefehle erlaubt.';
+    }
+    cmd = { ...cmd, manualDirect: !append && cmd.t !== 'route' && cmd.t !== 'harvest' && (cmd.t !== 'dock' || (cmd.actions?.length || 0) <= 1) };
+  }
   if (cmd.t === 'route' && ship.main) return `${ship.name} ist dein Hauptschiff und fährt keine Routen.`;
   const c = { ...cmd, qid: ++ship.qid };
   if (!append) {
@@ -108,6 +121,7 @@ export default {
   flagship: {
     args: { ship: V.opt(V.ownShip(), null) },
     run({ game, player }, { ship }) {
+      if (game.profile === 'homeworld') return 'Wähle das aktive manuelle Schiff; den Reliktantrieb wechselst du ausschließlich in einer eigenen Werkstatt.';
       const wait = (player.flagshipAt ?? -Infinity) + FLAGSHIP.COOLDOWN - game.time;
       if (wait > 0) return `Das Hauptschiff kannst du erst in ${Math.ceil(wait / 60)} min wieder wechseln.`;
       const cur = game.shipsOf(player.id).find((s) => s.main);

@@ -160,6 +160,7 @@ function shipDetails(s) {
 
 /** Hauptschiff ernennen bzw. abberufen, mit Sperre nach jeder Änderung */
 function flagshipButton(s) {
+  if (state.homeworld) return `<button data-act="manualShip" data-ship="${s.id}" ${state.manualShip === s.id ? 'disabled' : ''}>${state.manualShip === s.id ? '● Manuell aktiv' : 'Manuell steuern'}</button>${s.relicSpeed ? `<span class="badge">Relikt ×${s.relicSpeed} · treibstofffrei</span>` : ''}`;
   const wait = (state.flagshipAt ?? -Infinity) + FLAGSHIP.COOLDOWN - state.time;
   const lock = wait > 0 ? ` disabled title="Wechsel erst in ${Math.ceil(wait / 60)} min möglich"` : '';
   if (s.main) return `<button data-act="flagship" data-ship=""${lock} title="Hauptschiff abberufen">♛ Abberufen</button>`;
@@ -323,6 +324,8 @@ function entityDetails(e) {
     h += `<div class="section"><div class="section-title">Markt${tradeShip ? ' · handelt mit ' + esc(tradeShip.name) : ''}</div>${marketTable(e, tradeShip)}</div>`;
   }
   const myDocked = dockedHere.find((s) => state.selected?.kind === 'ship' && s.id === state.selected.id) || dockedHere[0];
+  if (e.salvageOwner === state.me.id) h += `<p>Persönlicher versiegelter Reliktfund. Nur das aktiv manuell gesteuerte Schiff kann ihn bergen und zur Heimatwerkstatt bringen.</p>
+    <button class="primary" data-act="relicSalvage" data-ent="${e.id}" data-ship="${state.manualShip || ''}" ${dockedHere.some(s=>s.id===state.manualShip) && state.homeQuest?.salvage?.phase==='available' ? '' : 'disabled'}>Versiegelten Fund bergen</button>`;
   if (e.kind === 'planet') h += eventSection(e, dockedHere.find((s) => s.queue?.[0]?.t !== 'route') || myDocked);
   if (e.faction && e.kind === 'planet') h += `<div class="muted small-note">${repLine(e.faction)}</div>`;
   if (m && e.type !== 'ruins' && (e.kind === 'planet' || m.strategy === 'shipyard')) h += questBoardSection(e, myDocked);
@@ -425,6 +428,8 @@ det.addEventListener('click', (ev) => {
     case 'alm': openAlmanac(d.good); break;
     case 'jettison': if (confirm(`${GOODS[d.good].name} wirklich abwerfen?`)) cmd('jettison', { ship: d.ship, good: d.good }); break;
     case 'trade': cmd('trade', { ship: d.ship, target: d.ent, good: d.good, dir: d.dir, amount: d.amt }); break;
+    case 'manualShip': cmd('manualShip', { ship: d.ship }); break;
+    case 'relicSalvage': cmd('relicSalvage', { ship: d.ship, target: d.ent }); break;
     case 'buyShip': cmd('buyShip', { target: d.ent, index: Number(d.idx) }); break;
     case 'yardOrder': {
       const t = $('orderType')?.value;

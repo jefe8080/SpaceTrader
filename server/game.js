@@ -16,6 +16,7 @@ import { tickEvents, sellToEvent } from './events.js';
 import { isConsortiumOwner, consortiumIdOf } from '../shared/consortium.js';
 import { checkWorldFile, worldProfile } from './world-profile.js';
 import { createHomeworld, tickHomeworld, tickHomeResource } from './homeworld.js';
+import { tickRelics } from './relic.js';
 
 export const WORLD_GEN_VERSION = 3; // Bestandswelt; Versionskonflikte lösen niemals einen Reset aus
 
@@ -234,7 +235,7 @@ export class Game {
   }
 
   /** Einstandspreis je Ware mitführen; manueller Handel des Hauptschiffs bringt XP (gedeckelt je Stunde) */
-  tradeBasis(ship, good, n, total, dir) {
+  tradeBasis(ship, good, n, total, dir, opts = {}) {
     if (ship.owner === NPC_OWNER || !n) return;
     ship.basis ||= {};
     if (dir === 'buy') {
@@ -244,7 +245,7 @@ export class Game {
     }
     const profit = total - n * (ship.basis[good] || 0);
     if (!ship.cargo[good]) delete ship.basis[good];
-    if (!ship.main || profit <= 0) return;
+    if ((this.profile === 'homeworld' ? !opts.manual || opts.auto : !ship.main) || profit <= 0) return;
     const p = this.players.get(ship.owner);
     const hour = Math.floor(this.time / 3600);
     if (p.tradeXp?.hour !== hour) p.tradeXp = { hour, n: 0, acc: p.tradeXp?.acc || 0 };
@@ -296,6 +297,9 @@ export class Game {
    */
   canGiveAway(player, ship) {
     if (ship.owner !== player.id) return 'Das ist nicht dein Schiff.';
+    if (player.relic?.location.kind === 'ship' && player.relic.location.id === ship.id) return 'Vor der Abgabe den einzigartigen Reliktantrieb an einer eigenen Werkstatt ausbauen.';
+    if (player.relic?.operation?.ship === ship.id) return 'Während der Reliktarbeit kann dieses Schiff nicht abgegeben werden.';
+    if (player.homeQuest?.salvage?.phase === 'sealed' && player.homeQuest.salvage.ship === ship.id) return 'Zuerst den versiegelten Fund zur Heimatwerkstatt bringen.';
     // Im Konsortium angebotene Schiffe zählen nicht: Sonst bliebe nach dem Verkauf keines übrig
     if (!this.shipsOf(player.id).some((s) => s !== ship && !this.shipOffers.has(s.id))) return 'Dein letztes Schiff kannst du nicht abgeben.';
     return null;
@@ -450,6 +454,8 @@ export class Game {
     if (ship.owner === NPC_OWNER) return;
     // Almanach: angebotene Schiffe und Module sind gesehen
     const p = this.players.get(ship.owner);
+    if (ship.queue[0]?.manualDirect && p?.manualShip === ship.id) ship.manualDock = e.id;
+    else delete ship.manualDock;
     if (p && e.market) {
       for (const it of e.market.forSale || []) this.discover(p, 'ship', it.type);
       if (e.market.building) this.discover(p, 'ship', e.market.building.type);
@@ -457,7 +463,7 @@ export class Game {
     }
     if (p) questProgress(this, p, ship);
     const tank = this.shipTank(ship);
-    if (tank > 0 && ship.autoRefuel > 0 && ship.fuel < tank * ship.autoRefuel && e.market?.goods.shipfuel && canBuyFrom(e.market.goods.shipfuel)) {
+    if (!ship.relicSpeed && tank > 0 && ship.autoRefuel > 0 && ship.fuel < tank * ship.autoRefuel && e.market?.goods.shipfuel && canBuyFrom(e.market.goods.shipfuel)) {
       this.refuel(ship, e);
     }
   }
@@ -467,6 +473,7 @@ export class Game {
    * Rückgabe { ok, n, cost } oder { ok: false, reason }
    */
   refuel(ship, e, route = null) {
+    if (ship.relicSpeed) return { ok: false, reason: 'Der Reliktantrieb benötigt keinen Treibstoff' };
     const p = this.players.get(ship.owner);
     const tank = this.shipTank(ship);
     const slot = e.market?.goods.shipfuel;
@@ -623,6 +630,7 @@ export class Game {
   // ---------- Simulation ----------
   tick(dt) {
     this.time += dt;
+    tickRelics(this);
     for (const s of this.ships.values()) {
       updateShip(s, dt, this);
       if (s.owner !== NPC_OWNER && (s.revX === undefined || Math.hypot(s.x - s.revX, s.y - s.revY) > 300)) {
@@ -740,13 +748,13 @@ export class Game {
     }
     stat(e.market, this.time, dir === 'buy' ? 'o' : 'i', good, n);
     this.shipLog(ship, `${dir === 'buy' ? 'Gekauft' : 'Verkauft'}: ${n} ${GOODS[good].name} für ${Math.round(total)} Cr bei ${e.name}`);
-    this.afterTrade(ship, e, good, n, total, dir);
+    this.afterTrade(ship, e, good, n, total, dir, opts);
     return { n, total };
   }
 
   /** Nach jedem Handel mit Fremden: Einstandspreis bzw. Hauptschiff-XP, wenig XP für den Questgeber aus dem Umsatz */
-  afterTrade(ship, e, good, n, total, dir) {
-    this.tradeBasis(ship, good, n, total, dir);
+  afterTrade(ship, e, good, n, total, dir, opts = {}) {
+    this.tradeBasis(ship, good, n, total, dir, opts);
     this.addGiverXp(e, total / GIVER_TRADE_CR);
   }
 
@@ -857,7 +865,7 @@ export class Game {
     if (!n) return { n: 0, reason: dir === 'buy' ? 'nicht möglich' : 'Lager voll' };
     stat(e.market, this.time, dir === 'buy' ? 'o' : 'i', good, n);
     this.shipLog(ship, `${dir === 'buy' ? 'Gekauft' : 'Verkauft'}: ${n} ${GOODS[good].name} für ${Math.round(total)} Cr bei ${e.name}${c ? ` (Zoll ${Math.round(c * 100)} %)` : ''}`);
-    this.afterTrade(ship, e, good, n, total, dir);
+    this.afterTrade(ship, e, good, n, total, dir, opts);
     return { n, total };
   }
 

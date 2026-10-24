@@ -261,6 +261,7 @@ export function serializeEntity(e) {
   if (e.size) o.size = e.size;
   if (e.wh) o.wh = e.wh;
   if (e.faction) o.faction = e.faction;
+  if (e.salvageOwner) o.salvageOwner = e.salvageOwner;
   if (e.market?.owner) Object.assign(o, { owner: e.market.owner, ownerName: e.ownerName, ownerColor: e.ownerColor });
   return o;
 }
@@ -334,13 +335,13 @@ function shipDetail(s, game) {
     queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},
     nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,
     transit: s.transit ? s.transit.exit : null, zone: s.zone || null, marker: s.marker || null,
-    fuel: Math.round((s.fuel || 0) * 10) / 10, autoRefuel: s.autoRefuel ?? 0, upg: s.upg || {}, modules: s.modules || [], upgValue: s.upgValue || 0, main: !!s.main, mined: s.mined || {}, bonus: s.bonus || 0, yardLvl: s.yardLvl || 0,
+    fuel: Math.round((s.fuel || 0) * 10) / 10, autoRefuel: s.autoRefuel ?? 0, upg: s.upg || {}, modules: s.modules || [], upgValue: s.upgValue || 0, main: !!s.main, relicSpeed: s.relicSpeed || 0, mined: s.mined || {}, bonus: s.bonus || 0, yardLvl: s.yardLvl || 0,
   };
 }
 
 function playerDetail(p) {
   return { stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1, governor: p.governor || 0, faction: p.faction || null,
-    homeworld: p.homeworld || null, homeQuest: p.homeQuest || null, manualShip: p.manualShip || null,
+    homeworld: p.homeworld || null, homeQuest: p.homeQuest || null, manualShip: p.manualShip || null, relic: p.relic || null,
     flagshipAt: p.flagshipAt ?? null, xp: Math.floor(p.xp || 0), level: pilotLevel(p.xp), quest: p.quest || null, questLock: p.questLock || 0,
     rep: p.rep || {}, questsDone: p.questsDone || 0, dogUntil: p.dogUntil || 0, mg: p.mg || null };
 }

@@ -1,6 +1,6 @@
 # PRD 5: Heimatwelten, reale Wirtschaft und gezeichnete Planeten
 
-Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U5 abgeschlossen, U6–U17 offen
+Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U6 abgeschlossen, U7–U17 offen
 
 ## 1. Geltung, Ziel und Freigabe
 
@@ -508,8 +508,8 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | U2 | Geschirmter Frachtüberlauf, konsistente Belegung und Modulabbauprüfung | U1 unabhängig möglich | Abgeschlossen (verpackte Module folgen U10) |
 | U3 | Neue Weltversion, getrennte Testwelt, Bestands-/Warenquelleninventar, zentrale Werte | Vor großen Systemänderungen | Abgeschlossen |
 | U4 | Bildschirmfüllendes Umfeld für vorhandene Planeten und zusätzliche visuelle Abnahme | U3; keine Wirtschaftsabhängigkeit | Abgeschlossen |
-| U5 | Neue Ruinenwelt, Startverteilung, Hauptquestkanal und sicherer Anfang H00–H06 | U3, erste Stilprobe | Abgeschlossen; Reliktzweig H04 folgt U6 |
-| U6 | Reliktzustand, Werkstatt, manuelle Präsenz und Handels-XP | U5 | Offen |
+| U5 | Neue Ruinenwelt, Startverteilung, Hauptquestkanal und sicherer Anfang H00–H06 | U3, erste Stilprobe | Abgeschlossen; H04 in U6 ergänzt |
+| U6 | Reliktzustand, Werkstatt, manuelle Präsenz und Handels-XP | U5 | Abgeschlossen |
 | U7 | Bevölkerung, Energie, Bauzeiten, Qualifikation, Lager und Reserven | U2, U5 | Offen |
 | U8 | Leitstellenabdeckung, Wurmlochregeln, Befehlsprüfung, frühe Automatisierung | U1, U6, U7 | Offen |
 | U9 | Vollständige Warenherkunft, echte NPC-Kassen/Transporte, keine öffentliche Verarbeitung | U3, U5, U7, U8 | Offen |
@@ -561,6 +561,8 @@ Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehen
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: U6 umgesetzt: H02 registriert ein persönliches Wrack; H04 verlangt manuellen Anflug, einmalige Bergung, denselben versiegelten Fund auf demselben Schiff und Übergabe an der Heimat. 60-s-Erstwerkstatt, dann genau ein nutzbarer Antrieb am Standort. Ein-/Ausbau atomar mit 15 s Serverzeit, ohne Fernwechsel, Warenverladung oder Erstattung. Abgabe-/Verkaufs-/Automatisierungssperren, Betrieb mit leerem Tank bei ×4 und ohne Treibstoffverbrauch. Eigene Auswahl des aktiven manuellen Schiffs ohne Tempobonus; einzelne Direktbefehle außerhalb Abdeckung, keine vorbereiteten Ketten. Handels-XP über explizite manuelle Transaktionen ohne Relikt; Routen/eigene Lager ausgeschlossen. Anzeige und Werkstattbedienung ergänzt. Vollständige Strecken-/Wurmloch-/Abdeckungsverlustprüfung folgt U8. Alle 160 Tests erfolgreich; sechs gezielte Relikt-/Präsenz-/XP-/Neustarttests. Browser prüft Ein- und Ausbau. Reproduzierbare Flugsimulation `npm run sim:homeworld`: Seed 42 erreicht H04 bei 510 s, H05 bei 1.170 s und H06 bei 1.997 s, zwei Frachter, 100 Einwohner, 7.826 Cr Rest; zweimal identisches Ergebnis. Dies ist ein idealisierter Einstieg vor U7–U15, keine finale A25-Abnahme; Zielkorridore werden in U17 mit vollständiger Wirtschaft geprüft. Nachweise unter `docs/qa/prd5-u6/`.
 
 - 2026-10-24: U5 umgesetzt: persönliche Ruinenwelt außerhalb des Ursprungs, zufällige geeignete Systeme in Ring 1/2 mit Sucherweiterung, mindestens 27.000 Abstand und sechs erreichbare Grundrohstoffe. Acht freie Plätze plus separate Grundanlagenanker, geometrisch auf 48 erweiterbare Plätze vorbereitet. Kostenloser Besitz zählt nicht gegen Gouverneursgrenzen und ist nicht übertragbar. Hauptquestkanal H00–H06 mit eigenen Belohnungen/Journal; H04-Reliktmechanik ist dem anschließenden U6 zugeordnet. Dock-/Anlagenreparaturen binden Credits/Material, laufen parallel und bleiben über Neustarts erhalten. Startausnahmen mit Empfänger und eindeutiger ID; zweiter Frachter H05 einmalig und lizenzgebunden. Materialgebundene Grundproduktion zählt Eigenproduktion, Versorgung sammelt Betriebszeit nach H03. Voller Personal-/Energie-/Reservierungsbetrieb folgt U7. Integrationstest erreicht H05/H06 mit echten Einkäufen/Transfers ohne fremde Industrie, ohne neue Waren im Heimatlager zu injizieren. Verteilung mit 24 Spielern und erschöpften Startringen geprüft. Alle 154 Tests erfolgreich. Browser prüft Ankunft, Landung, H00, Dockreparatur und Journal; Nachweise unter `docs/qa/prd5-u5/`.
 

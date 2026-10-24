@@ -1,8 +1,25 @@
 import { HOME_QUESTS } from '../../shared/homeworld.js';
 import { ownHome, homePresent, repairHome, completeHomeQuest } from '../homeworld.js';
 import { V } from './validate.js';
+import { relicSalvage, relicDeliver, relicWork } from '../relic.js';
 
 export default {
+  manualShip: {
+    args: { ship: V.ownShip() },
+    run({ player }, { ship }) { player.manualShip = ship.id; },
+  },
+  relicSalvage: {
+    args: { ship: V.ownShip(), target: V.entity() },
+    run({ game, player }, { ship, target }) { return relicSalvage(game, player, ship, target); },
+  },
+  relicDeliver: {
+    args: { ship: V.ownShip(), target: V.entity() },
+    run({ game, player }, { ship, target }) { return relicDeliver(game, player, ship, target); },
+  },
+  relicWork: {
+    args: { ship: V.ownShip(), target: V.entity(), kind: V.oneOf('install', 'remove') },
+    run({ game, player }, { ship, target, kind }) { return relicWork(game, player, ship, target, kind); },
+  },
   homeDialogRead: {
     args: { scene: V.oneOf('H00') },
     run({ player }, { scene }) {

@@ -29,7 +29,7 @@ function flyTo(ship, tx, ty, dt, game) {
   ship.zone = fx.zones ? fx.zones.map((z) => z.type) : null;
   let speed = game.shipSpeed(ship) * fx.speed;
   const tank = game.shipTank(ship);
-  if (tank > 0 && ship.fuel <= 0) speed *= FUEL.EMPTY_SPEED; // leerer Tank: 30 % Geschwindigkeit, Befehl läuft weiter
+  if (!ship.relicSpeed && tank > 0 && ship.fuel <= 0) speed *= FUEL.EMPTY_SPEED; // leerer Tank: 30 % Geschwindigkeit, Befehl läuft weiter
   const dx = tx - ship.x, dy = ty - ship.y;
   const d = Math.hypot(dx, dy);
   const step = speed * dt;
@@ -249,7 +249,7 @@ const EXEC = {
     if (!flyToEntity(ship, e, dt, game)) return false;
     ship.state = 'docked';
     c.actionIdx ??= 0;
-    return runActions(ship, e, c.actions || [], c, dt, game, { auto: false });
+    return runActions(ship, e, c.actions || [], c, dt, game, { auto: false, manual: !!c.manualDirect });
   },
   mine(ship, c, dt, game) {
     const e = game.world.entities.get(c.target);

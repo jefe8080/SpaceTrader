@@ -1,6 +1,6 @@
 import { GOODS, RECIPES } from '/shared/config.js';
 import { HOME_QUESTS, HOMEWORLD } from '/shared/homeworld.js';
-import { state, fmt, esc } from '../state.js';
+import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 
 let dialog;
@@ -43,6 +43,7 @@ export function homePanel(entity, item, ship) {
       html += `<div class="quest-offer"><b>${id} · ${esc(quest.title)} ${completed(id) ? '✓' : ''}</b><p>${esc(quest.goal)}</p>
       <div class="muted">${quest.credits} Cr · ${quest.xp} XP${unlocked ? '' : ' · Voraussetzung: ' + quest.requires.join(', ')}</div>
       ${completed(id) ? '' : `<button class="small primary" data-pp="homeQuest" data-quest="${id}" ${unlocked ? '' : 'disabled'}>Fortschritt prüfen und abschließen</button>`}</div>`;
+      if (id === 'H04' && state.homeQuest?.salvage?.phase === 'available') html += '<button class="small" data-pp="homeWreck">Markiertes Wrack zeigen</button>';
     }
     html += '<details><summary>Journal nachlesen</summary><button class="small" data-pp="homeReplay">Ankunftsszene erneut ansehen</button>' + (state.homeQuest?.journal || []).map((entry) => `<p><b>${esc(entry.speaker || entry.id)}</b> · ${esc(entry.text)}</p>`).join('') + '</details>';
     return html;
@@ -56,6 +57,22 @@ export function homePanel(entity, item, ship) {
   if (facility === 'workshop' && building.status === 'ruined') html += '<p>Der Reliktfund führt zur Wiederherstellung dieser Werkstatt.</p>';
   else if (building.status === 'ruined') html += `<p>${cost.credits} Cr · ${Object.entries(cost.goods).map(([g, n]) => n + ' ' + GOODS[g].name).join(', ')} · ${cost.seconds} s</p>
     <button class="primary" data-pp="homeRepair" data-facility="${facility}">Reparieren</button>`;
+  if (facility === 'workshop') {
+    const salvage = state.homeQuest?.salvage;
+    if (salvage?.phase === 'sealed') html += `<button class="primary" data-pp="relicDeliver" data-ship="${salvage.ship}">Versiegelten Fund übergeben · Werkstatt 60 s</button>`;
+    if (state.relic) {
+      const relic = state.relic, location = relic.location;
+      const where = location.kind === 'ship' ? state.ships.get(location.id)?.name || location.id : state.entities.get(location.id)?.name || location.id;
+      html += `<p>Einzigartiger Antrieb ×${relic.speed} · ${esc(where)} · ${location.kind === 'ship' ? 'eingebaut' : 'eingelagert'}</p>`;
+      if (relic.operation) html += `<p>Werkstattarbeit: ${Math.max(0, Math.ceil(relic.operation.until-state.time))} s verbleibend.</p>`;
+      else {
+        const docked = myShips().filter(s=>s.dockedAt===entity.id);
+        html += `<select id="homeRelicShip" aria-label="Schiff für Reliktarbeit">${docked.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select>
+          <button class="small" data-pp="relicWork" data-kind="install" ${location.kind==='world'&&location.id===entity.id&&docked.length ? '' : 'disabled'}>Einbauen · 15 s</button>
+          <button class="small" data-pp="relicWork" data-kind="remove" ${location.kind==='ship'&&docked.some(s=>s.id===location.id) ? '' : 'disabled'}>Ausbauen · 15 s</button>`;
+      }
+    }
+  }
   if (RECIPES[facility]) {
     const recipe = RECIPES[facility];
     html += `<p>${Object.entries(recipe.in).map(([g,n]) => `${n} ${GOODS[g].name}`).join(' + ')} → ${Object.entries(recipe.out).map(([g,n]) => `${n} ${GOODS[g].name}`).join(' + ')}</p><div class="muted">Reparierter Grundbetrieb: 10 % Geschwindigkeit. ${esc(building.blocked || '')}</div>`;

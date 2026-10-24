@@ -3,6 +3,7 @@ import { HOMEWORLD, HOME_QUESTS } from '../shared/homeworld.js';
 import { hexAt, hexKey } from '../shared/hex.js';
 import { rng, hashN } from './worldgen.js';
 import { newProperty } from './property.js';
+import { grantRelic } from './relic.js';
 
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const done = (player, id) => !!player.homeQuest?.completed[id];
@@ -163,7 +164,7 @@ export function homeQuestReady(game, player, entity, id) {
     case 'H01': return plantDone(home, 'dock');
     case 'H02': return plantDone(home, 'waterworks') && plantDone(home, 'foodplant') && (home.produced.water || 0) >= 20 && (home.produced.food || 0) >= 10;
     case 'H03': return home.controlLevel >= 1 && plantDone(home, 'fueldepot') && [...game.routes.values()].some((route) => route.owner === player.id && route.stops.length && route.stops.every((stop) => game.world.entities.get(stop.targetId)?.system === entity.system));
-    case 'H04': return false; // Unique salvage/relic state is implemented in U6.
+    case 'H04': return player.homeQuest.salvage?.phase === 'workshop' && plantDone(home, 'workshop');
     case 'H05': return home.suppliedSeconds >= 600;
     case 'H06': return plantDone(home, 'refinery') && plantDone(home, 'smelter') && (home.produced.ingots || 0) >= 40;
     default: return false;
@@ -175,6 +176,9 @@ export function completeHomeQuest(game, player, entity, id) {
   if (!homePresent(game, player, entity)) return 'Ein eigenes Schiff muss hier angedockt sein.';
   if (!homeQuestReady(game, player, entity, id)) return 'Voraussetzungen noch nicht erfüllt oder Belohnung bereits abgeholt.';
   if (id === 'H05' && game.shipsOf(player.id).length >= PILOT_LICENSES[player.pilot || 1].maxShips) return 'Schiffslimit erreicht. Für den zweiten Frachter wird ein freier Lizenzplatz benötigt.';
+  const salvagePosition = id === 'H02' ? clearPosition(game.world, game.world.systems.get(entity.system), entity,
+    rng(hashN(game.world.seed, Number(player.id.slice(1)), 504)), 1600, 4500) : null;
+  if (id === 'H02' && !salvagePosition) return 'Aktuell kein freier Bergungsstandort. Bitte erneut versuchen.';
   const quest = HOME_QUESTS[id], home = entity.market.homeworld;
   player.homeQuest.completed[id] = { at: game.time };
   player.homeQuest.journal.push({ id, at: game.time, text: `${quest.title}: abgeschlossen.` });
@@ -185,6 +189,14 @@ export function completeHomeQuest(game, player, entity, id) {
     for (const [good, n] of Object.entries(HOMEWORLD.start.supplies)) entity.market.goods[good].stock += n;
     home.grants.push({ id: `${entity.id}:supplies`, source: 'start_exception', recipient: player.id, goods: structuredClone(HOMEWORLD.start.supplies) });
   }
+  if (id === 'H02') {
+    const wreck = { id: `${entity.id}_relic_wreck`, kind: 'station', type: 'wreck', name: 'Wrack ohne Kennung', radius: 65,
+      ...salvagePosition, sector: entity.sector, system: entity.system, noBuy: true, salvageOwner: player.id };
+    game.world.addEntity(wreck);
+    player.homeQuest.salvage = { id: `${player.id}:relic:H04`, wreck: wreck.id, phase: 'available' };
+    game.revealAround(player, wreck.x, wreck.y, 1000);
+  }
+  if (id === 'H04') { grantRelic(game, player, entity); player.homeQuest.salvage.phase = 'complete'; }
   if (id === 'H05') {
     const ship = game.spawnShip(player, 'spatz', entity);
     home.grants.push({ id: `${entity.id}:second-ship`, source: 'quest_H05', recipient: player.id, ship: ship.id });

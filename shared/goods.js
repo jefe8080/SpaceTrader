@@ -188,6 +188,7 @@ const TIER_WEIGHT = [0, 10, 7, 5, 3, 2];
 const ACCENTS = ['#ff7043', '#29b6f6', '#ffa000', '#26c6da', '#9575cd', '#78909c', '#ef5350', '#ec407a', '#ffca28', '#66bb6a', '#42a5f5', '#8d6e63', '#26a69a', '#d4e157'];
 
 export const STATION_TYPES = {};
+STATION_TYPES.wreck = { name: 'Bergungswrack', sprite: 'station_deepmine', accent: '#bfa36d', weight: 0, radius: 65 };
 Object.entries(RECIPES).forEach(([id, r], i) => {
   const out = Object.keys(r.out)[0];
   STATION_TYPES[id] = { name: r.name, sprite: 'station_factory', accent: ACCENTS[i % ACCENTS.length], weight: TIER_WEIGHT[GOODS[out].tier],

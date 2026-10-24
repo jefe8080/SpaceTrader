@@ -17,6 +17,7 @@ Dann http://localhost:3000 öffnen. Entwicklung mit automatischem Neustart: `npm
 |---|---|
 | `npm test` | Unit-Tests (node:test) |
 | `npm run sim -- --hours 8 --bots 3` | Headless-Simulation mit Handels- und Quest-Bots zur Kalibrierung |
+| `npm run sim:homeworld -- --seed 42` | Reproduzierbarer PRD-5-Einstieg H00–H06 mit echten Flügen, Käufen und Reliktbergung |
 | `npm run reset` | Weltreset: löscht `data/spacetrader.db` (Server vorher beenden) |
 | `npm run sprites` | Schiffsgrafiken neu erzeugen |
 

@@ -10,6 +10,7 @@ import { questBoardSection } from './quests.js';
 import { scene, canLand, resetPlanetside, selectBuilding, hidePlanetside } from '../planetside.js';
 import { sfx } from '../audio.js';
 import { homePanel } from './homeworld.js';
+import { bus } from './bus.js';
 
 const bar = $('planetBar');
 const panel = $('planetPanel');
@@ -149,6 +150,13 @@ panel.addEventListener('click', (ev) => {
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'relicDeliver': cmd('relicDeliver', { ship: d.ship, target: e.id }); return;
+    case 'relicWork': cmd('relicWork', { ship: document.getElementById('homeRelicShip')?.value, target: e.id, kind: d.kind }); return;
+    case 'homeWreck': {
+      const wreck = state.entities.get(state.homeQuest?.salvage?.wreck);
+      if (wreck) { leavePlanet(); state.camera.x = wreck.x; state.camera.y = wreck.y; bus.select({kind:'entity',id:wreck.id}); }
+      return;
+    }
     case 'homeReplay': state.homeDialogReplay = true; return;
     case 'homeRepair': cmd('homeRepair', { target: e.id, facility: d.facility }); return;
     case 'homeQuest': cmd('homeQuestComplete', { target: e.id, quest: d.quest }); return;

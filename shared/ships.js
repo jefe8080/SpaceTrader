@@ -164,7 +164,7 @@ export function shipStats(ship) {
   if (d.ability === 'drill') mining.drill = Math.max(mining.drill || 0, DRILL_ABILITY_RATE * b);
   const cargoTotal = Math.round(d.cargo * (1 + UPGRADES.cargo.per * (u.cargo || 0)) * b);
   return {
-    speed: d.speed * (1 + UPGRADES.speed.per * (u.speed || 0)) * b * (ship.main ? FLAGSHIP.SPEED : 1),
+    speed: d.speed * (1 + UPGRADES.speed.per * (u.speed || 0)) * b * (ship.relicSpeed || (ship.main ? FLAGSHIP.SPEED : 1)),
     tank: d.tank * (1 + UPGRADES.tank.per * (u.tank || 0)) * b,
     cargoTotal,
     cargo: Math.max(0, cargoTotal - MODULE_SIZE * mods),
@@ -173,7 +173,7 @@ export function shipStats(ship) {
     mining,
     sensor: SENSOR.BASE * sensorFactor(n.sensor || 0) * (d.ability === 'sensor' ? 2 : 1),
     // Treibstoffverbrauch je Flugsekunde relativ zum Normalwert
-    burn: (ship.main ? FLAGSHIP.SPEED : 1) * (d.ability === 'fuel' ? 0.5 : 1),
+    burn: ship.relicSpeed ? 0 : (ship.main ? FLAGSHIP.SPEED : 1) * (d.ability === 'fuel' ? 0.5 : 1),
   };
 }
 /** Hat der Schiffstyp eine Fraktionsfähigkeit? */
