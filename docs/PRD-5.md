@@ -1,6 +1,6 @@
 # PRD 5: Heimatwelten, reale Wirtschaft und gezeichnete Planeten
 
-Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U6 abgeschlossen, U7–U17 offen
+Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U12 abgeschlossen, U13–U17 offen
 
 ## 1. Geltung, Ziel und Freigabe
 
@@ -515,7 +515,7 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | U9 | Vollständige Warenherkunft, echte NPC-Kassen/Transporte, keine öffentliche Verarbeitung | U3, U5, U7, U8 | Abgeschlossen; Module/Personen/Funde in U10/U13/U14 ergänzt |
 | U10 | Physische Module, Rezepte, Studie und reale Werft-/Fraktionsbestände | U2, U7, U9 | Abgeschlossen; Questvorlagen und Orbitalringe U14 |
 | U11 | Sechs Sonderveredelungen und neue Fraktionswährungen | U7, U9, U10 | Abgeschlossen |
-| U12 | Bedarfsgesteuerte Disposition, Produktions- und Absatzaufträge | U8–U11 | Offen |
+| U12 | Bedarfsgesteuerte Disposition, Produktions- und Absatzaufträge | U8–U11 | Abgeschlossen |
 | U13 | Spezialisierungen, geänderte Questgeber-/Besitzprogression und Besucher | U7, U9 | Offen |
 | U14 | Vollständige Hauptquestzweige, Orbitalringe, Forschung und Reliktverbesserungen | U10–U13 | Offen |
 | U15 | Weitere Ruinenwelten, gemeinsames eigenes Netz, Warpservice | U8, U12–U14 | Offen |
@@ -561,6 +561,8 @@ Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehen
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: U12 umgesetzt: bedarfsgesteuerte Versorgung mit Zielbestand, erlaubten Quellen, Preisgrenze, gebundenem Budget und begrenzter ausdrücklicher Notfreigabe; Produktionsziele beschaffen Rezeptzutaten, schützen vorhandene Zutaten und zählen ausschließlich ganze tatsächliche Zyklen. Absatz reserviert nur freien Überschuss und nutzt zugewiesene reguläre Frachter sowie erlaubte Ziele. Gemeinsame Bedarfs-/Quellbestandsberechnung berücksichtigt laufende Abholungen und bezahlte Ladung. Transporte verwenden echte Flüge, Handelsgegenkassen, Laderäume und durchgängige Netzprüfung; volle Ziele und Netzausfall pausieren ohne Verlust oder Warnungsflut. Abbruch oder ersetzte Queue gibt Reservierungen frei, erstattet nur ungenutztes Budget und erhält geladene Ware. Persistente Zustände und begründete Pausen im Leitstellenpanel. Alle 230 Tests erfolgreich, elf neue Logistikintegrationstests einschließlich Neustart; Browser zeigt tatsächliche Lieferung von 20 Eis und Budgetabrechnung. Nachweise unter docs/qa/prd5-u12/. U13–U17 bleiben offen.
 
 - 2026-10-24: U11 umgesetzt: sechs konkrete Produktwaren und Veredelungsrezepte mit eigenen Zykluszeiten, Energie und Qualifikationen; zugeordnet zu Baugruppen III–V. Rohuran/Antimaterie und ihre Produkte bleiben Gefahrgut. Hubs und Fraktionsmärkte akzeptieren Produkte statt Rohformen; alle 18 Schiffsgebühren, Nachfragekapazitäten und Wert-Raten sind nachvollziehbar umgerechnet. Rohformen bleiben zwischen Spielern handelbar. Reproduzierbare globale Preisliste für 66 Waren/46 Rezepte und die Fraktionsumrechnung über npm run prices:prd5; bestehende Rezeptwertformel ohne Zusatzaufschlag. Tatsächliche öffentliche Produzenten bestimmen Standortaufschläge. Rezeptwechsel verwirft nur Zyklusfortschritt und kann höhere Baugruppen nicht kostenlos erschleichen. Reaktor verbraucht angereichertes Uran und Kühlmittel, kein Rohuran. Alle 219 Tests erfolgreich, neun neue Veredelungstests; erste Anlage vor H10 baubar. Frischer Browsernachweis: sechs Rohgold und drei Chemikalien werden zu genau drei Feingold, danach Zutatenpause. Einstiegssimulation weiterhin H06 bei 1.997 s, 101 Einwohner und zwei Schiffe, nach Preisbereinigung 8.083 Cr; Nachweise unter docs/qa/prd5-u11/.
 

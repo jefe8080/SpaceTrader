@@ -89,7 +89,7 @@ export function homePanel(entity, item, ship) {
       const cost={...spec,credits:Math.round(spec.credits*(id==='capacity'?1.5**count:1))};
       html+=`<p>${spec.name}: ${costLabel(cost)} · 2 Energie / 2 Fachkräfte</p><button class="small" data-pp="homeControlUpgrade" data-module="${id}" ${pending?'disabled':''}>Funktionsmodul bauen</button>`;
     }
-    html+='<p class="muted">Disposition, Produktions- und Absatzplanung werden bei den Leitstellenaufträgen verwendet.</p>';
+    html+=logisticsPanel(entity);
   }
   if (RECIPES[facility]) {
     const recipe = RECIPES[facility];
@@ -115,6 +115,29 @@ export function homePanel(entity, item, ship) {
 }
 
 const costLabel=cost=>`${fmt(cost.credits)} Cr · ${Object.entries(cost.goods).map(([g,n])=>`${n} ${GOODS[g]?.name||g}`).join(', ')} · ${cost.seconds||60} s`;
+function logisticsPanel(entity){
+  const h=entity.market.homeworld,states={planned:'Geplant',reserved:'Reserviert',collecting:'In Abholung',intransit:'Unterwegs',delivered:'Geliefert',paused:'Pausiert',cancelled:'Abgebrochen'};
+  let html='<h3>Leitstellenaufträge</h3>';
+  for(const o of h.logistics?.orders||[]){
+    const jobs=(h.logistics.jobs||[]).filter(j=>j.order===o.id&&!['cancelled','delivered'].includes(j.state));
+    html+=`<div class="quest-offer"><b>${esc(o.kind==='production'?RECIPES[o.recipe]?.name:GOODS[o.good]?.name)} · ${states[o.state]}</b><p>${o.kind==='production'?`Ziel ${o.target} · ${o.cycles} fertige Zyklen`:`Zielbestand ${o.target} · ${o.delivered} geliefert`} · Budgetrest ${fmt(o.escrow)} Cr · Ausgaben ${fmt(o.spent)} Cr</p>${o.reason?`<p>${esc(o.reason)}</p>`:''}${jobs.map(j=>`<p>${esc(state.ships.get(j.ship)?.name||j.ship)}: ${states[j.state]} · ${j.loaded??j.amount} ${GOODS[j.good].name} · ${esc(state.entities.get(j.source)?.name||j.source)} → ${esc(state.entities.get(j.destination)?.name||j.destination)}</p>`).join('')}${o.state!=='cancelled'?`<button class="small" data-pp="homeLogisticsCancel" data-id="${o.id}">Abbrechen / Bindung freigeben</button>`:''}</div>`;
+  }
+  if(!Object.keys(h.controlModules||{}).some(k=>['dispatch','production','sales'].includes(k)))return html+'<p>Für neue Aufträge zuerst ein Funktionsmodul bauen.</p>';
+  const choices=[['supply','Versorgung','dispatch'],['production','Produktion','production'],['sales','Absatz','sales']].filter(([, ,m])=>h.controlModules[m]);
+  return html+`<details><summary>Neuer Auftrag</summary>
+    <label>Auftrag <select id="logKind">${choices.map(([id,n])=>`<option value="${id}">${n}</option>`).join('')}</select></label>
+    <label>Ware <select id="logGood">${Object.entries(GOODS).filter(([,g])=>g.cls!=='passenger').map(([id,g])=>`<option value="${id}">${g.name}</option>`).join('')}</select></label>
+    <label>Rezept bei Produktion <select id="logRecipe">${Object.entries(RECIPES).map(([id,r])=>`<option value="${id}">${r.name}</option>`).join('')}</select></label>
+    <label>Zielbestand / Produktionsmenge / verbleibender Absatzbestand <input id="logAmount" type="number" min="1" max="1000000" value="100"></label>
+    <label>Höchstpreis beim Einkauf / Mindestpreis beim Absatz (0 = frei) <input id="logLimit" type="number" min="0" value="0"></label>
+    <label>Einkaufsbudget in Cr <input id="logBudget" type="number" min="0" value="1000"></label>
+    <label>Zusätzliche begrenzte Notkauffreigabe in Cr <input id="logEmergency" type="number" min="0" value="0"></label>
+    <label>Priorität (Lebenserhalt / Treibstoff empfohlen: 100) <input id="logPriority" type="number" min="0" max="100" value="80"></label>
+    <label>Zugewiesene Schiffe <select id="logShips" multiple>${myShips().filter(s=>!s.relicSpeed).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></label>
+    <label>Erlaubte Quellen / Absatzziele <select id="logLocations" multiple>${[...state.entities.values()].filter(e=>e.id!==entity.id&&e.market).map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</select></label>
+    <p>Budget wird beim Anlegen gebunden. Grundreserven und bestehende Materialreservierungen bleiben geschützt. Beim Abbruch bleibt geladene Ware an Bord. Produktion endet nach ganzen Zyklen; Abbrechen hebt die Rezeptbindung auf.</p>
+    <button class="primary" data-pp="homeLogistics">Auftrag anlegen</button></details>`;
+}
 function homeBalance(entity){
   const home=entity.market.homeworld,used=homeStorageUsage(entity.market),work=home.workforce;
   let html=`<div class="kv"><span>Einwohner / Wohnraum</span><span>${home.population} / ${home.housing}</span><span>Energie benutzt / verfügbar</span><span>${home.energy?.used||0} / ${home.energy?.generation||12}</span>

@@ -153,6 +153,11 @@ panel.addEventListener('click', (ev) => {
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'homeLogistics':{
+      const value=id=>document.getElementById(id)?.value, selected=id=>[...document.getElementById(id).selectedOptions].map(o=>o.value);
+      cmd('homeLogistics',{target:e.id,kind:value('logKind'),good:value('logGood'),recipe:value('logRecipe'),amount:Number(value('logAmount')),limit:Number(value('logLimit')),budget:Number(value('logBudget')),emergency:Number(value('logEmergency')),priority:Number(value('logPriority')),ships:selected('logShips'),locations:selected('logLocations')});return;
+    }
+    case 'homeLogisticsCancel':cmd('homeLogisticsCancel',{target:e.id,id:d.id});return;
     case 'homeRecipeChange':{
       const recipe=document.getElementById('homeRefiningRecipe')?.value;
       if(recipe&&confirm(`Zu ${RECIPES[recipe].name} wechseln? Laufender Zyklusfortschritt wird zurückgesetzt; keine Materialerstattung.`))cmd('homeRecipeChange',{target:e.id,id:d.id,recipe});return;

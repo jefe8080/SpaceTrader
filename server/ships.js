@@ -5,6 +5,7 @@ import { zoneEffects, inZone } from '../shared/nav.js';
 import { availableHomeStock } from '../shared/homeworld.js';
 import { segmentCovered, pointCovered } from './coverage.js';
 import {loadRealSupply} from './real-economy.js';
+import {runLogistics} from './logistics.js';
 
 const inZoneAt = (z, p) => inZone(z, p.x, p.y);
 
@@ -239,6 +240,7 @@ function runActions(ship, e, actions, st, dt, game, opts) {
 // ---------- Befehlsqueue ----------
 /** Ausführung je Befehlstyp. Rückgabe: true = erledigt, false = läuft noch */
 const EXEC = {
+  logistics(ship,c,dt,game){return runLogistics(ship,c,dt,game,flyToEntity);},
   move(ship, c, dt, game) {
     if (!followNav(ship, `p:${c.x},${c.y}`, c.x, c.y, dt, game)) return false;
     ship.state = 'flying';

@@ -3,9 +3,18 @@ import { GOODS, RECIPES } from '../../shared/goods.js';
 import { ownHome, homePresent, repairHome, completeHomeQuest } from '../homeworld.js';
 import { V } from './validate.js';
 import { relicSalvage, relicDeliver, relicWork } from '../relic.js';
+import {createLogistics,cancelLogistics} from '../logistics.js';
 import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess,changeRefinement } from '../homeworld-operations.js';
 
 export default {
+  homeLogistics:{
+    args:{target:V.entity(),kind:V.oneOf('supply','production','sales'),good:V.opt(V.key(GOODS)),recipe:V.opt(V.key(RECIPES)),amount:V.int(1,1e6),limit:V.num(0,1e9),budget:V.num(0,1e9),emergency:V.opt(V.num(0,1e9),0),priority:V.int(0,100),ships:V.ownShips(),locations:V.arr(V.entity(),100)},
+    run({game,player},{target,...spec}){return createLogistics(game,player,target,spec);},
+  },
+  homeLogisticsCancel:{
+    args:{target:V.entity(),id:V.str(40,1)},
+    run({game,player},{target,id}){return cancelLogistics(game,player,target,id);},
+  },
   homeRecipeChange:{
     args:{target:V.entity(),id:V.str(40,1),recipe:V.key(RECIPES)},
     run({game,player},{target,id,recipe}){return changeRefinement(game,player,target,id,recipe);},

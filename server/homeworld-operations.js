@@ -4,6 +4,7 @@ import { pointCovered } from './coverage.js';
 import {tickCivilMoney} from './real-economy.js';
 import {stat} from './markets.js';
 import {tickModuleProjects} from './modules.js';
+import {tickLogistics,productionAllowed,productionStock,consumeProductionReservation,recordProduction} from './logistics.js';
 
 const QUALIFICATIONS = ['basic', 'skilled', 'specialist'];
 const qualified = () => ({ basic: 0, skilled: 0, specialist: 0 });
@@ -200,8 +201,9 @@ function completeConstruction(game,entity,now) {
   home.projects=pending;
 }
 
-function productionAvailable(market,recipe) {
-  if(!Object.entries(recipe.in).every(([g,n])=>availableHomeStock(market,g)>=n))return false;
+function productionAvailable(market,recipe,id) {
+  if(id&&!productionAllowed(market,id))return false;
+  if(!Object.entries(recipe.in).every(([g,n])=>(id?productionStock(market,g,id):availableHomeStock(market,g))>=n))return false;
   const delta={normal:0,hazard:0};
   for(const [g,n] of Object.entries(recipe.out)){const cls=GOODS[g]?.cls;if(cls in delta)delta[cls]+=n;}
   for(const [g,n] of Object.entries(recipe.in)){const cls=GOODS[g]?.cls;if(cls in delta)delta[cls]-=n;}
@@ -210,18 +212,19 @@ function productionAvailable(market,recipe) {
 }
 
 function runProduction(market,building,recipe,dt,speed,now) {
-  if(!productionAvailable(market,recipe))return;
+  const id=building.recipe||building.facility;
+  if(!productionAvailable(market,recipe,id))return;
   building.progress=(building.progress||0)+dt*speed;
   let cycles=Math.floor((building.progress+1e-9)/recipe.time);
   // Each iteration is a full physical recipe cycle; no partial inputs or outputs.
   let completedCycles=0;
-  while(cycles-->0&&productionAvailable(market,recipe)){
+  while(cycles-->0&&productionAvailable(market,recipe,id)){
+    consumeProductionReservation(market,id);recordProduction(market,id);
     for(const [g,n] of Object.entries(recipe.in)){market.goods[g].stock-=n;stat(market,now,'c',g,n);}
     for(const [g,n] of Object.entries(recipe.out)){market.goods[g].stock+=n;market.homeworld.produced[g]=(market.homeworld.produced[g]||0)+n;stat(market,now,'p',g,n);}
     building.progress-=recipe.time;completedCycles++;
   }
   building.progress=Math.min(recipe.time,Math.max(0,building.progress));
-  const id=building.recipe||building.facility;
   market.homeworld.productionCycles[id]=(market.homeworld.productionCycles[id]||0)+completedCycles;
 }
 
@@ -307,7 +310,7 @@ function operationStep(game,entity,dt,now) {
   for(const unit of units){
     const {id,building,spec,recipe}=unit;
     if(unit.relicWorkshop&&relicWork)remaining.skilled+=2;
-    const reason=building.enabled===false?'Pausiert':recipe&&!productionAvailable(market,recipe)?'Zutaten fehlen, Reserve geschützt oder Lager voll':powerUsed+(spec.power||0)>generation?'Energie fehlt':null;
+    const reason=building.enabled===false?'Pausiert':recipe&&!productionAvailable(market,recipe,building.recipe||id)?'Produktionsziel erreicht, Zutaten fehlen, Reserve geschützt oder Lager voll':powerUsed+(spec.power||0)>generation?'Energie fehlt':null;
     const emergency=['dock','control'].includes(id)&&reason==='Energie fehlt';
     if(emergency){allocations.push({id,state:'emergency',reason:'Unabhängige Notversorgung erhält Lagerzugang und Reichweite',power:0,workers:qualified()});continue;}
     if(!assign(id,spec,reason)){building.blocked=reason||'Personal fehlt';continue;}
@@ -343,4 +346,5 @@ export function tickHomeOperations(game,entity,dt) {
   const home=entity.market.homeworld;initializeHomeOperations(home);
   let remaining=dt;
   while(remaining>0){const step=Math.min(10,remaining),now=game.time-remaining+step;operationStep(game,entity,step,now);remaining-=step;}
+  tickLogistics(game,entity);
 }
