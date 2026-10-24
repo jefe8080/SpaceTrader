@@ -1,10 +1,21 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import {HOME_STORY,storyAvailable} from '../shared/home-story.js';
+import {HOME_STORY,storyAvailable,storyDialogReady} from '../shared/home-story.js';
 import {buildingDevelopment,developBuilding,paintPlanet} from '../client/js/planetArt.js';
 import {Game} from '../server/game.js';
 import {runCommand} from '../server/handlers/index.js';
+
+test('Erstkontakt wartet auf den Schiffsklick nach der Erklärung; gelesene Spielstände bleiben freigeschaltet',()=>{
+  const quest={completed:{}};
+  assert.equal(storyDialogReady(quest,false,true),false);
+  assert.equal(storyDialogReady(quest,false,false),false);
+  assert.equal(storyDialogReady(quest,true,true),false);
+  assert.equal(storyDialogReady(quest,true,false),true);
+  assert.equal(storyDialogReady({...quest,scenesSeen:{H00:true}},false,false),true);
+  assert.equal(storyDialogReady({completed:{H00:{at:0}}},false,false),true);
+  assert.equal(storyDialogReady({...quest,scenesSeen:{H00:true}},false,true),false);
+});
 
 test('Bilddialoge sind freischaltbar und nachlesbar, ohne Spielzustand oder Kosten zu gewähren',()=>{
   const game=new Game(':memory:',{profile:'homeworld',seed:42}),p=game.createPlayer('Geschichte');

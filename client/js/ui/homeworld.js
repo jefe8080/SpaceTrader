@@ -1,4 +1,4 @@
-import {HOME_STORY,storyAvailable} from '/shared/home-story.js';
+import {HOME_STORY,storyAvailable,storyDialogReady} from '/shared/home-story.js';
 import { GOODS, RECIPES,recipeText } from '/shared/config.js';
 import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock } from '/shared/homeworld.js';
 import { state, fmt, esc, myShips } from '../state.js';
@@ -28,6 +28,9 @@ export function renderHomeDialog() {
     document.body.append(dialog);
   }
   const requested=typeof state.homeDialogReplay==='string'?state.homeDialogReplay:state.homeDialogReplay?'H00':null;
+  if (!storyDialogReady(state.homeQuest, state.homeStoryShipClicked, !document.getElementById('help').hidden)) {
+    dialog.hidden = true; currentScene = null; return;
+  }
   const id=requested&&storyAvailable(state.homeQuest,requested)?requested:Object.keys(HOME_STORY).find(key=>storyAvailable(state.homeQuest,key)&&!state.homeQuest.scenesSeen?.[key]);
   if(!state.me||!id){dialog.hidden=true;currentScene=null;return;}
   if(currentScene!==id){

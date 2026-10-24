@@ -37,6 +37,7 @@ socket.on('welcome', (d) => {
   state.moduleTypes = new Set(d.moduleTypes || []);
   state.ships.clear();
   state.selection.clear();
+  state.homeStoryShipClicked = false;
   lastSub = '';
   state.awaitCenter = first;
   ui.enterGame();
@@ -229,6 +230,9 @@ function clickAt(sx, sy, multi) {
     return;
   }
   // Strg+Klick auf eigenes Schiff: Mehrfachauswahl
+  if (hit?.kind === 'ship' && state.ships.get(hit.id)?.owner === state.me.id && document.getElementById('help').hidden) {
+    state.homeStoryShipClicked = true;
+  }
   if (multi && hit?.kind === 'ship' && state.ships.get(hit.id)?.owner === state.me.id) {
     if (!state.selection.size && state.selected?.kind === 'ship') state.selection.add(state.selected.id);
     if (state.selection.has(hit.id)) state.selection.delete(hit.id); else state.selection.add(hit.id);

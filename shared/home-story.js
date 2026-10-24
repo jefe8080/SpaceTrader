@@ -1,6 +1,6 @@
 // Narrative availability never gates the simulation or quest completion.
 export const HOME_STORY = {
-  H00: {image:'arrival',title:'Ein Licht im Rauschen',speaker:'Mira · Hafenmeisterin',text:'Wir sehen dein Signal. Der alte Landeplatz hält noch – wenn du uns herunterfindest.',hint:'Fliege deine Heimat an und lande, um Kontakt mit den Bewohnern aufzunehmen.',requires:[]},
+  H00: {image:'arrival',title:'Ein Licht im Rauschen',speaker:'Mira · Hafenmeisterin',text:'Hallo? Hier spricht Mira, Hafenmeisterin auf dem Planeten in deiner Nähe. Wir empfangen dein Schiff zum ersten Mal. Bitte hilf uns: Unsere Anlagen liegen in Trümmern, und wir brauchen Unterstützung. Der alte Landeplatz hält noch. Kannst du zu uns kommen?',hint:'Dies ist der erste Funkkontakt mit einem hilfesuchenden Planeten. Fliege den markierten Planeten an und lande, um seine Bewohner kennenzulernen.',requires:[]},
   H02: {image:'workshop',title:'Unter dem Rost',speaker:'Tarek · Ingenieur',text:'Nicht alles hier ist tot. Die Leitungen sind noch verbunden. Wir müssen nur herausfinden, womit.',hint:'Repariere die Grundanlagen. Materialien und Baufortschritt bleiben im Heimatjournal sichtbar.',requires:['H01']},
   H04: {image:'relic',title:'Für Menschen gebaut',speaker:'Iven · Archivar',text:'Die Zeichen passen zu keiner unserer Datenbanken. Aber die Anordnung … jemand hat hier für Menschen gebaut.',hint:'Berge den versiegelten Fund persönlich und bringe ihn zur Heimatwerkstatt.',requires:['H02']},
   H08: {image:'orbital',title:'Der gebrochene Ring',speaker:'Tarek · Ingenieur',text:'Wir können wieder Schiffe bauen. Der erste Abschnitt braucht mehr als Metall: einen Frachter, der hierbleibt.',hint:'Der Spatz wird dauerhaft zur Infrastruktur. Die separate Bestätigung nennt das Schiff und bindet die tatsächlichen Lieferungen.',requires:['H07']},
@@ -9,3 +9,6 @@ export const HOME_STORY = {
   H17: {image:'archive',title:'Was zwischen den Zeilen bleibt',speaker:'Iven · Archivar',text:'Ein Absender. Kein Datum, dem ich trauen würde. Ob dort noch jemand ist, sagt uns das nicht.',hint:'Die Archivexpedition verbessert dasselbe einzigartige Relikt auf ×6. Die Herkunft bleibt eine offene Frage.',requires:['H14','H15']},
 };
 export function storyAvailable(quest,id){return !!quest&&!!HOME_STORY[id]&&HOME_STORY[id].requires.every(key=>quest.completed?.[key]);}
+export function storyDialogReady(quest, ownShipClicked, helpVisible) {
+  return !helpVisible && !!(quest?.scenesSeen?.H00 || quest?.completed?.H00 || ownShipClicked);
+}

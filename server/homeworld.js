@@ -7,6 +7,7 @@ import { grantRelic } from './relic.js';
 import {stat} from './markets.js';
 import { tickHomeOperations, homeAccess, homeConstructionError } from './homeworld-operations.js';
 import {advancedQuestReady,completeAdvancedQuest} from './homequests.js';
+import { HOME_STORY } from '../shared/home-story.js';
 
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const done = (player, id) => !!player.homeQuest?.completed[id];
@@ -84,7 +85,7 @@ export function createHomeworld(game, player) {
   home.fixedSiteBase=propertyBasePrice(entity);
   player.homeworld = id;
   player.homeQuest = { completed: {}, landed: false, journal: [{ id: 'H00', at: game.time,
-    speaker: 'Mira', text: 'Wir sehen dein Signal. Der alte Landeplatz hält noch – wenn du uns herunterfindest.' }] };
+    speaker: 'Mira', text: HOME_STORY.H00.text }] };
   game.world.addEntity(entity);
   const prop = newProperty(id, player.id, game.time); prop.mode = 'private'; prop.personal = true;
   game.ownership.set(id, prop);

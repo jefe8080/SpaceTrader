@@ -68,7 +68,7 @@ export const CONTROL_MODULES=freeze({
 });
 
 export const HOME_QUESTS = freeze({
-  H00: { title: 'Ein Licht im Rauschen', requires: [], goal: 'Heimat anfliegen und landen.', credits: 0, xp: 10 },
+  H00: { title: 'Ein Licht im Rauschen', requires: [], goal: 'Den hilfesuchenden Planeten anfliegen und zum ersten Kontakt landen.', credits: 0, xp: 10 },
   H01: { title: 'Der erste sichere Landeplatz', requires: ['H00'], goal: 'Das Dock reparieren.', credits: 500, xp: 10 },
   H02: { title: 'Wasser unter den Trümmern', requires: ['H01'], goal: 'Wasser- und Nahrungsanlage reparieren; 20 Wasser und 10 Nahrung selbst produzieren.', credits: 1000, xp: 20 },
   H03: { title: 'Ein Netz aus Stimmen', requires: ['H02'], goal: 'Leitstelle 1 und Treibstoffanlage reparieren; eine lokale Route einrichten.', credits: 1000, xp: 20 },
