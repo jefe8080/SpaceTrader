@@ -43,12 +43,12 @@ function canonical(file) {
 }
 
 export function runtimeOptions(root, env = process.env) {
-  const profile = env.WORLD_PROFILE || 'legacy';
+  const profile = env.WORLD_PROFILE || 'homeworld';
   worldProfile(profile);
   const activeFile = path.join(root, 'data', 'spacetrader.db');
-  const dbFile = env.DB_FILE || (profile === 'homeworld' ? path.join(root, 'data', 'prd5', 'spacetrader.db') : activeFile);
+  const dbFile = env.DB_FILE || (profile === 'homeworld' ? path.join(root, 'data', 'world-v5', 'spacetrader.db') : activeFile);
   if (profile === 'homeworld' && dbFile !== ':memory:' && canonical(dbFile) === canonical(activeFile)) {
-    throw new Error('Die PRD-5-Testwelt darf den aktiven Datenpfad nicht verwenden.');
+    throw new Error('Die neue PRD-5-Welt darf den bisherigen aktiven Datenpfad nicht verwenden.');
   }
   return { profile, dbFile };
 }

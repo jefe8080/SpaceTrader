@@ -1,7 +1,7 @@
 # Space Trader
 
 Multiplayer-Handels- und Aufbauspiel in einer unendlichen Galaxie aus Sektoren um Schwarze Löcher.
-Umsetzung des PRD [docs/PRD.md](docs/PRD.md) (Erweiterung "Galaxie") , [docs/PRD-2.md](docs/PRD-2.md) (Erweiterung "Progression") und [docs/PRD-3.md](docs/PRD-3.md) (Erweiterung "Gemeinschaft").
+Umsetzung einschließlich [PRD 5](docs/PRD-5.md): persönliche Ruinenwelten, materielle Produktionsketten, reale Bevölkerung, eigene Leitstellennetze und gezeichnete Planetenoberflächen.
 
 ## Start
 
@@ -16,25 +16,26 @@ Dann http://localhost:3000 öffnen. Entwicklung mit automatischem Neustart: `npm
 | Befehl | Zweck |
 |---|---|
 | `npm test` | Unit-Tests (node:test) |
-| `npm run sim -- --hours 8 --bots 3` | Headless-Simulation mit Handels- und Quest-Bots zur Kalibrierung |
+| `npm run sim -- --hours 8 --bots 3` | Historische Vergleichssimulation für die frühere Wirtschaft; PRD 5 verwendet `sim:progression` |
 | `npm run sim:homeworld -- --seed 42` | Reproduzierbarer PRD-5-Einstieg H00–H06 mit echten Flügen, Käufen und Reliktbergung |
-| `npm run reset` | Weltreset: löscht `data/spacetrader.db` (Server vorher beenden) |
+| `npm run sim:homeworld -- --decision-seconds 30` | Einstieg mit ausdrücklich modellierter Lese-/Entscheidungszeit; keine Verzögerung im eigentlichen Spiel |
+| `npm run sim:progression` | Vollständiger Einzelspielerpfad H00–H13 mit realer Finanzierung, Produktion und Zweitgründung |
+| `npm run dev:prd5` | Getrennte Entwicklungswelt, Port 3005, inklusive grafischer Prüfoberfläche unter `/dev/planet.html` |
+| `npm run reset` | Löscht die ausgewählte Weltdatei samt SQLite-Seitendateien; Server vorher beenden |
 | `npm run sprites` | Schiffsgrafiken neu erzeugen |
 
-Der Spielstand liegt in `data/spacetrader.db` (SQLite, alle 15 s und beim Beenden mit Strg+C gespeichert).
+Der neue Hauptspielstand liegt in `data/world-v5/spacetrader.db` (SQLite, Profil `homeworld`, Weltversion 5; alle 15 s und beim Beenden mit Strg+C gespeichert).
 Inkompatible Weltversionen werden vor Migrationen lesend geprüft und mit Fehlermeldung abgewiesen. Es gibt keinen automatischen Reset.
 
-Die Umsetzung von [PRD 5](docs/PRD-5.md) läuft getrennt vom aktiven Spielstand:
+Die Entwicklungswelt bleibt davon getrennt:
 
 ```bash
 npm run dev:prd5
 ```
 
 Dieser Entwicklungsserver verwendet Port 3005 und `data/prd5/spacetrader.db` (Profil `homeworld`, Weltversion 5).
-Ein eigener Pfad lässt sich über `DB_FILE` wählen; der aktive Standardpfad ist für dieses Profil gesperrt.
-`npm start` verwendet weiterhin die Bestandswelt. Das Entwicklungsprofil ist noch keine abgenommene neue Wirtschaft.
-Warenquellen und geplante Umstellungen stehen im [Warenquelleninventar](docs/PRD-5-warenquellen.md).
-Der gemeinsame Start erfolgt mit einer vollständig frisch generierten Welt nach U17; es gibt keine Übernahme alter Spielstände.
+Ein eigener Pfad lässt sich über `DB_FILE` wählen. Der frühere Pfad `data/spacetrader.db` wird vom neuen Profil nicht verwendet; es gibt keine Übernahme alter Spielstände. `npm start` erzeugt beim ersten Start die neue Hauptwelt. Die grafische Prüfoberfläche wird nur mit `DEV_TOOLS=1` beziehungsweise dem Entwicklungsstarter bereitgestellt.
+Warenquellen und ihre Nachweise stehen im [Warenquelleninventar](docs/PRD-5-warenquellen.md); Bilanz-/Balanceannahmen und Prüfergebnisse unter `docs/qa/prd5-u17/`.
 
 **Sicherheit:** Es gibt keine Authentifizierung. Wer einen Spielernamen kennt, übernimmt das Konto.
 Nur im Freundeskreis betreiben. Vor einem öffentlichen Betrieb sind Authentifizierung und HTTPS zwingend.

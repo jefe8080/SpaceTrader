@@ -33,15 +33,15 @@ export const HOMEWORLD = freeze({
 
 export const INDUSTRY_GROUPS = freeze({
   I: { recipes: ['waterworks', 'foodplant', 'fueldepot', 'refinery', 'smelter', 'oilworks', 'chemworks', 'glassworks', 'weavery', 'fertilizerplant', 'siliconworks'],
-    credits: 5000, goods: { ingots: 10 }, seconds: 60, power: 4, workers: { basic: 6, skilled: 0, specialist: 0 }, quest: 'H02' },
+    credits: 1250, goods: { ingots: 10 }, seconds: 60, power: 4, workers: { basic: 6, skilled: 0, specialist: 0 }, quest: 'H02' },
   II: { recipes: ['rollingmill', 'cableworks', 'chemplant', 'toolworks', 'refinery2', 'alloyworks', 'chipfab', 'pharma', 'coolantworks', 'tailor', 'cannery', 'opticsworks', 'batteryplant', 'jeweler'],
-    credits: 15000, goods: { ingots: 12, hydraulicoil: 4 }, seconds: 90, power: 8, workers: { basic: 6, skilled: 2, specialist: 0 }, quest: 'H06' },
+    credits: 2500, goods: { ingots: 12, hydraulicoil: 4 }, seconds: 90, power: 8, workers: { basic: 6, skilled: 2, specialist: 0 }, quest: 'H06' },
   III: { recipes: ['gearworks', 'electronicsworks', 'hullworks', 'sensorworks', 'reactorworks', 'cellworks','goldpurifier','diamondcutter','nebulagasrefiner'],
-    credits: 40000, goods: { plates: 12, wires: 8 }, seconds: 120, power: 12, workers: { basic: 6, skilled: 4, specialist: 0 }, quest: 'H07' },
+    credits: 5000, goods: { plates: 12, wires: 8 }, seconds: 120, power: 12, workers: { basic: 6, skilled: 4, specialist: 0 }, quest: 'H07' },
   IV: { recipes: ['robotics', 'machineworks', 'engineworks', 'shippartsworks', 'consumerworks', 'medtechworks', 'computerworks','uraniumrefiner','exocrystalrefiner'],
-    credits: 100000, goods: { alloys: 12, electronics: 8, gears: 6 }, seconds: 180, power: 20, workers: { basic: 8, skilled: 6, specialist: 2 }, quest: 'H09', facility: 'researchWorkshop' },
+    credits: 25000, goods: { alloys: 12, electronics: 8, gears: 6 }, seconds: 180, power: 20, workers: { basic: 8, skilled: 6, specialist: 2 }, quest: 'H09', facility: 'researchWorkshop' },
   V: { recipes: ['aiforge', 'habitatworks','antimatterstabilizer'],
-    credits: 250000, goods: { machinery: 6, computers: 4, robots: 2 }, seconds: 180, power: 32, workers: { basic: 8, skilled: 8, specialist: 4 }, quest: 'H12', facility: 'researchCenter' },
+    credits: 50000, goods: { machinery: 6, computers: 4, robots: 2 }, seconds: 180, power: 32, workers: { basic: 8, skilled: 8, specialist: 4 }, quest: 'H12', facility: 'researchCenter' },
 });
 
 export function industryGroup(recipe) {
@@ -86,13 +86,13 @@ export const HOME_BUILDINGS = freeze({
   silo: { name: 'Lagersilo', credits: 3000, goods: { ingots: 10 }, seconds: 60, power: 1, workers: { basic: 1 }, storage: 2000, quest: 'H02' },
   safeStorage: { name: 'Sicherheitslager', credits: 5000, goods: { plates: 10, electronics: 4 }, seconds: 60, power: 2, workers: { skilled: 2 }, hazardStorage: 500, quest: 'H06' },
   spaceport: { name: 'Raumhafenmodul', credits: 10000, goods: { plates: 20, electronics: 6 }, seconds: 90, power: 4, workers: { basic: 4 }, docks: 2, throughput: 500, quest: 'H06' },
-  school: { name: 'Schule', credits: 10000, goods: { plates: 12, electronics: 6 }, seconds: 90, power: 4, workers: { skilled: 2 }, quest: 'H06' },
+  school: { name: 'Schule', credits: 6000, goods: { plates: 12, electronics: 6 }, seconds: 90, power: 4, workers: { skilled: 2 }, quest: 'H06' },
   academy: { name: 'Akademieausbau', credits: 30000, goods: { chips: 10, medicine: 4, electronics: 4 }, seconds: 120, power: 4, workers: { skilled: 2 }, parent: 'school', quest: 'H07' },
   moduleBench: { name: 'Einfache Modulwerkbank', credits: 3000, goods: { ingots: 12, glass: 4, plastics: 4 }, seconds: 60, power: 2, workers: { basic: 2 }, quest: 'H06' },
   researchWorkshop: { name: 'Forschungswerkstatt', credits: 20000, goods: { plates: 12, electronics: 10 }, seconds: 120, power: 6, workers: { skilled: 4 }, quest: 'H07' },
-  researchCenter: { name: 'Forschungszentrum', credits: 100000, goods: { computers: 10, robots: 4, sensors: 4 }, seconds: 180, power: 10, workers: { specialist: 4 }, parent: 'researchWorkshop', quest: 'H09' },
+  researchCenter: { name: 'Forschungszentrum', credits: 50000, goods: { computers: 10, robots: 4, sensors: 4 }, seconds: 180, power: 10, workers: { specialist: 4 }, parent: 'researchWorkshop', quest: 'H09' },
   workshop: { name: 'Antriebswerkstatt', credits: 15000, goods: { plates: 12, electronics: 8 }, seconds: 60, power: 2, workers: { skilled: 2 }, quest: 'H04' },
-  land: { name: 'Fläche erschließen', credits: 5000, goods: { ingots: 10 }, seconds: 60, power: 0, workers: {}, quest: 'H02' },
+  land: { name: 'Fläche erschließen', credits: 3000, goods: { ingots: 10 }, seconds: 60, power: 0, workers: {}, quest: 'H02' },
 });
 
 export function homeStorageUsage(market) {

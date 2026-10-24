@@ -1,6 +1,6 @@
 # PRD 5: Heimatwelten, reale Wirtschaft und gezeichnete Planeten
 
-Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U16 abgeschlossen, U17 offen
+Stand: 2026-10-24 · Status: Umsetzung U1–U17 abgeschlossen; frische Hauptwelt gestartet, kleine modellbedingte Zeitabweichungen gemäß A25 dokumentiert
 
 ## 1. Geltung, Ziel und Freigabe
 
@@ -137,13 +137,13 @@ Kosten sind je Gebäude beziehungsweise Ausbaustufe. B = Barren, P = Platten, E 
 | Lagersilo | 3.000 Cr, 10 B | 60 s | +2.000 normale Kapazität; 1 Energie, 1 einfache Kraft |
 | Sicherheitslager | 5.000 Cr, 10 P, 4 E | 60 s | +500 Gefahrgutkapazität; 2 Energie, 2 Fachkräfte |
 | Raumhafenmodul | 10.000 Cr, 20 P, 6 E | 90 s | +2 gleichzeitige Abfertigungen und +500 Einheiten/min Umschlag; 4 Energie, 4 einfache Kräfte |
-| Schule | 10.000 Cr, 12 P, 6 E | 90 s | Fachkräfteausbildung; 4 Energie, 2 Fachkräfte |
+| Schule | 6.000 Cr, 12 P, 6 E | 90 s | Fachkräfteausbildung; 4 Energie, 2 Fachkräfte |
 | Akademieausbau | 30.000 Cr, 10 Mikrochips, 4 Medizin, 4 E | 120 s | Spezialistenausbildung; zusätzlich 4 Energie, 2 Fachkräfte |
 | Einfache Modulwerkbank | 3.000 Cr, 12 B, 4 Glas, 4 Kunststoff | 60 s | Grundmodulfertigung; 2 Energie, 2 einfache Kräfte; nach H06 |
 | Forschungswerkstatt | 20.000 Cr, 12 P, 10 E | 120 s | Modulstudium/-fertigung; 6 Energie, 4 Fachkräfte |
-| Forschungszentrum | 100.000 Cr, 10 Computer, 4 Roboter, 4 Sensoren | 180 s | Hochtechnologie; zusätzlich 10 Energie, 4 Spezialisten |
+| Forschungszentrum | 50.000 Cr, 10 Computer, 4 Roboter, 4 Sensoren | 180 s | Hochtechnologie; zusätzlich 10 Energie, 4 Spezialisten |
 | Antriebswerkstatt | Erste per H04; weitere 15.000 Cr, 12 P, 8 E | 60 s | Ein-/Ausbau und Lager des Relikts; 2 Energie, 2 Fachkräfte während Arbeit |
-| Fläche erschließen | 5.000 Cr, 10 B je Schritt | 60 s | +4 Bauplätze, Kostenfaktor 1,4 je Folgeschritt |
+| Fläche erschließen | 3.000 Cr, 10 B je Schritt | 60 s | +4 Bauplätze, Kostenfaktor 1,4 je Folgeschritt |
 
 Ruinenwelten beginnen mit acht nutzbaren regulären Bauplätzen und vorhandenen Grundruinen. Der Ausgangsausbau erschließt bis zu 48 reguläre Plätze; eine ausreichende erweiterbare Ruinenlandschaft wird dafür entworfen. Normale vorhandene Weltlayouts bleiben zunächst bei ihren bisherigen Plätzen. Der dekorative Hintergrund erschließt niemals Bauplätze. Gebäude dürfen nicht auf nicht interaktives Hintergrundgelände gesetzt werden.
 
@@ -180,11 +180,11 @@ Alle 40 bestehenden Warenrezepte aus `shared/goods.js` bleiben mit ihren Zutaten
 
 | Baugruppe | Credits / Baumaterial für eine neue Anlage | Bauzeit | Energie | Personal: einfach / Fach / Spezial |
 |---|---|---|---|---|
-| I | 5.000 Cr, 10 B | 60 s | 4 | 6 / 0 / 0 |
-| II | 15.000 Cr, 12 B, 4 Hydrauliköl | 90 s | 8 | 6 / 2 / 0 |
-| III | 40.000 Cr, 12 P, 8 Kabel | 120 s | 12 | 6 / 4 / 0 |
-| IV | 100.000 Cr, 12 Legierungen, 8 E, 6 Zahnräder | 180 s | 20 | 8 / 6 / 2 |
-| V | 250.000 Cr, 6 M, 4 Computer, 2 Roboter | 180 s | 32 | 8 / 8 / 4 |
+| I | 1.250 Cr, 10 B | 60 s | 4 | 6 / 0 / 0 |
+| II | 2.500 Cr, 12 B, 4 Hydrauliköl | 90 s | 8 | 6 / 2 / 0 |
+| III | 5.000 Cr, 12 P, 8 Kabel | 120 s | 12 | 6 / 4 / 0 |
+| IV | 25.000 Cr, 12 Legierungen, 8 E, 6 Zahnräder | 180 s | 20 | 8 / 6 / 2 |
+| V | 50.000 Cr, 6 M, 4 Computer, 2 Roboter | 180 s | 32 | 8 / 8 / 4 |
 
 Ein normaler Neubau arbeitet mit voller vorhandener Rezeptgeschwindigkeit. Die fünf reparierten Grundanlagen beginnen bei 10 %; ihr Ausbau zur normalen Anlage kostet je 4.750 Cr und 6 B, dauert 60 s und erhöht Energie-/Personalbedarf auf Baugruppe I. Diese explizite Einstiegsregel gilt auch für Nahrung und Barren trotz ihrer abweichenden Warenstufe. Mehrere Anlagen derselben Art sind möglich.
 
@@ -520,7 +520,7 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | U14 | Vollständige Hauptquestzweige, Orbitalringe, Forschung und Reliktverbesserungen | U10–U13 | Abgeschlossen; H13-Gründung/Standortnachweise in U15 angebunden |
 | U15 | Weitere Ruinenwelten, gemeinsames eigenes Netz, Warpservice | U8, U12–U14 | Abgeschlossen |
 | U16 | Gezeichnete Assets/Bilddialoge und sichtbare Entwicklungsstände vollständig | Stilprobe ab U5; begleitet alle Fachschritte | Abgeschlossen |
-| U17 | Gesamtsimulation, Mehrspieler- und visuelle Abnahme, Balance, frischer Weltstart | U1–U16 | Offen |
+| U17 | Gesamtsimulation, Mehrspieler- und visuelle Abnahme, Balance, frischer Weltstart | U1–U16 | Abgeschlossen; A25-Abweichungen im Abnahmeprotokoll begründet |
 
 Öffentliche Fabriken dürfen nicht vor einem nachweislich funktionierenden Einstieg und Warenversorgung abgeschaltet werden. Zwischenstände bleiben in Testwelten, bis ihre abhängigen Systeme zusammen funktionieren. Stilprobe und Bilddialogtechnik werden früh eingeführt; U16 ist die Vollständigkeitsprüfung, kein Aufschieben sämtlicher Gestaltung.
 
@@ -561,6 +561,8 @@ Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehen
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: U17 abgeschlossen: ununterbrochene frische Einzelspielersimulation H00–H13 ohne injizierte Waren, Credits, Personen, Qualifikationen oder Rümpfe. Tatsächliche Finanzierung durch 29 Exporte und drei normale Kurierquests, reale Industrie-/Modulfertigung, Anwerbung, zwei dauerhafte Schiffsabgaben und gebaute zweite Welt. Modellannahmen ausdrücklich 30 s Bedien-/Lesezeit im Einstieg, danach 2 s je Aktion, physische Erkundungsflüge bei bekannten möglichen Rohstoffkoordinaten und überwiegend serielle Nutzung eines manuellen Schiffs. H05 30:48 min, H08 8:06:56 h, Zweitgründung 29:59:42 h, Rückkehr/Abholung H13 30:00:48 h. H08 liegt 1,44 % über dem Richtwert; H13s tatsächliche Gründung liegt im Korridor, die Rückkehr/Abholung 48 s dahinter. Beide kleinen Abweichungen gemäß A25 nachvollziehbar dokumentiert, keine neue Spielwartezeit. Baucredits anhand erheblicher früherer Geldengpässe auf I/II/III/IV/V = 1.250/2.500/5.000/25.000/50.000 Cr, Schule 6.000, Forschungszentrum 50.000 und Fläche zunächst 3.000 kalibriert; Material-/Bauzeit-/Personal-/Energie-/Warenpreisregeln unverändert. Reales Beschaffungsbetriebskapital im Planer verhindert unnötige Kurierumwege. Ende mit 43.611 Cr, Heimat 247 und Kolonie 20 Einwohnern, gleicher Reliktträger, acht neue Plätze und ohne erneute Einstiegshilfen. Drei zusätzliche Mehrspielerprüfungen für getrennten/späten Einstieg, Gegenkassenhandel und persönliche Netz-/Verwaltungsrechte trotz Konsortium; bestehende Modul-/Rohform-/Kooperationsprüfungen ergänzt. Alle 286 Tests erfolgreich; 195 gerenderte Fälle aus U16 weiterhin gültig. Hauptstart auf Profil homeworld/Version 5 und vollständig neuem Pfad data/world-v5/spacetrader.db umgestellt und tatsächlich auf Port 3000 gestartet: null Testspieler/Besitz/Flottenschiffe, 57 öffentliche Märkte, keine erzeugten Industriewaren. Entwicklungswelt bleibt getrennt, /dev nur ausdrücklich aktiviert. Vollständige Nachweise und Bewertungsgrenzen unter docs/qa/prd5-u17/.
 
 - 2026-10-24: U16 umgesetzt: freigegebenen Zeichenstil mit transparentem zwölfteiligem Gebäudeatlas, durchgehendem malerischem Ruinenboden und sechs weiteren illustrierten Szenen umgesetzt. Mira/Tarek/Nela/Iven besitzen erkennbare eigene Gestaltung. H00/H02/H04/H08/H11/H13/H17 automatisch bei Freigabe, überspringbar und vollständig im Journal nachlesbar; Schiffe und Lieferungen laufen unabhängig weiter. Nelas Betriebspriorität ist ohne Kosten-/Funktionsänderung widerrufbar. Ruinen, Baustellen, fertige Anlagen, Wohnviertel, Infrastruktur/Spezialisierung, Forschung, Raumhafen und Ringgrößen ändern sichtbare Darstellung. Gezeichnete Gebäude über unveränderten 3D-Ankern, gemeinsame Tusche-/Pigmentmaterialien für alle Weltgruppen, getrennte nicht auswählbare Kulisse. Journal bleibt bei Lageraktualisierungen offen. Alle 283 Tests erfolgreich; 195 echte Browserfälle über 13 Welten und fünf Formate ohne fehlende Randabdeckung oder Browserfehler, dazu mobile Dialog- und Journalprüfung. Herkunft/Prompts unter docs/art/prd5/u16-prompts.md, Nachweise unter docs/qa/prd5-u16/. Warpabschluss nach U15 zusätzlich im Browser bestätigt. Vollständige Fortschritts-/Balanceabnahme und Hauptweltumstellung bleiben U17.
 

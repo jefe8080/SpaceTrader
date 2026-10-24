@@ -28,7 +28,7 @@ test('Bau bindet Material, Geld, gewählten Platz und Team; unabhängige Projekt
   const f=fixture(),credits=f.player.credits,ingots=f.entity.market.goods.ingots.stock;
   assert.equal(command(f,'homeBuild',{kind:'solar',plot:3}),undefined);
   assert.equal(command(f,'homeBuild',{kind:'school',plot:4}),undefined);
-  assert.ok(Math.abs(f.player.credits-(f.home.civil?.taxes||0)-(f.home.civil?.consumptionPayments||0)-(credits-13000))<1e-7);
+  assert.ok(Math.abs(f.player.credits-(f.home.civil?.taxes||0)-(f.home.civil?.consumptionPayments||0)-(credits-9000))<1e-7);
   assert.equal(f.entity.market.goods.ingots.stock,ingots-10);
   assert.equal(f.home.structures[0].plot,3);
   assert.match(command(f,'homeBuild',{kind:'housing',plot:3}),/bereits belegt/);
@@ -37,7 +37,7 @@ test('Bau bindet Material, Geld, gewählten Platz und Team; unabhängige Projekt
   assert.equal(f.home.workforce.reserved.basic,4);
   advance(f,1);assert.equal(f.home.structures[0].status,'ready');assert.equal(f.home.energy.generation,32);
   advance(f,30);assert.equal(f.home.structures[1].status,'ready');assert.equal(f.home.projects.length,0);
-  assert.ok(Math.abs(f.player.credits-(f.home.civil?.taxes||0)-(f.home.civil?.consumptionPayments||0)-(credits-13000))<1e-7);
+  assert.ok(Math.abs(f.player.credits-(f.home.civil?.taxes||0)-(f.home.civil?.consumptionPayments||0)-(credits-9000))<1e-7);
   assert.ok(Object.values(HOME_BUILDINGS).every(spec=>spec.seconds<=600));
   f.game.store.close();
 });
@@ -155,7 +155,7 @@ test('Flächenerweiterung, Baugruppen und Hypothesenprüfung verändern keine ni
   assert.match(command(f,'homeBuild',{kind:'land'}),/läuft bereits/);
   advance(f,60);assert.equal(f.home.plots,12);assert.equal(f.home.expansions,1);
   const credits=f.player.credits;assert.equal(command(f,'homeBuild',{kind:'land'}),undefined);
-  assert.equal(f.player.credits,credits-7000);advance(f,60);assert.equal(f.home.plots,16);
+  assert.equal(f.player.credits,credits-4200);advance(f,60);assert.equal(f.home.plots,16);
   assert.equal(command(f,'homeBuild',{kind:'plant',recipe:'oilworks',plot:15}),undefined);
   assert.equal(f.home.structures[0].plot,15);assert.equal(f.home.structures[0].status,'building');
   f.game.store.close();

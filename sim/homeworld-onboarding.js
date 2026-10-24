@@ -8,7 +8,7 @@ import { runCommand } from '../server/handlers/index.js';
 import { rng } from '../server/worldgen.js';
 import {GOODS} from '../shared/goods.js';
 
-export function simulateOnboarding({ seed = 42, dbFile = ':memory:', name = 'Heimat Simulation' } = {}) {
+export function simulateOnboarding({ seed = 42, dbFile = ':memory:', name = 'Heimat Simulation',continueWith,decisionSeconds=0 } = {}) {
   if (dbFile !== ':memory:' && fs.existsSync(dbFile)) throw new Error('Für die Simulation einen neuen Datenpfad wählen.');
   const originalRandom = Math.random;
   Math.random = rng(seed);
@@ -16,8 +16,9 @@ export function simulateOnboarding({ seed = 42, dbFile = ':memory:', name = 'Hei
   try {
     game = new Game(dbFile, { profile: 'homeworld', seed });
     const player = game.createPlayer(name), home = game.world.entities.get(player.homeworld), ship = game.shipsOf(player.id)[0];
-    const stages = [];
+    const stages = [];let decisions=0;
     const command = (cmd, fields = {}) => {
+      if(decisionSeconds>0)game.tick(decisionSeconds);decisions++;
       const error = runCommand(game, player, { cmd, target: home.id, ...fields });
       if (error) throw new Error(`${cmd}: ${error}`);
     };
@@ -51,12 +52,13 @@ export function simulateOnboarding({ seed = 42, dbFile = ':memory:', name = 'Hei
     until(()=>home.market.homeworld.suppliedSeconds>=600,'Versorgungsbetrieb');claim('H05');
     repair('refinery');repair('smelter');deliver('crude',44);deliver('ore',44);
     until(()=>home.market.homeworld.produced.ingots>=40,'Barrenproduktion');claim('H06');
-    const result = { seed, stages, serverSeconds: game.time, credits: Math.round(player.credits),
+    const result = { seed, decisionSeconds,decisions,stages, serverSeconds: game.time, credits: Math.round(player.credits),
       produced: home.market.homeworld.produced, stock: Object.fromEntries(Object.entries(home.market.goods).filter(([,s])=>s.stock>0).map(([g,s])=>[g,Math.round(s.stock*100)/100])),
       grants: home.market.homeworld.grants, relic: player.relic, population: home.market.homeworld.population,
       civilianMoney:home.market.homeworld.civil,
       publicMarkets:[...game.world.entities.values()].filter(e=>e.market&&!e.market.homeworld).length,
       publicManufacturedStock:Object.fromEntries(Object.keys(home.market.goods).filter(g=>GOODS[g].tier>0).map(g=>[g,[...game.world.entities.values()].filter(e=>e.market&&!e.market.homeworld).reduce((sum,e)=>sum+(e.market.goods[g]?.stock||0),0)]).filter(([,n])=>n>0)) };
+    if(continueWith)result.advanced=continueWith({game,player,home,ship,stages});
     game.save();
     return result;
   } finally { if (game?.store.db.open) game.store.close(); Math.random = originalRandom; }
@@ -64,5 +66,5 @@ export function simulateOnboarding({ seed = 42, dbFile = ':memory:', name = 'Hei
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const option=(name,fallback)=>{const index=process.argv.indexOf('--'+name);return index<0?fallback:process.argv[index+1];};
-  console.log(JSON.stringify(simulateOnboarding({seed:Number(option('seed',42)),dbFile:option('db',':memory:')}),null,2));
+  console.log(JSON.stringify(simulateOnboarding({seed:Number(option('seed',42)),dbFile:option('db',':memory:'),decisionSeconds:Number(option('decision-seconds',0))}),null,2));
 }

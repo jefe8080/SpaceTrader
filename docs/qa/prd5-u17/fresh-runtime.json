@@ -1,0 +1,40 @@
+{
+  "path": "data/world-v5/spacetrader.db",
+  "meta": [
+    {
+      "key": "time",
+      "value": "119.98099999999965"
+    },
+    {
+      "key": "worldGen",
+      "value": "5"
+    },
+    {
+      "key": "worldProfile",
+      "value": "\"homeworld\""
+    }
+  ],
+  "players": 0,
+  "ships": 0,
+  "ownership": 0,
+  "markets": 57,
+  "manufactured": [],
+  "http": [
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/shared/home-story.js",
+      "status": 200
+    },
+    {
+      "path": "/assets/art/homeworld/buildings.png",
+      "status": 200
+    },
+    {
+      "path": "/dev/planet.html",
+      "status": 404
+    }
+  ]
+}

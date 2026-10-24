@@ -2,11 +2,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {runtimeOptions} from '../server/world-profile.js';
 
-const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'data');
-for (const f of fs.existsSync(dir) ? fs.readdirSync(dir) : []) {
-  if (/^spacetrader\.db(-wal|-shm)?$/.test(f)) {
-    fs.rmSync(path.join(dir, f));
-    console.log('gelöscht:', f);
-  }
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const {dbFile}=runtimeOptions(root);
+if(dbFile===':memory:')throw new Error('Kein gespeicherter Spielstand ausgewählt.');
+const selected=path.resolve(dbFile);
+for(const suffix of ['','-wal','-shm'])if(fs.existsSync(selected+suffix)){
+  fs.unlinkSync(selected+suffix);console.log('gelöscht:',selected+suffix);
 }

@@ -55,7 +55,7 @@ test('Erste Veredelungsanlage ist vor ihrem H10-Nachweis baubar und bindet die k
   const f=fixture();f.player.credits=60000;f.entity.market.goods.plates.stock=12;f.entity.market.goods.wires.stock=8;
   assert.equal(f.player.homeQuest.completed.H10,undefined);
   assert.equal(runCommand(f.game,f.player,{cmd:'homeBuild',target:f.entity.id,kind:'plant',recipe:'goldpurifier',plot:2}),undefined);
-  assert.equal(f.player.credits,20000);assert.equal(f.entity.market.goods.plates.stock,0);assert.equal(f.entity.market.goods.wires.stock,0);
+  assert.equal(f.player.credits,55000);assert.equal(f.entity.market.goods.plates.stock,0);assert.equal(f.entity.market.goods.wires.stock,0);
   advance(f,120);assert.equal(f.home.structures.find(s=>s.recipe==='goldpurifier').status,'ready');close(f);
 });
 

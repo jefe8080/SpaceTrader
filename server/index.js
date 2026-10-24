@@ -17,7 +17,7 @@ app.use(express.static(path.join(root, 'client')));
 app.use('/vendor/three/addons', express.static(path.join(root, 'node_modules/three/examples/jsm')));
 app.use('/vendor/three', express.static(path.join(root, 'node_modules/three/build')));
 app.use('/shared', express.static(path.join(root, 'shared')));
-if (profile === 'homeworld') app.use('/dev', express.static(path.join(root, 'tests', 'browser')));
+if (profile === 'homeworld'&&process.env.DEV_TOOLS==='1') app.use('/dev', express.static(path.join(root, 'tests', 'browser')));
 
 const server = http.createServer(app);
 const io = new Server(server);

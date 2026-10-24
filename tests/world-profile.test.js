@@ -20,11 +20,11 @@ const digest = (file) => createHash('sha256').update(fs.readFileSync(file)).dige
 test('PRD-5-Server nutzt getrennten Datenpfad; aktiver Pfad wird abgewiesen', () => {
   temporary((root) => {
     const active = runtimeOptions(root, {});
-    const dev = runtimeOptions(root, { WORLD_PROFILE: 'homeworld' });
-    assert.equal(active.profile, 'legacy');
+    const dev = runtimeOptions(root, { WORLD_PROFILE: 'homeworld',DB_FILE:path.join(root,'data','prd5','spacetrader.db') });
+    assert.equal(active.profile, 'homeworld');assert.match(active.dbFile,/world-v5/);
     assert.notEqual(active.dbFile, dev.dbFile);
     assert.match(dev.dbFile, /prd5/);
-    assert.throws(() => runtimeOptions(root, { WORLD_PROFILE: 'homeworld', DB_FILE: active.dbFile }), /aktiven Datenpfad/);
+    assert.throws(() => runtimeOptions(root, { WORLD_PROFILE: 'homeworld', DB_FILE:path.join(root,'data','spacetrader.db') }), /aktiven Datenpfad/);
     assert.throws(() => runtimeOptions(root, { WORLD_PROFILE: 'typo' }), /Unbekanntes Weltprofil/);
     assert.equal(runtimeOptions(root, { WORLD_PROFILE: 'homeworld', DB_FILE: ':memory:' }).dbFile, ':memory:');
   });
