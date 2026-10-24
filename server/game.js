@@ -15,6 +15,7 @@ import { removeOffersOf } from './offers.js';
 import { tickEvents, sellToEvent } from './events.js';
 import { isConsortiumOwner, consortiumIdOf } from '../shared/consortium.js';
 import { checkWorldFile, worldProfile } from './world-profile.js';
+import { createHomeworld, tickHomeworld, tickHomeResource } from './homeworld.js';
 
 export const WORLD_GEN_VERSION = 3; // Bestandswelt; Versionskonflikte lösen niemals einen Reset aus
 
@@ -267,6 +268,10 @@ export class Game {
       revealed: new Set(), favorites: {}, known: newKnown(), groups: [], stopLoss: 0, pilot: 1, createdAt: Date.now(), lastSeen: Date.now() };
     this.players.set(id, p);
     this.noXp = true;
+    if (this.profile === 'homeworld') {
+      try { createHomeworld(this, p); } finally { this.noXp = false; }
+      return p;
+    }
     // Startwissen: Startsystem aufgedeckt, alle Systeme und Sondergebiete des Startsektors bekannt
     const home = this.world.sectors.get('0,0');
     const startSys = home.systems.find((x) => x.start);
@@ -630,13 +635,15 @@ export class Game {
     if (this.econAcc >= 1) {
       for (const prop of this.ownership.values()) {
         const e = this.world.entities.get(prop.entity);
-        if (e?.kind !== 'planet') continue;
+        if (e?.kind !== 'planet' || e.type === 'ruins') continue;
         tickOwnedPlanet(this, e, prop, this.econAcc);
         // Fabriken auf Bauplätzen laufen nur bei Besitz
         for (const f of e.market.bld?.factories || []) f.prog = runRecipe(e.market, recipeOf(f.recipe), f.prog || 0, this.econAcc, this.time);
       }
       const propSectors = new Set([...this.ownership.keys()].map((id) => this.world.entities.get(id)?.sector));
       for (const e of this.world.entities.values()) {
+        if (e.market?.strategy === 'homeworld') { tickHomeworld(this, e, this.econAcc); continue; }
+        if (e.market?.strategy === 'homeResource') { tickHomeResource(e, this.econAcc); continue; }
         tickMarket(e, this.econAcc, this.time, this);
         if (!e.market) continue;
         if (SUPPLIED.has(e.market.strategy)) this.checkSupply(e);
@@ -745,6 +752,7 @@ export class Game {
 
   /** Eigenes Lager: kostenlos laden und einlagern */
   ownerTransfer(ship, e, good, amount, dir) {
+    if (e.type === 'ruins' && e.market.homeworld?.facilities.dock.status !== 'ready') return { n: 0, reason: 'Zuerst das Dock reparieren' };
     const slot = e.market.goods[good];
     let n;
     if (dir === 'buy') {

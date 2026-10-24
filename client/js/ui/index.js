@@ -9,6 +9,7 @@ import { renderQuestBox } from './quests.js';
 import { renderEventsButton } from './events.js';
 import { renderPlanetUi } from './planetPanel.js';
 import { renderDogBuff } from './minigames.js';
+import { renderHomeDialog } from './homeworld.js';
 import './routes.js';
 import './favorites.js';
 import './almanac.js';
@@ -37,6 +38,7 @@ export function renderAll() {
   renderEventsButton();
   renderPlanetUi();
   renderDogBuff();
+  renderHomeDialog();
 }
 
 /**

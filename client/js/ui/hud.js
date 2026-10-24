@@ -54,6 +54,8 @@ $('btnMarker').onclick = () => {
 };
 
 export function renderTop() {
+  $('btnHome').textContent = state.homeworld ? '⌂ Heimat' : '⌂ Start';
+  $('btnHome').title = state.homeworld ? 'Zur persönlichen Heimatwelt' : 'Zum Startpunkt';
   $('btnMarker').textContent = state.markerMode === 'state' ? '◆ Marker: Zustand' : '◆ Marker: Farbe';
   $('credits').textContent = fmt(state.credits) + ' Cr';
   $('shipCount').textContent = `${myShips().length} / ${PILOT_LICENSES[state.pilot || 1].maxShips}`;

@@ -25,7 +25,7 @@ function licenseBlock(game, player, kind) {
   if (!gov.unlocks.includes(kind)) return `${UNLOCK_NAMES[kind]} erfordern Gouverneurslizenz ${minGovernorFor(kind)}.`;
   return null;
 }
-const ownedBy = (game, owner) => [...game.ownership.values()].filter((p) => p.player === owner).length;
+const ownedBy = (game, owner) => [...game.ownership.values()].filter((p) => p.player === owner && !p.personal).length;
 export const dockedOwn = (game, player, e) => game.shipsOf(player.id).filter((s) => s.dockedAt === e.id);
 
 /** Waren aus den Laderäumen der angedockten eigenen Schiffe abziehen (falls vollständig vorhanden) */
@@ -56,7 +56,7 @@ export default {
       const gov = governor(player);
       if (!gov) return 'Für Besitz brauchst du eine Gouverneurslizenz (am Hub).';
       if (!gov.unlocks.includes(kind)) return `${UNLOCK_NAMES[kind]} erfordern Gouverneurslizenz ${minGovernorFor(kind)}.`;
-      const owned = [...game.ownership.values()].filter((p) => p.player === player.id).length;
+      const owned = [...game.ownership.values()].filter((p) => p.player === player.id && !p.personal).length;
       if (owned >= gov.maxProps) return `Gouverneurslizenz ${gov.level} erlaubt höchstens ${gov.maxProps} Besitztümer.`;
       if (!dockedOwn(game, player, e).length) return 'Kauf nur vor Ort: ein eigenes Schiff muss angedockt sein.';
       const price = propertyPrice(e);
@@ -147,6 +147,7 @@ export default {
   cTransfer: {
     args: { target: V.entity() },
     run({ game, player }, { target: e }) {
+      if (e.type === 'ruins') return 'Persönliche Ruinenwelten sind nicht übertragbar.';
       const c = consortiumOf(game, player);
       if (!c) return 'Du bist in keinem Konsortium.';
       const prop = game.ownership.get(e.id);

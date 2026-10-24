@@ -1,0 +1,23 @@
+# Freigegebene Stilrichtung für PRD 5
+
+2026-10-24: Nutzer hat `style-sample.png` ausdrücklich als Grundlage der Spielgrafik bestätigt.
+
+- Gezeichnete Comic-/Fantasy-/Science-Fiction-Welt mit variierenden Tuschekonturen und malerischen Oberflächen.
+- Ockerfarbene, überwachsene monumentale Ruinen menschlicher Technik; gedämpftes Grün, verwitterte türkise Maschinen, sparsame warme Betriebslichter.
+- Gut unterscheidbare technische Formen, lesbare Gebäudeabstände, charaktervolle erwachsene Menschen.
+- Landschaft setzt sich über die Bildränder fort; keine schwebende ausgeschnittene Inselplatte.
+- Bilddialoge besitzen separate lesbare Texte, Überspringen und Journal. Das Bild enthält keine gebackenen Dialogtexte.
+- Die Musterfigur wird als Hafenmeisterin Mira verwendet. Die übrigen Kontakte erhalten eigene wiedererkennbare Gestaltung.
+
+Die beiden Bilder wurden mit dem eingebauten `image_gen`-Werkzeug erstellt. Projektdateien:
+
+- `docs/art/prd5/style-sample.png`: freigegebene Stilprobe mit Landschaft, Figur und Questszene.
+- `client/assets/art/homeworld/arrival.png`: erste fertige Ankunftsszene für den Hauptquestdialog.
+
+## Verwendete Prompts
+
+Stilprobe: “Use case: stylized-concept. Create one cohesive art direction board for the game Space Trader, a hopeful rebuilding and industry game set on a personal ruined human colony world. The board is a concrete style sample to approve before production, not final gameplay. Landscape 1536x1024 composition. Main panel occupying upper two thirds: an elevated oblique orthographic 2.5D view of a broad alien river valley that continues beyond all four image edges, not a floating island or cutaway diorama. Monumental overgrown ancient HUMAN science fiction ruins, a recognizable half restored waterworks with tanks and pipes, five small ruined utility structures, a makeshift landing dock with one very small utilitarian cargo shuttle, simple homes among vines and broken stone arches, distant ruined orbital architecture. Generous spacing so each building silhouette would be clickable. Lower third split into two panels: left character study of an expressive adult human engineer / expedition guide in practical worn work clothing, warm and distinctive, holding a rugged maintenance tablet; right a close narrative illustration of that same engineer discovering a sealed mysterious ancient propulsion artifact in a ruined workshop, ancient technology rather than magic, no aliens. Consistent hand-painted comic / fantasy / science fiction illustration across all three panels, ink outlines of varying weight, painterly textured surfaces, strong readable technical shapes, weathered teal machinery, warm ochre stone, muted foliage, subtle amber technological lights, atmospheric blue distance. Charming mature European graphic novel art, not photorealistic, not generic plastic 3D low-poly. No labels, text, logos or watermarks. The lower narrative panel should reserve a quiet dark lower area where readable dialog text could later be placed. Preserve unified world design and engineer identity across panels.”
+
+Ankunftsszene (Stilprobe als Bildreferenz): “Use case: illustration-story. Asset type: opening quest dialog scene in Space Trader. Use the attached style board only as art-direction reference: retain its mature hand-painted graphic-novel linework, warm ochre human ruins, teal machinery, muted foliage and hopeful science-fiction mood. Make ONE seamless wide 1536x1024 illustration, no split panels and no text. At a damaged landing platform amid an inhabited ruined human colony, Mira, the same practical adult woman with short dark tousled hair, rust orange neck scarf, weathered gray work clothing and a rugged tablet, looks toward the viewer as if greeting a recently arrived cargo pilot over comms. Show her from the waist up on the right half, face expressive and clearly readable, her other hand indicating a broken dock beacon. Behind her: a small temporary settlement in vine-covered monumental old HUMAN stone and technical architecture, water pipes, repaired lights, wide valley continuing into blue atmospheric distance, a few distant residents. No aliens, no magic, no new ship design, no hovering floating-island platform. Keep the left half less visually busy for a separate text overlay, and bottom 20 percent darker with soft shadow suitable for readable white UI text. Preserve consistent guide identity from the reference. This is a finished story illustration, not a concept board, not a game screenshot, no logos or watermark.”
+
+Interaktive Ruinengeometrie und die vorhandenen Gebäudemodelle sind bis U16 weiterhin Übergangsassets; die Freigabe der Stilprobe erklärt sie nicht automatisch zu fertigen gezeichneten Spielassets.

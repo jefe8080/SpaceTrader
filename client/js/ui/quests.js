@@ -4,6 +4,7 @@ import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import { $, setHtml } from './dom.js';
 import { bus } from './bus.js';
+import { HOME_QUESTS } from '/shared/homeworld.js';
 
 const g = (x) => GOODS[x]?.name || x;
 
@@ -92,11 +93,13 @@ function questTarget(q) {
 export function renderQuestBox() {
   const q = state.quest;
   const box = $('questBox');
-  box.hidden = !q;
-  if (!q) return;
+  box.hidden = !q && !state.homeworld;
+  const nextHome = Object.entries(HOME_QUESTS).find(([id, quest]) => !state.homeQuest?.completed[id] && quest.requires.every(id => state.homeQuest?.completed[id]));
+  const homeSummary = state.homeworld && nextHome ? `<div class="qb-head">⌂ Hauptquest · ${nextHome[0]}</div><p>${esc(nextHome[1].title)}: ${esc(nextHome[1].goal)}</p><button class="small" data-q="homeTarget">Heimat zeigen</button><hr>` : '';
+  if (!q) { setHtml(box, homeSummary); return; }
   const t = questTarget(q);
   const docked = myShips().filter((s) => s.dockedAt);
-  setHtml(box, `<div class="qb-head">${qTitle(q)}<span style="flex:1"></span><button class="small ghost" data-q="abort" title="Abbrechen: 10 min Sperre${q.faction ? ', kleiner Rufverlust' : ''}">✕</button></div>
+  setHtml(box, `${homeSummary}<div class="qb-head">${qTitle(q)}<span style="flex:1"></span><button class="small ghost" data-q="abort" title="Abbrechen: 10 min Sperre${q.faction ? ', kleiner Rufverlust' : ''}">✕</button></div>
     <div class="qb-text">${questText(q)}</div>
     <div class="qb-prog">${progressText(q)}</div>
     <div class="qb-foot">${rewardText(q)}<span style="flex:1"></span>
@@ -107,6 +110,11 @@ export function renderQuestBox() {
 $('questBox').addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-q]');
   const q = state.quest;
+  if (b?.dataset.q === 'homeTarget') {
+    const home = state.entities.get(state.homeworld);
+    if (home) { state.follow = null; state.camera.x = home.x; state.camera.y = home.y; bus.select({ kind: 'entity', id: home.id }); }
+    return;
+  }
   if (!b || !q) return;
   if (b.dataset.q === 'abort') {
     if (confirm(`Quest abbrechen? Danach ${QUEST.ABORT_LOCK / 60} min keine neue Quest${q.faction ? ' und kleiner Rufverlust bei der Fraktion' : ''}.`)) cmd('questAbort');

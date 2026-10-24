@@ -9,6 +9,7 @@ import { stockBar } from './charts.js';
 import { questBoardSection } from './quests.js';
 import { scene, canLand, resetPlanetside, selectBuilding, hidePlanetside } from '../planetside.js';
 import { sfx } from '../audio.js';
+import { homePanel } from './homeworld.js';
 
 const bar = $('planetBar');
 const panel = $('planetPanel');
@@ -25,6 +26,7 @@ export function enterPlanet(id) {
   if (e?.kind !== 'planet') return;
   if (!canLand(id)) { toast('Kein Schiff angedockt'); return; }
   state.landed = id;
+  if (e.type === 'ruins') cmd('homeLand', { target: id });
   resetPlanetside(e);
   current = null;
   state.follow = null;
@@ -79,7 +81,8 @@ export function renderPlanetUi() {
   current = it;
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   let body = '';
-  if (it.kind === 'questhouse') body = questBoardSection(e, ship, true);
+  if (e.type === 'ruins') body = homePanel(e, it, ship);
+  else if (it.kind === 'questhouse') body = questBoardSection(e, ship, true);
   else if (it.kind === 'produce' || it.kind === 'consume') body = goodBuilding(it, e);
   else if (it.kind === 'factory') body = factoryPanel(it, e);
   else if (it.kind === 'plot') body = plotPanel(it, e);
@@ -146,6 +149,10 @@ panel.addEventListener('click', (ev) => {
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'homeReplay': state.homeDialogReplay = true; return;
+    case 'homeRepair': cmd('homeRepair', { target: e.id, facility: d.facility }); return;
+    case 'homeQuest': cmd('homeQuestComplete', { target: e.id, quest: d.quest }); return;
+    case 'homeTransfer': if (ship) cmd('trade', { ship: ship.id, target: e.id, good: d.good, dir: d.dir, amount: 'max' }); return;
     case 'close': closeBuilding(); return;
     case 'bld': cmd('bldUpgrade', { target: e.id, good: current.good }); return;
     case 'facBuild': if (confirm(`${RECIPES[d.recipe].name} bauen?`)) cmd('facBuild', { target: e.id, recipe: d.recipe }); return;

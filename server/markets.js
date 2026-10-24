@@ -334,7 +334,7 @@ const yardBonusOf = (b) => (b.bonus ? { bonus: b.bonus, yardLvl: b.yardLvl } : {
  */
 export function applyLevel(e) {
   const m = e.market;
-  if (e.kind !== 'planet' || !m) return;
+  if (e.kind !== 'planet' || !m || e.type === 'ruins') return;
   const L = m.lvl || 0;
   EXTRA_STEPS.forEach(([lv, role], i) => {
     const g = PLANET_EXTRAS[e.type]?.[i];

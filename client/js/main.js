@@ -66,6 +66,7 @@ socket.on('ships', (d) => {
   ui.scheduleRender();
 });
 socket.on('me', (d) => {
+  Object.assign(state, { homeworld: d.homeworld, homeQuest: d.homeQuest, manualShip: d.manualShip });
   Object.assign(state, { stopLoss: d.stopLoss, groups: d.groups, favorites: d.favorites, pilot: d.pilot, governor: d.governor, faction: d.faction, flagshipAt: d.flagshipAt,
     xp: d.xp, level: d.level, quest: d.quest, questLock: d.questLock, rep: d.rep, dogUntil: d.dogUntil, mg: d.mg });
   ui.scheduleRender(true);
@@ -401,7 +402,7 @@ function flyCamera(x, y, zoom) {
   camAnim = { x0: cam.x, y0: cam.y, z0: cam.zoom, x, y, z: zoom, t: 0 };
 }
 document.getElementById('btnHome').onclick = () => {
-  const home = [...state.systems.values()].find((s) => s.start);
+  const home = state.entities.get(state.homeworld) || [...state.systems.values()].find((s) => s.start);
   state.follow = null;
   if (home) flyCamera(home.x, home.y, 0.12);
 };

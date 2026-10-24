@@ -1,6 +1,6 @@
 # PRD 5: Heimatwelten, reale Wirtschaft und gezeichnete Planeten
 
-Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U4 abgeschlossen, U5–U17 offen
+Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U5 abgeschlossen, U6–U17 offen
 
 ## 1. Geltung, Ziel und Freigabe
 
@@ -508,7 +508,7 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | U2 | Geschirmter Frachtüberlauf, konsistente Belegung und Modulabbauprüfung | U1 unabhängig möglich | Abgeschlossen (verpackte Module folgen U10) |
 | U3 | Neue Weltversion, getrennte Testwelt, Bestands-/Warenquelleninventar, zentrale Werte | Vor großen Systemänderungen | Abgeschlossen |
 | U4 | Bildschirmfüllendes Umfeld für vorhandene Planeten und zusätzliche visuelle Abnahme | U3; keine Wirtschaftsabhängigkeit | Abgeschlossen |
-| U5 | Neue Ruinenwelt, Startverteilung, Hauptquestkanal und sicherer Anfang H00–H06 | U3, erste Stilprobe | Offen |
+| U5 | Neue Ruinenwelt, Startverteilung, Hauptquestkanal und sicherer Anfang H00–H06 | U3, erste Stilprobe | Abgeschlossen; Reliktzweig H04 folgt U6 |
 | U6 | Reliktzustand, Werkstatt, manuelle Präsenz und Handels-XP | U5 | Offen |
 | U7 | Bevölkerung, Energie, Bauzeiten, Qualifikation, Lager und Reserven | U2, U5 | Offen |
 | U8 | Leitstellenabdeckung, Wurmlochregeln, Befehlsprüfung, frühe Automatisierung | U1, U6, U7 | Offen |
@@ -561,6 +561,10 @@ Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehen
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: U5 umgesetzt: persönliche Ruinenwelt außerhalb des Ursprungs, zufällige geeignete Systeme in Ring 1/2 mit Sucherweiterung, mindestens 27.000 Abstand und sechs erreichbare Grundrohstoffe. Acht freie Plätze plus separate Grundanlagenanker, geometrisch auf 48 erweiterbare Plätze vorbereitet. Kostenloser Besitz zählt nicht gegen Gouverneursgrenzen und ist nicht übertragbar. Hauptquestkanal H00–H06 mit eigenen Belohnungen/Journal; H04-Reliktmechanik ist dem anschließenden U6 zugeordnet. Dock-/Anlagenreparaturen binden Credits/Material, laufen parallel und bleiben über Neustarts erhalten. Startausnahmen mit Empfänger und eindeutiger ID; zweiter Frachter H05 einmalig und lizenzgebunden. Materialgebundene Grundproduktion zählt Eigenproduktion, Versorgung sammelt Betriebszeit nach H03. Voller Personal-/Energie-/Reservierungsbetrieb folgt U7. Integrationstest erreicht H05/H06 mit echten Einkäufen/Transfers ohne fremde Industrie, ohne neue Waren im Heimatlager zu injizieren. Verteilung mit 24 Spielern und erschöpften Startringen geprüft. Alle 154 Tests erfolgreich. Browser prüft Ankunft, Landung, H00, Dockreparatur und Journal; Nachweise unter `docs/qa/prd5-u5/`.
+
+- 2026-10-24: Stilprobe vom Nutzer ausdrücklich freigegeben. Referenz und Gestaltungsregeln unter `docs/art/prd5/`; erste gezeichnete Ankunftsszene unter `client/assets/art/homeworld/arrival.png`, mit getrennten lesbaren Texten, Überspringen und erneutem Aufruf im Journal. Eingebauter ImageGen-Modus; Prompts und Herkunft im Art-README. Interaktive Grundgeometrie/Gebäudemodelle sind weiterhin Übergangsassets bis U16, keine vorgezogene Vollständigkeitsabnahme.
 
 - 2026-10-24: Nutzerentscheidung: keine Rücksicht auf die vorhandene alte Welt; vollständige Neugenerierung. Altkompatibilität, Migrations-/Sicherungsanforderungen und Wiederherstellungsabnahme entfallen. Getrennte Entwicklungswelt bleibt für reproduzierbare Tests bestehen.
 

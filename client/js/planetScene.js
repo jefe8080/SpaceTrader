@@ -3,6 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { planBuildingPlacements } from '/assets/models/planets/placement.js';
 import { CameraFlight, fitDioramaCamera, buildingViewDirection } from './planetCamera.js';
 import { createPlanetEnvironment } from './planetEnvironment.js';
+import { createRuinsTerrain, ruinsLayout, planRuinsBuildings } from './ruinsTerrain.js';
 
 const COLORS = { agrar: 0x739db4, ocean: 0x497fa3, desert: 0xbe946d, mining: 0x706874,
   ice: 0xa6c7de, urban: 0x596481, resort: 0xd6af8c, gasgiant: 0xa98b71,
@@ -31,7 +32,7 @@ export class PlanetScene {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.shadowMap.autoUpdate = false;
     this.world = new THREE.Scene();
     this.world.add(new THREE.HemisphereLight(0xe3f2ff, 0x74634d, 1.8));
@@ -132,9 +133,10 @@ export class PlanetScene {
     const base = '/assets/models/', groundBase = base + 'planets/';
     const [manifest, planets] = await Promise.all([json(base + 'manifest.json'), json(groundBase + 'manifest.json')]);
     const descriptor = planets.assets.find(x => x.planet_type === e.type);
-    if (!descriptor) throw new Error('Missing planet model: ' + e.type);
-    const [layout, terrain] = await Promise.all([json(groundBase + descriptor.layout), model(groundBase + descriptor.glb)]);
-    const plan = planBuildingPlacements(items, layout, manifest, {
+    if (!descriptor && e.type !== 'ruins') throw new Error('Missing planet model: ' + e.type);
+    const [layout, terrain] = e.type === 'ruins' ? [ruinsLayout(), createRuinsTerrain()]
+      : await Promise.all([json(groundBase + descriptor.layout), model(groundBase + descriptor.glb)]);
+    const plan = e.type === 'ruins' ? planRuinsBuildings(items, layout, manifest) : planBuildingPlacements(items, layout, manifest, {
       planetId: e.id, recipeCategory, previous: this.assignments.get(e.id),
     });
     const templates = await Promise.all(plan.placements.map(p => model(p.url)));

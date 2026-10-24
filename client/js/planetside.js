@@ -11,6 +11,7 @@ const LOOK = {
 };
 const lookOf = g => Object.keys(LOOK).find(k => LOOK[k].includes(g)) || 'hall';
 export function buildingKey(it) {
+  if (it.key) return it.key;
   return it.good ? it.kind + ':' + it.good
     : it.kind === 'factory' ? 'factory:' + it.recipe + ':' + it.index
     : it.kind === 'plot' ? 'plot:' + it.cat + ':' + it.plotIndex
@@ -60,7 +61,7 @@ export function renderPlanetside(now, dt) {
   const e = state.entities.get(state.landed);
   if (!e) return;
   canvas.hidden = false;
-  const key = JSON.stringify([e.id, e.type, Object.entries(e.market.goods).map(([g,s]) => [g,s.role,s.fac]), e.market.bld?.fac, !!state.props.get(e.id)?.manage]);
+  const key = JSON.stringify([e.id, e.type, Object.entries(e.market.goods).map(([g,s]) => [g,s.role,s.fac]), e.market.bld?.fac, e.market.homeworld?.plots, !!state.props.get(e.id)?.manage]);
   if (key !== scene.key) {
     const factoriesChanged = JSON.stringify(scene.items.filter(it => it.kind === 'factory').map(it => it.recipe)) !== JSON.stringify(e.market.bld?.fac ?? []);
     Object.assign(scene, buildItems(e), { key });
@@ -85,6 +86,17 @@ export function renderPlanetside(now, dt) {
 document.getElementById('planetRetry').onclick = () => { scene.key = ''; };
 /** Gebäudeliste eines Planeten (abhängig von Markt, Besitz und Fabriken) */
 export function buildItems(e) {
+  if (e.type === 'ruins') {
+    const basic = [
+      ['dock', 'consume', 'store', 'Landeplatz und Zentrallager'], ['control', 'produce', 'hall', 'Leitstelle'],
+      ['workshop', 'factory', null, 'Antriebswerkstatt'], ['waterworks', 'produce', 'silo', 'Wasserwerk'],
+      ['foodplant', 'produce', 'farm', 'Nahrungsanlage'], ['fueldepot', 'produce', 'drill', 'Treibstoffanlage'],
+      ['refinery', 'produce', 'drill', 'Raffinerie'], ['smelter', 'produce', 'mine', 'Schmelzwerk'],
+    ];
+    const items = [{ kind: 'questhouse', key: 'questhouse', label: 'Heimatjournal' }, ...basic.map(([homeFacility, kind, look, label]) => ({ kind, look, homeFacility, key: `home:${homeFacility}`, label }))];
+    for (let i = 0; i < (e.market.homeworld?.plots || 8); i++) items.push({ kind: 'plot', cat: 'bio', plotIndex: i, key: `home:plot_${i}`, label: `Bauplatz ${i + 1}` });
+    return { items, width: 240, feat: {} };
+  }
   const m = e.market;
   const feat = planetFeatures(e.id);
   const owned = state.props.get(e.id)?.manage;

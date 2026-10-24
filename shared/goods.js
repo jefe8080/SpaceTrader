@@ -154,6 +154,8 @@ export const ULTRA = Object.keys(GOODS).filter((g) => GOODS[g].ultra);
 // ---------- Planeten ----------
 // Raten in Einheiten pro Sekunde (bei Größe 1)
 export const PLANET_TYPES = {
+  ruins:    { name: 'Ruinenwelt', sprite: 'planet_colony', radius: [100, 100], weight: 0,
+              desc: 'Persönliche Heimat mit bewohnten Ruinen und wiederaufbaubarer Industrie.', produce: {}, consume: {} },
   agrar:    { name: 'Agrarwelt',     sprite: 'planet_agrar', radius: [80, 120], weight: 16, desc: 'Fruchtbare Welt, exportiert Getreide und Biomasse.',
               produce: { grain: 1.2, biomass: 0.4, food: 0.3 }, consume: { water: 0.3, fertilizer: 0.2, machinery: 0.02, consumer: 0.03 } },
   ocean:    { name: 'Ozeanwelt',     sprite: 'planet_ocean', radius: [85, 125], weight: 12, desc: 'Wasserwelt mit Ölplattformen und Algenfarmen.',

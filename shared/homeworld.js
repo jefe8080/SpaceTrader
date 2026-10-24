@@ -45,3 +45,13 @@ export const INDUSTRY_GROUPS = freeze({
 export function industryGroup(recipe) {
   return Object.entries(INDUSTRY_GROUPS).find(([, group]) => group.recipes.includes(recipe))?.[0];
 }
+
+export const HOME_QUESTS = freeze({
+  H00: { title: 'Ein Licht im Rauschen', requires: [], goal: 'Heimat anfliegen und landen.', credits: 0, xp: 10 },
+  H01: { title: 'Der erste sichere Landeplatz', requires: ['H00'], goal: 'Das Dock reparieren.', credits: 500, xp: 10 },
+  H02: { title: 'Wasser unter den Trümmern', requires: ['H01'], goal: 'Wasser- und Nahrungsanlage reparieren; 20 Wasser und 10 Nahrung selbst produzieren.', credits: 1000, xp: 20 },
+  H03: { title: 'Ein Netz aus Stimmen', requires: ['H02'], goal: 'Leitstelle 1 und Treibstoffanlage reparieren; eine lokale Route einrichten.', credits: 1000, xp: 20 },
+  H04: { title: 'Bergung ohne Kennung', requires: ['H02'], goal: 'Das markierte Wrack persönlich erreichen und den versiegelten Fund zur Heimat zurückbringen.', credits: 0, xp: 25 },
+  H05: { title: 'Ein zweites Paar Hände', requires: ['H03'], goal: 'Zehn Minuten Wasser und Nahrung bereitstellen (angesammelte Betriebszeit).', credits: 500, xp: 15 },
+  H06: { title: 'Feuer und Metall', requires: ['H03'], goal: 'Raffinerie und Schmelzwerk reparieren; 40 Barren selbst produzieren.', credits: 3000, xp: 35 },
+});

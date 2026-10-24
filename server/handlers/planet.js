@@ -26,6 +26,7 @@ export default {
   bldUpgrade: {
     args: { target: landedPlanet(), good: V.key(GOODS) },
     run({ game, player }, { target: e, good }) {
+      if (e.type === 'ruins') return 'Ruinenanlagen werden über die Heimat-Bauverwaltung ausgebaut.';
       const ships = dockedOwn(game, player, e);
       if (!ships.length) return 'Ein eigenes Schiff muss hier angedockt sein.';
       const s = e.market.goods[good];
@@ -54,6 +55,7 @@ export default {
   facBuild: {
     args: { target: landedPlanet(), recipe: V.key(RECIPES) },
     run({ game, player }, { target: e, recipe }) {
+      if (e.type === 'ruins') return 'Nutze die Heimat-Bauverwaltung für eigene Industrieanlagen.';
       const prop = game.ownership.get(e.id);
       if (!game.canManage(prop, player.id)) return 'Fabriken baust du nur auf eigenen Planeten (Konsortium: Handelsmeister).';
       const ships = dockedOwn(game, player, e);

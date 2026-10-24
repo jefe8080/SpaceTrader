@@ -214,7 +214,7 @@ export function marketTable(e, ship) {
   const mine = e.owner === state.me.id;
   const member = !mine && state.props.get(e.id)?.cons;
   const customs = !mine && !member && e.owner ? (e.market.customs || 0) : 0;
-  const rows = Object.entries(e.market.goods).map(([g, sl]) => {
+  const rows = Object.entries(e.market.goods).filter(([g, sl]) => e.type !== 'ruins' || (sl.cap > 0 && (sl.stock > 0 || ship?.cargo?.[g] || ['ore','ice','grain','gas','helium3','crude','water','food','shipfuel','fuel','ingots'].includes(g)))).map(([g, sl]) => {
     if (mine) return ownRow(e, g, sl, canTrade ? ship : null);
     if (member) return memberRow(e, g, sl, canTrade ? ship : null);
     const buy = canBuyFrom(sl), sell = canSellTo(sl);
@@ -251,7 +251,7 @@ function ownRow(e, g, sl, ship) {
   }
   return `<tr><td>${goodTag(g)} <span class="role role-${sl.role}">${ROLE_LABEL[sl.role]}</span></td>
     <td>${stockBar(sl.stock, sl.cap, '#81c784')} <span class="muted">${Math.floor(sl.stock)}/${sl.cap}</span></td>
-    <td><span class="muted" title="Marktpreis für Fremde">${playerPrice(e, g, canBuyFrom(sl) ? 'buy' : 'sell').toFixed(1)}</span></td>
+    <td><span class="muted" title="${e.type === 'ruins' ? 'Eigene Lagertransfers sind kostenlos' : 'Marktpreis für Fremde'}">${e.type === 'ruins' ? 'kostenlos' : playerPrice(e, g, canBuyFrom(sl) ? 'buy' : 'sell').toFixed(1)}</span></td>
     <td style="white-space:nowrap">${act}</td></tr>`;
 }
 
@@ -278,7 +278,7 @@ function entityDetails(e) {
     <button class="star${fav ? ' on' : ''}" data-act="fav" data-ent="${e.id}" title="${fav ? 'Aus Favoriten entfernen' : 'Zu Favoriten (F)'}">${fav ? '★' : '☆'}</button></div>`;
   const m = e.market;
   if (e.kind === 'planet') {
-    h += `<div class="muted">${PLANET_TYPES[e.type].desc}</div>
+    h += e.type === 'ruins' ? `<p>Persönliche, unverkäufliche Ruinenwelt. Lande für Heimatjournal, Reparaturen und Bauverwaltung.</p><div class="kv"><span>Einwohner / Wohnraum</span><span>${m.homeworld.population} / ${m.homeworld.housing}</span><span>Leitstelle</span><span>Stufe ${m.homeworld.controlLevel}</span><span>Reguläre Bauplätze</span><span>${m.homeworld.plots}</span></div>` : `<div class="muted">${PLANET_TYPES[e.type].desc}</div>
       <div class="kv" style="margin-top:6px"><span>Versorgung</span><span>${Math.round(m.eff * 100)} % Produktionsleistung</span></div>`;
   } else if (e.kind === 'station') {
     const def = STATION_TYPES[e.type];
@@ -325,13 +325,13 @@ function entityDetails(e) {
   const myDocked = dockedHere.find((s) => state.selected?.kind === 'ship' && s.id === state.selected.id) || dockedHere[0];
   if (e.kind === 'planet') h += eventSection(e, dockedHere.find((s) => s.queue?.[0]?.t !== 'route') || myDocked);
   if (e.faction && e.kind === 'planet') h += `<div class="muted small-note">${repLine(e.faction)}</div>`;
-  if (m && (e.kind === 'planet' || m.strategy === 'shipyard')) h += questBoardSection(e, myDocked);
+  if (m && e.type !== 'ruins' && (e.kind === 'planet' || m.strategy === 'shipyard')) h += questBoardSection(e, myDocked);
   if (m?.strategy === 'shipyard') h += shipyardSection(e, myDocked);
   if (e.type === 'hub') h += hubSection(e, myDocked) + governorSection(myDocked);
-  if (m) h += propertySection(e);
+  if (m && e.type !== 'ruins') h += propertySection(e);
   if (m?.strategy === 'factionyard') h += factionYardSection(e, myDocked);
   if (e.type === 'outpost') h += outpostSection(e, myDocked);
-  if (m) h += statsSection(e);
+  if (m && e.type !== 'ruins') h += statsSection(e);
 
   if (ships.length) {
     h += `<div class="section"><div class="section-title">Schiff hierher schicken <span class="muted" style="text-transform:none;letter-spacing:0">· Shift: anhängen</span></div><div class="btnrow">
