@@ -164,7 +164,10 @@ function actionOk(ship, key) {
  */
 function doTrade(ship, e, a, game, opts = {}) {
   const key = actionKey(a, e.id);
-  const amount = a.amount > 0 ? a.amount : Infinity;
+  const amount = a.amount > 0
+    ? (opts.route && a.op === 'buy' ? Math.max(0, a.amount - (ship.cargo[a.good] || 0)) : a.amount)
+    : Infinity;
+  if (amount === 0) { actionOk(ship, key); return; }
   if (a.op === 'buy' && freeFor(ship, a.good) <= 0) return;      // voll: nichts zu tun, kein Fehler
   if (a.op === 'sell' && !(ship.cargo[a.good] > 0)) return;      // nichts geladen: kein Fehler
   const res = game.trade(ship, e, a.good, amount, a.op, a.limit || 0, opts);

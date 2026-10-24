@@ -88,7 +88,7 @@ function actionRow(a, i, j, e) {
         <input type="number" min="0" step="0.1" placeholder="Wert" value="${a.value ?? ''}" data-f="value" data-i="${i}" data-j="${j}">
         <input type="number" min="10" placeholder="Timeout s" title="Zeitlimit in Sekunden" value="${a.timeout || ''}" data-f="timeout" data-i="${i}" data-j="${j}">`;
     } else {
-      h += `<input type="number" min="0" placeholder="Menge" title="Menge (leer = so viel wie möglich)" value="${a.amount || ''}" data-f="amount" data-i="${i}" data-j="${j}">
+      h += `<input type="number" min="0" placeholder="${a.op === 'buy' ? 'Zielbestand an Bord' : 'Verkaufsmenge'}" title="${a.op === 'buy' ? 'Zielbestand an Bord' : 'Verkaufsmenge'} (leer/0 = so viel wie möglich)" value="${a.amount || ''}" data-f="amount" data-i="${i}" data-j="${j}">
         <input type="number" min="0" step="0.1" placeholder="${a.op === 'buy' ? 'max. Preis' : 'min. Preis'}"
           title="${a.op === 'buy' ? 'Nur kaufen, solange der Preis höchstens so hoch ist' : 'Nur verkaufen, solange der Preis mindestens so hoch ist'}"
           value="${a.limit || ''}" data-f="limit" data-i="${i}" data-j="${j}">`;
@@ -104,7 +104,8 @@ function renderEditor() {
   const ship = refShip();
   let h = `<h2>${ed.id ? 'Route bearbeiten' : 'Neue Route'}</h2>
     <div class="muted">Eine Route ist eine Vorlage. Alle zugewiesenen Schiffe fliegen sie; Änderungen wirken sofort auf alle.
-    Menge leer = so viel wie möglich. Preisgrenzen verhindern Verlustgeschäfte.</div>
+    Käufe ergänzen den Zielbestand der jeweiligen Ware an Bord. Verkäufe verwenden die zusätzliche Verkaufsmenge.
+    Leer/0 = so viel wie möglich. Teilkäufe fahren weiter; Wartebedingungen gelten separat. Preisgrenzen verhindern Verlustgeschäfte.</div>
     <div class="form-row"><label>Name <input id="reName" maxlength="32" value="${esc(ed.name)}"></label>
     <label title="Automatische Einkäufe dieser Route nur, solange der Kontostand darüber bleibt">Mindestkontostand <input id="reMin" type="number" min="0" placeholder="0 = aus" value="${ed.minBalance || ''}"></label></div>`;
 

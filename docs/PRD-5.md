@@ -504,7 +504,7 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | Schritt | Ergebnis | Voraussetzungen | Status |
 |---|---|---|---|
 | D0 | Review, Interview, konkretes PRD 5 | Q34–Q66 | Abgeschlossen; Dokumentationscommit folgt |
-| U1 | Zielbestandskäufe auf Routen, klare Texte, Null-/Teilkaufregeln | Umsetzungsbeginn | Offen |
+| U1 | Zielbestandskäufe auf Routen, klare Texte, Null-/Teilkaufregeln | Umsetzungsbeginn | Abgeschlossen |
 | U2 | Geschirmter Frachtüberlauf, konsistente Belegung und Modulabbauprüfung | U1 unabhängig möglich | Offen |
 | U3 | Neue Weltversion, getrennte Testwelt, Bestands-/Warenquelleninventar, zentrale Werte | Vor großen Systemänderungen | Offen |
 | U4 | Bildschirmfüllendes Umfeld für vorhandene Planeten und zusätzliche visuelle Abnahme | U3; keine Wirtschaftsabhängigkeit | Offen |
@@ -561,6 +561,8 @@ Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehen
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: U1 umgesetzt: Routen-Kaufmengen gelten einheitlich als Zielbestand je Ware, einschließlich vorhandener Vorlagen. Erreichte Ziele löschen alte Aktionsfehler; Teilkäufe, Preis-/Kontogrenzen und separate Warteaktionen bleiben erhalten. Einmalige Dockkäufe und Verkäufe bleiben Zusatzmengen. Oberfläche erklärt die Semantik. Gezielte Integrationstests und vollständiges `npm test` vor Commit.
 
 - 2026-10-24: PRD 4 anhand Code und Interview geprüft. Q34–Q66 abgeschlossen; Neustart statt Migration, konkrete Betriebsregeln und Sonderveredelung aufgenommen. D0 fertiggestellt; U1–U17 noch nicht begonnen.
 
