@@ -76,7 +76,7 @@ import { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES } from './goods.js';
 export { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES, RECIPES, TIER_NAMES, CARGO_CLASSES, MINE_CLASSES, ULTRA, STATION_FOOD } from './goods.js';
 export { FACTIONS, FACTION_SHIPS, FACTION, ABILITIES, factionShips } from './factions.js';
 export { SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, STEP, YARD_MARGIN, MODULE_SIZE, MODULE_REFUND, SENSOR, FLAGSHIP, sensorFactor,
-  upgradeCost, moduleCapacity, moduleMiningRate, shipStats, holdOf, holdFor, hasAbility, holdUsage, freeFor, sellValue, countModules, buildMaterials } from './ships.js';
+  upgradeCost, moduleCapacity, moduleMiningRate, shipStats, holdOf, holdFor, hasAbility, holdUsage, freeFor, cargoFits, sellValue, countModules, buildMaterials } from './ships.js';
 
 export * from './progression.js';
 export * from './consortium.js';

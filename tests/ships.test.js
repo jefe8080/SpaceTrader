@@ -53,7 +53,7 @@ test('Module belegen 30 Fracht, Gefahrgut und Passagiere nur mit Modul', () => {
   assert.equal(freeFor(s, 'tourists'), 30);
   s.cargo = { chemicals: 60, ore: 10 };
   assert.equal(freeFor(s, 'chemicals'), 5);
-  assert.equal(freeFor(s, 'ore'), SHIP_TYPES.lastesel.cargo - 90 - 10);
+  assert.equal(freeFor(s, 'ore'), SHIP_TYPES.lastesel.cargo - 90 - 10 + 5);
 });
 
 test('Verkaufswert: 60 % Marktpreis plus 50 % der Upgrades', () => {

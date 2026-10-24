@@ -505,7 +505,7 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 |---|---|---|---|
 | D0 | Review, Interview, konkretes PRD 5 | Q34–Q66 | Abgeschlossen; Dokumentationscommit folgt |
 | U1 | Zielbestandskäufe auf Routen, klare Texte, Null-/Teilkaufregeln | Umsetzungsbeginn | Abgeschlossen |
-| U2 | Geschirmter Frachtüberlauf, konsistente Belegung und Modulabbauprüfung | U1 unabhängig möglich | Offen |
+| U2 | Geschirmter Frachtüberlauf, konsistente Belegung und Modulabbauprüfung | U1 unabhängig möglich | Abgeschlossen (verpackte Module folgen U10) |
 | U3 | Neue Weltversion, getrennte Testwelt, Bestands-/Warenquelleninventar, zentrale Werte | Vor großen Systemänderungen | Offen |
 | U4 | Bildschirmfüllendes Umfeld für vorhandene Planeten und zusätzliche visuelle Abnahme | U3; keine Wirtschaftsabhängigkeit | Offen |
 | U5 | Neue Ruinenwelt, Startverteilung, Hauptquestkanal und sicherer Anfang H00–H06 | U3, erste Stilprobe | Offen |
@@ -561,6 +561,10 @@ Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehen
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: Zwischenstand nach U1/U2: alle 132 Tests erfolgreich, `git diff --check` erfolgreich. Git-Identität nach Nutzerangabe eingerichtet. U1 mit Commit `34a2c22` abgeschlossen; U2 wird mit diesem Fortschrittsstand separat committed. U3–U17 unverändert offen; aktiver Datenbestand wurde nicht geöffnet oder zurückgesetzt.
+
+- 2026-10-24: U2 umgesetzt: zentrale Belegungsberechnung ordnet normale Ware zuerst normalem und danach geschirmtem Raum zu; Handel, Transfers, Bergbau und Detailanzeigen nutzen dieselben Funktionen. Flotten-Füllstand berücksichtigt beide Frachtbereiche. Hypothetischer Modulausbau prüft die neue Gesamtbelegung einschließlich legaler Umsortierung; blockierter Ausbau verändert weder Ware noch Credits. Passagiere und NPC-Kapazitätsausnahme bleiben getrennt. Physische verpackte Module existieren erst mit U10 und werden dort eingebunden. Gezielte Kapazitäts-/Handler-/Persistenztests sowie vollständiges `npm test` vor Commit.
 
 - 2026-10-24: U1 umgesetzt: Routen-Kaufmengen gelten einheitlich als Zielbestand je Ware, einschließlich vorhandener Vorlagen. Erreichte Ziele löschen alte Aktionsfehler; Teilkäufe, Preis-/Kontogrenzen und separate Warteaktionen bleiben erhalten. Einmalige Dockkäufe und Verkäufe bleiben Zusatzmengen. Oberfläche erklärt die Semantik. Gezielte Integrationstests und vollständiges `npm test` vor Commit.
 

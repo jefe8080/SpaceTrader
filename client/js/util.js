@@ -40,7 +40,10 @@ export const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 export const cargoUsed = (s) => Object.values(s.cargo || {}).reduce((a, b) => a + b, 0);
 export const shipSpeed = (s) => (s.upg ? shipStats(s).speed : SHIP_TYPES[s.type].speed);
 /** Belegung des normalen Laderaums (0..1) */
-export const cargoFill = (s) => { const st = shipStats(s); return st.cargo ? Math.min(1, holdUsage(s).cargo / st.cargo) : 0; };
+export const cargoFill = (s) => {
+  const st = shipStats(s), used = holdUsage(s), cap = st.cargo + st.hazard;
+  return cap ? Math.min(1, (used.cargo + used.hazard) / cap) : 0;
+};
 export const canMine = (s, good) => (shipStats(s).mining[GOODS[good].mine || 'std'] || 0) > 0;
 
 /** Geschätzte Flugzeit in Sekunden: bekannte Wurmlöcher und Sondergebiete eingerechnet */

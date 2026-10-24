@@ -1,5 +1,5 @@
 import { GOODS, SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, MODULE_SIZE, MODULE_REFUND,
-  upgradeCost, shipStats, holdUsage, sellValue, countModules, moduleCapacity, pilotLevel, factionRank, RANK_NAMES, FACTIONS } from '../../shared/config.js';
+  upgradeCost, shipStats, holdUsage, cargoFits, sellValue, pilotLevel, factionRank, RANK_NAMES, FACTIONS } from '../../shared/config.js';
 import { V } from './validate.js';
 
 /** Eigenes Schiff ist an einem Ort angedockt, der die Bedingung erfüllt */
@@ -165,11 +165,10 @@ export default {
       if (!dockedAt(game, ship, isYard)) return 'Module baust du an einer Werft aus.';
       const i = (ship.modules || []).indexOf(module);
       if (i < 0) return 'Modul nicht eingebaut.';
-      const n = countModules(ship)[module] - 1;
-      const cap = MODULES[module].cap;
-      if (cap && holdUsage(ship)[cap] > moduleCapacity(n)) return 'Erst die Ladung aus diesem Bereich entladen.';
+      const remaining = ship.modules.filter((_, k) => k !== i);
+      if (!cargoFits({ ...ship, modules: remaining })) return 'Modulausbau nicht möglich: Die vorhandene Fracht passt nicht in die verbleibenden normalen, geschirmten oder Passagierbereiche. Erst passende Ladung entladen.';
       const refund = Math.round(MODULES[module].price * MODULE_REFUND);
-      ship.modules = ship.modules.filter((_, k) => k !== i);
+      ship.modules = remaining;
       ship.upgValue = Math.max(0, (ship.upgValue || 0) - MODULES[module].price);
       player.credits += refund;
       game.shipLog(ship, `Modul ausgebaut: ${MODULES[module].name}, ${refund.toLocaleString('de-DE')} Cr erstattet`);
