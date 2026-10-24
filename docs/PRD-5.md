@@ -1,6 +1,6 @@
 # PRD 5: Heimatwelten, reale Wirtschaft und gezeichnete Planeten
 
-Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U13 abgeschlossen, U14–U17 offen
+Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U14 abgeschlossen, U15–U17 offen
 
 ## 1. Geltung, Ziel und Freigabe
 
@@ -517,7 +517,7 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | U11 | Sechs Sonderveredelungen und neue Fraktionswährungen | U7, U9, U10 | Abgeschlossen |
 | U12 | Bedarfsgesteuerte Disposition, Produktions- und Absatzaufträge | U8–U11 | Abgeschlossen |
 | U13 | Spezialisierungen, geänderte Questgeber-/Besitzprogression und Besucher | U7, U9 | Abgeschlossen |
-| U14 | Vollständige Hauptquestzweige, Orbitalringe, Forschung und Reliktverbesserungen | U10–U13 | Offen |
+| U14 | Vollständige Hauptquestzweige, Orbitalringe, Forschung und Reliktverbesserungen | U10–U13 | Abgeschlossen; H13-Gründung/Standortnachweise in U15 angebunden |
 | U15 | Weitere Ruinenwelten, gemeinsames eigenes Netz, Warpservice | U8, U12–U14 | Offen |
 | U16 | Gezeichnete Assets/Bilddialoge und sichtbare Entwicklungsstände vollständig | Stilprobe ab U5; begleitet alle Fachschritte | Offen |
 | U17 | Gesamtsimulation, Mehrspieler- und visuelle Abnahme, Balance, frischer Weltstart | U1–U16 | Offen |
@@ -561,6 +561,8 @@ Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehen
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: U14 umgesetzt: vollständiger Katalog H00–H17, getrennte parallele Hauptquestzweige, dauerhaft gespeicherte Teillieferungen und Eigenproduktions-/Ausbildungs-/Versorgungsnachweise. Persönliche reale Archivstellen mit manueller Anflugprüfung, einmalige registrierte physische Studienvorlagen für Säureextraktor/Sensorphalanx nach H09 und Kollektor/Bohrer nach H10. Kleine Orbitalstufe mit tatsächlicher ausdrücklich bestätigter dauerhafter Spatzabgabe und 600-s-Aufbau; große Stufe in zwei getrennten 600-s-Abschnitten ohne doppelte Materialbindung. Eigener auswählbarer Orbitalanker, kein Bodenplatz. Getrennte reale S/M- und L/XL-Bauplätze, gebundene Schiffbaumaterialien, Energie-/Personalpausen, reservierte Ausgabe und endliche Rümpfe mit leerem Tank. Fraktions-L/XL zusätzlich mit Ruf und Produktwährung; Klasse F bleibt den Fraktionswerften vorbehalten. H14/H17 verbessern dasselbe Reliktexemplar auf ×5/×6. H13-Gründung und H16-Standortnachweis nutzen die anschließende U15-Standortmechanik. Alle 264 Tests erfolgreich, 13 neue Quest-/Archiv-/Orbitalprüfungen einschließlich echtem Archivflug, paralleler Fertigung und Neustart. Browser bestätigt gebaute Infrastruktur, materiellen 40-s-Spatzbau, genau einen neuen Rumpf ohne Gratis-Tank und H08-Abschluss. Isolierte QA/Einrichtungsannahmen unter docs/qa/prd5-u14/. Gezeichnete Szenen und Entwicklungsstände bleiben U16, vollständige Fortschritts-/Zeitabnahme U17.
 
 - 2026-10-24: U13 umgesetzt: typgebundene Rohstoffschwerpunkte I–III mit nicht gestapelten Faktoren, konkreten Baukosten, Energie, Personal und tatsächlich verbrauchtem Verschleiß; Hive, Ausbildung, Tourismus, Logistik und Besiedlungsbüro mit den festgelegten Wirkungen. Materialgebundene Infrastruktur, qualifikationserhaltende Ausbildung, bezahlter Schwerpunktwechsel und Erhalt der Einwohner bei Mangel. Gemeinsame Abfertigungs-/Minutenbudgets wirken auf Spieler- und NPC-Transaktionen. Gewöhnlicher Besitz erhält Steuer-/Betriebs-/Ausbauanzeige, alte Fabrik- und Leistungsversprechen entfallen; Questgeberlevel erhöht weder Warenleistung noch Besitzpreis. Gouverneursgrenzen unverändert, persönliche Welten im UI nicht mitgezählt. Anwerbung entfernt konkrete Herkunftseinwohner, Transporte/Umladungen/Ansiedlung erhalten Qualifikationen und Kabinenbelegung. Touristen behalten Herkunft und reales Reisegeld, einmalige Aufenthaltszahlung, 20-min-Aufenthalt und tatsächlichen Abreisebedarf; Rundreisequests verwenden dieselben Personen. Alle 251 Tests erfolgreich, 21 neue Bevölkerungs-/Spezialisierungsprüfungen einschließlich Neustart, fünf Minuten realem Förder-/Verschleißbetrieb aller drei Stufen und Marktstrukturübertragung. Früher Einstieg weiterhin H06 nach 1.997 s, 101 Einwohner, zwei Frachter; 8.162 Cr Rest und keine öffentlichen Fertigwaren. Browser belegt Anwerbung 1.270 → 1.260 Einwohner / zehn Personen an Bord sowie bezahlten 120-s-Erzausbau mit aktivem Betrieb nach Neustart. Nachweise unter docs/qa/prd5-u13/. Gesamtabnahme und Balance bleiben U17.
 

@@ -4,9 +4,17 @@ import { ownHome, homePresent, repairHome, completeHomeQuest } from '../homeworl
 import { V } from './validate.js';
 import { relicSalvage, relicDeliver, relicWork } from '../relic.js';
 import {createLogistics,cancelLogistics} from '../logistics.js';
+import {deliverHomeQuest,visitHomeSite} from '../homequests.js';
+import {startOrbital,orbitalBuild,claimOrbital} from '../orbital.js';
+import {SHIP_TYPES} from '../../shared/config.js';
 import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess,changeRefinement } from '../homeworld-operations.js';
 
 export default {
+  homeQuestDeliver:{args:{target:V.entity(),quest:V.key(HOME_QUESTS),good:V.key(GOODS),amount:V.int(1,1e6)},run({game,player},{target,quest,good,amount}){return deliverHomeQuest(game,player,target,quest,good,amount);}},
+  homeArchiveVisit:{args:{target:V.entity(),ship:V.ownShip()},run({game,player},{target,ship}){return visitHomeSite(game,player,ship,target);}},
+  homeOrbital:{args:{target:V.entity(),large:V.bool(),ship:V.opt(V.ownShip()),confirmed:V.opt(V.bool(),false)},run({game,player},{target,large,ship,confirmed}){return startOrbital(game,player,target,large,ship,confirmed);}},
+  homeOrbitalBuild:{args:{target:V.entity(),type:V.key(SHIP_TYPES)},run({game,player},{target,type}){return orbitalBuild(game,player,target,type);}},
+  homeOrbitalClaim:{args:{target:V.entity(),id:V.str(100,1)},run({game,player},{target,id}){return claimOrbital(game,player,target,id);}},
   homeLogistics:{
     args:{target:V.entity(),kind:V.oneOf('supply','production','sales'),good:V.opt(V.key(GOODS)),recipe:V.opt(V.key(RECIPES)),amount:V.int(1,1e6),limit:V.num(0,1e9),budget:V.num(0,1e9),emergency:V.opt(V.num(0,1e9),0),priority:V.int(0,100),ships:V.ownShips(),locations:V.arr(V.entity(),100)},
     run({game,player},{target,...spec}){return createLogistics(game,player,target,spec);},

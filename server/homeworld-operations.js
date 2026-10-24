@@ -6,6 +6,7 @@ import {stat} from './markets.js';
 import {tickModuleProjects} from './modules.js';
 import {tickLogistics,productionAllowed,productionStock,consumeProductionReservation,recordProduction} from './logistics.js';
 import {initializePopulation,tickVisitors} from './population.js';
+import {ORBITAL_OPERATION,tickOrbital} from './orbital.js';
 
 const QUALIFICATIONS = ['basic', 'skilled', 'specialist'];
 const qualified = () => ({ basic: 0, skilled: 0, specialist: 0 });
@@ -61,7 +62,7 @@ export function upgradeControl(game,player,entity,module) {
 
 function buildTeams(home) {
   return Object.values(home.facilities).filter(building=>building.status==='building').length*2
-    +home.projects.filter(project=>!['training','module','study'].includes(project.kind)).length*2;
+    +home.projects.filter(project=>!['training','module','study'].includes(project.kind)).length*2+(home.orbital?.project?2:0);
 }
 
 function trainingReserved(home) {
@@ -264,6 +265,7 @@ function operationStep(game,entity,dt,now) {
   }
   for(const [good,slot] of Object.entries(market.goods))slot.cap=GOODS[good].cls==='normal'?home.storage:GOODS[good].cls==='hazard'?home.hazardStorage:0;
   const fullySupplied=ready(home.facilities.dock)?populationStep(entity,dt,now):false;
+  if(fullySupplied)home.fullSupplySeconds=(home.fullSupplySeconds||0)+dt;
   if(fullySupplied&&completed(game.players.get(home.owner),'H03'))home.suppliedSeconds+=dt;
   const reserved=trainingReserved(home),remaining={...home.workers},used=qualified();
   for(const q of QUALIFICATIONS)remaining[q]-=reserved[q];remaining.basic-=buildTeams(home);
@@ -292,6 +294,11 @@ function operationStep(game,entity,dt,now) {
   }
   const units=[];
   for(const [id,count] of Object.entries(home.controlModules||{}))for(let i=0;i<count;i++)units.push({id:`control:${id}:${i}`,building:{},spec:CONTROL_MODULES[id],priority:70});
+  if(home.orbital?.jobs?.small)units.push({id:'orbital:small',building:{},spec:ORBITAL_OPERATION.small,priority:61});
+  if(home.orbital?.jobs?.large){
+    const spec=home.orbital.jobs.small?ORBITAL_OPERATION.large:{power:80,workers:{basic:8,skilled:16,specialist:4}};
+    units.push({id:'orbital:large',building:{},spec,priority:60});
+  }
   for(const [id,building] of Object.entries(home.facilities)){
     if(!ready(building))continue;
     let spec;
@@ -311,7 +318,7 @@ function operationStep(game,entity,dt,now) {
   for(const unit of units){
     const {id,building,spec,recipe}=unit;
     if(unit.relicWorkshop&&relicWork)remaining.skilled+=2;
-    const reason=building.enabled===false?'Pausiert':recipe&&!productionAvailable(market,recipe,building.recipe||id)?'Produktionsziel erreicht, Zutaten fehlen, Reserve geschützt oder Lager voll':powerUsed+(spec.power||0)>generation?'Energie fehlt':null;
+    const reason=id==='orbital:large'&&home.orbital.jobs.small&&!allocations.some(a=>a.id==='orbital:small'&&a.state==='active')?'Grundring nicht in Betrieb':building.enabled===false?'Pausiert':recipe&&!productionAvailable(market,recipe,building.recipe||id)?'Produktionsziel erreicht, Zutaten fehlen, Reserve geschützt oder Lager voll':powerUsed+(spec.power||0)>generation?'Energie fehlt':null;
     const emergency=['dock','control'].includes(id)&&reason==='Energie fehlt';
     if(emergency){allocations.push({id,state:'emergency',reason:'Unabhängige Notversorgung erhält Lagerzugang und Reichweite',power:0,workers:qualified()});continue;}
     if(!assign(id,spec,reason)){building.blocked=reason||'Personal fehlt';continue;}
@@ -337,6 +344,7 @@ function operationStep(game,entity,dt,now) {
   home.workforce={total:{...home.workers},used,reserved:{...reserved,basic:reserved.basic+buildTeams(home),skilled:reserved.skilled+(relicWork?2:0)},free:remaining};
   home.allocations=allocations;
   tickModuleProjects(game,entity,dt);
+  tickOrbital(game,entity,dt);
   home.flows=flows;
   home.employmentFactor=.5+.5*Math.min(1,QUALIFICATIONS.reduce((sum,q)=>sum+used[q],0)/Math.max(1,Math.floor(home.population*.6)));
   tickCivilMoney(game,entity,dt,ready(home.facilities.dock)?home.civilConsumption:{});

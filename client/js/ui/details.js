@@ -336,6 +336,7 @@ function entityDetails(e) {
   if (m?.strategy === 'shipyard') h += shipyardSection(e, myDocked);
   if (e.type === 'hub') h += hubSection(e, myDocked) + governorSection(myDocked);
   if (m && e.type !== 'ruins') h += propertySection(e);
+  if(e.archiveOwner===state.me.id)h+=`<div class="section"><p>Persönliche Archiv-/Forschungsstelle. Das aktive manuelle Schiff muss hier persönlich anfliegen. Studienvorlagen benötigen 30 freie normale Frachteinheiten und werden einmalig geborgen.</p><button class="primary" data-act="homeArchiveVisit" data-ent="${e.id}" data-ship="${state.manualShip||''}" ${dockedHere.some(s=>s.id===state.manualShip)?'':'disabled'}>Archiv untersuchen / Vorlage bergen</button></div>`;
   if (m?.strategy === 'factionyard') h += factionYardSection(e, myDocked);
   if (e.type === 'outpost') h += outpostSection(e, myDocked);
   if (m && e.type !== 'ruins') h += statsSection(e);
@@ -401,6 +402,7 @@ det.addEventListener('click', (ev) => {
   const d = b.dataset;
   if (handlePropertyAction(d)) return;
   switch (d.act) {
+    case 'homeArchiveVisit':cmd('homeArchiveVisit',{target:d.ent,ship:d.ship});break;
     case 'moduleTransfer':case 'moduleInstall':case 'moduleRemove':handleModuleAction(d);break;
     case 'rename': {
       const s = state.ships.get(d.ship);

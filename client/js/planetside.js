@@ -94,7 +94,7 @@ export function buildItems(e) {
       ['foodplant', 'produce', 'farm', 'Nahrungsanlage'], ['fueldepot', 'produce', 'drill', 'Treibstoffanlage'],
       ['refinery', 'produce', 'drill', 'Raffinerie'], ['smelter', 'produce', 'mine', 'Schmelzwerk'],
     ];
-    const items = [{ kind: 'questhouse', key: 'questhouse', label: 'Heimatjournal' }, ...basic.map(([homeFacility, kind, look, label]) => ({ kind, look, homeFacility, key: `home:${homeFacility}`, label }))];
+    const items = [{ kind: 'questhouse', key: 'questhouse', label: 'Heimatjournal' }, ...basic.map(([homeFacility, kind, look, label]) => ({ kind, look, homeFacility, key: `home:${homeFacility}`, label })),{kind:'factory',homeOrbital:true,key:'home:orbital',label:'Orbitalring'}];
     for (let i = 0; i < (e.market.homeworld?.plots || 8); i++) {
       const structure=e.market.homeworld?.structures?.find(s=>s.plot===i);
       items.push(structure ? {kind:structure.status==='ready'?'factory':'plot',cat:'bio',plotIndex:i,homeStructure:structure.id,

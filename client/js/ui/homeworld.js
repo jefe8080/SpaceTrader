@@ -5,6 +5,8 @@ import { cmd } from '../net.js';
 import {moduleStockPanel,moduleCraftPanel} from './modules.js';
 import {REFINEMENT_RECIPES} from '/shared/goods.js';
 import {populationPanel} from './population.js';
+import {QUEST_DELIVERIES,STUDY_FINDS} from '/shared/advanced-homequests.js';
+import {SHIP_TYPES,SHIPYARD} from '/shared/config.js';
 
 let dialog;
 export function renderHomeDialog() {
@@ -47,11 +49,22 @@ export function homePanel(entity, item, ship) {
       <div class="muted">${quest.credits} Cr · ${quest.xp} XP${unlocked ? '' : ' · Voraussetzung: ' + quest.requires.join(', ')}</div>
       ${completed(id) ? '' : `<button class="small primary" data-pp="homeQuest" data-quest="${id}" ${unlocked ? '' : 'disabled'}>Fortschritt prüfen und abschließen</button>`}</div>`;
       if (id === 'H04' && state.homeQuest?.salvage?.phase === 'available') html += '<button class="small" data-pp="homeWreck">Markiertes Wrack zeigen</button>';
+      if(unlocked&&!completed(id)){
+        for(const [g,n] of Object.entries(QUEST_DELIVERIES[id]||{})){
+          const have=home.questDeliveries?.[id]?.[g]||0,remaining=n-have;
+          html+=`<p>${GOODS[g].name}: ${have} / ${n} unwiderruflich für diesen Auftrag gebunden</p>${remaining>0?`<input aria-label="Liefermenge ${id} ${GOODS[g].name}" id="questDelivery-${id}-${g}" type="number" min="1" max="${remaining}" value="${Math.min(10,remaining)}"><button class="small" data-pp="homeQuestDeliver" data-quest="${id}" data-good="${g}">Teilmenge liefern</button>`:''}`;
+        }
+        const site=state.homeQuest?.sites?.[id];
+        if(site)html+=`<p>Archivbesuch: ${state.homeQuest.visits?.[id]?'aufgezeichnet':'offen'}</p><button class="small" data-pp="homeSite" data-id="${site}">Archivstelle zeigen</button>`;
+      }
     }
+    for(const [module,find] of Object.entries(STUDY_FINDS))if(completed(find.quest))html+=`<p>${find.name}: ${state.homeQuest.finds?.[module]?'einmalige Vorlage geborgen':'Studienvorlage verfügbar'}</p><button class="small" data-pp="homeSite" data-id="${state.homeQuest.sites?.[module]||''}">Forschungsfund zeigen</button>`;
+    html+=`<p>Volle Grundversorgung: ${Math.floor(home.fullSupplySeconds||0)} / 1.800 s · Selbst ausgebildete Fachkräfte: ${home.trained?.skilled||0}</p>`+orbitalPanel(entity);
     html += '<details><summary>Journal nachlesen</summary><button class="small" data-pp="homeReplay">Ankunftsszene erneut ansehen</button>' + (state.homeQuest?.journal || []).map((entry) => `<p><b>${esc(entry.speaker || entry.id)}</b> · ${esc(entry.text)}</p>`).join('') + '</details>';
     return html;
   }
   if (item.homeStructure) return structurePanel(entity,item.homeStructure);
+  if(item.homeOrbital)return orbitalPanel(entity);
   if (item.kind === 'plot') return `<div class="muted">Freier Bauplatz ${item.plotIndex + 1}. Aktuell ${home.plots} von maximal ${HOMEWORLD.start.maxPlots} Plätzen erschlossen.</div>`+homeBuildPanel(entity);
   const facility = item.homeFacility, building = home.facilities[facility];
   if (!building) return '';
@@ -116,6 +129,24 @@ export function homePanel(entity, item, ship) {
 }
 
 const costLabel=cost=>`${fmt(cost.credits)} Cr · ${Object.entries(cost.goods).map(([g,n])=>`${n} ${GOODS[g]?.name||g}`).join(', ')} · ${cost.seconds||60} s`;
+function orbitalPanel(entity){
+  const o=entity.market.homeworld.orbital;
+  let html=`<h3>Orbitalring</h3><p>Kleiner Ring: ${o?.small?'betriebsbereit':'gebrochen'} · Großer Ring: ${o?.large?'betriebsbereit':`${o?.largeStage||0} / 2 Abschnitte`}. Eigener Orbitalanker, kein Bodenbauplatz.</p>`;
+  if(o?.project)html+=`<p>Ringbau ${o.project.kind==='small'?'klein':'groß'}, Abschnitt ${o.project.stage}: ${Math.ceil(o.project.remaining)} s · zwei Bauarbeiter gebunden.</p>`;
+  else if(completed('H07')&&!o?.small){
+    const ships=myShips().filter(s=>s.type==='spatz'&&s.dockedAt===entity.id);
+    html+=`<p>100 Platten, 40 Elektronik und zehn Rumpfsegmente für H08 liefern. Ein Spatz wird dauerhaft aus der steuerbaren Flotte entfernt und als Infrastruktur erhalten. Vorher alle Fracht und Module ausladen.</p><select id="orbitalSurrender" aria-label="Dauerhaft abzugebender Spatz">${ships.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select><button class="small" data-pp="homeOrbital" data-large="false" ${ships.length?'':'disabled'}>Spatz dauerhaft abgeben und Ring aufbauen · 600 s</button>`;
+  }else if(completed('H08')&&completed('H12')&&!o?.large)html+=`<button class="small" data-pp="homeOrbital" data-large="true">Großen Ring: Abschnitt ${(o?.largeStage||0)+1} starten · 600 s</button>`;
+  for(const s of o?.infrastructureShips||[])html+=`<p>Infrastruktur: ${esc(s.name)} (${s.id}) · dauerhaft im Ring.</p>`;
+  if(o?.small){
+    html+='<details><summary>Schiffbau mit echten Materialien</summary><p>Kleiner Betrieb: 20 Energie, acht einfache und sechs Fachkräfte. Große Fertigung zusätzlich: 60 Energie, zehn Fachkräfte, vier Spezialisten. Personal und Energie nur bei laufendem Bau.</p>';
+    for(const [id,d] of Object.entries(SHIP_TYPES).filter(([,d])=>!d.npc&&(o.large?['S','M','L','XL']:['S','M']).includes(d.cls)))html+=`<p>${d.name}: ${Object.entries(d.build).map(([g,n])=>`${n} ${GOODS[g].name}`).join(', ')}${d.currency?` + ${d.currency.n} ${GOODS[d.currency.good].name} · Fraktionsrang ${d.rank}`:''} · ${SHIPYARD.BUILD_TIME[d.cls]} s</p><button class="small" data-pp="homeOrbitalBuild" data-type="${id}">Rumpf bauen</button>`;
+    html+='</details>';
+    for(const j of Object.values(o.jobs))html+=`<p>${SHIP_TYPES[j.type].name}: ${Math.ceil(j.remaining)} s · ${j.paused?'pausiert: Energie oder Personal fehlt':'in Fertigung'} · Ausgabeplatz reserviert.</p>`;
+    for(const i of o.inventory)html+=`<p>${SHIP_TYPES[i.type].name} · ${esc(i.id)} · Tank leer</p><button class="small" data-pp="homeOrbitalClaim" data-id="${i.id}">Vorhandenen Rumpf in Flotte übernehmen</button>`;
+  }
+  return html;
+}
 function logisticsPanel(entity){
   const h=entity.market.homeworld,states={planned:'Geplant',reserved:'Reserviert',collecting:'In Abholung',intransit:'Unterwegs',delivered:'Geliefert',paused:'Pausiert',cancelled:'Abgebrochen'};
   let html='<h3>Leitstellenaufträge</h3>';

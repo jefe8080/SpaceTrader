@@ -1,4 +1,5 @@
 import { GOODS, RECIPES } from './goods.js';
+import {ADVANCED_HOME_QUESTS} from './advanced-homequests.js';
 // PRD 5 starting values. Rates use server seconds, costs use actual goods IDs.
 const freeze = (value) => {
   for (const child of Object.values(value)) if (child && typeof child === 'object') freeze(child);
@@ -74,6 +75,7 @@ export const HOME_QUESTS = freeze({
   H04: { title: 'Bergung ohne Kennung', requires: ['H02'], goal: 'Das markierte Wrack persönlich erreichen und den versiegelten Fund zur Heimat zurückbringen.', credits: 0, xp: 25 },
   H05: { title: 'Ein zweites Paar Hände', requires: ['H03'], goal: 'Zehn Minuten Wasser und Nahrung bereitstellen (angesammelte Betriebszeit).', credits: 500, xp: 15 },
   H06: { title: 'Feuer und Metall', requires: ['H03'], goal: 'Raffinerie und Schmelzwerk reparieren; 40 Barren selbst produzieren.', credits: 3000, xp: 35 },
+  ...ADVANCED_HOME_QUESTS,
 });
 
 export const HOME_BUILDINGS = freeze({

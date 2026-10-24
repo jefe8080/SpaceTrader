@@ -263,6 +263,7 @@ export function serializeEntity(e) {
   if (e.wh) o.wh = e.wh;
   if (e.faction) o.faction = e.faction;
   if (e.salvageOwner) o.salvageOwner = e.salvageOwner;
+  if(e.archiveOwner)Object.assign(o,{archiveOwner:e.archiveOwner,archiveKey:e.archiveKey});
   if (e.market?.owner) Object.assign(o, { owner: e.market.owner, ownerName: e.ownerName, ownerColor: e.ownerColor });
   return o;
 }

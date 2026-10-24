@@ -159,6 +159,16 @@ panel.addEventListener('click', (ev) => {
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'homeQuestDeliver':cmd('homeQuestDeliver',{target:e.id,quest:d.quest,good:d.good,amount:Number(document.getElementById(`questDelivery-${d.quest}-${d.good}`)?.value)});return;
+    case 'homeSite':{
+      const site=state.entities.get(d.id);if(site){leavePlanet();state.camera.x=site.x;state.camera.y=site.y;bus.select({kind:'entity',id:site.id});}return;
+    }
+    case 'homeOrbital':{
+      const large=d.large==='true',ship=document.getElementById('orbitalSurrender')?.value;
+      if(large||confirm('Dieser Spatz wird dauerhaft aus der steuerbaren Flotte entfernt und als Orbitalinfrastruktur erhalten. Fracht und Module müssen vorher entladen sein. Jetzt endgültig abgeben?'))cmd('homeOrbital',{target:e.id,large,ship:large?undefined:ship,confirmed:!large});return;
+    }
+    case 'homeOrbitalBuild':cmd('homeOrbitalBuild',{target:e.id,type:d.type});return;
+    case 'homeOrbitalClaim':cmd('homeOrbitalClaim',{target:e.id,id:d.id});return;
     case 'homeLogistics':{
       const value=id=>document.getElementById(id)?.value, selected=id=>[...document.getElementById(id).selectedOptions].map(o=>o.value);
       cmd('homeLogistics',{target:e.id,kind:value('logKind'),good:value('logGood'),recipe:value('logRecipe'),amount:Number(value('logAmount')),limit:Number(value('logLimit')),budget:Number(value('logBudget')),emergency:Number(value('logEmergency')),priority:Number(value('logPriority')),ships:selected('logShips'),locations:selected('logLocations')});return;

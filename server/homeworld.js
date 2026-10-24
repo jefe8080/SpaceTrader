@@ -6,6 +6,7 @@ import { newProperty } from './property.js';
 import { grantRelic } from './relic.js';
 import {stat} from './markets.js';
 import { tickHomeOperations, homeAccess, homeConstructionError } from './homeworld-operations.js';
+import {advancedQuestReady,completeAdvancedQuest} from './homequests.js';
 
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const done = (player, id) => !!player.homeQuest?.completed[id];
@@ -170,13 +171,15 @@ export function homeQuestReady(game, player, entity, id) {
     case 'H04': return player.homeQuest.salvage?.phase === 'workshop' && plantDone(home, 'workshop');
     case 'H05': return home.suppliedSeconds >= 600;
     case 'H06': return plantDone(home, 'refinery') && plantDone(home, 'smelter') && (home.produced.ingots || 0) >= 40;
-    default: return false;
+    default: return advancedQuestReady(game,player,entity,id);
   }
 }
 
 export function completeHomeQuest(game, player, entity, id) {
   if (!ownHome(game, player, entity) || player.homeworld !== entity.id) return 'Kein eigener Hauptqueststandort.';
   if (!homePresent(game, player, entity)) return 'Ein eigenes Schiff muss hier angedockt sein.';
+  const accessError=homeAccess(game,player,entity);if(accessError)return accessError;
+  if(Number(id.slice(1))>=7)return completeAdvancedQuest(game,player,entity,id);
   if (!homeQuestReady(game, player, entity, id)) return 'Voraussetzungen noch nicht erfüllt oder Belohnung bereits abgeholt.';
   if (id === 'H05' && game.shipsOf(player.id).length >= PILOT_LICENSES[player.pilot || 1].maxShips) return 'Schiffslimit erreicht. Für den zweiten Frachter wird ein freier Lizenzplatz benötigt.';
   const salvagePosition = id === 'H02' ? clearPosition(game.world, game.world.systems.get(entity.system), entity,

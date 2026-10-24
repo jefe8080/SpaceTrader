@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 const anchors = { dock: [-55, 0.35, 116], control: [-24, 0.35, 116], workshop: [7, 0.35, 116], questhouse: [40, 0.35, 116],
-  waterworks: [-84, 0.35, -86], foodplant: [-42, 0.35, -86], fueldepot: [0, 0.35, -86], refinery: [42, 0.35, -86], smelter: [84, 0.35, -86] };
+  waterworks: [-84, 0.35, -86], foodplant: [-42, 0.35, -86], fueldepot: [0, 0.35, -86], refinery: [42, 0.35, -86], smelter: [84, 0.35, -86],orbital:[74,.35,116] };
 
 export function ruinsLayout() {
   const slots = Object.entries(anchors).map(([id, position]) => ({ id, node: `ruins__${id}`, position, rotation_y: 0, footprint: [22, 18], role: 'home' }));
@@ -31,7 +31,7 @@ export function createRuinsTerrain() {
 export function planRuinsBuildings(items, layout, manifest) {
   const assignments = {}, used = new Set();
   const placements = items.map((item) => {
-    const anchor = item.homeFacility || (item.kind === 'questhouse' ? 'questhouse' : `plot_${item.plotIndex}`);
+    const anchor = item.homeFacility || (item.homeOrbital?'orbital':item.kind === 'questhouse' ? 'questhouse' : `plot_${item.plotIndex}`);
     const slot = layout.slots.find((candidate) => candidate.id === anchor);
     const asset = manifest.assets.find((entry) => Object.entries(entry.selector).every(([key, value]) => item[key] === value));
     if (!slot || used.has(slot.id) || !asset) throw new Error(`Ungültiger Ruinenanker: ${anchor}`);
