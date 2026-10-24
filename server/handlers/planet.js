@@ -3,10 +3,12 @@ import { V, CmdError } from './validate.js';
 import { takeGoods, dockedOwn } from './property.js';
 import { applyLevel } from '../markets.js';
 import { clog } from '../consortium.js';
+import { remoteManagementError } from '../coverage.js';
 
 /** Planet, an dem ein eigenes Schiff angedockt ist (Voraussetzung für die planetare Ansicht) */
 const landedPlanet = () => (v, ctx) => {
   const e = V.entity()(v, ctx);
+  const error=remoteManagementError(ctx.game,ctx.player,e);if(error)throw new CmdError(error);
   if (e.kind !== 'planet' || !e.market) throw new CmdError('Nur Planeten haben eine planetare Ansicht.');
   return e;
 };

@@ -1,5 +1,5 @@
 import { GOODS, RECIPES } from '/shared/config.js';
-import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, industryGroup, homeStorageUsage, availableHomeStock } from '/shared/homeworld.js';
+import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, homeStorageUsage, availableHomeStock } from '/shared/homeworld.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 
@@ -73,6 +73,21 @@ export function homePanel(entity, item, ship) {
           <button class="small" data-pp="relicWork" data-kind="remove" ${location.kind==='ship'&&docked.some(s=>s.id===location.id) ? '' : 'disabled'}>Ausbauen · 15 s</button>`;
       }
     }
+  }
+  if(facility==='control'&&building.status==='ready'){
+    const pending=home.projects?.find(p=>p.kind==='control');
+    if(pending)html+=`<p>Leitstellenausbau läuft · ${Math.max(0,Math.ceil(pending.until-state.time))} s · Material und Bauteam gebunden</p>`;
+    const cost=controlUpgradeCost(home.controlLevel+1);
+    const area=home.controlLevel===1?'Systemzone mit allen lokalen Transferwegen':`Vollständiger Hexsektor + ${home.controlLevel-2} Hexringe`;
+    html+=`<p>Stufe ${home.controlLevel}: ${area}. Eigene Gebiete bilden ein gemeinsames Netz; Konsortien teilen es nicht.</p>
+      <p>Auftragskapazität hier: ${4+4*home.controlLevel+8*(home.controlModules?.capacity||0)} · Notversorgung erhält die Reichweite.</p>`;
+    if(cost)html+=`<p>Nächste Stufe: ${costLabel(cost)}</p><button class="primary" data-pp="homeControlUpgrade" ${pending?'disabled':''}>Leitstelle auf Stufe ${home.controlLevel+1} ausbauen</button>`;
+    for(const [id,spec] of Object.entries(CONTROL_MODULES)){
+      const count=home.controlModules?.[id]||0;if(count&&id!=='capacity'){html+=`<p>✓ ${spec.name}</p>`;continue;}
+      const cost={...spec,credits:Math.round(spec.credits*(id==='capacity'?1.5**count:1))};
+      html+=`<p>${spec.name}: ${costLabel(cost)} · 2 Energie / 2 Fachkräfte</p><button class="small" data-pp="homeControlUpgrade" data-module="${id}" ${pending?'disabled':''}>Funktionsmodul bauen</button>`;
+    }
+    html+='<p class="muted">Disposition, Produktions- und Absatzplanung werden bei den Leitstellenaufträgen verwendet.</p>';
   }
   if (RECIPES[facility]) {
     const recipe = RECIPES[facility];

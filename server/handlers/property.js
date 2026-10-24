@@ -4,6 +4,7 @@ import { GOODS, SHIP_TYPES, SHIPYARD, GOVERNOR_LICENSES, UNLOCK_NAMES, PROP_UPGR
 import { V, CmdError } from './validate.js';
 import { newProperty, buildableTypes, propBook } from '../property.js';
 import { consortiumOf, isMaster, propCount, clog } from '../consortium.js';
+import { remoteManagementError } from '../coverage.js';
 
 /**
  * Verwaltbarer Besitz: eigener oder (als Handelsmeister) Besitz des eigenen Konsortiums.
@@ -12,6 +13,7 @@ import { consortiumOf, isMaster, propCount, clog } from '../consortium.js';
 const ownProp = () => (v, ctx) => {
   const e = V.entity()(v, ctx);
   const { game, player } = ctx;
+  const remoteError=remoteManagementError(game,player,e);if(remoteError)throw new CmdError(remoteError);
   const prop = game.ownership.get(e.id);
   if (!game.canManage(prop, player.id)) throw new CmdError(prop && game.canUseStorage(prop, player.id) ? 'Verwalten dürfen nur Handelsmeister.' : 'Das gehört dir nicht.');
   const cons = isConsortiumOwner(prop.player) ? game.accountOf(prop.player) : null;

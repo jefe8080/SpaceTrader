@@ -66,7 +66,7 @@ socket.on('ships', (d) => {
   ui.scheduleRender();
 });
 socket.on('me', (d) => {
-  Object.assign(state, { homeworld: d.homeworld, homeQuest: d.homeQuest, manualShip: d.manualShip, relic: d.relic });
+  Object.assign(state, { homeworld: d.homeworld, homeQuest: d.homeQuest, manualShip: d.manualShip, relic: d.relic, coverage:d.coverage||[],controlCapacity:d.controlCapacity||0 });
   Object.assign(state, { stopLoss: d.stopLoss, groups: d.groups, favorites: d.favorites, pilot: d.pilot, governor: d.governor, faction: d.faction, flagshipAt: d.flagshipAt,
     xp: d.xp, level: d.level, quest: d.quest, questLock: d.questLock, rep: d.rep, dogUntil: d.dogUntil, mg: d.mg });
   ui.scheduleRender(true);

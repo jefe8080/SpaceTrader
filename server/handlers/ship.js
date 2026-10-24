@@ -1,9 +1,19 @@
 import { GOODS, FLAGSHIP } from '../../shared/config.js';
 import { V, CmdError } from './validate.js';
 import { tradeAction } from './route.js';
-import { pointCovered, manualActionError } from '../coverage.js';
+import { pointCovered, manualActionError, coveredPath, controlAdmissionCapacity } from '../coverage.js';
 
 const MAX_QUEUE = 30;
+const isDirect=(player,ship,cmd,append)=>player.manualShip===ship.id&&!append&&!['route','harvest'].includes(cmd.t)&&(cmd.t!=='dock'||(cmd.actions?.length||0)<=1);
+
+export function batchOrderError(game,ships,cmd,append,routeOverride){
+  for(const ship of ships){const error=orderError(game,ship,cmd,append,routeOverride);if(error)return error;}
+  if(game.profile!=='homeworld'||!ships.length)return null;
+  const player=game.players.get(ships[0].owner),active=new Set(game.shipsOf(player.id).filter(s=>s.queue.some(c=>!c.manualDirect)).map(s=>s.id));
+  const previous=active.size;
+  for(const ship of ships){if(!isDirect(player,ship,cmd,append))active.add(ship.id);else if(!append)active.delete(ship.id);}
+  return active.size>previous&&active.size>controlAdmissionCapacity(game,player)?'Die gleichzeitige Auftragskapazität deiner Leitstellen ist ausgeschöpft; Versorgung kann neue Aufträge begrenzen.':null;
+}
 
 /** Ein Queue-Befehl vom Client -> bereinigter Befehl */
 const queueCmd = (v, ctx) => {
@@ -32,7 +42,7 @@ const queueCmd = (v, ctx) => {
 };
 
 /** Befehl an Schiff übergeben: ersetzen oder anhängen */
-export function giveOrder(game, ship, cmd, append) {
+export function orderError(game, ship, cmd, append, routeOverride) {
   const player = game.players.get(ship.owner);
   if (game.profile === 'homeworld') {
     if (player?.relic?.operation?.ship === ship.id) return 'Das Schiff ist für die laufende Reliktarbeit gesperrt.';
@@ -43,11 +53,37 @@ export function giveOrder(game, ship, cmd, append) {
     if (!pointCovered(game, player, ship) || !pointCovered(game, player, target)) {
       if (append || cmd.t === 'route' || cmd.t === 'harvest' || (cmd.t === 'dock' && cmd.actions?.length > 1)) return 'Außerhalb der Abdeckung sind nur einzelne manuelle Direktbefehle erlaubt.';
     }
-    cmd = { ...cmd, manualDirect: !append && cmd.t !== 'route' && cmd.t !== 'harvest' && (cmd.t !== 'dock' || (cmd.actions?.length || 0) <= 1) };
+    const direct=isDirect(player,ship,cmd,append);
+    if(!direct){
+      if(cmd.t==='goto'&&target?.kind==='wormhole'){
+        const wormhole=game.world.wormholes.get(target.wh);
+        if(!player.known.wh.has(target.wh)||!wormhole||![wormhole.a,wormhole.b].every(id=>pointCovered(game,player,game.world.entities.get(id))))return 'Automatischer Wurmlochtransit braucht bekannte und beidseitig abgedeckte Enden.';
+      }
+      let from=ship;
+      if(append&&ship.queue.length){
+        const tail=ship.queue.at(-1),route=game.routes.get(tail.route);
+        from=game.world.entities.get(tail.target||route?.stops.at(-1)?.targetId)||(tail.x!==undefined?tail:ship);
+      }
+      if(cmd.t==='route'){
+        const route=routeOverride||game.routes.get(cmd.route);
+        const targets=route?.stops.map(s=>game.world.entities.get(s.targetId))||[];
+        if(!targets.length)return 'Die Route hat keine erreichbaren Stopps.';
+        for(const to of [...targets,targets[0]]){if(!to||!Number.isFinite(coveredPath(game,player,from,to,game.shipSpeed(ship)).time))return 'Die Route verlässt die durchgängige eigene Leitstellenabdeckung.';from=to;}
+      }else if(!Number.isFinite(coveredPath(game,player,from,target,game.shipSpeed(ship)).time))return 'Die Flugstrecke ist nicht durchgängig von eigenen Leitstellen abgedeckt.';
+      const active=game.shipsOf(player.id).filter(s=>s.id!==ship.id&&s.queue.some(c=>!c.manualDirect)).length;
+      if(active>=controlAdmissionCapacity(game,player)&&!ship.queue.some(c=>!c.manualDirect))return 'Die gleichzeitige Auftragskapazität deiner Leitstellen ist ausgeschöpft; Versorgung kann neue Aufträge begrenzen.';
+    }
   }
   if (cmd.t === 'route' && ship.main) return `${ship.name} ist dein Hauptschiff und fährt keine Routen.`;
+  if(append&&ship.queue.length>=MAX_QUEUE)return `Queue von ${ship.name} ist voll (max. ${MAX_QUEUE}).`;
+}
+
+export function giveOrder(game, ship, cmd, append) {
+  const error=orderError(game,ship,cmd,append);if(error)return error;
+  if(game.profile==='homeworld')cmd={...cmd,manualDirect:isDirect(game.players.get(ship.owner),ship,cmd,append)};
   const c = { ...cmd, qid: ++ship.qid };
   if (!append) {
+    ship.nav=null;delete ship.coverageLeg;delete ship.coverageTransit;
     ship.queue = [c];
     ship.fails = {};
     ship.warn = {};
@@ -61,6 +97,7 @@ export default {
   order: {
     args: { ships: V.ownShips(), order: queueCmd, append: V.bool() },
     run({ game }, { ships, order, append }) {
+      const error=batchOrderError(game,ships,order,append);if(error)return error;
       for (const s of ships) {
         const err = giveOrder(game, s, order, append);
         if (err) return err;

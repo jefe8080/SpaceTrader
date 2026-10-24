@@ -1,11 +1,15 @@
-import { HOME_QUESTS, HOME_BUILDINGS } from '../../shared/homeworld.js';
+import { HOME_QUESTS, HOME_BUILDINGS, CONTROL_MODULES } from '../../shared/homeworld.js';
 import { GOODS, RECIPES } from '../../shared/goods.js';
 import { ownHome, homePresent, repairHome, completeHomeQuest } from '../homeworld.js';
 import { V } from './validate.js';
 import { relicSalvage, relicDeliver, relicWork } from '../relic.js';
-import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation } from '../homeworld-operations.js';
+import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl } from '../homeworld-operations.js';
 
 export default {
+  homeControlUpgrade:{
+    args:{target:V.entity(),module:V.opt(V.key(CONTROL_MODULES))},
+    run({game,player},{target,module}){return upgradeControl(game,player,target,module);},
+  },
   homeBuild: {
     args: { target: V.entity(), kind: V.oneOf(...Object.keys(HOME_BUILDINGS), 'plant'), recipe: V.opt(V.key(RECIPES)), parent: V.opt(V.str(40)), plot: V.opt(V.int(0, 47)) },
     run({ game, player }, { target, kind, recipe, parent, plot }) { return homeBuild(game, player, target, kind, recipe, parent, plot); },

@@ -55,9 +55,9 @@ function segNearZone(ax, ay, bx, by, z) {
  * Kantengewicht: gerade Flugzeit (inkl. Zonen), Wurmlochdurchflug WORMHOLE_TRANSIT Sekunden.
  * Rückgabe: { time, legs: [{ x, y, wh?: { id, side: 'a' | 'b' } }] } – letzter Leg ist das Ziel.
  */
-export function planPath(from, to, wormholes, speed, zones = []) {
-  const direct = segmentTime(from.x, from.y, to.x, to.y, speed, zones);
-  if (!wormholes?.length) return { time: direct, legs: [{ x: to.x, y: to.y }] };
+export function planPath(from, to, wormholes, speed, zones = [], allowedSegment = () => true) {
+  const direct = allowedSegment(from,to) ? segmentTime(from.x, from.y, to.x, to.y, speed, zones) : Infinity;
+  if (!wormholes?.length) return { time: direct, legs: Number.isFinite(direct)?[{ x: to.x, y: to.y }]:[] };
   // Knoten: 0 = Start, 1 = Ziel, dann je Wurmloch zwei Enden
   const nodes = [{ x: from.x, y: from.y }, { x: to.x, y: to.y }];
   for (const w of wormholes) {
@@ -83,10 +83,11 @@ export function planPath(from, to, wormholes, speed, zones = []) {
       let w = Math.hypot(nv.x - nu.x, nv.y - nu.y) / speed;
       let wh = false;
       if (nu.wh && nv.wh === nu.wh) { w = WORLD.WORMHOLE_TRANSIT; wh = true; }
+      if (!wh && !allowedSegment(nu,nv)) continue;
       if (dist[u] + w < dist[v]) { dist[v] = dist[u] + w; prev[v] = u; viaWh[v] = wh; }
     }
   }
-  if (dist[1] === Infinity) return { time: direct, legs: [{ x: to.x, y: to.y }] };
+  if (dist[1] === Infinity) return { time: direct, legs: [] };
   const chain = [];
   for (let v = 1; v > 0; v = prev[v]) chain.unshift(v);
   // Legs: Flug zum Eingang (mit wh-Markierung), Austritt ist der nächste Startpunkt

@@ -18,6 +18,7 @@ import { checkWorldFile, worldProfile } from './world-profile.js';
 import { createHomeworld, tickHomeworld, tickHomeResource } from './homeworld.js';
 import { tickRelics } from './relic.js';
 import { homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
+import { coveredPath, pointCovered } from './coverage.js';
 
 export const WORLD_GEN_VERSION = 3; // Bestandswelt; Versionskonflikte lösen niemals einen Reset aus
 
@@ -443,6 +444,7 @@ export class Game {
   planLegs(ship, x, y) {
     const p = this.players.get(ship.owner);
     if (!p) return { time: 0, legs: [{ x, y }] };
+    if(this.profile==='homeworld'&&!ship.queue[0]?.manualDirect)return coveredPath(this,p,ship,{x,y},this.shipSpeed(ship));
     const zones = [...this.world.zonesNear(ship.x, ship.y), ...this.world.zonesNear(x, y)];
     return planPath(ship, { x, y }, this.knownWormholes(p), this.shipSpeed(ship), [...new Set(zones)]);
   }
@@ -464,7 +466,7 @@ export class Game {
     }
     if (p) questProgress(this, p, ship);
     const tank = this.shipTank(ship);
-    if (!ship.relicSpeed && tank > 0 && ship.autoRefuel > 0 && ship.fuel < tank * ship.autoRefuel && e.market?.goods.shipfuel && canBuyFrom(e.market.goods.shipfuel)) {
+    if ((this.profile!=='homeworld'||ship.queue[0]?.manualDirect||pointCovered(this,p,e)) && !ship.relicSpeed && tank > 0 && ship.autoRefuel > 0 && ship.fuel < tank * ship.autoRefuel && e.market?.goods.shipfuel && canBuyFrom(e.market.goods.shipfuel)) {
       this.refuel(ship, e);
     }
   }

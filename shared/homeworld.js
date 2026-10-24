@@ -47,6 +47,20 @@ export function industryGroup(recipe) {
   return Object.entries(INDUSTRY_GROUPS).find(([, group]) => group.recipes.includes(recipe))?.[0];
 }
 
+export function controlUpgradeCost(level) {
+  if(!Number.isSafeInteger(level)||level<2)return null;
+  const cost=level===2?{credits:8000,goods:{plates:10,wires:4},seconds:60}
+    :{credits:Math.round(30000*1.5**(level-3)),goods:{plates:Math.ceil(20*1.3**(level-3)),electronics:Math.ceil(10*1.3**(level-3)),computers:Math.ceil(2*1.3**(level-3))},seconds:Math.min(180,120+15*(level-3))};
+  return [cost.credits,...Object.values(cost.goods)].every(Number.isSafeInteger)?cost:null;
+}
+
+export const CONTROL_MODULES=freeze({
+  dispatch:{name:'Disposition',credits:10000,goods:{electronics:8},seconds:60,power:2,workers:{skilled:2}},
+  production:{name:'Produktionsplanung',credits:20000,goods:{computers:4},seconds:90,power:2,workers:{skilled:2}},
+  sales:{name:'Absatzplanung',credits:20000,goods:{computers:4},seconds:90,power:2,workers:{skilled:2}},
+  capacity:{name:'Auftragskapazität +8',credits:15000,goods:{electronics:6},seconds:90,power:2,workers:{skilled:2}},
+});
+
 export const HOME_QUESTS = freeze({
   H00: { title: 'Ein Licht im Rauschen', requires: [], goal: 'Heimat anfliegen und landen.', credits: 0, xp: 10 },
   H01: { title: 'Der erste sichere Landeplatz', requires: ['H00'], goal: 'Das Dock reparieren.', credits: 500, xp: 10 },

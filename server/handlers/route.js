@@ -1,6 +1,7 @@
 import { GOODS } from '../../shared/config.js';
 import { V, CmdError } from './validate.js';
-import { giveOrder } from './ship.js';
+import { giveOrder, batchOrderError } from './ship.js';
+import { remoteManagementError } from '../coverage.js';
 
 const MAX_ROUTES = 100;
 
@@ -50,6 +51,10 @@ export default {
     },
     run({ game, player }, { id: route, name, stops, minBalance, assign }) {
       if (!stops.length) return 'Eine Route braucht mindestens einen Stopp.';
+      if(game.profile==='homeworld'){
+        for(const stop of stops){const error=remoteManagementError(game,player,game.world.entities.get(stop.targetId));if(error)return error;}
+        const error=batchOrderError(game,[...new Set([...assign,...(route?shipsOnRoute(game,route.id):[])])],{t:'route',route:route?.id},false,{stops});if(error)return error;
+      }
       if (!route) {
         if ([...game.routes.values()].filter((r) => r.owner === player.id).length >= MAX_ROUTES) return 'Zu viele Routen.';
         route = { id: 'r' + ++game.counters.route, owner: player.id, paused: false, created: Math.round(game.time) };
@@ -78,6 +83,7 @@ export default {
   routeAssign: {
     args: { route: V.ownRoute(), ships: V.ownShips(), rounds: V.opt(V.int(0, 1000), 0), append: V.bool() },
     run({ game, player }, { route, ships, rounds, append }) {
+      const error=batchOrderError(game,ships,{t:'route',route:route.id,rounds},append);if(error)return error;
       for (const s of ships) {
         const err = giveOrder(game, s, { t: 'route', route: route.id, rounds }, append);
         if (err) return err;

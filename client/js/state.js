@@ -8,7 +8,7 @@ export const state = {
   flagshipAt: null,     // Spielzeit der letzten Änderung am Hauptschiff
   xp: 0, level: 1,
   quest: null,          // aktive Quest
-  homeworld: null, homeQuest: null, manualShip: null, relic: null,
+  homeworld: null, homeQuest: null, manualShip: null, relic: null, coverage: [], controlCapacity: 0,
   questLock: 0,         // Spielzeit, ab der nach einem Abbruch wieder Quests möglich sind
   rep: {},              // Fraktionsruf
   stopLoss: 0,

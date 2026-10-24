@@ -511,7 +511,7 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | U5 | Neue Ruinenwelt, Startverteilung, Hauptquestkanal und sicherer Anfang H00–H06 | U3, erste Stilprobe | Abgeschlossen; H04 in U6 ergänzt |
 | U6 | Reliktzustand, Werkstatt, manuelle Präsenz und Handels-XP | U5 | Abgeschlossen |
 | U7 | Bevölkerung, Energie, Bauzeiten, Qualifikation, Lager und Reserven | U2, U5 | Abgeschlossen |
-| U8 | Leitstellenabdeckung, Wurmlochregeln, Befehlsprüfung, frühe Automatisierung | U1, U6, U7 | Offen |
+| U8 | Leitstellenabdeckung, Wurmlochregeln, Befehlsprüfung, frühe Automatisierung | U1, U6, U7 | Abgeschlossen |
 | U9 | Vollständige Warenherkunft, echte NPC-Kassen/Transporte, keine öffentliche Verarbeitung | U3, U5, U7, U8 | Offen |
 | U10 | Physische Module, Rezepte, Studie und reale Werft-/Fraktionsbestände | U2, U7, U9 | Offen |
 | U11 | Sechs Sonderveredelungen und neue Fraktionswährungen | U7, U9, U10 | Offen |
@@ -561,6 +561,8 @@ Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehen
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: U8 umgesetzt: exakte eigene Gebietsvereinigung aus Systemzonen und vollständigen Hexflächen, durchgängige Prüfung normaler Strecken und Navigation über bekannte beidseitig abgedeckte Wurmlöcher. Begonnene Abschnitte und Transit bleiben bei Netzausfall/Neustart sicher; ungedeckte Fortsetzungen und Routenaktionen pausieren ohne Warnungsflut. Atomare Vorprüfung von Mehrfachaufträgen und Routenänderungen, Kapazitätsgrenze und reduzierte Neuannahme bei Mangel. Lokale laufende Produktion bleibt erhalten; neue Fernverwaltung braucht eigene Abdeckung oder manuelle Anwesenheit. Materialgebundene Leitstellenstufen und Funktionsmodule mit sicheren Zahlenbereichen und maximal 180 s je Stufe; bedarfsgesteuerte Nutzung folgt U12. Karte zeichnet tatsächliche System-/Hexgrenzen. Alle 182 Tests erfolgreich, zwölf neue Netztests einschließlich realer früher Eisroute und echtem Wurmlochflug. Einstiegssimulation weiter erfolgreich. Browser bestätigt Ausbau Stufe 2 und Netzgrenzen, Nachweise unter docs/qa/prd5-u8/.
 
 - 2026-10-24: U7 umgesetzt: tatsächliche Qualifikationen, Bau- und Ausbildungsreservierungen, parallele materialgebundene Bauzeiten, 8 bis 48 belegbare Plätze, Infrastruktur und vollständiger Industriekatalog nach Gruppen. Pro Anlage Energie-/Personalzuordnung und priorisierte Pausen; Generatoren verbrauchen echte Betriebsmittel. Ausbildung wandelt vorhandene Einwohner um und pausiert bei fehlendem Schulbetrieb oder Versorgung. Vollständige Rezeptzyklen respektieren gemeinsame normale/Gefahrgutlager und geschützte Reserven; Transfers, Bau und NPC-Abholung berücksichtigen dieselben Bestände. Notversorgung bewahrt Einwohner und Reichweite; begrenztes Wachstum bei Grundversorgung. Bau-, Bilanz-, Reserve- und Schulbedienung ergänzt. Alle 170 Tests erfolgreich, zehn neue Betriebsintegrationstests einschließlich einer Woche Mangel und Neustarts. Seed-42-Flugsimulation erreicht H06 nach 1.997 s mit 101 Einwohnern und 7.826 Cr; finale Balance bleibt U17. Browsernachweise unter docs/qa/prd5-u7/.
 

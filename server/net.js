@@ -5,6 +5,7 @@ import { sumWindow } from './stats.js';
 import { consortiumView, consortiumOf } from './consortium.js';
 import { offersView } from './offers.js';
 import { eventsView } from './events.js';
+import { coverageAreas, controlCapacity } from './coverage.js';
 
 const r1 = (v) => Math.round(v * 10) / 10;
 const MAX_MARKET_SUBS = 400;
@@ -176,7 +177,7 @@ export class Net {
     for (const id of s.sentDetail.keys()) if (!this.game.ships.has(id) || this.game.ships.get(id).owner !== p.id) s.sentDetail.delete(id);
     s.socket.emit('ships', { t: r1(this.game.time), credits: Math.floor(p.credits), ships });
     // Spielerdaten und Routen nur bei Änderung
-    const me = JSON.stringify(playerDetail(p));
+    const me = JSON.stringify({...playerDetail(p),coverage:this.game.profile==='homeworld'?coverageAreas(this.game,p):[],controlCapacity:controlCapacity(this.game,p)});
     if (me !== s.sentMe) { s.sentMe = me; s.socket.emit('me', JSON.parse(me)); }
     const routes = JSON.stringify([...this.game.routes.values()].filter((r) => r.owner === p.id));
     if (routes !== s.sentRoutes) { s.sentRoutes = routes; s.socket.emit('routes', JSON.parse(routes)); }

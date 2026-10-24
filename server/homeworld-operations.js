@@ -1,5 +1,5 @@
 import { GOODS, RECIPES } from '../shared/goods.js';
-import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, industryGroup, homeStorageUsage, homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
+import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, homeStorageUsage, homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { pointCovered } from './coverage.js';
 
 const QUALIFICATIONS = ['basic', 'skilled', 'specialist'];
@@ -22,7 +22,7 @@ export function homeAccess(game, player, entity) {
   return null;
 }
 
-function charge(game, player, entity, cost) {
+export function chargeHome(game, player, entity, cost) {
   if (player.credits < cost.credits) return 'Nicht genug Credits.';
   const ships=shipsHere(game,player,entity), market=entity.market;
   for(const [good,n] of Object.entries(cost.goods)){
@@ -35,6 +35,23 @@ function charge(game, player, entity, cost) {
     market.goods[good].stock-=stored;remaining-=stored;
     for(const ship of ships){const take=Math.min(remaining,ship.cargo[good]||0);if(!take)continue;ship.cargo[good]-=take;remaining-=take;if(!ship.cargo[good])delete ship.cargo[good];}
   }
+}
+const charge=chargeHome;
+
+export function upgradeControl(game,player,entity,module) {
+  const error=homeAccess(game,player,entity);if(error)return error;
+  const home=entity.market.homeworld;initializeHomeOperations(home);home.controlModules||={};
+  if(home.controlLevel<1)return 'Zuerst die Leitstelle reparieren.';
+  if(home.projects.some(p=>p.kind==='control'))return 'Ein Leitstellenausbau läuft bereits.';
+  if(module&&module!=='capacity'&&home.controlModules[module])return 'Dieses Funktionsmodul ist bereits vorhanden.';
+  let cost=module?CONTROL_MODULES[module]:controlUpgradeCost(home.controlLevel+1);
+  if(!cost)return 'Diese Kosten überschreiten den sicher darstellbaren Zahlenbereich.';
+  if(module==='capacity')cost={...cost,credits:Math.round(cost.credits*1.5**(home.controlModules.capacity||0))};
+  if(!Number.isSafeInteger(cost.credits))return 'Diese Kosten überschreiten den sicher darstellbaren Zahlenbereich.';
+  const teamError=homeConstructionError(home);if(teamError)return teamError;
+  const costError=charge(game,player,entity,cost);if(costError)return costError;
+  home.projects.push({id:`control_${++home.nextProject}`,kind:'control',module:module||null,level:home.controlLevel+1,until:game.time+cost.seconds,bound:{credits:cost.credits,goods:structuredClone(cost.goods)}});
+  notify(game,entity);
 }
 
 function buildTeams(home) {
@@ -160,6 +177,10 @@ function completeConstruction(game,entity,now) {
     }else if(project.kind==='restore'){
       const building=home.facilities[project.target];building.restored=true;delete building.upgrading;
     }else if(project.kind==='land'){home.plots=Math.min(48,home.plots+4);home.expansions++;}
+    else if(project.kind==='control'){
+      if(project.module){home.controlModules||={};home.controlModules[project.module]=(home.controlModules[project.module]||0)+1;}
+      else home.controlLevel=project.level;
+    }
     notify(game,entity);
   }
   home.projects=pending;
@@ -249,6 +270,7 @@ function operationStep(game,entity,dt,now) {
     }
   }
   const units=[];
+  for(const [id,count] of Object.entries(home.controlModules||{}))for(let i=0;i<count;i++)units.push({id:`control:${id}:${i}`,building:{},spec:CONTROL_MODULES[id],priority:70});
   for(const [id,building] of Object.entries(home.facilities)){
     if(!ready(building))continue;
     let spec;

@@ -37,6 +37,27 @@ function resize() {
 export const worldToScreen = (x, y) => [(x - cam.x) * cam.zoom + W / 2, (y - cam.y) * cam.zoom + H / 2];
 export const screenToWorld = (sx, sy) => [(sx - W / 2) / cam.zoom + cam.x, (sy - H / 2) / cam.zoom + cam.y];
 
+function drawCoverage(){
+  ctx.save();ctx.fillStyle='rgba(68,198,185,0.035)';ctx.strokeStyle='rgba(83,225,208,0.55)';ctx.lineWidth=1/cam.zoom;ctx.setLineDash([8/cam.zoom,6/cam.zoom]);
+  for(const area of state.coverage||[]){
+    if(area.kind==='circle'){
+      ctx.beginPath();ctx.arc(area.x,area.y,area.radius,0,TAU);ctx.fill();ctx.stroke();
+    }else{
+      // Draw only exterior cell edges; shared edges in an own hex ring disappear.
+      const edges=new Map();
+      for(let q=-area.rings;q<=area.rings;q++)for(let r=Math.max(-area.rings,-q-area.rings);r<=Math.min(area.rings,-q+area.rings);r++){
+        const corners=hexCorners(area.q+q,area.r+r);
+        for(let i=0;i<6;i++){
+          const a=corners[i],b=corners[(i+1)%6],ka=`${Math.round(a.x)},${Math.round(a.y)}`,kb=`${Math.round(b.x)},${Math.round(b.y)}`,key=[ka,kb].sort().join(':');
+          if(edges.has(key))edges.delete(key);else edges.set(key,[a,b]);
+        }
+      }
+      ctx.beginPath();for(const [a,b] of edges.values()){ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);}ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
 function srand(seed) {
   let a = seed >>> 0;
   return () => {
@@ -787,6 +808,8 @@ export function render(now, dt) {
   ctx.translate(W / 2, H / 2);
   ctx.scale(z, z);
   ctx.translate(-cam.x, -cam.y);
+
+  drawCoverage();
 
   if (mode === 'galaxy') {
     drawGalaxyView(now);
