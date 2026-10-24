@@ -1,0 +1,29 @@
+<!doctype html><html lang="de"><meta charset="utf-8"><title>Schiffsdesign- und Zoomprüfung</title>
+<style>body{margin:0;background:#04050d;color:#eee;font:14px system-ui}canvas{position:fixed;inset:0}header{position:fixed;z-index:1;top:12px;left:18px}#cards{position:fixed;bottom:8px;left:12px;display:flex;gap:14px}img{width:48px;height:48px;object-fit:contain}</style>
+<canvas id="map"></canvas><header>Schiffsdesigns · <span id="mode"></span></header><div id="cards"></div>
+<script type="module">
+import {SHIP_TYPES,cellKey} from '/shared/config.js';
+import {state} from '/js/state.js';
+import {loadAssets,spriteUrl} from '/js/assets.js';
+import {initRenderer,render,viewMode,pickAt} from '/js/render.js';
+await loadAssets();
+state.me={id:'qa',name:'QA',color:'#56caff'};state.players=[state.me];
+for(let x=-50;x<=50;x++)for(let y=-50;y<=50;y++)state.cells.add(cellKey(x,y));
+initRenderer(document.querySelector('canvas'));
+const types=Object.entries(SHIP_TYPES);
+const ctx=document.querySelector('canvas').getContext('2d'),draw=ctx.drawImage.bind(ctx);
+let images=0;
+ctx.drawImage=(img,...args)=>{if(img instanceof HTMLImageElement&&img.src.includes('/art/ships/'))images++;draw(img,...args);};
+window.showZoom=zoom=>{
+ state.camera.zoom=zoom;state.ships.clear();images=0;
+ types.forEach(([type,d],i)=>{
+  const x=((i%8)*155+135-innerWidth/2)/zoom,y=(Math.floor(i/8)*155+150-innerHeight/2)/zoom;
+  state.ships.set(type,{id:type,type,name:d.name,owner:'qa',x,y,rx:x,ry:y,ra:0,angle:0,recv:1000,vx:0,vy:0,state:'idle',queue:[],cargo:{},modules:[]});
+ });
+ render(1000,0);
+ document.querySelector('#mode').textContent=`Zoom ${zoom} · ${viewMode()}`;
+ return {mode:viewMode(),images,picked:pickAt(135,150)};
+};
+document.querySelector('#cards').innerHTML=types.slice(0,8).map(([,d])=>`<img alt="${d.name}" src="${spriteUrl(d.sprite,'#56caff')}">`).join('');
+window.qaReady=true;window.showZoom(1);
+</script></html>

@@ -1,6 +1,7 @@
 import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, ZONE_TYPES, GOODS, cellKey } from '/shared/config.js';
 import { hexAt, hexCorners, hexCenter, hexKey } from '/shared/hex.js';
 import { getSprite } from './assets.js';
+import { shipScreenSize } from './shipArt.js';
 import { state, playerColor, selectedShips } from './state.js';
 import { hasWarn, stationAccent } from './util.js';
 import { FACTIONS } from '/shared/factions.js';
@@ -339,9 +340,8 @@ function drawShip(s, now) {
   const def = SHIP_TYPES[s.type];
   const col = shipColor(s);
   const transit = s.state === 'transit';
-  // Bei kleinem Zoom Marker statt Sprite
-  if (def.size * cam.zoom < 9) return drawMarker(s, col, now);
-  const size = Math.max(def.size, px(16)) * 1.28;
+  // Die Systemansicht behält Illustrationen; die Sektoransicht zeichnet Marker.
+  const size = px(shipScreenSize(def.size, cam.zoom));
   const moving = Math.hypot(s.vx, s.vy) > 1;
   ctx.save();
   ctx.translate(s.rx, s.ry);
@@ -360,10 +360,15 @@ function drawShip(s, now) {
     ctx.lineTo(-size * 0.4, size * 0.09);
     ctx.fill();
   }
-  const spr = getSprite(def.sprite, s.owner === state.me?.id ? (s.marker || playerColor(s.owner)) : playerColor(s.owner), 128);
+  const spr = getSprite(def.sprite, s.owner === state.me?.id ? (s.marker || playerColor(s.owner)) : playerColor(s.owner), 256);
   if (spr) ctx.drawImage(spr, -size / 2, -size / 2, size, size);
   else { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, size / 4, 0, TAU); ctx.fill(); }
   ctx.restore();
+  // Die Illustration behält ihre Fraktionsfarben; der Punkt zeigt den Besitzer.
+  ctx.fillStyle = s.owner === state.me?.id ? (s.marker || playerColor(s.owner)) : playerColor(s.owner);
+  ctx.strokeStyle = '#101925';
+  ctx.lineWidth = px(1);
+  ctx.beginPath(); ctx.arc(s.rx - size * 0.4, s.ry + size * 0.35, px(3), 0, TAU); ctx.fill(); ctx.stroke();
   if (state.markerMode === 'state' && s.owner === state.me?.id) {
     ctx.fillStyle = col;
     ctx.beginPath(); ctx.arc(s.rx + size * 0.45, s.ry - size * 0.45, px(3.5), 0, TAU); ctx.fill();
@@ -842,8 +847,8 @@ export function render(now, dt) {
 
   drawWormholeLinks(0.35);
   drawOrders(now);
-  for (const s of state.ships.values()) if (inView(s.rx, s.ry, 40)) drawShip(s, now);
-  const shipR = (s) => Math.max(SHIP_TYPES[s.type].size, px(16)) * 0.9;
+  for (const s of state.ships.values()) if (inView(s.rx, s.ry, px(shipScreenSize(SHIP_TYPES[s.type].size, z)))) drawShip(s, now);
+  const shipR = (s) => px(shipScreenSize(SHIP_TYPES[s.type].size, z)) * 0.7;
   for (const s of selectedShips()) ring(s.rx, s.ry, shipR(s), '#4fc3f7', now);
   if (sel?.kind === 'ship' && !state.selection.size) { const s = state.ships.get(sel.id); if (s && s.owner !== state.me.id) ring(s.rx, s.ry, shipR(s), '#4fc3f7', now); }
   if (hov?.kind === 'ship') { const s = state.ships.get(hov.id); if (s) ring(s.rx, s.ry, shipR(s), 'rgba(255,255,255,0.35)', now, false); }
@@ -873,7 +878,7 @@ export function pickAt(sx, sy) {
   let best = null, bestScore = Infinity;
   const shipList = mode === 'galaxy' ? selectedShips() : state.ships.values();
   for (const s of shipList) {
-    const r = mode === 'system' ? Math.max(SHIP_TYPES[s.type].size * 0.7, 14 / z) : 10 / z;
+    const r = mode === 'system' ? Math.max(shipScreenSize(SHIP_TYPES[s.type].size, z) * 0.5, 14) / z : 10 / z;
     const d = Math.hypot(s.rx - wx, s.ry - wy);
     if (d > r) continue;
     const score = d - (s.owner === state.me?.id ? 10 / z : 0);

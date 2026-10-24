@@ -15,10 +15,12 @@ Die ausdrückliche Freigabe der Vorschau bildet die Designentscheidung für dies
 ## Teilschritte und Fortschritt
 - [x] Bestand und bestehende Zoomschwelle untersucht, Designfreigabe übernommen.
 - [x] 1. Freigegebene Tafeln archivieren, freigestellte Sprite-Tafeln mit Imagegen erstellen und einzelne Schiffe als PNG aufbereiten; Vollständigkeit und Darstellung prüfen.
-- [ ] 2. Gemeinsamen Assetloader für PNG-Schiffe erweitern, Kartenrendering und Zoomgrenze anpassen, UI-Einbindung und Besitzererkennung prüfen.
+- [x] 2. Gemeinsamen Assetloader für PNG-Schiffe erweitern, Kartenrendering und Zoomgrenze anpassen, UI-Einbindung und Besitzererkennung prüfen.
 - [ ] 3. Automatische Regressionstests und visuelle Vorschau prüfen, Ergebnisse dokumentieren.
 
 ## Prüfungen
 Assetprüfung auf alle Schiffstypen, PNG-Abmessungen und Transparenz; gezielte Tests für Assetloader und Zoomdarstellung; bestehende Testsuite. Visuelle Kontrolle der extrahierten Flotten und der Integration im Browser, sofern verfügbar.
 
 Schritt 1: Alle 32 RGBA-PNGs mit 512 × 512 Pixeln geprüft. Visuelle Flottenkontrolle bestanden. Erster Prüflauf fand 576 statt 512 Pixel durch die Reihenfolge von Skalierung und Randzugabe; korrigiert, erneuter Lauf erfolgreich. Freistellung mit dem eingebauten Imagegen-Tool; Alpha-Restflächen beim Verpacken entfernt. Quellen unter `docs/art/ships/`, austauschbare Spielgrafiken unter `client/assets/art/ships/`.
+
+Schritt 2: Gemeinsamer Loader lädt PNGs vor der ersten Darstellung und nutzt bei Ladefehlern weiterhin SVGs. Keine zusätzlichen Rasterkopien je Besitzerfarbe. Besitzerpunkt, Statuspunkt, Auswahlradius, Rand-Culling und Treffertest an die Darstellung angepasst. 290/290 Tests erfolgreich; Browserprüfung zeigt bei Zoom 1/0,32/0,1/0,035 alle 32 PNGs, bei 0,034/0,007 nur Marker. Auswahl bleibt möglich, UI-Bilder vollständig geladen. Playwrights mitgelieferter Browser war nicht installiert; derselbe Test wurde erfolgreich mit dem vorhandenen Edge ausgeführt.
