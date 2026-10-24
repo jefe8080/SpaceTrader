@@ -1,0 +1,162 @@
+[
+  {
+    "id": "spatz",
+    "file": "ship_spatz.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "maulwurf",
+    "file": "ship_maulwurf.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "kolibri",
+    "file": "ship_kolibri.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "lastesel",
+    "file": "ship_lastesel.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "grubenhund",
+    "file": "ship_grubenhund.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "bussard",
+    "file": "ship_bussard.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "pelikan",
+    "file": "ship_pelikan.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "seekuh",
+    "file": "ship_seekuh.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "mammut",
+    "file": "ship_mammut.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "wal",
+    "file": "ship_wal.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "kondor",
+    "file": "ship_kondor.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "titan",
+    "file": "ship_titan.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "leviathan",
+    "file": "ship_leviathan.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "versorger",
+    "file": "ship_versorger.png",
+    "source": "civilian-atlas.png"
+  },
+  {
+    "id": "fl_miners",
+    "file": "ship_fl_miners.png",
+    "source": "factions-1-atlas.png"
+  },
+  {
+    "id": "fx_miners",
+    "file": "ship_fx_miners.png",
+    "source": "factions-1-atlas.png"
+  },
+  {
+    "id": "f_miners",
+    "file": "ship_f_miners.png",
+    "source": "factions-1-atlas.png"
+  },
+  {
+    "id": "fl_tech",
+    "file": "ship_fl_tech.png",
+    "source": "factions-1-atlas.png"
+  },
+  {
+    "id": "fx_tech",
+    "file": "ship_fx_tech.png",
+    "source": "factions-1-atlas.png"
+  },
+  {
+    "id": "f_tech",
+    "file": "ship_f_tech.png",
+    "source": "factions-1-atlas.png"
+  },
+  {
+    "id": "fl_nomads",
+    "file": "ship_fl_nomads.png",
+    "source": "factions-1-atlas.png"
+  },
+  {
+    "id": "fx_nomads",
+    "file": "ship_fx_nomads.png",
+    "source": "factions-1-atlas.png"
+  },
+  {
+    "id": "f_nomads",
+    "file": "ship_f_nomads.png",
+    "source": "factions-1-atlas.png"
+  },
+  {
+    "id": "fl_order",
+    "file": "ship_fl_order.png",
+    "source": "factions-2-atlas.png"
+  },
+  {
+    "id": "fx_order",
+    "file": "ship_fx_order.png",
+    "source": "factions-2-atlas.png"
+  },
+  {
+    "id": "f_order",
+    "file": "ship_f_order.png",
+    "source": "factions-2-atlas.png"
+  },
+  {
+    "id": "fl_league",
+    "file": "ship_fl_league.png",
+    "source": "factions-2-atlas.png"
+  },
+  {
+    "id": "fx_league",
+    "file": "ship_fx_league.png",
+    "source": "factions-2-atlas.png"
+  },
+  {
+    "id": "f_league",
+    "file": "ship_f_league.png",
+    "source": "factions-2-atlas.png"
+  },
+  {
+    "id": "fl_syndicate",
+    "file": "ship_fl_syndicate.png",
+    "source": "factions-2-atlas.png"
+  },
+  {
+    "id": "fx_syndicate",
+    "file": "ship_fx_syndicate.png",
+    "source": "factions-2-atlas.png"
+  },
+  {
+    "id": "f_syndicate",
+    "file": "ship_f_syndicate.png",
+    "source": "factions-2-atlas.png"
+  }
+]
