@@ -1,6 +1,6 @@
 # PRD 5: Heimatwelten, reale Wirtschaft und gezeichnete Planeten
 
-Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U3 abgeschlossen, U4–U17 offen
+Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U4 abgeschlossen, U5–U17 offen
 
 ## 1. Geltung, Ziel und Freigabe
 
@@ -8,7 +8,7 @@ Dieses Dokument konsolidiert [PRD 4](PRD-4.md) einschließlich sämtlicher ansch
 
 Ziel ist ein persönliches, später aus mehreren Standorten bestehendes Industrieimperium: natürliche Rohstoffe beschaffen, auf eigenen Ruinenwelten verarbeiten, Bevölkerung versorgen und tatsächliche Nachfrage bedienen. Anspruch entsteht aus Entscheidungen und abgestimmten Warenflüssen, nicht aus langen Pflichtwartezeiten oder dem Verlust eines Imperiums während der Abwesenheit.
 
-Der ursprüngliche Dokumentationsauftrag umfasste Prüfung, Konzeptklärung, Erstellung und Commit dieses PRD. Der Nutzer hat anschließend die Umsetzung beauftragt. Diese läuft schrittweise mit getrennten Testwelten. Der vereinbarte gemeinsame Neustart wird erst bei der Umstellung auf die fertig geprüfte neue Wirtschaft ausgeführt, nach Sicherung des alten Stands. Ein Push bleibt gesondert zustimmungspflichtig.
+Der ursprüngliche Dokumentationsauftrag umfasste Prüfung, Konzeptklärung, Erstellung und Commit dieses PRD. Der Nutzer hat anschließend die Umsetzung beauftragt. Diese läuft schrittweise mit getrennten Testwelten. Nach ausdrücklicher Folgeentscheidung wird eine vollständig neue Welt erzeugt; Rücksichtnahme, Migration und Übernahme des alten Spielstands sind nicht erforderlich. Ein Push bleibt gesondert zustimmungspflichtig.
 
 Die Spielregeln sind verbindlich. Mit **Ausgangswert** bezeichnete Zahlen sind ausdrücklich zur Ausarbeitung delegierte, nachvollziehbare Startwerte. Sie dürfen anhand von Simulation und Spieltests angepasst werden, solange dadurch keine bestätigte Grundregel geändert wird. Änderungen werden im Fortschrittsprotokoll mit Begründung festgehalten.
 
@@ -16,7 +16,7 @@ Die Spielregeln sind verbindlich. Mit **Ausgangswert** bezeichnete Zahlen sind a
 
 | Thema | Maßgebliche Entscheidung |
 |---|---|
-| Alte Spielstände | Gemeinsamer Neustart; keine Investitionskompensation oder Übernahme von Fortschritt. Vorherige Sicherung bleibt erhalten. |
+| Alte Spielstände | Vollständig neue Welt; keine Migration, Kompensation oder Pflicht zur Altstandsicherung (Folgeentscheidung 2026-10-24). |
 | Ruinenbesitz | Alle Ruinenwelten bleiben persönlich gebunden, nicht verkäuflich und nicht an Konsortien übertragbar. |
 | Manuelle Präsenz | Außerhalb eigener Abdeckung erhält genau ein aktiv manuell gesteuertes Schiff neue direkte Befehle; es muss nicht der Reliktträger sein. |
 | Handels-XP | Persönlicher manueller Handel ist unabhängig vom Reliktantrieb XP-berechtigt; automatischer Handel bleibt ausgeschlossen. |
@@ -491,11 +491,11 @@ Bestehende Assetprüfungen, die keine Bildtexturen oder genau drei Meshes verlan
 
 Alle fachlichen Grenzen werden serverseitig validiert. Persistenz umfasst Bevölkerung/Qualifikation, Besucher, Lager samt Modulen, Reservierungen, Produktion, Bauaufträge, Hauptquests, Leitstellen, Transit, Kassen, Antriebszustand und Warpfristen. Wiederholte Anfragen dürfen keine doppelte Abgabe, Belohnung, Lieferung oder Antriebserzeugung bewirken.
 
-Die neue Welt wird zunächst getrennt getestet. Erst nach fachlicher Abnahme: Server kontrolliert beenden, vollständigen alten Spielstand und relevante Konfiguration mit Prüfsumme/Datum sichern, Wiederherstellbarkeit prüfen, neue Weltversion aktivieren und gemeinsam neu starten. Die Sicherung wird nicht gelöscht oder als aktive Welt überschrieben. Ein Zurückrollen stellt die alte Anwendungsversion und den zugehörigen alten Datenstand gemeinsam wieder her.
+Die neue Welt wird zunächst getrennt getestet und nach fachlicher Abnahme als vollständig frische Welt gestartet. Nach ausdrücklicher Nutzerentscheidung vom 2026-10-24 sind Sicherung/Wiederherstellung des alten Spielstands, Migration und Altkompatibilität keine Abnahmevoraussetzungen mehr.
 
-Eine bloße Erhöhung der bisherigen Generierungsversionskonstante darf vor dieser Umstellung keinen automatischen Reset der aktiven Datenbank auslösen. Entwicklungsstarts verwenden einen eindeutig getrennten Datenpfad beziehungsweise In-Memory-Betrieb. Der Neustart gehört ausschließlich zum späteren dokumentierten Umstellungsschritt.
+Entwicklungsstarts verwenden einen getrennten Datenpfad beziehungsweise In-Memory-Betrieb für reproduzierbare Tests. Die in U3 angelegte Profilprüfung bleibt als Schutz gegen versehentlich vermischte Entwicklungswelten erhalten; weitere Altkompatibilitätsarbeit entfällt.
 
-Es gibt keine stille Migration von Altbesitz und keine Kompensationspflicht, weil der Neustart ausdrücklich vereinbart ist. Bis zur Umstellung bleiben vorhandene Daten unberührt. Temporäre Tests nutzen eigene Datenbanken oder In-Memory-Zustände.
+Es gibt keine Übernahme von Altbesitz und keine Kompensationspflicht. Temporäre Tests nutzen eigene Datenbanken oder In-Memory-Zustände; die neue Welt enthält ausschließlich ihren eigenen Anfangszustand.
 
 ## 17. Arbeitsplan und Fortschritt
 
@@ -507,7 +507,7 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | U1 | Zielbestandskäufe auf Routen, klare Texte, Null-/Teilkaufregeln | Umsetzungsbeginn | Abgeschlossen |
 | U2 | Geschirmter Frachtüberlauf, konsistente Belegung und Modulabbauprüfung | U1 unabhängig möglich | Abgeschlossen (verpackte Module folgen U10) |
 | U3 | Neue Weltversion, getrennte Testwelt, Bestands-/Warenquelleninventar, zentrale Werte | Vor großen Systemänderungen | Abgeschlossen |
-| U4 | Bildschirmfüllendes Umfeld für vorhandene Planeten und zusätzliche visuelle Abnahme | U3; keine Wirtschaftsabhängigkeit | Offen |
+| U4 | Bildschirmfüllendes Umfeld für vorhandene Planeten und zusätzliche visuelle Abnahme | U3; keine Wirtschaftsabhängigkeit | Abgeschlossen |
 | U5 | Neue Ruinenwelt, Startverteilung, Hauptquestkanal und sicherer Anfang H00–H06 | U3, erste Stilprobe | Offen |
 | U6 | Reliktzustand, Werkstatt, manuelle Präsenz und Handels-XP | U5 | Offen |
 | U7 | Bevölkerung, Energie, Bauzeiten, Qualifikation, Lager und Reserven | U2, U5 | Offen |
@@ -520,7 +520,7 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | U14 | Vollständige Hauptquestzweige, Orbitalringe, Forschung und Reliktverbesserungen | U10–U13 | Offen |
 | U15 | Weitere Ruinenwelten, gemeinsames eigenes Netz, Warpservice | U8, U12–U14 | Offen |
 | U16 | Gezeichnete Assets/Bilddialoge und sichtbare Entwicklungsstände vollständig | Stilprobe ab U5; begleitet alle Fachschritte | Offen |
-| U17 | Gesamtsimulation, Mehrspieler- und visuelle Abnahme, Balance, gesicherter Neustart | U1–U16 | Offen |
+| U17 | Gesamtsimulation, Mehrspieler- und visuelle Abnahme, Balance, frischer Weltstart | U1–U16 | Offen |
 
 Öffentliche Fabriken dürfen nicht vor einem nachweislich funktionierenden Einstieg und Warenversorgung abgeschaltet werden. Zwischenstände bleiben in Testwelten, bis ihre abhängigen Systeme zusammen funktionieren. Stilprobe und Bilddialogtechnik werden früh eingeführt; U16 ist die Vollständigkeitsprüfung, kein Aufschieben sämtlicher Gestaltung.
 
@@ -554,13 +554,17 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | A24 | Parallel konkurrierende Frachter respektieren Reserven, laufende Lieferungen, Budgets und Prioritäten; kein Doppelauftrag aus derselben Bedarfslücke. |
 | A25 | Normale Einzelspielerprogression erreicht die Zielkorridore 30–60 min / 4–8 h / 20–30 h; wesentliche Abweichungen werden vor Umstellung kalibriert oder begründet dokumentiert. |
 | A26 | Mehrspielerprüfung deckt Kooperation, Rohstoff-/Modulhandel, neue Teilnehmer und Konsortiumsrechte ab. Niemand benötigt einen bereits fortgeschrittenen anderen Spieler für den Einstieg. |
-| A27 | Sicherung des alten Stands und Wiederherstellung sind geprüft; gemeinsamer Neustart erfolgt erst nach Abnahme und niemals durch bloße Dokument- oder Paketinstallation. |
+| A27 | Vollständig frische Welt startet mit konsistenten PRD-5-Anfangszuständen. Übernahme, Sicherung oder Wiederherstellung des alten Stands sind nach Folgeentscheidung nicht erforderlich. |
 
 Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehende Prüfungen. Für abgeschlossene fachliche Pakete `npm test`; für die Wirtschaft zusätzlich reproduzierbare Simulationen mit Kosten-, Waren-, Geld- und Zeitbilanzen. Visuelle Aufgaben erfordern echte gerenderte/browserbasierte Prüfung, nicht allein Strukturtests.
 
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: Nutzerentscheidung: keine Rücksicht auf die vorhandene alte Welt; vollständige Neugenerierung. Altkompatibilität, Migrations-/Sicherungsanforderungen und Wiederherstellungsabnahme entfallen. Getrennte Entwicklungswelt bleibt für reproduzierbare Tests bestehen.
+
+- 2026-10-24: U4 umgesetzt: separat verwaltete Geländefortsetzung mit geschlossenen Originalkanten, ausgedehntes Meer für Ozean/Paradies und drei Wolkenschichten für Gasriesen. Kulisse beeinflusst weder Gebäude-Picking noch Anker oder Kamerafit. Kameraabstand an große orthografische Ausschnitte angepasst, damit Hochformat keine unterhalb des Bodens beginnenden Randstrahlen erhält. 12 GLB-/Geometrie-Integrationstests über fünf Formate und beide Schwenkgrenzen; gerenderte Browserprüfung mit 180 Fällen (12 Welten × fünf Formate × Übersicht/Schwenk/unterbrochene Fokusfahrt), ohne fehlende Randabdeckung oder Browserfehler. Nachweise unter `docs/qa/prd5-u4/`; Zeichnungsstil bleibt eigener Schritt U5/U16.
 
 - 2026-10-24: U3 umgesetzt: explizite Profile `legacy` (Version 3) und `homeworld` (Version 5), isolierter Entwicklungsstart auf Port 3005 mit `data/prd5/spacetrader.db`. Read-only-Prüfung vor Store/Migrationen weist Versions-/Profilkonflikte ohne Reset ab; aktiver Standardpfad ist im Testprofil gesperrt. SHA-256-/SQLite-Tests prüfen unveränderte Altbestände und Schemas. Start-, Bevölkerungs-, Wirtschafts-, Baugruppen-, Relikt- und Warp-Ausgangswerte in `shared/homeworld.js`; alle 40 Rezepte auf vollständige, kreislauffreie Baugruppenzuordnung geprüft. Warenquelleninventar in `docs/PRD-5-warenquellen.md`. Neue Wirtschaftsregeln folgen U5–U15; öffentliche Fabriken wurden noch nicht abgeschaltet. U1 `34a2c22`, U2 `abd536b` committed.
 

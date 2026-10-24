@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { planBuildingPlacements } from '/assets/models/planets/placement.js';
 import { CameraFlight, fitDioramaCamera, buildingViewDirection } from './planetCamera.js';
+import { createPlanetEnvironment } from './planetEnvironment.js';
 
 const COLORS = { agrar: 0x739db4, ocean: 0x497fa3, desert: 0xbe946d, mining: 0x706874,
   ice: 0xa6c7de, urban: 0x596481, resort: 0xd6af8c, gasgiant: 0xa98b71,
@@ -40,7 +41,7 @@ export class PlanetScene {
     Object.assign(sun.shadow.camera, { left: -95, right: 95, top: 85, bottom: -85, near: 1, far: 240 });
     sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.08;
     this.world.add(sun);
-    this.camera = new THREE.OrthographicCamera(-50,50,50,-50,0.1,1500);
+    this.camera = new THREE.OrthographicCamera(-50,50,50,-50,0.1,20000);
     this.controls = { target: new THREE.Vector3() };
     this.flight = new CameraFlight(this.camera, this.controls);
     this.records = new Map(); this.assignments = new Map();
@@ -116,7 +117,7 @@ export class PlanetScene {
     canvas.addEventListener('pointerleave', () => { this.hover=null;this.mark(); });
     this.clearPointers = () => { pointers.clear();gesture=true;drag=null;pinch=null; };
   }
-  reset() { this.epoch++; this.loading = true; if (this.group) this.group.visible = false; this.selected = null; this.overview = null; this.flight.cancel(); this.hover = null; this.mark(); }
+  reset() { this.epoch++; this.loading = true; if (this.group) this.group.visible = false; if (this.environment) this.environment.visible = false; this.selected = null; this.overview = null; this.flight.cancel(); this.hover = null; this.mark(); }
   show() { this.active = true;  }
   hide() {
     if (!this.active) return;
@@ -127,6 +128,7 @@ export class PlanetScene {
     const epoch = ++this.epoch;
     this.loading = true;
     if (this.group) this.group.visible = false;
+    if (this.environment) this.environment.visible = false;
     const base = '/assets/models/', groundBase = base + 'planets/';
     const [manifest, planets] = await Promise.all([json(base + 'manifest.json'), json(groundBase + 'manifest.json')]);
     const descriptor = planets.assets.find(x => x.planet_type === e.type);
@@ -154,9 +156,12 @@ export class PlanetScene {
     for (const r of records.values()) r.box = new THREE.Box3().setFromObject(r.object);
     const changedPlanet = this.planetId !== e.id || !this.overview;
     if (this.group) this.world.remove(this.group);
+    if (this.environment) { this.world.remove(this.environment); this.environment.userData.dispose(); }
     this.loading = false;
     this.group = group; this.world.add(group); this.records = records;
     this.bounds = new THREE.Box3().setFromObject(group);
+    this.environment = createPlanetEnvironment(ground, e.type);
+    this.world.add(this.environment);
     this.planetId = e.id; this.assignments.set(e.id, plan.assignments);
     this.world.background = new THREE.Color(COLORS[e.type] ?? COLORS.colony);
     this.renderer.shadowMap.needsUpdate = true;

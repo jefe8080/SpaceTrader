@@ -1,0 +1,2012 @@
+[
+  {
+    "cases": 36,
+    "failures": [],
+    "results": [
+      {
+        "type": "agrar",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "agrar",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "agrar",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ocean",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "ocean",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "ocean",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "desert",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "desert",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "desert",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "jungle",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "jungle",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "jungle",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          390,
+          844
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      }
+    ]
+  },
+  {
+    "cases": 36,
+    "failures": [],
+    "results": [
+      {
+        "type": "agrar",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "agrar",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "agrar",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ocean",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "ocean",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "ocean",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "desert",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "desert",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "desert",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "jungle",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "jungle",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "jungle",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          1024,
+          768
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      }
+    ]
+  },
+  {
+    "cases": 36,
+    "failures": [],
+    "results": [
+      {
+        "type": "agrar",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "agrar",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "agrar",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ocean",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "ocean",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "ocean",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "desert",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "desert",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "desert",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "jungle",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "jungle",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "jungle",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          1440,
+          900
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      }
+    ]
+  },
+  {
+    "cases": 36,
+    "failures": [],
+    "results": [
+      {
+        "type": "agrar",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "agrar",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "agrar",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ocean",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "ocean",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "ocean",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "desert",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "desert",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "desert",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "jungle",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "jungle",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "jungle",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          1920,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      }
+    ]
+  },
+  {
+    "cases": 36,
+    "failures": [],
+    "results": [
+      {
+        "type": "agrar",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "agrar",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "agrar",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ocean",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "ocean",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "ocean",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "desert",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "desert",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "desert",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "mining",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "ice",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "urban",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "resort",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "gasgiant",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 0
+      },
+      {
+        "type": "jungle",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "jungle",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "jungle",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "volcanic",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "colony",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      },
+      {
+        "type": "industrial",
+        "size": [
+          2560,
+          1080
+        ],
+        "misses": 0,
+        "boundsSeparate": true,
+        "objects": 2,
+        "edges": 350
+      }
+    ]
+  }
+]

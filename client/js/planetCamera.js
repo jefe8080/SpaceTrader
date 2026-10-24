@@ -14,7 +14,10 @@ export function fitDioramaCamera(box, width, height, area, direction = OVERVIEW_
       Math.abs(p.dot(up)) * height / Math.max(100,area.height));
   }
   const span = Math.max(1,halfSpan * 2 * 1.1);
-  return {target, position:target.clone().addScaledVector(d,260), zoom:100/span, span};
+  // Orthographic rays at the bottom edge must start above the continued ground,
+  // even when UI panels force a wide overview in a portrait viewport.
+  const distance = Math.max(260, span * 2 + 100);
+  return {target, position:target.clone().addScaledVector(d,distance), zoom:100/span, span};
 }
 export function buildingViewDirection(rotationY = 0) {
   const yaw = rotationY + Math.PI / 24, elevation = Math.PI / 5;
