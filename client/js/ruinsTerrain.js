@@ -10,18 +10,12 @@ export function ruinsLayout() {
   return { planet_type: 'ruins', terrain_root: 'planet_ruins', slots };
 }
 
-/** Transitional, code-native terrain; approved painted materials are completed in U16. */
+/** Stable interactive terrain/anchors; U16 applies painted ground and building art. */
 export function createRuinsTerrain() {
   const ground = new THREE.Group(), root = new THREE.Group(); root.name = 'planet_ruins'; ground.add(root);
   const terrain = new THREE.Mesh(new THREE.BoxGeometry(224, 5.3, 274), new THREE.MeshStandardMaterial({ color: 0x78875e, roughness: 1 }));
   terrain.name = 'planet_ruins__Terrain'; terrain.position.set(0, -2.35, 15); root.add(terrain);
   terrain.material.name = 'Landscape_ruins_ground';
-  const stone = new THREE.MeshStandardMaterial({ color: 0xa99b78, roughness: 1 });
-  for (let i = 0; i < 12; i++) {
-    const pillar = new THREE.Mesh(new THREE.BoxGeometry(5, 9 + i % 4 * 3, 6), stone);
-    pillar.position.set(i % 2 ? 104 : -104, (9 + i % 4 * 3) / 2 + 0.3, -106 + Math.floor(i / 2) * 45);
-    pillar.rotation.z = (i % 3 - 1) * 0.06; root.add(pillar);
-  }
   for (const slot of ruinsLayout().slots) {
     const anchor = new THREE.Object3D(); anchor.name = slot.node; anchor.position.fromArray(slot.position); root.add(anchor);
   }

@@ -93,7 +93,9 @@ export function renderPlanetUi() {
   else if (it.kind === 'factory') body = factoryPanel(it, e);
   else if (it.kind === 'plot') body = plotPanel(it, e);
   else body = panelKinds[it.kind]?.render(it, e, ship) ?? '<div class="muted">Hier ist gerade nichts los.</div>';
+  const expanded=new Set([...panel.querySelectorAll('details[open]')].map(d=>d.querySelector('summary')?.textContent));
   setHtml(panel, `<div class="panel-head"><h2>${esc(it.label)}</h2><span style="flex:1"></span><button class="small ghost" data-pp="close">✕</button></div>${body}`);
+  for(const details of panel.querySelectorAll('details'))if(expanded.has(details.querySelector('summary')?.textContent))details.open=true;
 }
 
 /** Produktions- und Verbrauchsgebäude: Ausbau (PRD-3 6.3) */
@@ -205,7 +207,7 @@ panel.addEventListener('click', (ev) => {
       if (wreck) { leavePlanet(); state.camera.x = wreck.x; state.camera.y = wreck.y; bus.select({kind:'entity',id:wreck.id}); }
       return;
     }
-    case 'homeReplay': state.homeDialogReplay = true; return;
+    case 'homeReplay': state.homeDialogReplay = d.scene || 'H00'; return;
     case 'homeRepair': cmd('homeRepair', { target: e.id, facility: d.facility }); return;
     case 'homeQuest': cmd('homeQuestComplete', { target: e.id, quest: d.quest }); return;
     case 'homeTransfer': if (ship) cmd('trade', { ship: ship.id, target: e.id, good: d.good, dir: d.dir, amount: 'max' }); return;

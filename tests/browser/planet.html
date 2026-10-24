@@ -18,6 +18,7 @@ import { PlanetScene } from '/js/planetScene.js';
 import { Vector2, Vector3, Raycaster } from 'three';
 const status=document.getElementById('status'), select=document.getElementById('type');
 const manifest=await (await fetch('/assets/models/planets/manifest.json')).json();
+manifest.assets.push({planet_type:'ruins',label:'Ruinenwelt'});
 for(const asset of manifest.assets) select.add(new Option(asset.label,asset.planet_type));
 let loading=false;
 const viewer=new PlanetScene(document.getElementById('view'),{select:key=>viewer.select(key),status:()=>{}});
@@ -26,7 +27,7 @@ let last=performance.now();
 function loop(now){if(!loading)viewer.render(Math.min(.05,(now-last)/1000));last=now;requestAnimationFrame(loop)}requestAnimationFrame(loop);
 async function load(type){
  loading=true;select.value=type;
- await viewer.load({id:'qa-'+type,type},[{kind:'questhouse',key:'questhouse',label:'Questhaus'},{kind:'produce',look:'silo',good:'water',key:'produce:water',label:'Wasserwerk'}],()=>null,()=>true);
+ await viewer.load({id:'qa-'+type,type,...(type==='ruins'?{market:{homeworld:{controlLevel:1,facilities:{waterworks:{status:'ruined'}}}}}:{})},[{kind:'questhouse',key:'questhouse',label:'Questhaus'},{kind:'produce',look:'silo',good:'water',key:'produce:water',label:'Wasserwerk',...(type==='ruins'?{homeFacility:'waterworks'}:{})}],()=>null,()=>true);
  viewer.flight.move(viewer.overview,true);viewer.camera.zoom*=.85;viewer.camera.updateProjectionMatrix();loading=false;viewer.render(0);
 }
 function inspect(){

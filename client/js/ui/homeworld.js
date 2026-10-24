@@ -1,3 +1,4 @@
+import {HOME_STORY,storyAvailable} from '/shared/home-story.js';
 import { GOODS, RECIPES,recipeText } from '/shared/config.js';
 import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock } from '/shared/homeworld.js';
 import { state, fmt, esc, myShips } from '../state.js';
@@ -9,29 +10,31 @@ import {QUEST_DELIVERIES,STUDY_FINDS} from '/shared/advanced-homequests.js';
 import {SHIP_TYPES,SHIPYARD} from '/shared/config.js';
 import {warpPanel} from './colonies.js';
 
-let dialog;
+let dialog, currentScene;
 export function renderHomeDialog() {
   if (!dialog) {
     dialog = document.createElement('div'); dialog.className = 'overlay'; dialog.id = 'homeStory'; dialog.hidden = true;
-    dialog.innerHTML = `<section class="home-story" role="dialog" aria-modal="true" aria-labelledby="homeStoryTitle">
-      <img src="/assets/art/homeworld/arrival.png" alt="Mira begrüßt dich am beleuchteten Landeplatz zwischen überwachsenen Ruinen.">
-      <div class="home-story-text"><div class="muted">HAUPTGESCHICHTE · H00</div><h2 id="homeStoryTitle">Ein Licht im Rauschen</h2>
-      <p><b>Mira · Hafenmeisterin</b></p><p>„Wir sehen dein Signal. Der alte Landeplatz hält noch – wenn du uns herunterfindest.“</p>
-      <p class="muted">Deine Heimatwelt liegt direkt in deiner Nähe. Fliege sie an und lande, um Kontakt mit den Bewohnern aufzunehmen.</p>
-      <button class="primary" data-story-close>Zur Heimat</button> <button data-story-close>Überspringen</button>
-      <p class="muted small-note">Diese Szene bleibt im Heimatjournal nachlesbar. Deine Schiffe und Lieferungen laufen während des Dialogs weiter.</p></div></section>`;
     dialog.addEventListener('click', (event) => {
-      if (!event.target.closest('[data-story-close]')) return;
+      const choice=event.target.closest('[data-story-priority]');
+      if(choice)cmd('homeStoryPriority',{priority:choice.dataset.storyPriority});
+      if (!event.target.closest('[data-story-close]')&&!choice) return;
       state.homeDialogReplay = false;
-      if (state.homeQuest) { state.homeQuest.scenesSeen ||= {}; state.homeQuest.scenesSeen.H00 = true; }
-      dialog.hidden = true; cmd('homeDialogRead', { scene: 'H00' });
+      if (state.homeQuest) { state.homeQuest.scenesSeen ||= {}; state.homeQuest.scenesSeen[currentScene] = true; }
+      dialog.hidden = true; cmd('homeDialogRead', { scene: currentScene });currentScene=null;
     });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && !dialog.hidden) { event.stopImmediatePropagation(); dialog.querySelector('[data-story-close]').click(); }
     }, true);
     document.body.append(dialog);
   }
-  dialog.hidden = !state.me || !state.homeQuest || (!!state.homeQuest.scenesSeen?.H00 && !state.homeDialogReplay);
+  const requested=typeof state.homeDialogReplay==='string'?state.homeDialogReplay:state.homeDialogReplay?'H00':null;
+  const id=requested&&storyAvailable(state.homeQuest,requested)?requested:Object.keys(HOME_STORY).find(key=>storyAvailable(state.homeQuest,key)&&!state.homeQuest.scenesSeen?.[key]);
+  if(!state.me||!id){dialog.hidden=true;currentScene=null;return;}
+  if(currentScene!==id){
+    currentScene=id;const scene=HOME_STORY[id];
+    dialog.innerHTML=`<section class="home-story" role="dialog" aria-modal="true" aria-labelledby="homeStoryTitle"><img src="/assets/art/homeworld/${scene.image}.png" alt="${esc(scene.title)} · gezeichnete Szene mit ${esc(scene.speaker)}"><div class="home-story-text"><div class="muted">HAUPTGESCHICHTE · ${id}</div><h2 id="homeStoryTitle">${esc(scene.title)}</h2><p><b>${esc(scene.speaker)}</b></p><p>„${esc(scene.text)}“</p><p class="muted">${esc(scene.hint)}</p>${scene.choice?'<button data-story-priority="housing">Wohnraum zuerst</button> <button data-story-priority="supply">Versorgung zuerst</button>':''}<button class="primary" data-story-close>Weiter</button> <button data-story-close>Überspringen</button><p class="muted small-note">Im Heimatjournal nachlesbar. Schiffe, Produktion und Lieferungen laufen weiter.</p></div></section>`;
+  }
+  dialog.hidden=false;
 }
 
 const names = { dock: 'Dock und Zentrallager', control: 'Leitstelle', workshop: 'Antriebswerkstatt' };
@@ -65,7 +68,7 @@ export function homePanel(entity, item, ship) {
     html+='<h3>Eigene Welten und Expeditionen</h3>';
     for(const world of [...state.entities.values()].filter(e=>e.ruinsSite||e.market?.homeworld?.owner===state.me.id))html+=`<p>${esc(world.name)} · ${world.ruinsSite?'unbewohnter Standort':`Leitstelle ${world.market.homeworld.controlLevel}`}</p><button class="small" data-pp="homeSite" data-id="${world.id}">Standort zeigen</button>`;
     html+=warpPanel(entity);
-    html += '<details><summary>Journal nachlesen</summary><button class="small" data-pp="homeReplay">Ankunftsszene erneut ansehen</button>' + (state.homeQuest?.journal || []).map((entry) => `<p><b>${esc(entry.speaker || entry.id)}</b> · ${esc(entry.text)}</p>`).join('') + '</details>';
+    html += '<details><summary>Journal nachlesen</summary>'+Object.entries(HOME_STORY).filter(([id])=>storyAvailable(state.homeQuest,id)).map(([id,scene])=>`<button class="small" data-pp="homeReplay" data-scene="${id}">${id} · ${esc(scene.title)} ansehen</button><p><b>${esc(scene.speaker)}</b>: ${esc(scene.text)}</p>`).join('') + (state.homeQuest?.journal || []).map((entry) => `<p><b>${esc(entry.speaker || entry.id)}</b> · ${esc(entry.text)}</p>`).join('') + '</details>';
     return html;
   }
   if (item.homeStructure) return structurePanel(entity,item.homeStructure);

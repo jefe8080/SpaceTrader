@@ -114,7 +114,7 @@ export function createPlanetEnvironment(ground, type) {
       const material = surface(0xffffff); material.vertexColors = true;
       group.add(new THREE.Mesh(geometry, material));
       group.userData.boundaryEdges = edges.length;
-      if (type !== 'resort') {
+      if (type !== 'resort' && type !== 'ruins') {
         const wooded = ['agrar', 'jungle', 'colony'].includes(type);
         const decoration = new THREE.InstancedMesh(keep(wooded ? new THREE.ConeGeometry(3, 9, 5) : new THREE.DodecahedronGeometry(3, 0)),
           surface(find(wooded ? 'dark_leaf' : 'rock', 0x64705b)), 140);

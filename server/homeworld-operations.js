@@ -118,7 +118,7 @@ export function homeBuild(game,player,entity,kind,recipe,parentId,requestedPlot)
   if(parent){parent.upgrading=id;home.projects.push({id,kind:'upgrade',target:parent.id,upgrade:kind,until,bound:{credits:spec.credits,goods:structuredClone(spec.goods)}});}
   else if(kind==='land')home.projects.push({id,kind:'land',until,bound:{credits:spec.credits,goods:structuredClone(spec.goods)}});
   else{
-    const structure={id,kind,recipe:kind==='plant'?recipe:null,buildGroup:kind==='plant'?industryGroup(recipe):null,plot,status:'building',readyAt:until,enabled:true,priority:50,progress:0};
+    const structure={id,kind,recipe:kind==='plant'?recipe:null,buildGroup:kind==='plant'?industryGroup(recipe):null,plot,status:'building',readyAt:until,enabled:true,priority:kind==='housing'&&player.homeQuest?.storyPriority==='housing'?95:50,progress:0};
     home.structures.push(structure);home.projects.push({id:'build_'+id,kind:'construction',target:id,until,bound:{credits:spec.credits,goods:structuredClone(spec.goods)}});
   }
   notify(game,entity);

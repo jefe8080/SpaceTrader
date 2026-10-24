@@ -4,6 +4,7 @@ import { planBuildingPlacements } from '/assets/models/planets/placement.js';
 import { CameraFlight, fitDioramaCamera, buildingViewDirection } from './planetCamera.js';
 import { createPlanetEnvironment } from './planetEnvironment.js';
 import { createRuinsTerrain, ruinsLayout, planRuinsBuildings } from './ruinsTerrain.js';
+import {paintPlanet,developBuilding,loadPlanetArt,illustrateBuilding,illustrateGround,illustrateEnvironment} from './planetArt.js';
 
 const COLORS = { agrar: 0x739db4, ocean: 0x497fa3, desert: 0xbe946d, mining: 0x706874,
   ice: 0xa6c7de, urban: 0x596481, resort: 0xd6af8c, gasgiant: 0xa98b71,
@@ -139,17 +140,22 @@ export class PlanetScene {
     const plan = e.type === 'ruins' ? planRuinsBuildings(items, layout, manifest) : planBuildingPlacements(items, layout, manifest, {
       planetId: e.id, recipeCategory, previous: this.assignments.get(e.id),
     });
-    const templates = await Promise.all(plan.placements.map(p => model(p.url)));
+    const [templates,[atlas,groundTexture]] = await Promise.all([Promise.all(plan.placements.map(p => model(p.url))),loadPlanetArt()]);
     if (epoch !== this.epoch || !valid()) return;
     const group = new THREE.Group();
     const ground = terrain.clone(true); group.add(ground);
     const root = ground.getObjectByName(layout.terrain_root);
     if (!root) throw new Error('Missing terrain root: ' + layout.terrain_root);
     const records = new Map();
+    const artDisposers=[paintPlanet(ground)];
+    artDisposers.push(illustrateGround(ground,groundTexture,e.type));
     plan.placements.forEach((p, i) => {
       const object = templates[i].clone(true);
       object.position.fromArray(p.position); object.rotation.y = p.rotationY;
       object.userData.buildingKey = p.key;
+      artDisposers.push(developBuilding(object,p.item,e));
+      artDisposers.push(paintPlanet(object,{outlines:true}));
+      artDisposers.push(illustrateBuilding(object,p.item,e,atlas));
       root.add(object);
       records.set(p.key, { object, item: p.item, placement: p });
     });
@@ -157,12 +163,16 @@ export class PlanetScene {
     group.updateMatrixWorld(true);
     for (const r of records.values()) r.box = new THREE.Box3().setFromObject(r.object);
     const changedPlanet = this.planetId !== e.id || !this.overview;
-    if (this.group) this.world.remove(this.group);
+    if (this.group) {this.world.remove(this.group);this.group.userData.disposeArt?.();}
     if (this.environment) { this.world.remove(this.environment); this.environment.userData.dispose(); }
     this.loading = false;
-    this.group = group; this.world.add(group); this.records = records;
+    this.group = group;group.userData.disposeArt=()=>artDisposers.forEach(dispose=>dispose()); this.world.add(group); this.records = records;
     this.bounds = new THREE.Box3().setFromObject(group);
     this.environment = createPlanetEnvironment(ground, e.type);
+    const disposeEnvironment=this.environment.userData.dispose,disposePaint=paintPlanet(this.environment);
+    illustrateGround(this.environment,groundTexture,e.type);
+    const disposeDecor=illustrateEnvironment(this.environment,atlas,e.type);
+    this.environment.userData.dispose=()=>{disposeDecor();disposePaint();disposeEnvironment();};
     this.world.add(this.environment);
     this.planetId = e.id; this.assignments.set(e.id, plan.assignments);
     this.world.background = new THREE.Color(COLORS[e.type] ?? COLORS.colony);
@@ -209,7 +219,7 @@ export class PlanetScene {
   focusPose(record) {
     const direction=buildingViewDirection(record.placement.rotationY);
     return fitDioramaCamera(record.box,innerWidth,innerHeight,this.area,direction,
-      Math.max(55,(this.overview?.span ?? 150)*.42));
+      Math.max(45,(this.overview?.span ?? 150)*.2));
   }
   select(key, force = false) {
     if (!force && key === this.selected && (!key || this.records.has(key))) return;
@@ -225,7 +235,7 @@ export class PlanetScene {
     const rect = this.canvas.getBoundingClientRect();
     this.pointer.set((x - rect.left) / rect.width * 2 - 1, 1 - (y - rect.top) / rect.height * 2);
     this.ray.setFromCamera(this.pointer,this.camera);
-    const hit = this.ray.intersectObject(this.group, true)[0];
+    const hit = this.ray.intersectObjects([...this.records.values()].map(r=>r.object), true)[0];
     let object = hit?.object;
     while (object) {
       if (object.userData.buildingKey) return object.userData.buildingKey;

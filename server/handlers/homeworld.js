@@ -2,6 +2,7 @@ import { HOME_QUESTS, HOME_BUILDINGS, CONTROL_MODULES } from '../../shared/homew
 import { GOODS, RECIPES } from '../../shared/goods.js';
 import { ownHome, homePresent, repairHome, completeHomeQuest } from '../homeworld.js';
 import { V } from './validate.js';
+import {HOME_STORY,storyAvailable} from '../../shared/home-story.js';
 import { relicSalvage, relicDeliver, relicWork } from '../relic.js';
 import {createLogistics,cancelLogistics} from '../logistics.js';
 import {deliverHomeQuest,visitHomeSite} from '../homequests.js';
@@ -74,10 +75,21 @@ export default {
     args: { ship: V.ownShip(), target: V.entity(), kind: V.oneOf('install', 'remove') },
     run({ game, player }, { ship, target, kind }) { return relicWork(game, player, ship, target, kind); },
   },
+  homeStoryPriority:{
+    args:{priority:V.oneOf('housing','supply')},
+    run({game,player},{priority}){
+      if(!storyAvailable(player.homeQuest,'H11'))return 'Diese Siedlungsentscheidung ist noch nicht verfügbar.';
+      const entity=game.world.entities.get(player.homeworld),error=homeAccess(game,player,entity);if(error)return error;
+      const home=entity.market.homeworld;player.homeQuest.storyPriority=priority;
+      for(const id of ['waterworks','foodplant'])home.facilities[id].priority=priority==='supply'?95:80;
+      for(const building of home.structures||[])if(building.kind==='housing')building.priority=priority==='housing'?95:50;
+    },
+  },
   homeDialogRead: {
-    args: { scene: V.oneOf('H00') },
+    args: { scene: V.key(HOME_STORY) },
     run({ player }, { scene }) {
       if (!player.homeQuest) return 'Keine Heimatgeschichte verfügbar.';
+      if(!storyAvailable(player.homeQuest,scene))return 'Diese Szene ist noch nicht verfügbar.';
       player.homeQuest.scenesSeen ||= {};
       player.homeQuest.scenesSeen[scene] = true;
     },

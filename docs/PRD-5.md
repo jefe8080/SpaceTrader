@@ -1,6 +1,6 @@
 # PRD 5: Heimatwelten, reale Wirtschaft und gezeichnete Planeten
 
-Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U15 abgeschlossen, U16–U17 offen
+Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U16 abgeschlossen, U17 offen
 
 ## 1. Geltung, Ziel und Freigabe
 
@@ -519,7 +519,7 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | U13 | Spezialisierungen, geänderte Questgeber-/Besitzprogression und Besucher | U7, U9 | Abgeschlossen |
 | U14 | Vollständige Hauptquestzweige, Orbitalringe, Forschung und Reliktverbesserungen | U10–U13 | Abgeschlossen; H13-Gründung/Standortnachweise in U15 angebunden |
 | U15 | Weitere Ruinenwelten, gemeinsames eigenes Netz, Warpservice | U8, U12–U14 | Abgeschlossen |
-| U16 | Gezeichnete Assets/Bilddialoge und sichtbare Entwicklungsstände vollständig | Stilprobe ab U5; begleitet alle Fachschritte | Offen |
+| U16 | Gezeichnete Assets/Bilddialoge und sichtbare Entwicklungsstände vollständig | Stilprobe ab U5; begleitet alle Fachschritte | Abgeschlossen |
 | U17 | Gesamtsimulation, Mehrspieler- und visuelle Abnahme, Balance, frischer Weltstart | U1–U16 | Offen |
 
 Öffentliche Fabriken dürfen nicht vor einem nachweislich funktionierenden Einstieg und Warenversorgung abgeschaltet werden. Zwischenstände bleiben in Testwelten, bis ihre abhängigen Systeme zusammen funktionieren. Stilprobe und Bilddialogtechnik werden früh eingeführt; U16 ist die Vollständigkeitsprüfung, kein Aufschieben sämtlicher Gestaltung.
@@ -561,6 +561,8 @@ Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehen
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: U16 umgesetzt: freigegebenen Zeichenstil mit transparentem zwölfteiligem Gebäudeatlas, durchgehendem malerischem Ruinenboden und sechs weiteren illustrierten Szenen umgesetzt. Mira/Tarek/Nela/Iven besitzen erkennbare eigene Gestaltung. H00/H02/H04/H08/H11/H13/H17 automatisch bei Freigabe, überspringbar und vollständig im Journal nachlesbar; Schiffe und Lieferungen laufen unabhängig weiter. Nelas Betriebspriorität ist ohne Kosten-/Funktionsänderung widerrufbar. Ruinen, Baustellen, fertige Anlagen, Wohnviertel, Infrastruktur/Spezialisierung, Forschung, Raumhafen und Ringgrößen ändern sichtbare Darstellung. Gezeichnete Gebäude über unveränderten 3D-Ankern, gemeinsame Tusche-/Pigmentmaterialien für alle Weltgruppen, getrennte nicht auswählbare Kulisse. Journal bleibt bei Lageraktualisierungen offen. Alle 283 Tests erfolgreich; 195 echte Browserfälle über 13 Welten und fünf Formate ohne fehlende Randabdeckung oder Browserfehler, dazu mobile Dialog- und Journalprüfung. Herkunft/Prompts unter docs/art/prd5/u16-prompts.md, Nachweise unter docs/qa/prd5-u16/. Warpabschluss nach U15 zusätzlich im Browser bestätigt. Vollständige Fortschritts-/Balanceabnahme und Hauptweltumstellung bleiben U17.
 
 - 2026-10-24: U15 umgesetzt: unbewohnte vorhandene Ruinenplaneten ohne Produktions-/Beutevorräte, persönliche Erkundung, reale Teillieferungen, 20 eigene Auswanderer mit erhaltenen Qualifikationen, dauerhafte bestätigte Expeditionsspatzabgabe und weiteres Rückreiseschiff. H13/H16 nutzen wirkliche Gründung und getrennte eigene Leitstellen. Weitere Standorte beginnen mit leerem Lager, 20/100 Einwohnern, acht Plätzen und ohne erneute Einstiegshilfen. Skalierende reguläre Gründungskosten und gespeicherter Material-/Personennachweis. Warp bewertet feste tatsächliche Investitionen und physische Bestände, reserviert ein freies erschlossenes Ziel, zeigt Preis/Netz-/Routenfolgen und friert den Standort 300 s ein. Derselbe Planet wird mit stabiler ID und korrekten Raumindizes versetzt; Schiffe bleiben zurück, Anflüge enden sicher, eigene Aufträge warten auf erneute Freigabe. Vorbereitung und 24-h-Serversperre bleiben über Neustarts erhalten. Gemeinsame Arbeitsplatzgrenze berücksichtigt Baureservierungen und Auswanderung. Alle 279 Tests erfolgreich, 15 neue Integrationsprüfungen. Browser bestätigt weitere Siedlung, Preisvorschau, Bestätigungsdialog und tatsächliche Warpvorbereitung; Nachweise unter docs/qa/prd5-u15/. Gesamte Fortschrittsdauer und frischer Hauptstart bleiben U17.
 

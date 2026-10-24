@@ -62,7 +62,7 @@ export function renderPlanetside(now, dt) {
   const e = state.entities.get(state.landed);
   if (!e) return;
   canvas.hidden = false;
-  const key = JSON.stringify([e.id, e.type, Object.entries(e.market.goods).map(([g,s]) => [g,s.role,s.fac]), e.market.bld?.fac, e.market.homeworld?.plots, e.market.homeworld?.structures?.map(s=>[s.id,s.kind,s.recipe,s.plot,s.status]), !!state.props.get(e.id)?.manage]);
+  const key = JSON.stringify([e.id, e.type, Object.entries(e.market.goods).map(([g,s]) => [g,s.role,s.fac]), e.market.bld?.fac, e.market.homeworld?.plots, e.market.homeworld?.structures?.map(s=>[s.id,s.kind,s.recipe,s.plot,s.status]),Object.entries(e.market.homeworld?.facilities||{}).map(([id,b])=>[id,b.status]),e.market.homeworld?.controlLevel,e.market.homeworld?.orbital&&[e.market.homeworld.orbital.small,e.market.homeworld.orbital.large,!!e.market.homeworld.orbital.project],e.market.economy?.specialization,e.market.economy?.infrastructure?.map(b=>[b.id,b.kind]),e.market.economy?.projects?.map(p=>[p.id,p.kind]), !!state.props.get(e.id)?.manage]);
   if (key !== scene.key) {
     const factoriesChanged = JSON.stringify(scene.items.filter(it => it.kind === 'factory').map(it => it.recipe)) !== JSON.stringify(e.market.bld?.fac ?? []);
     Object.assign(scene, buildItems(e), { key });
