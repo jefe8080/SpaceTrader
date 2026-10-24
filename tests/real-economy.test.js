@@ -30,7 +30,8 @@ test('Frische und spätere Sektoren haben keine öffentliche Verarbeitung, Ferti
     if(entity.id==='origin_yard'){assert.equal(m.forSale.length,1);assert.equal(m.forSale[0].source,'public_start_exception');assert(m.provenance.some(p=>p.id===m.forSale[0].id));}
     else assert.equal(m.forSale?.length||0,0);
     for(const [g,s] of Object.entries(m.goods)){
-      if(GOODS[g].tier>0||GOODS[g].cls==='passenger')assert.equal(s.stock,0);
+      if(GOODS[g].cls==='passenger'){assert(s.stock<=m.economy.population);assert.equal(s.rate,0);if(s.stock)assert(m.provenance.some(p=>p.source==='existing_population'));continue;}
+      if(GOODS[g].tier>0)assert.equal(s.stock,0);
       if(s.role==='produce')assert.equal(GOODS[g].tier,0);
       if(s.stock>0){const provenance=m.provenance.find(p=>p.good===g);assert(provenance);assert.equal(provenance.amount,s.stock);reserves++;}
     }
@@ -41,7 +42,7 @@ test('Frische und spätere Sektoren haben keine öffentliche Verarbeitung, Ferti
 test('Reale Förderung arbeitet unversorgt mit 25 %, versorgt mit 100 % und driftet keine Handelsbestände',()=>{
   const f=fixture(),e=market(f,'extract',{ore:slot('produce',0,1,10000),food:slot('consume',0,.1),electronics:slot('trade',7)});
   tickRealMarket(f.game,e,10);assert.equal(e.market.goods.ore.stock,2.5);assert.equal(e.market.goods.electronics.stock,7);
-  e.market.goods.food.stock=2;tickRealMarket(f.game,e,10);assert.equal(e.market.goods.ore.stock,12.5);assert.equal(e.market.goods.food.stock,1);
+  e.market.goods.food.stock=2;tickRealMarket(f.game,e,10);assert.equal(e.market.goods.ore.stock,12.5);approximately(e.market.goods.food.stock,2-1000*.1*10/3600);
   e.market.goods.ore.stock=9999;tickRealMarket(f.game,e,10);assert.equal(e.market.goods.ore.stock,10000);close(f);
 });
 

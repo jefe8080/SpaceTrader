@@ -7,6 +7,9 @@ import { cmd } from '../net.js';
 import { shipSprite, typeName, systemName, sectorName, entitySprite } from '../util.js';
 import { $, registerModal, openModal, closeModal, setHtml } from './dom.js';
 import { bus } from './bus.js';
+import {populationPanel,handlePopulationAction} from './population.js';
+import {WORLD_FOCI,FOCUS_NAMES,specializationSpec} from '/shared/specializations.js';
+import {HOME_BUILDINGS} from '/shared/homeworld.js';
 
 const gov = () => GOVERNOR_LICENSES[state.governor || 0];
 /** Eigenes Konsortium (oder null) und Rang */
@@ -21,7 +24,8 @@ const shipsHere = (e) => myShips().filter((s) => s.dockedAt === e.id);
 const onBoard = (e, g) => shipsHere(e).reduce((a, s) => a + (s.cargo?.[g] || 0), 0);
 
 /** Abschnitt im Detailpanel eines Objekts */
-export function propertySection(e) {
+export function propertySection(e){return populationPanel(e)+propertySectionCore(e);}
+function propertySectionCore(e) {
   const kind = propertyKind(e);
   const prop = state.props.get(e.id);
   if (prop?.manage) return manageSection(e, prop);
@@ -39,7 +43,7 @@ export function propertySection(e) {
   if (!kind) return '';
   const L = gov();
   const price = propertyPrice(e);
-  const owned = [...state.props.values()].filter((p) => !p.cons).length;
+  const owned = [...state.props.values()].filter((p) => !p.cons&&!p.personal).length;
   const why = !L ? 'Gouverneurslizenz nötig (am Hub)' : !L.unlocks.includes(kind) ? `${UNLOCK_NAMES[kind]} ab Gouverneurslizenz ${minGovernorFor(kind)}`
     : owned >= L.maxProps ? `Lizenz erlaubt max. ${L.maxProps} Besitztümer` : !shipsHere(e).length ? 'Ein eigenes Schiff muss hier angedockt sein' : state.credits < price ? 'Nicht genug Credits' : '';
   let h = `<div class="section"><div class="section-title">Besitz</div>
@@ -76,19 +80,21 @@ function manageSection(e, prop) {
 
   // Fixpreis-Verbrauch
   if (e.kind === 'planet') {
-    h += `<div class="sub-title">Fixpreis-Verbrauch der Bevölkerung</div><table class="market"><tr><th>Ware</th><th>Position</th><th>Preis</th><th>Verbrauch/h</th></tr>`;
+    h += `<div class="sub-title">${e.market.realEconomy?'Fixpreise und tatsächlicher Bedarf':'Fixpreis-Verbrauch der Bevölkerung'}</div><table class="market"><tr><th>Ware</th><th>Position</th><th>Preis</th><th>Verbrauch/h</th></tr>`;
     for (const [g, s] of Object.entries(e.market.goods)) {
       if (s.role !== 'consume') continue;
       const sv = prop.fixed[g] ?? FIXED.DEFAULT;
       const { pmin, pmax } = priceWindow(g, s.mod || 1);
-      const rate = (PLANET_TYPES[e.type].consume[g] || s.rate) * (e.size || 1);
+      const rate = e.market.realEconomy?s.rate:(PLANET_TYPES[e.type].consume[g] || s.rate) * (e.size || 1);
       const R = fixedRref(rate, pmin, pmax);
       h += `<tr><td>${GOODS[g].name}</td><td><input type="range" class="prop-fixed" data-ent="${e.id}" data-good="${g}" min="${FIXED.MIN}" max="${FIXED.MAX}" step="0.05" value="${sv}"></td>
-        <td>${fixedPrice(pmin, pmax, sv).toFixed(1)}</td><td>${fixedConsumptionPerHour(R, sv, pmin, pmax).toFixed(0)}</td></tr>`;
+        <td>${fixedPrice(pmin, pmax, sv).toFixed(1)}</td><td>${(e.market.realEconomy?rate*3600:fixedConsumptionPerHour(R, sv, pmin, pmax)).toFixed(0)}</td></tr>`;
     }
-    h += `</table><div class="muted small-note">Günstiger Preis = mehr Verbrauch: Position 0,3 bringt doppelt so viel Erlös wie 0,7 (bei voller Belieferung).</div>`;
+    h += e.market.realEconomy?'</table><p>Tatsächlicher ziviler Verbrauch zahlt aus begrenztem Konsumbudget. Betriebsmittel bezahlen keine fiktiven Erlöse.</p>':`</table><div class="muted small-note">Günstiger Preis = mehr Verbrauch: Position 0,3 bringt doppelt so viel Erlös wie 0,7 (bei voller Belieferung).</div>`;
   }
 
+  if(e.market.realEconomy&&e.kind==='planet')return h+specializationPanel(e)+'</div>';
+  if(e.market.realEconomy&&e.market.strategy!=='shipyard')return h+'</div>';
   // Upgrades
   h += `<div class="sub-title">Ausbau (max. Stufe ${max})</div><table class="market"><tr><th>Linie</th><th>Stufe</th><th>Kosten nächste Stufe</th><th></th></tr>`;
   const opts = extraOptions(e);
@@ -114,6 +120,21 @@ function manageSection(e, prop) {
 }
 
 /** Eigene Werft: Bau auf Befehl, Bestand, Verkauf an andere, Recycling */
+export function specializationPanel(e){
+  const h=e.market.economy;if(!h)return '';
+  const s=h.specialization,costText=spec=>`${fmt(spec.credits)} Cr · ${Object.entries(spec.goods).map(([g,n])=>`${n} ${GOODS[g].name}`).join(', ')} · ${spec.seconds} s`;
+  let html=`<h3>Spezialisierung und Infrastruktur</h3><p>${s?`${esc(FOCUS_NAMES[s.focus]||GOODS[s.focus]?.name)} Stufe ${s.level} · ${s.active?'in Betrieb':esc(s.reason||'pausiert')}`:'Natürlicher Grundbetrieb'}</p><p>Energie ${h.energy?.used||0} / ${h.energy?.generation||12} · Lerngruppen ${h.schoolCapacity||0} · Abfertigungen ${h.docks||2} · Umschlag ${h.throughput||500}/min</p>`;
+  for(const focus of WORLD_FOCI[e.type]||[]){const changing=s&&focus!==s.focus,level=changing?s.level:(s?.level||0)+1;let spec=specializationSpec(focus,level);if(!spec)continue;if(changing)spec={...spec,credits:Math.round(specializationSpec(s.focus,s.level).credits*.25),goods:{},seconds:180};
+    html+=`<p><b>${FOCUS_NAMES[focus]||GOODS[focus]?.name} ${level}</b>: ${costText(spec)} · ${spec.power} Energie · ${Object.entries(spec.workers).map(([q,n])=>`${n} ${q==='basic'?'einfach':q==='skilled'?'Fach':'Spezial'}`).join(', ')}${spec.factor?` · Förderfaktor ${spec.factor} · Verschleiß ${Object.entries(spec.wear).map(([g,n])=>`${n} ${GOODS[g].name}/h`).join(', ')}`:''}</p><button class="small" data-act="worldSpecialize" data-ent="${e.id}" data-focus="${focus}">${changing?'Schwerpunkt wechseln':'Schwerpunkt ausbauen'}</button>`;}
+  html+='<details><summary>Weitere Infrastruktur</summary>';
+  for(const kind of ['solar','gasGenerator','reactor','housing','school','academy']){const spec=HOME_BUILDINGS[kind];html+=`<p>${spec.name}: ${costText(spec)}</p><button class="small" data-act="worldInfrastructure" data-ent="${e.id}" data-kind="${kind}">Bauen</button>`;}
+  html+='</details>';
+  html+=(h.projects||[]).map(j=>`<p>${esc(j.kind==='training'?`Ausbildung: ${j.to}`:j.focus||HOME_BUILDINGS[j.building]?.name)} · ${Math.ceil(j.remaining??Math.max(0,j.until-state.time))} s · ${esc(j.reason||'Material gebunden')}</p>`).join('');
+  html+=`<button class="small" data-act="worldTrain" data-ent="${e.id}" data-qualification="skilled">10 Fachkräfte ausbilden · 120 s</button><button class="small" data-act="worldTrain" data-ent="${e.id}" data-qualification="specialist">10 Spezialisten ausbilden · 180 s</button>
+    <p>Steuern: ${Math.round((h.civil?.taxRate??.2)*100)} % · Konsumbudget ${fmt(h.civil?.budget||0)} Cr · Steuerertrag ${fmt(h.civil?.taxes||0)} Cr · bezahlter ziviler Absatz ${fmt(h.civil?.consumptionPayments||0)} Cr</p><input id="worldTax-${e.id}" aria-label="Steuersatz" type="number" min="0" max="40" value="${Math.round((h.civil?.taxRate??.2)*100)}"><button class="small" data-act="worldTax" data-ent="${e.id}">Steuersatz setzen</button>`;
+  return html;
+}
+
 function yardSection(e, prop) {
   const m = e.market;
   const x = prop.upg.extra || 0;
@@ -167,7 +188,12 @@ export function governorSection(dockedShip) {
 
 // ---------- Ereignisse (im Detailpanel) ----------
 export function handlePropertyAction(d) {
+  if(handlePopulationAction(d))return true;
   switch (d.act) {
+    case 'worldSpecialize':cmd('worldSpecialize',{target:d.ent,focus:d.focus});return true;
+    case 'worldInfrastructure':cmd('worldInfrastructure',{target:d.ent,kind:d.kind});return true;
+    case 'worldTrain':cmd('worldTrain',{target:d.ent,qualification:d.qualification});return true;
+    case 'worldTax':cmd('worldTax',{target:d.ent,percent:Number(document.getElementById(`worldTax-${d.ent}`)?.value)});return true;
     case 'buyProperty': if (confirm('Objekt kaufen?')) cmd('buyProperty', { target: d.ent }); return true;
     case 'cBuyProperty': if (confirm('Objekt für das Konsortium kaufen (aus dem Pool)?')) cmd('cBuyProperty', { target: d.ent }); return true;
     case 'cTransfer': if (confirm('Besitz ohne Gegenleistung an dein Konsortium übertragen?')) cmd('cTransfer', { target: d.ent }); return true;
@@ -199,7 +225,7 @@ const card = $('propsCard');
 function renderProps() {
   const L = gov();
   const list = [...state.props.values()].filter((p) => !p.cons).map((p) => ({ p, e: state.entities.get(p.entity) })).filter((x) => x.e);
-  let h = `<div class="modal-head"><h2>Besitz</h2><span class="muted">${list.length} / ${L?.maxProps || 0}${state.faction ? ` · <span style="color:${state.faction.color}">${esc(state.faction.name)}</span>` : ''}</span><span style="flex:1"></span><button data-p="close">✕</button></div>`;
+  let h = `<div class="modal-head"><h2>Besitz</h2><span class="muted">${list.filter(({p})=>!p.personal).length} / ${L?.maxProps || 0}${state.faction ? ` · <span style="color:${state.faction.color}">${esc(state.faction.name)}</span>` : ''}</span><span style="flex:1"></span><button data-p="close">✕</button></div>`;
   if (!L) h += `<div class="muted">Mit einer Gouverneurslizenz (am Hub) kannst du Stationen und Planeten kaufen.</div>`;
   if (L && !list.length) h += `<div class="muted">Noch kein Besitz. Wähle eine Station, dock ein Schiff an und kaufe sie im Detailpanel.</div>`;
   h += `<div class="fav-list">` + list.map(({ p, e }) => `<div class="fav-row"><img src="${entitySprite(e)}" alt=""><div class="fav-main">

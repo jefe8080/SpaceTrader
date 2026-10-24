@@ -56,7 +56,7 @@ export function questBoardSection(e, dockedShip, inHouse = false) {
         ? `<button class="small" data-act="land" data-ent="${e.id}" ${dockedShip ? '' : 'disabled'} title="${dockedShip ? 'Landen und im Questhaus annehmen' : 'Ein eigenes Schiff muss hier angedockt sein'}">Im Questhaus annehmen (landen)</button>`
         : `<button class="small primary" data-act="questAccept" data-ent="${e.id}" data-quest="${q.id}" data-ship="${dockedShip?.id || ''}" ${why ? 'disabled' : ''} title="${esc(why)}">Annehmen</button>`}</div></div>`;
   }
-  if (lvl < MAX_GIVER_LEVEL) h += `<div class="muted small-note">${e.kind === 'planet' ? 'Höhere Level: mehr Produktion und Lager, neue Waren, schwierigere Quests.' : 'Höhere Level: bessere Schiffe (+5 % je Level), schwierigere Quests.'}</div>`;
+  if (lvl < MAX_GIVER_LEVEL) h += `<div class="muted small-note">${e.market?.realEconomy?'Höhere Level verändern Questschwierigkeit und Angebot. Leistung entsteht durch konkrete Infrastruktur.':e.kind === 'planet' ? 'Höhere Level: mehr Produktion und Lager, neue Waren, schwierigere Quests.' : 'Höhere Level: bessere Schiffe (+5 % je Level), schwierigere Quests.'}</div>`;
   return h + '</div>';
 }
 

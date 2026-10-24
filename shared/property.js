@@ -12,7 +12,7 @@ export const GOVERNOR_LICENSES = [
   { level: 5, maxProps: 16, maxLevel: 6, unlocks: ['factory', 'shipyard', 'planet', 'customs', 'bigyard'], cost: 60000000 },
   { level: 6, maxProps: 25, maxLevel: 7, unlocks: ['factory', 'shipyard', 'planet', 'customs', 'bigyard'], cost: 150000000 },
 ];
-export const UNLOCK_NAMES = { factory: 'Fabriken, Raffinerien', shipyard: 'Werften', planet: 'Planeten', customs: 'Zoll', bigyard: 'große Werften' };
+export const UNLOCK_NAMES = { factory: 'Rohstoffbetriebe und Förderstationen', shipyard: 'Werften', planet: 'Planeten', customs: 'Zoll', bigyard: 'große Werften' };
 
 /** Welche Freischaltung braucht ein Objekt? null = nicht kaufbar */
 export function propertyKind(e) {
@@ -51,7 +51,7 @@ export function propertyBasePrice(e) {
 /** Kaufpreis: Basiswert × Größe × Ausbaustufe */
 export function propertyPrice(e, upg = {}) {
   const levels = Object.values(upg).reduce((a, b) => a + b, 0);
-  const lvl = e.kind === 'planet' ? 1 + LEVEL_FX.PLANET_PRICE * (e.market?.lvl || 0) : 1; // Planetenlevel: ×(1 + 0,4 × Level)
+  const lvl = e.kind === 'planet'&&!e.market?.realEconomy ? 1 + LEVEL_FX.PLANET_PRICE * (e.market?.lvl || 0) : 1;
   return Math.round(propertyBasePrice(e) * (1 + 0.5 * levels) * lvl);
 }
 export function propUpgradeCost(e, line, level) {

@@ -176,6 +176,7 @@ export default {
   jettison: {
     args: { ship: V.ownShip(), good: V.key(GOODS) },
     run({ game }, { ship, good }) {
+      if(game.profile==='homeworld'&&GOODS[good].cls==='passenger')return 'Personen können nicht abgeworfen werden. An einem bewohnten Standort aussteigen lassen.';
       if (!ship.cargo[good]) return;
       game.shipLog(ship, `${ship.cargo[good]} ${GOODS[good].name} abgeworfen`);
       delete ship.cargo[good];

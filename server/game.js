@@ -16,6 +16,8 @@ import { tickEvents, sellToEvent } from './events.js';
 import { isConsortiumOwner, consortiumIdOf } from '../shared/consortium.js';
 import { checkWorldFile, worldProfile } from './world-profile.js';
 import { createHomeworld, tickHomeworld, tickHomeResource } from './homeworld.js';
+import {passengerTrade} from './population.js';
+import {handlingAllowance,recordHandling} from './handling.js';
 import { tickRelics } from './relic.js';
 import { homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { coveredPath, pointCovered } from './coverage.js';
@@ -698,6 +700,15 @@ export class Game {
    * opts.auto: automatischer Einkauf aus Routen (Stop-Loss greift), opts.route: Routenvorlage für die Statistik
    */
   trade(ship, e, good, amount, dir, limit = 0, opts = {}) {
+    if(opts.handling||this.profile!=='homeworld')return this.tradeImpl(ship,e,good,amount,dir,limit,opts);
+    const allowed=handlingAllowance(this,e,ship);
+    if(allowed<1)return {n:0,reason:'Abfertigung oder Umschlagbudget belegt; nächstes Zeitfenster abwarten.'};
+    const result=this.tradeImpl(ship,e,good,Math.min(amount,allowed),dir,limit,{...opts,handling:true});
+    recordHandling(this,e,ship,result.n||0);return result;
+  }
+
+  tradeImpl(ship, e, good, amount, dir, limit = 0, opts = {}) {
+    if(this.profile==='homeworld'&&GOODS[good]?.cls==='passenger')return passengerTrade(this,ship,e,good,amount,dir,limit);
     // Sondernachfrage: nur manuelle Verkäufe über den Handelsbefehl, Überschuss zum normalen Marktpreis
     if (opts.manual && dir === 'sell' && ship.dockedAt === e.id) {
       const ev = sellToEvent(this, ship, e, good, amount);
@@ -777,6 +788,7 @@ export class Game {
 
   /** Eigenes Lager: kostenlos laden und einlagern */
   ownerTransfer(ship, e, good, amount, dir) {
+    if(this.profile==='homeworld'&&GOODS[good]?.cls==='passenger')return passengerTrade(this,ship,e,good,amount,dir);
     if (e.type === 'ruins' && e.market.homeworld?.facilities.dock.status !== 'ready') return { n: 0, reason: 'Zuerst das Dock reparieren' };
     const slot = e.market.goods[good];
     let n;

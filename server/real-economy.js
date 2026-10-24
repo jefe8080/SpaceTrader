@@ -3,6 +3,9 @@ import {HOMEWORLD,availableHomeStock,homeStorageFree} from '../shared/homeworld.
 import {stat} from './markets.js';
 import {propBook} from './property.js';
 import {preparePhysicalYard,tickPhysicalYard} from './physical-yards.js';
+import {initializePopulation,tickVisitors} from './population.js';
+import {tickSpecialization} from './specializations.js';
+import {handlingAllowance,recordHandling} from './handling.js';
 
 export const naturalGood=good=>GOODS[good]?.tier===0&&GOODS[good].cls!=='passenger';
 
@@ -21,7 +24,7 @@ export function preparePublicEntity(entity){
     if(natural&&slot.stock>0)market.provenance.push({id:`${entity.id}:${good}:natural`,source:'natural_reserve',good,amount:slot.stock});
     slot.baseRate=slot.rate;slot.baseCap=slot.cap;
   }
-  preparePhysicalYard(entity);ensureCash(entity);
+  preparePhysicalYard(entity);ensureCash(entity);initializePopulation(entity);
 }
 
 export function ensureCash(entity){
@@ -32,6 +35,7 @@ export function ensureCash(entity){
   // also returns actual receipts to this same cash account.
   if(entity.type==='hub')rate+=20*GOODS.shipfuel.base;
   market.economy={cash:0,rate,granted:0,spent:0,received:0,population:entity.kind==='planet'?Math.round(1000*(entity.size||1)):0};
+  if(entity.kind==='planet'){initializePopulation(entity);market.economy.rate=Object.entries(market.goods).reduce((n,[g,s])=>n+(s.role==='consume'?s.rate*3600*GOODS[g].base:0),0);}
   return market.economy;
 }
 
@@ -50,6 +54,17 @@ export function downstreamDemand(game,entity,good){
 
 export function tickRealMarket(game,entity,dt){
   const market=entity.market,cash=ensureCash(entity),now=game.time;
+  const structure=()=>JSON.stringify(Object.entries(market.goods).map(([g,s])=>[g,s.role,s.rate,s.cap]));
+  const before=structure();
+  tickVisitors(entity,now);
+  if(entity.kind==='planet'){
+    initializePopulation(entity);
+    const basic=Math.min(...Object.entries({water:.2,food:.1}).map(([g,n])=>Math.min(1,(market.goods[g]?.stock||0)/Math.max(1e-9,cash.population*n*dt/3600))));
+    const comfort=['clothing','medicine','consumer'].reduce((n,g)=>n+Math.min(1,(market.goods[g]?.stock||0)/Math.max(1e-9,market.goods[g].rate*dt))/3,0);
+    cash.supplyFactor=.25+.75*basic+.25*basic*comfort;
+    tickSpecialization(game,entity,dt);
+    cash.rate=Object.entries(market.goods).reduce((n,[g,s])=>n+(s.role==='consume'?s.rate*3600*GOODS[g].base:0),0);
+  }
   // Generated demand capital is bounded independently of player offers. Earned
   // sales receipts are retained; they are not a second generated allocation.
   const escrow=[...game.ships.values()].reduce((sum,ship)=>sum+(ship.queue[0]?.real&&ship.queue[0]?.stationId===entity.id?ship.queue[0].cash||0:0),0);
@@ -64,30 +79,33 @@ export function tickRealMarket(game,entity,dt){
   for(const [good,slot] of Object.entries(market.goods)){
     if(slot.role==='produce'&&naturalGood(good)){
       const amount=Math.max(0,Math.min(slot.cap-slot.stock,slot.rate*market.eff*dt));slot.stock+=amount;stat(market,now,'p',good,amount);
-    }else if(slot.role==='consume'&&GOODS[good].cls!=='passenger'){
+    }else if(slot.role==='consume'&&GOODS[good].cls!=='passenger'&&!slot.specialUse){
       const amount=Math.min(slot.stock,slot.rate*dt);slot.stock-=amount;stat(market,now,'c',good,amount);
       if(['water','food','clothing','medicine','consumer'].includes(good))civilConsumption[good]=amount;
     }
   }
-  cash.supplyFactor=market.eff;cash.employmentFactor=.5;tickCivilMoney(game,entity,dt,civilConsumption);
+  if(entity.kind!=='planet'){cash.supplyFactor=market.eff;cash.employmentFactor=.5;}tickCivilMoney(game,entity,dt,civilConsumption);
+  if(structure()!==before)game.emit('entity',entity);
 }
 
 export function tickCivilMoney(game,entity,dt,consumption={}){
   const home=entity.market.homeworld||ensureCash(entity),prop=game.ownership.get(entity.id),owner=prop&&game.accountOf(prop.player);
-  if(!home||!owner)return;
+  if(!home||!home.population)return;
   home.civil||={budget:0,taxRate:.2,gross:0,taxes:0,consumptionPayments:0};
+  for(const [key,value] of Object.entries({budget:0,taxRate:.2,gross:0,taxes:0,consumptionPayments:0}))home.civil[key]??=value;
   const civil=home.civil,income=HOMEWORLD.money.incomePerHour*home.population*(home.supplyFactor??.25)*(home.employmentFactor??.5);
   const gross=income*dt/3600,tax=gross*civil.taxRate;
-  owner.credits+=tax;civil.gross+=gross;civil.taxes+=tax;
+  if(owner)owner.credits+=tax;civil.gross+=gross;civil.taxes+=tax;
   const budgetBeforeCap=civil.budget+gross-tax;
   civil.budget=Math.min(income*(1-civil.taxRate)*HOMEWORLD.money.civilianBudgetHours,budgetBeforeCap);
   civil.unspentExpired=(civil.unspentExpired||0)+budgetBeforeCap-civil.budget;
   for(const [good,amount] of Object.entries(consumption)){
+    if(!owner)continue;
     const price=game.fixedPriceOf(entity,prop,good),payment=Math.min(civil.budget,amount*price);
     civil.budget-=payment;civil.consumptionPayments+=payment;owner.credits+=payment;
     propBook(game,prop,'inc',payment);
   }
-  propBook(game,prop,'inc',tax);
+  if(prop)propBook(game,prop,'inc',tax);
   civil.incomePerHour=income;
 }
 
@@ -128,7 +146,8 @@ export function dispatchRealSupply(game,entity){
 export function loadRealSupply(game,ship,source,order){
   const market=source.market,slot=market?.goods[order.good],prop=game.ownership.get(source.id);
   if(!slot||!canBuyFrom(slot)||prop?.mode==='private'||market.homeworld?.warp)return;
-  let amount=Math.min(order.amount,40,Math.floor(availableHomeStock(market,order.good))),loaded=0;
+  if(handlingAllowance(game,source,ship)<1)return false;
+  let amount=Math.min(order.amount,40,Math.floor(availableHomeStock(market,order.good)),handlingAllowance(game,source,ship)),loaded=0;
   while(loaded<amount){
     const price=buyPrice(order.good,slot)*(1+(prop?.customs||0));if(price>order.cash)break;
     order.cash-=price;slot.stock--;loaded++;
@@ -137,6 +156,7 @@ export function loadRealSupply(game,ship,source,order){
     else receiveMarketCash(source,price);
   }
   if(loaded){ship.cargo[order.good]=(ship.cargo[order.good]||0)+loaded;stat(market,game.time,'o',order.good,loaded);}
+  recordHandling(game,source,ship,loaded);
 }
 
 export function finishRealSupply(game,ship,station){
@@ -145,13 +165,14 @@ export function finishRealSupply(game,ship,station){
   if(order.cash&&primary){ensureCash(primary).cash+=order.cash;order.cash=0;}
   for(const [good,amount] of Object.entries(ship.cargo)){
     const slot=market.goods[good];if(!slot)continue;
-    let unloaded=Math.min(amount,Math.floor(homeStorageFree(market,good)));
+    let unloaded=Math.min(amount,Math.floor(homeStorageFree(market,good)),handlingAllowance(game,station,ship));
     if(station.id!==order.stationId){
       let sold=0;
       while(sold<unloaded){const price=sellPrice(good,slot);if(!spendMarketCash(station,price))break;receiveMarketCash(primary,price);slot.stock++;sold++;}
       unloaded=sold;
     }else slot.stock+=unloaded;
     ship.cargo[good]-=unloaded;
+    recordHandling(game,station,ship,unloaded);
     stat(market,game.time,'i',good,unloaded);if(!ship.cargo[good])delete ship.cargo[good];
   }
   if(Object.keys(ship.cargo).length){

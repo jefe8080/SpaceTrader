@@ -1,6 +1,6 @@
 # PRD 5: Heimatwelten, reale Wirtschaft und gezeichnete Planeten
 
-Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U12 abgeschlossen, U13–U17 offen
+Stand: 2026-10-24 · Status: Umsetzung läuft; U1–U13 abgeschlossen, U14–U17 offen
 
 ## 1. Geltung, Ziel und Freigabe
 
@@ -516,7 +516,7 @@ PRD 4 bleibt historische Grundlage. Fortschritt wird ab jetzt hier geführt. Jed
 | U10 | Physische Module, Rezepte, Studie und reale Werft-/Fraktionsbestände | U2, U7, U9 | Abgeschlossen; Questvorlagen und Orbitalringe U14 |
 | U11 | Sechs Sonderveredelungen und neue Fraktionswährungen | U7, U9, U10 | Abgeschlossen |
 | U12 | Bedarfsgesteuerte Disposition, Produktions- und Absatzaufträge | U8–U11 | Abgeschlossen |
-| U13 | Spezialisierungen, geänderte Questgeber-/Besitzprogression und Besucher | U7, U9 | Offen |
+| U13 | Spezialisierungen, geänderte Questgeber-/Besitzprogression und Besucher | U7, U9 | Abgeschlossen |
 | U14 | Vollständige Hauptquestzweige, Orbitalringe, Forschung und Reliktverbesserungen | U10–U13 | Offen |
 | U15 | Weitere Ruinenwelten, gemeinsames eigenes Netz, Warpservice | U8, U12–U14 | Offen |
 | U16 | Gezeichnete Assets/Bilddialoge und sichtbare Entwicklungsstände vollständig | Stilprobe ab U5; begleitet alle Fachschritte | Offen |
@@ -561,6 +561,8 @@ Pro Umsetzungsschritt gezielte Unit-/Integrationstests, danach passende bestehen
 Für D0: vollständige Inhalts-/Entscheidungsprüfung, gültige Dokumentverweise, Abgleich aller 40 bestehenden Rezepte und sechs Module sowie `git diff --check`. Ohne Laufzeitänderung wird nicht behauptet, dieses PRD habe bereits neue Spielfunktionen getestet.
 
 ## 19. Fortschrittsprotokoll
+
+- 2026-10-24: U13 umgesetzt: typgebundene Rohstoffschwerpunkte I–III mit nicht gestapelten Faktoren, konkreten Baukosten, Energie, Personal und tatsächlich verbrauchtem Verschleiß; Hive, Ausbildung, Tourismus, Logistik und Besiedlungsbüro mit den festgelegten Wirkungen. Materialgebundene Infrastruktur, qualifikationserhaltende Ausbildung, bezahlter Schwerpunktwechsel und Erhalt der Einwohner bei Mangel. Gemeinsame Abfertigungs-/Minutenbudgets wirken auf Spieler- und NPC-Transaktionen. Gewöhnlicher Besitz erhält Steuer-/Betriebs-/Ausbauanzeige, alte Fabrik- und Leistungsversprechen entfallen; Questgeberlevel erhöht weder Warenleistung noch Besitzpreis. Gouverneursgrenzen unverändert, persönliche Welten im UI nicht mitgezählt. Anwerbung entfernt konkrete Herkunftseinwohner, Transporte/Umladungen/Ansiedlung erhalten Qualifikationen und Kabinenbelegung. Touristen behalten Herkunft und reales Reisegeld, einmalige Aufenthaltszahlung, 20-min-Aufenthalt und tatsächlichen Abreisebedarf; Rundreisequests verwenden dieselben Personen. Alle 251 Tests erfolgreich, 21 neue Bevölkerungs-/Spezialisierungsprüfungen einschließlich Neustart, fünf Minuten realem Förder-/Verschleißbetrieb aller drei Stufen und Marktstrukturübertragung. Früher Einstieg weiterhin H06 nach 1.997 s, 101 Einwohner, zwei Frachter; 8.162 Cr Rest und keine öffentlichen Fertigwaren. Browser belegt Anwerbung 1.270 → 1.260 Einwohner / zehn Personen an Bord sowie bezahlten 120-s-Erzausbau mit aktivem Betrieb nach Neustart. Nachweise unter docs/qa/prd5-u13/. Gesamtabnahme und Balance bleiben U17.
 
 - 2026-10-24: U12 umgesetzt: bedarfsgesteuerte Versorgung mit Zielbestand, erlaubten Quellen, Preisgrenze, gebundenem Budget und begrenzter ausdrücklicher Notfreigabe; Produktionsziele beschaffen Rezeptzutaten, schützen vorhandene Zutaten und zählen ausschließlich ganze tatsächliche Zyklen. Absatz reserviert nur freien Überschuss und nutzt zugewiesene reguläre Frachter sowie erlaubte Ziele. Gemeinsame Bedarfs-/Quellbestandsberechnung berücksichtigt laufende Abholungen und bezahlte Ladung. Transporte verwenden echte Flüge, Handelsgegenkassen, Laderäume und durchgängige Netzprüfung; volle Ziele und Netzausfall pausieren ohne Verlust oder Warnungsflut. Abbruch oder ersetzte Queue gibt Reservierungen frei, erstattet nur ungenutztes Budget und erhält geladene Ware. Persistente Zustände und begründete Pausen im Leitstellenpanel. Alle 230 Tests erfolgreich, elf neue Logistikintegrationstests einschließlich Neustart; Browser zeigt tatsächliche Lieferung von 20 Eis und Budgetabrechnung. Nachweise unter docs/qa/prd5-u12/. U13–U17 bleiben offen.
 

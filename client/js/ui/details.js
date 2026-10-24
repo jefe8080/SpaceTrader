@@ -217,7 +217,7 @@ export function marketTable(e, ship) {
   const mine = e.owner === state.me.id;
   const member = !mine && state.props.get(e.id)?.cons;
   const customs = !mine && !member && e.owner ? (e.market.customs || 0) : 0;
-  const rows = Object.entries(e.market.goods).filter(([g, sl]) => e.type !== 'ruins' || (sl.cap > 0 && (sl.stock > 0 || ship?.cargo?.[g] || ['ore','ice','grain','gas','helium3','crude','water','food','shipfuel','fuel','ingots'].includes(g)))).map(([g, sl]) => {
+  const rows = Object.entries(e.market.goods).filter(([g])=>!state.homeworld||GOODS[g].cls!=='passenger').filter(([g, sl]) => e.type !== 'ruins' || (sl.cap > 0 && (sl.stock > 0 || ship?.cargo?.[g] || ['ore','ice','grain','gas','helium3','crude','water','food','shipfuel','fuel','ingots'].includes(g)))).map(([g, sl]) => {
     if (mine) return ownRow(e, g, sl, canTrade ? ship : null);
     if (member) return memberRow(e, g, sl, canTrade ? ship : null);
     const buy = canBuyFrom(sl), sell = canSellTo(sl);

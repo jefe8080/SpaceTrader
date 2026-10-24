@@ -4,6 +4,7 @@ import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import {moduleStockPanel,moduleCraftPanel} from './modules.js';
 import {REFINEMENT_RECIPES} from '/shared/goods.js';
+import {populationPanel} from './population.js';
 
 let dialog;
 export function renderHomeDialog() {
@@ -100,13 +101,13 @@ export function homePanel(entity, item, ship) {
     }
   }
   if (facility === 'dock' && building.status === 'ready') {
-    const goods = Object.entries(entity.market.goods).filter(([g, slot]) => slot.stock > 0 || ship?.cargo?.[g]);
+    const goods = Object.entries(entity.market.goods).filter(([g, slot]) => GOODS[g].cls!=='passenger'&&(slot.stock > 0 || ship?.cargo?.[g]));
     html += homeBalance(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market"><tr><th>Ware</th><th>Lager / Schiff</th><th></th></tr>';
     for (const [good, slot] of goods) html += `<tr><td>${GOODS[good].name}</td><td>${fmt(slot.stock)} / ${fmt(ship?.cargo?.[good] || 0)}</td><td>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${ship && slot.stock >= 1 ? '' : 'disabled'}>Laden</button>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Einlagern</button></td></tr>`;
     html += '</table>';
-    html+=moduleStockPanel(entity,ship,'pp');
+    html+=moduleStockPanel(entity,ship,'pp')+populationPanel(entity);
     html += `<label>Reserve für <select id="homeReserveGood" aria-label="Ware für Reserve">${Object.keys(entity.market.goods).filter(g=>GOODS[g].cls!=='passenger').map(g=>`<option value="${g}">${GOODS[g].name}</option>`).join('')}</select></label>
       <input id="homeReserveAmount" type="number" min="0" max="1000000000" value="0" aria-label="Geschützte Reservemenge"><button class="small" data-pp="homeReserve">Reserve setzen / freigeben</button>
       <p class="muted">Zwei Stunden Grundbedarf: ${Math.ceil(home.population*.4)} Wasser und ${Math.ceil(home.population*.2)} Nahrung. Reserven sind Teil des Lagerbestands, kein zusätzliches Lager.</p>`;

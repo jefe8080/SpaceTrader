@@ -387,7 +387,7 @@ function runSupply(ship, o, dt, game) {
     const src = game.world.entities.get(o.sourceId);
     if (!src) { o.phase = 'toStation'; return false; }
     if (!flyToEntity(ship, src, dt, game)) return false;
-    if(o.real){loadRealSupply(game,ship,src,o);o.phase='toStation';}
+    if(o.real){if(loadRealSupply(game,ship,src,o)===false)return false;o.phase='toStation';}
     else if (src.kind === 'belt') {
       if (!mineStep(ship, src, dt, o.amount ?? Infinity)) return false;
     } else {

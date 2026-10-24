@@ -12,6 +12,8 @@ import { sfx } from '../audio.js';
 import { homePanel } from './homeworld.js';
 import {handleModuleAction} from './modules.js';
 import { bus } from './bus.js';
+import {handlePopulationAction} from './population.js';
+import {propertySection,handlePropertyAction,specializationPanel} from './property.js';
 
 const bar = $('planetBar');
 const panel = $('planetPanel');
@@ -85,7 +87,7 @@ export function renderPlanetUi() {
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   let body = '';
   if (e.type === 'ruins') body = homePanel(e, it, ship);
-  else if (it.kind === 'questhouse') body = questBoardSection(e, ship, true);
+  else if (it.kind === 'questhouse') body = questBoardSection(e, ship, true)+(e.market.realEconomy?propertySection(e):'');
   else if (it.kind === 'produce' || it.kind === 'consume') body = goodBuilding(it, e);
   else if (it.kind === 'factory') body = factoryPanel(it, e);
   else if (it.kind === 'plot') body = plotPanel(it, e);
@@ -97,6 +99,7 @@ export function renderPlanetUi() {
 function goodBuilding(it, e) {
   const s = e.market.goods[it.good];
   if (!s) return '<div class="muted">Dieses Gebäude ist stillgelegt.</div>';
+  if(e.market.realEconomy)return `<p>${GOODS[it.good].name}: ${fmt(s.stock)} / ${fmt(s.cap)} · tatsächliche Rate ${fmt(s.rate*3600)}/h</p>`+(state.props.get(e.id)?.manage?specializationPanel(e):'<p>Natürlicher Standort. Konkrete Spezialisierung kann der Besitzer ausbauen.</p>');
   const prop = state.props.get(e.id);
   const manage = !!prop?.manage;
   const lvl = e.market.bld?.lvl?.[it.good] || 0;
@@ -131,6 +134,7 @@ function factoryPanel(it, e) {
 }
 
 function plotPanel(it, e) {
+  if(e.market.realEconomy)return '<p>Verarbeitungsanlagen entstehen auf Ruinenwelten. Infrastruktur und Spezialisierung verwaltest du im Questhaus oder im Besitzpanel.</p>';
   const prop = state.props.get(e.id);
   const c = prop?.cons ? cons() : null;
   const funds = c ? c.pool : state.credits;
@@ -146,6 +150,8 @@ function plotPanel(it, e) {
 panel.addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-pp], [data-act]');
   if (!b || b.disabled) return;
+  if(handlePopulationAction(b.dataset))return;
+  if(b.dataset.act&&handlePropertyAction(b.dataset))return;
   const d = b.dataset;
   if(handleModuleAction(d))return;
   const e = state.entities.get(state.landed);

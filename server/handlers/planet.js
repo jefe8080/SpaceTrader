@@ -4,6 +4,8 @@ import { takeGoods, dockedOwn } from './property.js';
 import { applyLevel } from '../markets.js';
 import { clog } from '../consortium.js';
 import { remoteManagementError } from '../coverage.js';
+import {startSpecialization,startWorldInfrastructure,startWorldTraining,specializationAccess} from '../specializations.js';
+import {WORLD_FOCI} from '../../shared/specializations.js';
 
 /** Planet, an dem ein eigenes Schiff angedockt ist (Voraussetzung für die planetare Ansicht) */
 const landedPlanet = () => (v, ctx) => {
@@ -21,6 +23,10 @@ function payerFor(game, player, e) {
 }
 
 export default {
+  worldSpecialize:{args:{target:V.entity(),focus:V.oneOf(...new Set(Object.values(WORLD_FOCI).flat()))},run({game,player},{target,focus}){return startSpecialization(game,player,target,focus);}},
+  worldInfrastructure:{args:{target:V.entity(),kind:V.oneOf('solar','gasGenerator','reactor','housing','school','academy')},run({game,player},{target,kind}){return startWorldInfrastructure(game,player,target,kind);}},
+  worldTrain:{args:{target:V.entity(),qualification:V.oneOf('skilled','specialist')},run({game,player},{target,qualification}){return startWorldTraining(game,player,target,qualification);}},
+  worldTax:{args:{target:V.entity(),percent:V.num(0,40)},run({game,player},{target,percent}){const error=specializationAccess(game,player,target);if(error)return error;target.market.economy.civil||={budget:0,gross:0,taxes:0,consumptionPayments:0};target.market.economy.civil.taxRate=percent/100;}},
   /**
    * Gebäude-Ausbau (PRD-3 6.3): jeder Spieler mit angedocktem Schiff bis Level 6, Level 7 bis 10 nur der Besitzer
    * (bzw. Handelsmeister). Credits plus Waren aus den Laderäumen, Questgeber-XP aus dem Ausbauwert, keine Piloten-XP.

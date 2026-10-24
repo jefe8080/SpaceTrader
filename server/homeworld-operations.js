@@ -5,6 +5,7 @@ import {tickCivilMoney} from './real-economy.js';
 import {stat} from './markets.js';
 import {tickModuleProjects} from './modules.js';
 import {tickLogistics,productionAllowed,productionStock,consumeProductionReservation,recordProduction} from './logistics.js';
+import {initializePopulation,tickVisitors} from './population.js';
 
 const QUALIFICATIONS = ['basic', 'skilled', 'specialist'];
 const qualified = () => ({ basic: 0, skilled: 0, specialist: 0 });
@@ -273,7 +274,7 @@ function operationStep(game,entity,dt,now) {
   const flow=(good,field,amount)=>{flows[good]||={produce:0,consume:0};flows[good][field]+=amount;};
   for(const [good,n] of Object.entries(HOMEWORLD.population.needPerHour))flow(good,'consume',home.population*n);
   let generation=HOMEWORLD.start.power,powerUsed=0;
-  const staffAvailable=(spec)=>QUALIFICATIONS.every(q=>remaining[q]>=(spec.workers[q]||0));
+  const staffAvailable=(spec)=>QUALIFICATIONS.every(q=>remaining[q]>=(spec.workers[q]||0))&&QUALIFICATIONS.reduce((n,q)=>n+used[q]+(spec.workers[q]||0)+reserved[q],0)+buildTeams(home)+(relicWork?2:0)<=Math.floor(home.population*.6);
   const assign=(id,spec,reason=null)=>{
     if(reason){allocations.push({id,state:'paused',reason,power:0,workers:qualified()});return false;}
     if(!staffAvailable(spec)){allocations.push({id,state:'paused',reason:'Personal fehlt',power:0,workers:qualified()});return false;}
@@ -333,18 +334,20 @@ function operationStep(game,entity,dt,now) {
   }
   home.projects=pending;
   home.energy={generation,used:powerUsed,free:Math.max(0,generation-powerUsed)};
-  home.workforce={total:{...home.workers},used,reserved:{...reserved,basic:reserved.basic+buildTeams(home)},free:remaining};
+  home.workforce={total:{...home.workers},used,reserved:{...reserved,basic:reserved.basic+buildTeams(home),skilled:reserved.skilled+(relicWork?2:0)},free:remaining};
   home.allocations=allocations;
   tickModuleProjects(game,entity,dt);
   home.flows=flows;
-  home.employmentFactor=.5+.5*QUALIFICATIONS.reduce((sum,q)=>sum+used[q],0)/Math.max(1,QUALIFICATIONS.reduce((sum,q)=>sum+home.workers[q],0));
+  home.employmentFactor=.5+.5*Math.min(1,QUALIFICATIONS.reduce((sum,q)=>sum+used[q],0)/Math.max(1,Math.floor(home.population*.6)));
   tickCivilMoney(game,entity,dt,ready(home.facilities.dock)?home.civilConsumption:{});
   home.power=generation;
 }
 
 export function tickHomeOperations(game,entity,dt) {
   const home=entity.market.homeworld;initializeHomeOperations(home);
+  initializePopulation(entity);
   let remaining=dt;
   while(remaining>0){const step=Math.min(10,remaining),now=game.time-remaining+step;operationStep(game,entity,step,now);remaining-=step;}
   tickLogistics(game,entity);
+  tickVisitors(entity,game.time);
 }

@@ -276,7 +276,7 @@ export function serializeMarket(m) {
 
 function extraOf(m) {
   const out = { eff: r1(m.eff ?? 1) };
-  if(m.economy)out.economy={cash:r1(m.economy.cash),rate:r1(m.economy.rate),granted:r1(m.economy.granted),spent:r1(m.economy.spent)};
+  if(m.economy)out.economy={...m.economy,cash:r1(m.economy.cash),rate:r1(m.economy.rate),granted:r1(m.economy.granted),spent:r1(m.economy.spent)};
   if(m.realEconomy)out.realEconomy=true;
   if (m.homeworld) out.homeworld = m.homeworld;
   if (m.qxp) out.qxp = Math.floor(m.qxp);
@@ -336,7 +336,7 @@ function foreignInfo(s) {
 function shipDetail(s, game) {
   return {
     offer: game?.shipOffers.get(s.id)?.price ?? null,
-    owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, moduleCargo:s.moduleCargo||{}, log: s.log, group: s.group, ord: s.ord,
+    owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, passengers:s.passengers||[],moduleCargo:s.moduleCargo||{}, log: s.log, group: s.group, ord: s.ord,
     queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},
     nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,
     transit: s.transit ? s.transit.exit : null, zone: s.zone || null, marker: s.marker || null,

@@ -1,8 +1,9 @@
 import { WORLD, GOODS, BELT_TYPES, QUEST, QUEST_TYPES, REP, RANKS, factionRank, questReward, flightMinutes, canBuyFrom, shipStats,
-  giverLevel, giverXpOf, planetFeatures, EXTRAS } from '../shared/config.js';
+  giverLevel, giverXpOf, planetFeatures, EXTRAS, freeFor } from '../shared/config.js';
 import { hexAt, hexKey, hexNeighbors } from '../shared/hex.js';
 import { missingInputs, stat } from './markets.js';
 import {homeStorageFree} from '../shared/homeworld.js';
+import {passengerTrade,updatePassengerOffers,peopleOf} from './population.js';
 
 /**
  * Quests (PRD-2 Kapitel 9): Questtafeln an Planeten und Werften, eine aktive Quest je Spieler, keine Fristen.
@@ -185,6 +186,13 @@ export function acceptQuest(game, player, ship, e, questId, offers = null) {
   if (questEntities(q).some((id) => game.canUseStorage(game.ownership.get(id), player.id))) return 'Diese Quest betrifft deinen eigenen Besitz oder den deines Konsortiums.';
   const st = shipStats(ship);
   if (q.type === 'tour' && st.passenger < q.tourists) return `Für ${q.tourists} Touristen braucht das Schiff Passagierkabinen mit ${q.tourists} Plätzen.`;
+  if(game.profile==='homeworld'&&q.type==='tour'){
+    const residents=peopleOf(e);if(!residents||residents.population-Object.values(residents.workers||{}).reduce((n,v)=>n+v,0)<q.tourists||freeFor(ship,'tourists')<q.tourists)return 'Nicht genügend reale Touristen oder freie Kabinenplätze.';
+    const loaded=passengerTrade(game,ship,e,'tourists',q.tourists,'buy',0,true);
+    if(loaded.n!==q.tourists){if(loaded.n)passengerTrade(game,ship,e,'tourists',loaded.n,'sell');return 'Nicht genügend reale Touristen oder freie Kabinenplätze.';}
+    let left=q.tourists;
+    for(const batch of [...ship.passengers].reverse())if(batch.kind==='tourists'&&left){batch.quest=q.id;left-=batch.n;}
+  }
   if (q.type === 'mine' && !(st.mining.std > 0)) return 'Für diese Quest braucht das Schiff Abbaugeräte.';
   list.splice(i, 1);
   const quest = { ...q, accepted: Math.round(game.time), ship: ship.id, progress: 0 };
@@ -209,6 +217,7 @@ export function acceptQuest(game, player, ship, e, questId, offers = null) {
 export function abortQuest(game, player) {
   const q = player.quest;
   if (!q) return 'Keine aktive Quest.';
+  if(game.profile==='homeworld'&&q.type==='tour')for(const ship of game.shipsOf(player.id))for(const batch of ship.passengers||[])if(batch.quest===q.id)delete batch.quest;
   player.quest = null;
   player.questLock = game.time + QUEST.ABORT_LOCK;
   if (q.faction) {
@@ -264,7 +273,15 @@ export function questProgress(game, player, ship) {
         game.shipLog(ship, `Rundreise: Halt ${q.visited.length} von ${q.stops.length}`);
         return true;
       }
-      if (q.state === 'return' && at === q.giver) { completeQuest(game, player); return true; }
+      if (q.state === 'return' && at === q.giver) {
+        if(game.profile==='homeworld'){
+          const e=game.world.entities.get(q.giver),h=peopleOf(e),batches=(ship.passengers||[]).filter(b=>b.quest===q.id);
+          if(batches.reduce((n,b)=>n+b.n,0)!==q.tourists||!h)return false;
+          for(const b of batches){h.population+=b.n;for(const qualification of Object.keys(h.workers))h.workers[qualification]+=b.workers[qualification]||0;if(h.civil)h.civil.budget+=b.wallet||0;}
+          ship.passengers=ship.passengers.filter(b=>b.quest!==q.id);ship.cargo.tourists=(ship.cargo.tourists||0)-q.tourists;if(!ship.cargo.tourists)delete ship.cargo.tourists;updatePassengerOffers(e);
+        }
+        completeQuest(game, player); return true;
+      }
       return false;
     default:
       return false;
