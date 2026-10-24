@@ -462,6 +462,7 @@ export class Game {
     else delete ship.manualDock;
     if (p && e.market) {
       for (const it of e.market.forSale || []) this.discover(p, 'ship', it.type);
+      for(const type of e.market.yardCatalog||[])this.discover(p,'ship',type);
       if (e.market.building) this.discover(p, 'ship', e.market.building.type);
       for (const m of e.market.modules || []) this.discover(p, 'module', m);
     }
@@ -1000,6 +1001,8 @@ export class Game {
   removeOffersOf(pid) { removeOffersOf(this, pid); }
 
   removeShip(ship) {
+    const player=this.players.get(ship.owner);
+    if(player?.manualShip===ship.id)player.manualShip=this.shipsOf(player.id).find(s=>s.id!==ship.id)?.id||null;
     if (ship.owner === NPC_OWNER) this.markNpc(ship, false);
     this.shipOffers.delete(ship.id);
     this.ships.delete(ship.id);

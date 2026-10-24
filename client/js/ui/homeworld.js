@@ -2,6 +2,7 @@ import { GOODS, RECIPES } from '/shared/config.js';
 import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, homeStorageUsage, availableHomeStock } from '/shared/homeworld.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
+import {moduleStockPanel,moduleCraftPanel} from './modules.js';
 
 let dialog;
 export function renderHomeDialog() {
@@ -104,6 +105,7 @@ export function homePanel(entity, item, ship) {
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${ship && slot.stock >= 1 ? '' : 'disabled'}>Laden</button>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Einlagern</button></td></tr>`;
     html += '</table>';
+    html+=moduleStockPanel(entity,ship,'pp');
     html += `<label>Reserve für <select id="homeReserveGood" aria-label="Ware für Reserve">${Object.keys(entity.market.goods).filter(g=>GOODS[g].cls!=='passenger').map(g=>`<option value="${g}">${GOODS[g].name}</option>`).join('')}</select></label>
       <input id="homeReserveAmount" type="number" min="0" max="1000000000" value="0" aria-label="Geschützte Reservemenge"><button class="small" data-pp="homeReserve">Reserve setzen / freigeben</button>
       <p class="muted">Zwei Stunden Grundbedarf: ${Math.ceil(home.population*.4)} Wasser und ${Math.ceil(home.population*.2)} Nahrung. Reserven sind Teil des Lagerbestands, kein zusätzliches Lager.</p>`;
@@ -129,7 +131,7 @@ function homeBalance(entity){
     html+=`<tr><td>${GOODS[g].name}<div class="muted">${duration}</div></td><td>${fmt(availableHomeStock(entity.market,g))} / ${fmt(protectedAmount)}</td><td>+${fmt(flow?.produce||0)} / −${fmt(flow?.consume||0)}</td></tr>`;
   }
   html+='</table><details><summary>Belegung und Engpässe</summary>'+(home.allocations||[]).map(a=>`<p>${esc(names[a.id]||RECIPES[a.id]?.name||home.structures?.find(s=>s.id===a.id)?.kind||a.id)}: ${a.state==='active'?'Betrieb':esc(a.reason||'Pausiert')} · ${a.power} Energie</p>`).join('')+'</details>';
-  html+='<details><summary>Bau- und Ausbildungsaufträge</summary>'+(home.projects||[]).map(p=>`<p>${esc(({training:'Ausbildung',construction:'Neubau',upgrade:'Ausbau',restore:'Wiederherstellung',land:'Flächenerschließung'})[p.kind]||p.kind)} · ${p.kind==='training'?`${p.count} Einwohner: ${Math.ceil(p.remaining)} s ${p.paused?'(pausiert)':''}`:`${Math.max(0,Math.ceil(p.until-state.time))} s · 2 einfache Kräfte im Bauteam · Material gebunden`}</p>`).join('')+'</details>';
+  html+='<details><summary>Bau- und Ausbildungsaufträge</summary>'+(home.projects||[]).map(p=>`<p>${esc(({module:'Modulfertigung',study:'Modulstudium',control:'Leitstellenausbau',training:'Ausbildung',construction:'Neubau',upgrade:'Ausbau',restore:'Wiederherstellung',land:'Flächenerschließung'})[p.kind]||p.kind)} · ${['training','module','study'].includes(p.kind)?`${p.kind==='training'?p.count+' Einwohner:':'Restzeit:'} ${Math.ceil(p.remaining)} s ${p.paused?'(pausiert)':''}`:`${Math.max(0,Math.ceil(p.until-state.time))} s · 2 einfache Kräfte im Bauteam · Material gebunden`}</p>`).join('')+'</details>';
   return html;
 }
 
@@ -152,6 +154,7 @@ function structurePanel(entity,id){
     else html+=`<p>Akademie: ${costLabel(HOME_BUILDINGS.academy)}</p><button class="small" data-pp="homeBuild" data-kind="academy" data-parent="${id}">Akademieausbau</button>`;
   }
   if(building.kind==='researchWorkshop'&&!building.upgrades?.includes('researchCenter'))html+=`<p>Forschungszentrum: ${costLabel(HOME_BUILDINGS.researchCenter)}</p><button class="small" data-pp="homeBuild" data-kind="researchCenter" data-parent="${id}">Forschungszentrum ausbauen</button>`;
+  if(['moduleBench','researchWorkshop'].includes(building.kind)&&building.status==='ready')html+=moduleCraftPanel(entity);
   return html;
 }
 

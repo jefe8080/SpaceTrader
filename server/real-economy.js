@@ -1,7 +1,8 @@
 import {GOODS,SHIP_TYPES,SHIPYARD,WORLD,SUPPLY,buyPrice,sellPrice,canBuyFrom,canSellTo,NPC_OWNER} from '../shared/config.js';
 import {HOMEWORLD,availableHomeStock,homeStorageFree} from '../shared/homeworld.js';
-import {stat,STRATEGIES} from './markets.js';
+import {stat} from './markets.js';
 import {propBook} from './property.js';
+import {preparePhysicalYard,tickPhysicalYard} from './physical-yards.js';
 
 export const naturalGood=good=>GOODS[good]?.tier===0&&GOODS[good].cls!=='passenger';
 
@@ -20,13 +21,13 @@ export function preparePublicEntity(entity){
     if(natural&&slot.stock>0)market.provenance.push({id:`${entity.id}:${good}:natural`,source:'natural_reserve',good,amount:slot.stock});
     slot.baseRate=slot.rate;slot.baseCap=slot.cap;
   }
-  ensureCash(entity);
+  preparePhysicalYard(entity);ensureCash(entity);
 }
 
 export function ensureCash(entity){
   const market=entity.market;if(market.economy)return market.economy;
   let rate=Object.entries(market.goods).reduce((sum,[good,slot])=>sum+(slot.role==='consume'?slot.rate*3600*GOODS[good].base:0),0);
-  if(market.strategy==='shipyard')rate=Math.max(rate,...(SHIPYARD.ORDER[entity.type]||[]).map(type=>Object.entries(SHIP_TYPES[type].build).reduce((sum,[g,n])=>sum+GOODS[g].base*n,0)));
+  if(market.yardCatalog)rate=Math.max(rate,...market.yardCatalog.map(type=>Object.entries(SHIP_TYPES[type].build).reduce((sum,[g,n])=>sum+GOODS[g].base*n,0)));
   // A hub's fuel service has a bounded procurement allocation; selling fuel
   // also returns actual receipts to this same cash account.
   if(entity.type==='hub')rate+=20*GOODS.shipfuel.base;
@@ -54,7 +55,7 @@ export function tickRealMarket(game,entity,dt){
   const escrow=[...game.ships.values()].reduce((sum,ship)=>sum+(ship.queue[0]?.real&&ship.queue[0]?.stationId===entity.id?ship.queue[0].cash||0:0),0);
   const grant=Math.max(0,Math.min(cash.rate*dt/3600,cash.rate*HOMEWORLD.money.npcBudgetHours-cash.cash-escrow));
   cash.cash+=grant;cash.granted+=grant;
-  if(market.strategy==='shipyard'){STRATEGIES.shipyard.tick(entity,market,dt,now,game);return;}
+  if(market.yardCatalog){tickPhysicalYard(game,entity,dt);return;}
   const food=market.goods.food;
   const foodNeed=food?.role==='consume'?Math.max(0,food.rate*dt):0;
   const supplied=foodNeed>0?Math.min(1,food.stock/foodNeed):0;
@@ -95,10 +96,12 @@ const queuedFor=(game,entity,good)=>[...game.ships.values()].some(s=>s.owner===N
 /** Public demand buys real goods with escrowed cash, never anticipated sales. */
 export function dispatchRealSupply(game,entity){
   const market=entity.market;if(game.ownership.has(entity.id))return;
+  if(market.yardCatalog&&(market.building||(!market.order&&market.forSale.length>=SHIPYARD.MAX_FOR_SALE)))return;
   const cash=ensureCash(entity);market.supCd||={};
   for(const [good,slot] of Object.entries(market.goods)){
     if(GOODS[good].cls==='passenger'||!canSellTo(slot)||slot.role==='produce'||queuedFor(game,entity,good)||(market.supCd[good]||0)>game.time)continue;
-    const target=slot.role==='consume'?slot.cap*.5:entity.type==='hub'&&good==='shipfuel'?Math.min(slot.cap,80):0;
+    const nextType=market.order?.type||market.yardCatalog?.[(market.nextBuild||0)%market.yardCatalog.length];
+    const target=nextType?SHIP_TYPES[nextType].build[good]||0:slot.role==='consume'?slot.cap*.5:entity.type==='hub'&&good==='shipfuel'?Math.min(slot.cap,80):0;
     const wanted=Math.min(40,Math.floor(target-slot.stock));if(wanted<1)continue;
     let source=null,distance=Infinity;
     for(const candidate of game.world.sectorEntities(entity.sector)){

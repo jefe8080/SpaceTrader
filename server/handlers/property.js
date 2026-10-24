@@ -5,6 +5,7 @@ import { V, CmdError } from './validate.js';
 import { newProperty, buildableTypes, propBook } from '../property.js';
 import { consortiumOf, isMaster, propCount, clog } from '../consortium.js';
 import { remoteManagementError } from '../coverage.js';
+import {startPhysicalBuild,applyPhysicalHull} from '../physical-yards.js';
 
 /**
  * Verwaltbarer Besitz: eigener oder (als Handelsmeister) Besitz des eigenen Konsortiums.
@@ -193,6 +194,10 @@ export default {
     args: { target: ownProp(), type: V.key(SHIP_TYPES) },
     run(ctx, { target: { e, prop }, type }) {
       const m = e.market;
+      if(ctx.game.profile==='homeworld'){
+        if(!PILOT_LICENSES[ctx.player.pilot||1].classes.includes(SHIP_TYPES[type].cls))return 'Für diese Schiffsklasse fehlt die Pilotenlizenz.';
+        return startPhysicalBuild(ctx.game,e,type);
+      }
       if (m.strategy !== 'shipyard') return 'Keine Werft.';
       if (!buildableTypes(e, prop).includes(type)) return 'Diese Klasse kann die Werft (noch) nicht bauen.';
       if (m.building) return 'Die Werft baut bereits.';
@@ -213,6 +218,7 @@ export default {
       if (!lic.classes.includes(SHIP_TYPES[item.type].cls)) return 'Für diese Klasse fehlt dir die Pilotenlizenz.';
       e.market.forSale.splice(index, 1);
       const s = game.spawnShip(player, item.type, e);
+      if(game.profile==='homeworld')applyPhysicalHull(s,item);
       if (item.bonus) Object.assign(s, { bonus: item.bonus, yardLvl: item.yardLvl, fuel: shipStats({ ...s, bonus: item.bonus }).tank });
       game.shipLog(s, `In die Flotte übernommen von ${e.name}`);
     },

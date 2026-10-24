@@ -37,7 +37,7 @@ export function playerPrice(e, g, dir = null) {
 }
 
 export const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-export const cargoUsed = (s) => Object.values(s.cargo || {}).reduce((a, b) => a + b, 0);
+export const cargoUsed = (s) => Object.values(s.cargo || {}).reduce((a, b) => a + b, 0)+Object.values(s.moduleCargo||{}).reduce((sum,n)=>sum+n*30,0);
 export const shipSpeed = (s) => (s.upg ? shipStats(s).speed : SHIP_TYPES[s.type].speed);
 /** Belegung des normalen Laderaums (0..1) */
 export const cargoFill = (s) => {

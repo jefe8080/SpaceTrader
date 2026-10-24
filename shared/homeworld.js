@@ -96,6 +96,7 @@ export function homeStorageUsage(market) {
   }
   // Physical modules are stored separately from installed ship modules (U10).
   used.normal += Object.values(market.moduleInventory || {}).reduce((sum, n) => sum + n * 30, 0);
+  used.normal += market.homeworld?.moduleOutputReserved||0;
   return used;
 }
 

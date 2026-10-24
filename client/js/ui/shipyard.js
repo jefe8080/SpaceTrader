@@ -91,6 +91,7 @@ function refitSection(e, s) {
       <td><button class="small" data-act="upgrade" data-ship="${s.id}" data-line="${line}" ${max || state.credits < cost ? 'disabled' : ''}>＋</button></td></tr>`;
   }
   h += `</table>`;
+  if(!state.homeworld){
   const counts = countModules(s);
   const st = shipStats(s);
   const freeCargo = st.cargo - holdUsage(s).cargo;
@@ -106,6 +107,7 @@ function refitSection(e, s) {
       return `<div class="cargo-row" title="${esc(MODULES[id].desc)}">${MODULES[id].name} <span class="muted">${fmt(cost)} Cr</span>
         <span class="amt"></span><button class="small" data-act="buyModule" data-ship="${s.id}" data-module="${id}" ${why ? 'disabled' : ''} title="${esc(why)}">Einbauen</button></div>`;
     }).join('');
+  }
   }
   h += sellRow(s) + '</div>';
   return h;
@@ -126,10 +128,19 @@ export function repLine(f) {
 /** Fraktionswerft: L, XL und Spezialschiff, doppelt gesperrt durch Fraktionsrang und Pilotenlizenz */
 export function factionYardSection(e, dockedShip) {
   const items = e.market.forSale || [];
-  if (!items.length) return '';
+  if (!items.length&&!e.market.yardCatalog) return '';
   const L = lic();
   const docked = myShips().filter((s) => s.dockedAt === e.id);
   let h = `<div class="section"><div class="section-title">Fraktionsschiffe</div><div class="muted small-note">${repLine(e.faction)} · Ruf gibt es für Quests auf Planeten der Fraktion.</div>`;
+  if(state.homeworld){
+    if(!items.length)h+='<p class="muted">Kein fertiger Rumpf im Bestand. Ein Auftrag ersetzt keine fehlenden Baumaterialien.</p>';
+    if(e.market.building)h+=`<p>Im realen Bau: ${SHIP_TYPES[e.market.building.type].name} · ${e.market.building.remaining} s</p>`;
+    else if(e.market.order)h+=`<p>Bestellt: ${SHIP_TYPES[e.market.order.type].name} · wartet auf Material im Werftlager</p>`;
+    else for(const type of e.market.yardCatalog||[]){
+      const d=SHIP_TYPES[type],allowed=dockedShip&&myRank(d.faction)>=d.rank&&L.classes.includes(d.cls)&&state.credits>=d.price*2;
+      h+=`<p>${d.name} · ${d.cls} · Rang ${d.rank} · Anzahlung ${fmt(d.price*2)} Cr</p><button class="small" data-act="factionOrder" data-ent="${e.id}" data-type="${type}" ${allowed?'':'disabled'}>Materialgebunden bestellen</button>`;
+    }
+  }
   items.forEach((it, i) => {
     const d = SHIP_TYPES[it.type];
     const have = docked.reduce((a, s) => a + (s.cargo?.[it.currency.good] || 0), 0);

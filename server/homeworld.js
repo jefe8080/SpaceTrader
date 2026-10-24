@@ -207,6 +207,7 @@ export function completeHomeQuest(game, player, entity, id) {
   if (id === 'H06') {
     home.hazardStorage = HOMEWORLD.start.hazardStorage;
     home.moduleBlueprints = ['cabin', 'shielded'];
+    player.moduleBlueprints=[...new Set([...(player.moduleBlueprints||[]),...home.moduleBlueprints])];
     for (const [good, slot] of Object.entries(entity.market.goods)) if (GOODS[good].cls === 'hazard') slot.cap = home.hazardStorage;
   }
   emitHome(game, entity);

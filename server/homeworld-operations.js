@@ -3,6 +3,7 @@ import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpg
 import { pointCovered } from './coverage.js';
 import {tickCivilMoney} from './real-economy.js';
 import {stat} from './markets.js';
+import {tickModuleProjects} from './modules.js';
 
 const QUALIFICATIONS = ['basic', 'skilled', 'specialist'];
 const qualified = () => ({ basic: 0, skilled: 0, specialist: 0 });
@@ -58,7 +59,7 @@ export function upgradeControl(game,player,entity,module) {
 
 function buildTeams(home) {
   return Object.values(home.facilities).filter(building=>building.status==='building').length*2
-    +home.projects.filter(project=>project.kind!=='training').length*2;
+    +home.projects.filter(project=>!['training','module','study'].includes(project.kind)).length*2;
 }
 
 function trainingReserved(home) {
@@ -171,7 +172,7 @@ function completeConstruction(game,entity,now) {
   }
   const pending=[];
   for(const project of home.projects){
-    if(project.kind==='training'||now<project.until){pending.push(project);continue;}
+    if(['training','module','study'].includes(project.kind)||now<project.until){pending.push(project);continue;}
     if(project.kind==='construction'){
       const building=home.structures.find(s=>s.id===project.target);building.status='ready';building.completedAt=project.until;delete building.readyAt;building.bound=project.bound;
     }else if(project.kind==='upgrade'){
@@ -320,6 +321,7 @@ function operationStep(game,entity,dt,now) {
   home.energy={generation,used:powerUsed,free:Math.max(0,generation-powerUsed)};
   home.workforce={total:{...home.workers},used,reserved:{...reserved,basic:reserved.basic+buildTeams(home)},free:remaining};
   home.allocations=allocations;
+  tickModuleProjects(game,entity,dt);
   home.flows=flows;
   home.employmentFactor=.5+.5*QUALIFICATIONS.reduce((sum,q)=>sum+used[q],0)/Math.max(1,QUALIFICATIONS.reduce((sum,q)=>sum+home.workers[q],0));
   tickCivilMoney(game,entity,dt,ready(home.facilities.dock)?home.civilConsumption:{});

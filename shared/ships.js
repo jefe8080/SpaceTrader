@@ -188,6 +188,7 @@ export const holdFor = (ship, good) => (GOODS[good].cls === 'hazard' && hasAbili
 /** Belegung je Laderaum */
 export function holdUsage(ship) {
   const u = { cargo: 0, hazard: 0, passenger: 0 };
+  u.cargo=Object.values(ship.moduleCargo||{}).reduce((sum,n)=>sum+n*MODULE_SIZE,0);
   for (const [g, n] of Object.entries(ship.cargo || {})) u[holdFor(ship, g)] += n;
   const overflow = Math.max(0, u.cargo - shipStats(ship).cargo);
   u.cargo -= overflow;
@@ -207,7 +208,7 @@ export function freeFor(ship, good) {
 /** Hypothetische Kapazitätsprüfung nach Ein-/Ausbau; erlaubtes Umsortieren ist enthalten. */
 export function cargoFits(ship) {
   const st = shipStats(ship), used = holdUsage(ship);
-  return ['cargo', 'hazard', 'passenger'].every((h) => used[h] <= st[h]);
+  return (ship.modules||[]).length*MODULE_SIZE<=st.cargoTotal&&['cargo', 'hazard', 'passenger'].every((h) => used[h] <= st[h]);
 }
 
 /** Verkaufswert: 60 % des Marktpreises plus 50 % der eingebauten Upgrades und Module */

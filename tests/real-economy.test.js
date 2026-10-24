@@ -20,13 +20,15 @@ function market(f,id,goods,extra={}){
 const close=f=>f.game.store.close();
 const approximately=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 
-test('Frische und spätere Sektoren haben keine öffentliche Verarbeitung oder erzeugte Fertigwaren/Module/Schiffe',()=>{
+test('Frische und spätere Sektoren haben keine öffentliche Verarbeitung, Fertigwaren oder unregistrierte Anfangsangebote',()=>{
   const f=fixture();for(let q=-2;q<=2;q++)for(let r=-2;r<=2;r++)f.game.world.ensureSector(q,r);
   let reserves=0;
   for(const entity of f.game.world.entities.values()){
     if(entity.type==='ruins'||entity.market?.strategy==='homeResource')continue;
     assert(!STATION_TYPES[entity.type]?.recipe);const m=entity.market;if(!m)continue;
-    assert.deepEqual(m.modules,[]);assert.equal(m.forSale?.length||0,0);
+    assert.deepEqual(m.modules,[]);
+    if(entity.id==='origin_yard'){assert.equal(m.forSale.length,1);assert.equal(m.forSale[0].source,'public_start_exception');assert(m.provenance.some(p=>p.id===m.forSale[0].id));}
+    else assert.equal(m.forSale?.length||0,0);
     for(const [g,s] of Object.entries(m.goods)){
       if(GOODS[g].tier>0||GOODS[g].cls==='passenger')assert.equal(s.stock,0);
       if(s.role==='produce')assert.equal(GOODS[g].tier,0);

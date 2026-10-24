@@ -1,6 +1,9 @@
 import { GOODS, SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, MODULE_SIZE, MODULE_REFUND,
   upgradeCost, shipStats, holdUsage, cargoFits, sellValue, pilotLevel, factionRank, RANK_NAMES, FACTIONS } from '../../shared/config.js';
 import { V } from './validate.js';
+import {installModule,removePhysicalModule} from '../modules.js';
+import {applyPhysicalHull} from '../physical-yards.js';
+import {receiveMarketCash,spendMarketCash} from '../real-economy.js';
 
 /** Eigenes Schiff ist an einem Ort angedockt, der die Bedingung erfüllt */
 const dockedAt = (game, ship, pred) => {
@@ -24,7 +27,7 @@ export default {
       const m = target.market;
       const item = m.forSale[index];
       if (!item) return 'Schiff nicht mehr verfügbar.';
-      if (item.faction) return 'Fraktionsschiffe gibt es nur über das Angebot der Fraktionswerft.';
+      if (item.faction||SHIP_TYPES[item.type].faction) return 'Fraktionsschiffe gibt es nur über das Angebot der Fraktionswerft.';
       if (item.reservedFor && item.reservedFor !== player.id && game.time < item.reservedUntil) return `Dieses Schiff ist noch ${Math.ceil((item.reservedUntil - game.time) / 60)} min für den Besteller reserviert.`;
       if (m.owner && !game.isOwnerOrMember(m.owner, player.id) && !m.yardSale) return 'Diese Werft verkauft nicht an andere Spieler.';
       const lic = pilotLicense(player);
@@ -34,10 +37,14 @@ export default {
       if (player.credits < item.price) return 'Nicht genug Credits.';
       player.credits -= item.price;
       if (m.owner && m.owner !== player.id) game.accountOf(m.owner).credits += item.price; // Verkauf aus Spieler- oder Konsortiumswerft
+      if(game.profile==='homeworld'&&!m.owner)receiveMarketCash(target,item.price);
       m.forSale.splice(index, 1);
       const s = game.spawnShip(player, item.type, target);
       if (item.bonus) Object.assign(s, { bonus: item.bonus, yardLvl: item.yardLvl, fuel: shipStats({ ...s, bonus: item.bonus }).tank });
       if (item.upg) Object.assign(s, { upg: item.upg, modules: item.modules || [], upgValue: item.upgValue || 0, fuel: shipStats({ ...s, upg: item.upg }).tank });
+      if(game.profile==='homeworld'){
+        applyPhysicalHull(s,item);const provenance=m.provenance?.find(p=>p.id===item.id);if(provenance)provenance.claimedBy=player.id;
+      }
       game.shipLog(s, `Neues Schiff gekauft: ${SHIP_TYPES[item.type].name} für ${item.price.toLocaleString('de-DE')} Cr bei ${target.name}`);
     },
   },
@@ -55,6 +62,7 @@ export default {
       if (!docked.length) return 'Eines deiner Schiffe muss an der Fraktionswerft angedockt sein.';
       const item = m.forSale[index];
       if (!item) return 'Unbekanntes Schiff.';
+      if(item.reservedFor&&item.reservedFor!==player.id&&game.time<item.reservedUntil)return 'Dieses Schiff ist noch für den Besteller reserviert.';
       const d = SHIP_TYPES[item.type];
       const rank = factionRank(player.rep?.[d.faction]);
       if (rank < d.rank) return `${d.name} erfordert Rang ${d.rank} (${RANK_NAMES[d.rank]}) bei ${FACTIONS[d.faction].name}, du hast Rang ${rank}.`;
@@ -66,6 +74,7 @@ export default {
       if (have < n) return `Es fehlen ${n - have} ${GOODS[good].name} (in den Laderäumen der angedockten Schiffe).`;
       if (player.credits < item.price) return 'Nicht genug Credits.';
       player.credits -= item.price;
+      if(game.profile==='homeworld')receiveMarketCash(target,item.price);
       let rest = n;
       for (const s of docked) {
         const k = Math.min(rest, s.cargo[good] || 0);
@@ -74,6 +83,7 @@ export default {
         rest -= k;
       }
       const s = game.spawnShip(player, item.type, target);
+      if(game.profile==='homeworld'){m.forSale.splice(index,1);applyPhysicalHull(s,item);m.factionPayments||={};m.factionPayments[good]=(m.factionPayments[good]||0)+n;}
       game.shipLog(s, `Fraktionsschiff ${SHIP_TYPES[item.type].name} erworben`);
     },
   },
@@ -86,20 +96,23 @@ export default {
     args: { target: V.entity(), type: V.key(SHIP_TYPES) },
     run({ game, player }, { target: e, type }) {
       const m = e.market;
-      if (m?.strategy === 'factionyard') return 'Fraktionsschiffe sind an der Fraktionswerft dauerhaft im Angebot.';
-      if (m?.strategy !== 'shipyard') return 'Keine Werft.';
+      const faction=game.profile==='homeworld'&&m?.strategy==='factionyard';
+      if (m?.strategy === 'factionyard'&&!faction) return 'Fraktionsschiffe sind an der Fraktionswerft dauerhaft im Angebot.';
+      if (m?.strategy !== 'shipyard'&&!faction) return 'Keine Werft.';
       if (m.owner) return 'Spielerwerften haben keinen Bestellslot.';
       if (!game.shipsOf(player.id).some((s) => s.dockedAt === e.id)) return 'Eines deiner Schiffe muss an der Werft angedockt sein.';
       if (m.order) return `Bestellt: ${SHIP_TYPES[m.order.type].name}. Eine neue Bestellung ist erst nach Fertigstellung möglich.`;
       const d = SHIP_TYPES[type];
-      if (d.npc || d.faction) return 'Dieser Typ ist nicht bestellbar.';
+      if (d.npc || (d.faction&&!faction)) return 'Dieser Typ ist nicht bestellbar.';
+      if(faction&&(!m.yardCatalog.includes(type)||factionRank(player.rep?.[d.faction])<d.rank))return 'Passender Fraktionskatalog und Fraktionsrang erforderlich.';
       if (!player.known.ship.has(type)) return 'Bestellen kannst du nur Schiffe aus deinem Almanach.';
-      if (!SHIPYARD.ORDER_CLASSES[e.type]?.includes(d.cls)) return `${e.type === 'bigyard' ? 'Große Werften' : 'Werften'} bauen nur Klasse ${SHIPYARD.ORDER_CLASSES[e.type].join(' und ')}.`;
+      if (!faction&&!SHIPYARD.ORDER_CLASSES[e.type]?.includes(d.cls)) return `${e.type === 'bigyard' ? 'Große Werften' : 'Werften'} bauen nur Klasse ${SHIPYARD.ORDER_CLASSES[e.type].join(' und ')}.`;
       const lic = pilotLicense(player);
       if (!lic.classes.includes(d.cls)) return `Für Klasse ${SHIP_CLASSES[d.cls].name} brauchst du Pilotenlizenz ${SHIP_CLASSES[d.cls].license}.`;
       const deposit = d.price * SHIPYARD.DEPOSIT;
       if (player.credits < deposit) return `Die Anzahlung beträgt ${deposit.toLocaleString('de-DE')} Cr.`;
       player.credits -= deposit;
+      if(game.profile==='homeworld')receiveMarketCash(e,deposit);
       m.order = { type, player: player.id, name: player.name, paid: deposit, at: Math.round(game.time) };
       game.emit('notice', player, `${d.name} bei ${e.name} bestellt (Anzahlung ${deposit.toLocaleString('de-DE')} Cr).`);
     },
@@ -112,8 +125,16 @@ export default {
       if (!e) return 'Schiffe verkaufst du an einer Werft oder am Hub.';
       const giveErr = game.canGiveAway(player, ship);
       if (giveErr) return giveErr;
-      if (Object.keys(ship.cargo).length) return 'Erst den Laderaum leeren.';
+      if (Object.keys(ship.cargo).length||Object.values(ship.moduleCargo||{}).some(n=>n>0)) return 'Erst den Laderaum leeren.';
       const value = sellValue(ship);
+      if(game.profile==='homeworld'){
+        const m=e.market;m.forSale||=[];
+        if(m.forSale.length>=SHIPYARD.MAX_FOR_SALE)return 'Der reale Werftbestand ist voll.';
+        if(m.owner===player.id)return 'Eigene Schiffe werden hier nicht gegen Geld zurückgekauft.';
+        if(m.owner){const buyer=game.accountOf(m.owner);if(buyer.credits<value)return 'Der Werfteigentümer kann nicht zahlen.';buyer.credits-=value;}
+        else if(!spendMarketCash(e,value))return 'Die Werftkasse reicht für den Ankauf nicht aus.';
+        m.forSale.push({id:ship.id,source:'player_sale',type:ship.type,price:Math.round(value*1.25),fuel:ship.fuel,upg:structuredClone(ship.upg),modules:[...ship.modules],upgValue:ship.upgValue,bonus:ship.bonus||0,yardLvl:ship.yardLvl||0,...(SHIP_TYPES[ship.type].faction?{faction:true,currency:structuredClone(SHIP_TYPES[ship.type].currency)}:{})});
+      }
       player.credits += value;
       game.removeShip(ship);
       game.emit('log', ship, `${ship.name} für ${value.toLocaleString('de-DE')} Cr verkauft`);
@@ -143,6 +164,7 @@ export default {
   buyModule: {
     args: { ship: V.ownShip(), module: V.key(MODULES) },
     run({ game, player }, { ship, module }) {
+      if(game.profile==='homeworld')return installModule(game,player,ship,module,'warehouse');
       const e = dockedAt(game, ship, (x) => offersModule(x, module) || (game.isOwnerOrMember(x.market?.owner, player.id) && isYard(x)));
       if (!e) return 'Dieses Modul wird hier nicht angeboten.';
       const st = shipStats(ship);
@@ -162,6 +184,7 @@ export default {
   removeModule: {
     args: { ship: V.ownShip(), module: V.key(MODULES) },
     run({ game, player }, { ship, module }) {
+      if(game.profile==='homeworld')return removePhysicalModule(game,player,ship,module);
       if (!dockedAt(game, ship, isYard)) return 'Module baust du an einer Werft aus.';
       const i = (ship.modules || []).indexOf(module);
       if (i < 0) return 'Modul nicht eingebaut.';

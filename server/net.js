@@ -283,6 +283,8 @@ function extraOf(m) {
   if (m.lvl) out.lvl = m.lvl;
   if (m.board) out.board = m.board.offers;
   if (m.modules) out.modules = m.modules;
+  if(m.moduleInventory)out.moduleInventory=m.moduleInventory;
+  if(m.yardCatalog)out.yardCatalog=m.yardCatalog;
   if (m.owner) Object.assign(out, { owner: m.owner, yardSale: !!m.yardSale, mode: m.mode, customs: m.customs || 0 });
   if (m.forSale) {
     out.forSale = m.forSale;
@@ -334,7 +336,7 @@ function foreignInfo(s) {
 function shipDetail(s, game) {
   return {
     offer: game?.shipOffers.get(s.id)?.price ?? null,
-    owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, log: s.log, group: s.group, ord: s.ord,
+    owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, moduleCargo:s.moduleCargo||{}, log: s.log, group: s.group, ord: s.ord,
     queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},
     nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,
     transit: s.transit ? s.transit.exit : null, zone: s.zone || null, marker: s.marker || null,
@@ -344,7 +346,7 @@ function shipDetail(s, game) {
 
 function playerDetail(p) {
   return { stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1, governor: p.governor || 0, faction: p.faction || null,
-    homeworld: p.homeworld || null, homeQuest: p.homeQuest || null, manualShip: p.manualShip || null, relic: p.relic || null,
+    homeworld: p.homeworld || null, homeQuest: p.homeQuest || null, manualShip: p.manualShip || null, relic: p.relic || null,moduleBlueprints:p.moduleBlueprints||[],
     flagshipAt: p.flagshipAt ?? null, xp: Math.floor(p.xp || 0), level: pilotLevel(p.xp), quest: p.quest || null, questLock: p.questLock || 0,
     rep: p.rep || {}, questsDone: p.questsDone || 0, dogUntil: p.dogUntil || 0, mg: p.mg || null };
 }

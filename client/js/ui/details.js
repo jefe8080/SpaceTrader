@@ -15,6 +15,7 @@ import { orderShips } from './orders.js';
 import { questBoardSection } from './quests.js';
 import { eventSection } from './events.js';
 import { enterPlanet } from './planetPanel.js';
+import {moduleStockPanel,handleModuleAction} from './modules.js';
 
 const entName = (id) => esc(state.entities.get(id)?.name || 'unbekannter Ort');
 const dockedHereOwn = (id) => myShips().some((s) => s.dockedAt === id);
@@ -142,10 +143,11 @@ function shipDetails(s) {
 
   h += `<div class="section"><div class="section-title">Ladung</div>`;
   const cargo = Object.entries(s.cargo || {});
-  h += cargo.length
+  h += cargo.length||Object.values(s.moduleCargo||{}).some(n=>n>0)
     ? `<div class="cargo-list">${cargo.map(([g, n]) => `<div class="cargo-row">${goodTag(g)}<span class="amt">${n}</span>
         <button class="small danger" data-act="jettison" data-ship="${s.id}" data-good="${g}" title="Abwerfen">✕</button></div>`).join('')}</div>`
     : `<div class="muted">leer</div>`;
+  for(const [module,n] of Object.entries(s.moduleCargo||{}))h+=`<div class="cargo-row">Verpackt: ${MODS[module].name}<span class="amt">${n} × 30</span></div>`;
   h += `</div>`;
 
   if (docked?.kind === 'planet') h += eventSection(docked, s);
@@ -235,6 +237,7 @@ export function marketTable(e, ship) {
   });
   let h = `<table class="market"><tr><th>Ware</th><th>Lager</th><th>Preis</th><th></th></tr>${rows.join('')}</table>`;
   if(!e.owner&&e.market.economy)h=`<p class="muted">Marktkasse: ${fmt(e.market.economy.cash)} Cr · begrenzte Nachfrage ${fmt(e.market.economy.rate)} Cr/h. Angebote garantieren keinen Ankauf.</p>`+h;
+  if(state.homeworld)h+=moduleStockPanel(e,ship);
   if (mine && canTrade) {
     // Waren an Bord, die das Lager noch nicht führt, können nicht eingelagert werden
   }
@@ -398,6 +401,7 @@ det.addEventListener('click', (ev) => {
   const d = b.dataset;
   if (handlePropertyAction(d)) return;
   switch (d.act) {
+    case 'moduleTransfer':case 'moduleInstall':case 'moduleRemove':handleModuleAction(d);break;
     case 'rename': {
       const s = state.ships.get(d.ship);
       const name = prompt('Neuer Name (max. 24 Zeichen)', s?.name || '');
@@ -437,6 +441,7 @@ det.addEventListener('click', (ev) => {
       if (t && confirm(`${SHIP_TYPES[t].name} bestellen? Die Anzahlung wird sofort fällig und nicht erstattet.`)) cmd('yardOrder', { target: d.ent, type: t });
       break;
     }
+    case 'factionOrder':if(confirm(`${SHIP_TYPES[d.type].name} bestellen? Anzahlung ${fmt(SHIP_TYPES[d.type].price*2)} Cr, Materiallieferung bleibt erforderlich.`))cmd('yardOrder',{target:d.ent,type:d.type});break;
     case 'upgrade': cmd('upgrade', { ship: d.ship, line: d.line }); break;
     case 'buyModule': cmd('buyModule', { ship: d.ship, module: d.module }); break;
     case 'removeModule': cmd('removeModule', { ship: d.ship, module: d.module }); break;

@@ -8,7 +8,7 @@ import {loadRealSupply} from './real-economy.js';
 
 const inZoneAt = (z, p) => inZone(z, p.x, p.y);
 
-export const cargoUsed = (ship) => Object.values(ship.cargo).reduce((a, b) => a + b, 0);
+export const cargoUsed = (ship) => Object.values(ship.cargo).reduce((a, b) => a + b, 0)+Object.values(ship.moduleCargo||{}).reduce((sum,n)=>sum+n*30,0);
 
 /** Abbaurate eines Schiffes für eine Ware (Standard: Bergbaulaser, Spezial: Module). NPC-Versorger bauen alles ab. */
 export function miningRate(ship, good) {
