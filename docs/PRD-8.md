@@ -23,7 +23,7 @@ Ein eigener Canvas-2D-Renderer übernimmt dieselbe Viewer-Schnittstelle wie bish
 ## Teilschritte und Fortschritt
 
 - [x] P1: Planung und Freigaben dokumentieren, Referenz sichern; Planungscommit.
-- [ ] P2: Stadtpläne für alle Typen, vollständige Objektplatzierung, Warenfamilien und kompatible Heimatausbaustände implementieren und prüfen.
+- [x] P2: Stadtpläne für alle Typen, vollständige Objektplatzierung, Warenfamilien und kompatible Heimatausbaustände implementieren und prüfen. `node --test tests/planet-city.test.js`: 4 Prüfungen erfolgreich, einschließlich 13 Typen, Überlappungsfreiheit, Trefferflächen, stabilen Positionen und Ausbauständen.
 - [ ] P3: Gezeichnete Assets, Canvas-Stadtansicht, Umgebung und dezente Animationen implementieren; neue Ansicht und reduzierte Bedienung integrieren.
 - [ ] P4: Alle Typen und dynamische Zustände visuell prüfen; Interaktion, Kamera, Touch und bestehende Spielfunktionen testen, Befunde korrigieren und dokumentieren.
 
