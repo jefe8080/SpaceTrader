@@ -214,4 +214,3 @@ Die Umsetzung nutzt vorhandene Projektprüfungen und ergänzt gezielte Tests fü
 - Q14: Hauptschiffrolle folgt dem eingebauten Antrieb, sichtbare Kennzeichnung und Entfall beim Ausbau bestätigt.
 - Q15: Keine besondere Rücksicht auf abgeschlossene H4-Spielstände erforderlich; noch niemand hat H4 abgeschlossen.
 - Q16: Tatsächliche Warenverkäufe einschließlich Routen, Gewinn nach zugehörigen Einkaufskosten, keine Questbelohnungen und keine erfundenen historischen Gewinne bestätigt.
-
