@@ -1,0 +1,146 @@
+{
+  "status": "passed",
+  "results": [
+    {
+      "type": "agrar",
+      "objects": 19,
+      "rendered": 19,
+      "misses": [],
+      "zoom": 1.0416666666666667,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-agrar776"
+    },
+    {
+      "type": "ocean",
+      "objects": 15,
+      "rendered": 15,
+      "misses": [],
+      "zoom": 0.6688617886178861,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-ocean848"
+    },
+    {
+      "type": "desert",
+      "objects": 18,
+      "rendered": 18,
+      "misses": [],
+      "zoom": 0.6688617886178861,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-desert221"
+    },
+    {
+      "type": "mining",
+      "objects": 19,
+      "rendered": 19,
+      "misses": [],
+      "zoom": 0.6688617886178861,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-mining1171"
+    },
+    {
+      "type": "ice",
+      "objects": 16,
+      "rendered": 16,
+      "misses": [],
+      "zoom": 0.6688617886178861,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-ice430"
+    },
+    {
+      "type": "urban",
+      "objects": 22,
+      "rendered": 22,
+      "misses": [],
+      "zoom": 0.6688617886178861,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-urban903"
+    },
+    {
+      "type": "resort",
+      "objects": 15,
+      "rendered": 15,
+      "misses": [],
+      "zoom": 0.6688617886178861,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-resort217"
+    },
+    {
+      "type": "gasgiant",
+      "objects": 19,
+      "rendered": 19,
+      "misses": [],
+      "zoom": 0.6688617886178861,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-gasgiant460"
+    },
+    {
+      "type": "jungle",
+      "objects": 15,
+      "rendered": 15,
+      "misses": [],
+      "zoom": 0.6688617886178861,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-jungle168"
+    },
+    {
+      "type": "volcanic",
+      "objects": 18,
+      "rendered": 18,
+      "misses": [],
+      "zoom": 0.6688617886178861,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-volcanic1493"
+    },
+    {
+      "type": "colony",
+      "objects": 21,
+      "rendered": 21,
+      "misses": [],
+      "zoom": 0.6688617886178861,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-colony795"
+    },
+    {
+      "type": "industrial",
+      "objects": 23,
+      "rendered": 23,
+      "misses": [],
+      "zoom": 0.6688617886178861,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-industrial786"
+    },
+    {
+      "type": "ruins",
+      "objects": 18,
+      "rendered": 18,
+      "misses": [],
+      "zoom": 0.6688617886178861,
+      "active": true,
+      "loading": false,
+      "landed": "qa8-ruins408"
+    }
+  ],
+  "errors": [],
+  "checks": [
+    "13 types and complete hit selection",
+    "real homeworld dialog and Escape",
+    "warehouse, beggar, dog, factory panels",
+    "mobile controls clear of header",
+    "touch tap and pinch without accidental selection",
+    "wheel, drag, focus and overview",
+    "spatial keyboard activation",
+    "live homeworld development updates and stable positions"
+  ]
+}

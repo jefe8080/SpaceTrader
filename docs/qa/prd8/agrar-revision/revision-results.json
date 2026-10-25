@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "painting": {
+    "authored": true,
+    "roads": 0,
+    "decor": 0,
+    "scenery": null,
+    "terrainDraws": 1
+  },
+  "maximum": {
+    "items": 29,
+    "records": 29,
+    "misses": []
+  },
+  "checks": [
+    "Original panels opened by clicking painted water tanks, beggar, dog and factory; Escape closes the panel",
+    "One composed painting; zero generated roads, decor houses or reflected tiles",
+    "1600x1000: 12 real canvas camera limit cases remain inside painting",
+    "390x844: 12 real canvas camera limit cases remain inside painting",
+    "844x390: 12 real canvas camera limit cases remain inside painting",
+    "2560x1080: 12 real canvas camera limit cases remain inside painting",
+    "All four category courtyards accept factories, replacing available plots without moving established sites",
+    "Seven extra production goods and all three level goods retain unique reachable service sites"
+  ],
+  "errors": []
+}

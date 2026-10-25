@@ -8,7 +8,7 @@ const browser=await chromium.launch({channel:'msedge',headless:true});
 const context=await browser.newContext({viewport:{width:1600,height:1000},hasTouch:true});
 const page=await context.newPage(),errors=[],results=[];
 page.on('pageerror',e=>errors.push(String(e)));
-const output=new URL('../docs/qa/prd8/',import.meta.url);await fs.mkdir(output,{recursive:true});
+const output=new URL(process.env.PRD8_QA_DIR||'../docs/qa/prd8/',import.meta.url);await fs.mkdir(output,{recursive:true});
 const settle=async()=>{
   const ready=async()=>{const {getPlanetView,scene}=await import('/js/planetside.js'),{state}=await import('/js/state.js'),v=getPlanetView();return v&&!v.loading&&v.entity?.id===state.landed&&v.records.size===scene.items.length&&document.getElementById('planetStatus').hidden;};
   await page.waitForFunction(ready);await page.waitForTimeout(650);await page.waitForFunction(ready);
