@@ -40,6 +40,13 @@ Warenquellen und ihre Nachweise stehen im [Warenquelleninventar](docs/PRD-5-ware
 **Sicherheit:** Es gibt keine Authentifizierung. Wer einen Spielernamen kennt, übernimmt das Konto.
 Nur im Freundeskreis betreiben. Vor einem öffentlichen Betrieb sind Authentifizierung und HTTPS zwingend.
 
+## Container bereitstellen
+
+GitHub Actions baut und veröffentlicht bei Pushes auf `master` automatisch das Image
+`ghcr.io/jefe8080/spacetrader:latest` für amd64 und arm64, nachdem die Tests erfolgreich waren.
+Die einmaligen GitHub-Einstellungen und die Umstellung des Servers stehen in der
+[Container-Anleitung](docs/container-deployment.md).
+
 ## Steuerung
 
 | Eingabe | Wirkung |
