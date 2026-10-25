@@ -4,6 +4,9 @@ import {CITY_TYPES, planCity, pickCity, storageFamily, citySprite, cityDevelopme
 import {PLANET_TYPES, GOODS, RECIPES, ENTERTAINMENT,recipeCat,extraOptions,factorySlots,RECIPE_CATS,PLANET_EXTRAS} from '../shared/config.js';
 
 function itemsFor(type) {
+  if(type==='ruins')return [{key:'questhouse',kind:'questhouse'},
+    ...['dock','control','workshop','waterworks','foodplant','fueldepot','refinery','smelter'].map(homeFacility=>({key:'home:'+homeFacility,kind:homeFacility==='workshop'?'factory':'produce',homeFacility})),
+    {key:'home:orbital',kind:'factory',homeOrbital:true},...Array.from({length:8},(_,plotIndex)=>({key:'home:plot_'+plotIndex,kind:'plot',plotIndex}))];
   const t=PLANET_TYPES[type];
   return [{key:'questhouse',kind:'questhouse'},
     ...Object.keys(t.produce).map(good=>({key:'produce:'+good,kind:'produce',good})),
@@ -20,7 +23,7 @@ test('city plans preserve all objects and provide unique unobscured clickable pl
     const items=itemsFor(type),entity={id:'test',type},plan=planCity(entity,items,undefined,recipeCat);
     assert.equal(plan.records.length,items.length,type);
     assert.equal(new Set(plan.records.map(r=>r.key)).size,items.length);
-    assert.equal(plan.roads.length,type==='ruins'?items.length-2:0);
+    assert.equal(plan.roads.length,0);
     layouts.add(JSON.stringify(plan.records.map(r=>[r.x,r.y])));
     for(const r of plan.records) {
       assert.equal(pickCity(plan.records,r.x,r.y-r.h/2),r.key,type+' '+r.key);
@@ -36,6 +39,23 @@ test('city plans preserve all objects and provide unique unobscured clickable pl
     assert.equal(pickCity(plan.records,1e6,1e6),null);
   }
   assert.equal(layouts.size,13);
+});
+test('the homeworld retains 48 authored parcels, facilities and orbital anchors through replacement and restoration',()=>{
+  const entity={type:'ruins',market:{homeworld:{facilities:{},structures:[],orbital:{}}}},base=itemsFor('ruins').filter(it=>it.plotIndex===undefined);
+  const plots=Array.from({length:48},(_,plotIndex)=>({key:'home:plot_'+plotIndex,kind:'plot',plotIndex}));
+  const first=planCity(entity,[...base,...plots]);assert.equal(first.records.length,58);
+  const converted=plots.map((p,i)=>{
+    if(i%2)return p;
+    entity.market.homeworld.structures.push({id:'s'+i,plot:i,kind:i%4?'solar':'housing',status:i%3?'building':'ready'});
+    return {...p,key:'home:structure:s'+i,homeStructure:'s'+i,kind:i%3?'plot':'factory'};
+  });
+  const next=planCity(entity,[...base,...converted],first.assignments),failures=[];
+  for(const r of next.records){
+    if(pickCity(next.records,r.x,r.y-r.h/2)!==r.key)failures.push(r.key+' @ '+r.id);
+    const old=first.records.find(o=>o.id===r.id);assert.deepEqual([r.x,r.y],[old.x,old.y]);
+    assert.equal(r.painted,r.item.kind==='questhouse');
+  }
+  assert.deepEqual(failures,[]);assert.equal(new Set(next.assignments.values()).size,58);
 });
 test('additional commodities and changing market order do not move existing agricultural sites',()=>{
   const entity={type:'agrar'},items=itemsFor('agrar'),first=planCity(entity,items,undefined,recipeCat);

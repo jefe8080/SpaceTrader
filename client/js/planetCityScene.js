@@ -1,12 +1,11 @@
 import {GOODS} from '/shared/config.js';
-import {CITY_TYPES, planCity, citySprite, cityDevelopment, hashCity, pickCity} from './planetCityLayout.js';
+import {CITY_TYPES, planCity, citySprite, cityDevelopment, pickCity} from './planetCityLayout.js';
 import {constrainCityPose,fitCityOverview} from './planetCityCamera2D.js';
 
 let artPromise;
 const terrainPromises=new Map();
-const CITY_DECOR={urban:[8,20,14,8],industrial:[16,6,21,20],gasgiant:[8,6,21],mining:[3,16,20],jungle:[20,11,20],volcanic:[5,16,6],colony:[20,21,20]};
 function loadImage(src) { return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('Stadtgrafik fehlt: '+src));image.src=src;}); }
-function loadTerrain(type){if(!terrainPromises.has(type))terrainPromises.set(type,loadImage('/assets/art/cities/'+(type==='ruins'?type:type+'-city-v2')+'.png').catch(error=>{terrainPromises.delete(type);throw error;}));return terrainPromises.get(type);}
+function loadTerrain(type){if(!terrainPromises.has(type))terrainPromises.set(type,loadImage('/assets/art/cities/'+type+'-city-v2.png').catch(error=>{terrainPromises.delete(type);throw error;}));return terrainPromises.get(type);}
 function loadArt() {
   return artPromise ||= loadImage('/assets/art/cities/sprites.png')
     .then(atlas=>{
@@ -151,60 +150,8 @@ export class PlanetCityScene {
   }
   mark(){this.canvas.style.cursor=this.hover?'pointer':'grab';if(this.label)this.label.hidden=true;}
   prepareScenery(){
-    // The composed agricultural city is one painting: no generated roads, decor sprites or tiling.
-    if(this.plan.authored){this.scenery=null;this.surroundings=null;this.decorations=[];return;}
-    const b=this.plan.bounds,padding=180;this.scenery=document.createElement('canvas');
-    this.sceneryOrigin={x:b.x-padding,y:b.y-padding};this.scenery.width=Math.ceil(b.width+padding*2);this.scenery.height=Math.ceil(b.height+padding*2);
-    const ctx=this.scenery.getContext('2d'),{terrain}=this.art;
-    ctx.fillStyle=this.theme.ground;ctx.fillRect(0,0,this.scenery.width,this.scenery.height);
-    ctx.drawImage(terrain,0,0,this.scenery.width,this.scenery.height);
-    this.surroundings=document.createElement('canvas');this.surroundings.width=this.scenery.width;this.surroundings.height=this.scenery.height;
-    this.surroundings.getContext('2d').drawImage(this.scenery,0,0);
-    ctx.translate(-this.sceneryOrigin.x,-this.sceneryOrigin.y);
-    ctx.globalAlpha=.25;ctx.fillStyle=this.theme.ground;ctx.fillRect(b.x-100,b.y-60,b.width+200,b.height+120);ctx.globalAlpha=1;
-    // Broad avenues, fine ink edges, irregular paving, and a shared civic plaza connect the settlement.
-    const paving=document.createElement('canvas');paving.width=48;paving.height=32;const pc=paving.getContext('2d');
-    pc.fillStyle=this.theme.road;pc.fillRect(0,0,48,32);
-    for(let row=0;row<4;row++)for(let col=-1;col<5;col++){
-      const x=col*15+(row%2?7:0),y=row*8;pc.fillStyle=(row+col)%3?'#fff1c519':'#5d50331c';pc.fillRect(x+1,y+1,13,6);pc.strokeStyle='#504f3926';pc.lineWidth=.6;pc.strokeRect(x,y,15,8);
-    }
-    const stone=ctx.createPattern(paving,'repeat');
-    const ring=[{x:b.x+90,y:b.y+130},{x:b.x+b.width-90,y:b.y+130},{x:b.x+b.width-90,y:b.y+b.height-95},{x:b.x+90,y:b.y+b.height-95},{x:b.x+90,y:b.y+130}];
-    line(ctx,ring,'#544f3c55',20);line(ctx,ring,stone,17);
-    line(ctx,[{x:0,y:b.y+130},this.plan.plaza,{x:0,y:b.y+b.height-95}],stone,18);
-    for(const road of this.plan.roads){line(ctx,road.points,'#554f4355',34);line(ctx,road.points,this.theme.road,30);line(ctx,road.points,stone,26);}
-    ellipse(ctx,0,156,158,115,'#5d57466b');ellipse(ctx,0,156,151,108,stone);
-    const seed=hashCity(this.entity.type);
-    for(let i=0;i<1600;i++){
-      const n=hashCity(seed+':'+i),x=b.x+(n%10000)/10000*b.width,y=b.y+((n>>>10)%10000)/10000*b.height;
-      ctx.fillStyle=i%2?'#eee4bd22':'#3e493522';ctx.fillRect(x,y,2+n%3,1);
-    }
-    this.decorations=[];
-    for(let row=0;row<7;row++)for(let col=0;col<12;col++){
-      const n=hashCity(this.entity.type+':house:'+row+':'+col);
-      const x=b.x+30+col*(b.width-60)/11+(n%33-16),y=b.y+90+row*(b.height-150)/6+((n>>>8)%41-20);
-      const box={x:x-50,y:y-92,width:100,height:104};
-      const collides=this.plan.records.some(r=>box.x<r.box.x+r.w+28&&box.x+box.width>r.box.x-28&&box.y<r.y+34&&box.y+box.height>r.box.y-22);
-      if(collides||Math.hypot(x,y-150)<195)continue;
-      const cells=CITY_DECOR[this.entity.type]||[20];
-      const cell=this.entity.type==='ruins'&&col%3===0?18:cells[n%cells.length];
-      const width=92+n%21;drawSprite(ctx,this.art.sprites[cell],x,y,width,96);
-      if(this.entity.type==='ice')line(ctx,[{x:x-26,y:y-43},{x:x+22,y:y-49}],'#edf1dbcc',4);
-      this.decorations.push({x,y});
-    }
-    if(this.entity.type!=='ruins'){
-      const x=b.x+185,y=b.y+b.height-180;
-      if(!this.plan.records.some(r=>Math.abs(r.x-x)<190&&Math.abs(r.y-y)<140)){
-        line(ctx,[{x,y},{x:0,y},this.plan.plaza],stone,24);
-        drawSprite(ctx,this.art.sprites[17],x,y,200,150);
-      }
-    }
-    // Small civic planting and lamps frame the square without inventing interactive buildings.
-    for(const x of [-125,125])for(const y of [125,215]){
-      ellipse(ctx,x,y+3,13,6,'#49473866');line(ctx,[{x,y},{x,y:y-28}],'#554e39',3);
-      ellipse(ctx,x,y-28,13,9,this.entity.type==='ice'?'#d7e5d5':this.entity.type==='volcanic'?'#8e7050':'#60794a');
-      ellipse(ctx,x-3,y-32,9,6,this.theme.trim);
-    }
+    // Streets, residences and surroundings belong to the single authored painting for every type.
+    this.scenery=null;this.surroundings=null;this.decorations=[];
   }
   drawRecord(ctx,r){
     const item=r.item,cell=citySprite(this.entity,item,GOODS),active=r.key===this.selected||r.key===this.hover;
@@ -246,16 +193,7 @@ export class PlanetCityScene {
     this.clampPose();
     const ctx=this.ctx,a=this.area,p=this.pose;ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.fillStyle=this.theme.ground;ctx.fillRect(0,0,innerWidth,innerHeight);
     ctx.save();ctx.translate(a.x+a.width/2,a.y+a.height/2);ctx.scale(p.zoom,p.zoom);ctx.translate(-p.x,-p.y);
-    // Authored cities use a single bounded painting; older types retain their renderer until approval.
-    if(this.plan.authored){const b=this.plan.landscape;ctx.drawImage(this.art.terrain,b.x,b.y,b.width,b.height);}
-    else {
-    const image=this.surroundings,o=this.sceneryOrigin,lo=this.toWorld(0,0),hi=this.toWorld(innerWidth,innerHeight);
-    for(let y=Math.floor((lo.y-o.y)/image.height);y<=Math.floor((hi.y-o.y)/image.height);y++)
-      for(let x=Math.floor((lo.x-o.x)/image.width);x<=Math.floor((hi.x-o.x)/image.width);x++){
-        const flipX=Math.abs(x)%2,flipY=Math.abs(y)%2;ctx.save();ctx.translate(o.x+(x+flipX)*image.width,o.y+(y+flipY)*image.height);ctx.scale(flipX?-1:1,flipY?-1:1);ctx.drawImage(image,0,0);ctx.restore();
-      }
-    ctx.drawImage(this.scenery,o.x,o.y);
-    }
+    const b=this.plan.landscape;ctx.drawImage(this.art.terrain,b.x,b.y,b.width,b.height);
     for(const r of [...this.records.values()].sort((a,b)=>a.y-b.y))this.drawRecord(ctx,r);
     if(!this.reducedMotion)for(const r of this.records.values()){
       if(r.item.kind!=='factory'||cityDevelopment(this.entity,r.item)!=='ready')continue;
