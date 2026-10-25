@@ -10,13 +10,22 @@ const g = (x) => GOODS[x]?.name || x;
 
 /** Beschreibung einer Quest (Angebot oder aktiv) */
 export function questText(q) {
+  q=liveQuestNames(q);
+  const discreet=q.smuggler?'Diskreter Auftrag: Unser Kontakt verlässt sich auf dein Schweigen. ':'';
+  return discreet+questDescription(q);
+}
+function liveQuestNames(q){
+  const name=(id,fallback)=>state.entities.get(id)?.name||fallback;
+  return {...q,giverName:name(q.giver,q.giverName),sourceName:name(q.source,q.sourceName),pickupName:name(q.pickup,q.pickupName),destName:name(q.dest,q.destName),beltName:name(q.belt,q.beltName),stopNames:q.stops?.map((id,i)=>name(id,q.stopNames?.[i]))||q.stopNames};
+}
+function questDescription(q) {
   switch (q.type) {
-    case 'procure': return `${q.amount} ${g(q.good)} ${q.source ? `bei ${esc(q.sourceName)} kaufen` : 'beschaffen'} und an ${esc(q.giverName)} liefern`;
-    case 'rush': return `Eilbestellung: ${q.amount} ${g(q.good)} für den aktuellen Bau an ${esc(q.giverName)} liefern${q.source ? ` (z.B. von ${esc(q.sourceName)})` : ''}`;
-    case 'courier': return `Questfracht bei ${esc(q.pickupName)} abholen und zu ${esc(q.destName)} bringen`;
-    case 'tour': return `${q.tourists} Touristen: ${q.stopNames.map(esc).join(', ')} anfliegen und zurück nach ${esc(q.giverName)} (Passagierkabine)`;
-    case 'explore': return q.zone ? `Sondergebiet ${esc(q.zoneName)} besuchen` : `${q.pct} % von Sektor ${esc(q.sectorName)} aufdecken`;
-    case 'mine': return `${q.amount} ${g(q.good)} selbst abbauen (z.B. ${esc(q.beltName)}) und an ${esc(q.giverName)} liefern`;
+    case 'procure': return `Die örtlichen Vorräte gehen zur Neige. ${q.amount} ${g(q.good)} ${q.source ? `bei ${esc(q.sourceName)} kaufen` : 'beschaffen'} und an ${esc(q.giverName)} liefern`;
+    case 'rush': return `In der Werft wartet ein unfertiger Rumpf auf Material. ${q.amount} ${g(q.good)} für den aktuellen Bau an ${esc(q.giverName)} liefern${q.source ? ` (z.B. von ${esc(q.sourceName)})` : ''}`;
+    case 'courier': return `Eine versiegelte Sendung wartet auf einen verlässlichen Kapitän. Hole sie bei ${esc(q.pickupName)} ab und bringe sie nach ${esc(q.destName)}.`;
+    case 'tour': return `Die Reisenden wollen die Häfen mit eigenen Augen sehen. ${q.tourists} Touristen: ${q.stopNames.map(esc).join(', ')} anfliegen und zurück nach ${esc(q.giverName)} (Passagierkabine)`;
+    case 'explore': return q.zone ? `Unsere Karten lassen Fragen offen. Besuche das Sondergebiet ${esc(q.zoneName)} mit einem eigenen Schiff.` : `Im Sektor ${esc(q.sectorName)} fehlen verlässliche Karten. Decke dort ${q.pct} % neue Fläche auf.`;
+    case 'mine': return `Die Werft braucht Material aus frischem Abbau. Gewinne selbst ${q.amount} ${g(q.good)}, etwa bei ${esc(q.beltName)}, und liefere sie nach ${esc(q.giverName)}.`;
     default: return q.type;
   }
 }
@@ -66,6 +75,7 @@ const best = (good) => Math.max(0, ...myShips().map((s) => s.cargo?.[good] || 0)
 const minedTotal = (good) => myShips().reduce((a, s) => a + (s.mined?.[good] || 0), 0);
 
 function progressText(q) {
+  q=liveQuestNames(q);
   switch (q.type) {
     case 'procure':
     case 'rush': return `An Bord (bestes Schiff): ${Math.min(best(q.good), q.amount)} / ${q.amount} ${g(q.good)}`;

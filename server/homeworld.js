@@ -190,7 +190,7 @@ export function completeHomeQuest(game, player, entity, id) {
   if (id === 'H02' && !salvagePosition) return 'Aktuell kein freier Bergungsstandort. Bitte erneut versuchen.';
   const quest = HOME_QUESTS[id], home = entity.market.homeworld;
   player.homeQuest.completed[id] = { at: game.time };
-  player.homeQuest.journal.push({ id, at: game.time, text: `${quest.title}: abgeschlossen.` });
+  player.homeQuest.journal.push({ id, at: game.time, text: HOME_STORY[id].completion });
   player.credits += quest.credits; game.addXp(player, quest.xp);
   if (id === 'H01') {
     for (const [good, n] of Object.entries(home.bootstrap)) entity.market.goods[good].stock += n;

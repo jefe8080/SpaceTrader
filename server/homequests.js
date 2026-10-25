@@ -1,3 +1,4 @@
+import {HOME_STORY} from '../shared/home-story.js';
 import {HOME_QUESTS} from '../shared/homeworld.js';
 import {QUEST_DELIVERIES,STUDY_FINDS} from '../shared/advanced-homequests.js';
 import {RECIPES,REFINEMENT_RECIPES} from '../shared/goods.js';
@@ -79,7 +80,7 @@ export function visitHomeSite(game,p,ship,e){
 export function completeAdvancedQuest(game,p,e,id){
   if(!advancedQuestReady(game,p,e,id))return 'Voraussetzungen noch nicht erfüllt oder Belohnung bereits abgeholt.';
   const q=HOME_QUESTS[id];p.homeQuest.completed[id]={at:game.time};p.credits+=q.credits;game.addXp(p,q.xp);
-  p.homeQuest.journal.push({id,at:game.time,speaker:['H09','H10','H12','H14','H17'].includes(id)?'Iven':id==='H11'?'Nela':'Tarek',text:`${q.title}: abgeschlossen.`});
+  p.homeQuest.journal.push({id,at:game.time,speaker:['H09','H10','H12','H14','H17'].includes(id)?'Iven':id==='H11'?'Nela':'Tarek',text:HOME_STORY[id].completion});
   if(id==='H14'||id==='H17'){
     p.relic.speed=id==='H14'?5:6;
     for(const s of game.shipsOf(p.id))if(p.relic.location.kind==='ship'&&p.relic.location.id===s.id)s.relicSpeed=p.relic.speed;

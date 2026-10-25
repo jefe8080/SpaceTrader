@@ -261,7 +261,7 @@ export function questProgress(game, player, ship) {
       if (q.state === 'pickup' && at === q.pickup) {
         q.state = 'deliver';
         q.ship = ship.id;
-        game.shipLog(ship, `Questfracht übernommen bei ${q.pickupName}`);
+        game.shipLog(ship, `Die versiegelte Sendung wurde bei ${game.world.entities.get(q.pickup)?.name||q.pickupName} an Bord gebracht.`);
         return true;
       }
       if (q.state === 'deliver' && at === q.dest && ship.id === q.ship) { completeQuest(game, player); return true; }
@@ -317,7 +317,7 @@ function completeQuest(game, player) {
   // Schmugglerquests: keine XP, kein Questgeber-Level, kein Fraktionsruf (PRD-3 6.6)
   if (giver && !q.smuggler) game.addGiverXp(giver, giverXpOf(q.reward.xp));
   if (q.faction && !q.smuggler) game.addRep(player, q.faction, q.reward.xp * REP.PER_XP);
-  game.emit('notice', player, `Quest erfüllt: +${q.reward.cr.toLocaleString('de-DE')} Cr, +${q.reward.xp} XP`);
+  game.emit('notice', player, `Die ${q.smuggler?'Kontaktperson':'Auftraggeber'} ${q.smuggler?'bestätigt':'bestätigen'} den erfolgreichen Auftrag. Dein vereinbarter Lohn: +${q.reward.cr.toLocaleString('de-DE')} Cr, +${q.reward.xp} XP`);
   game.emit('sfx', player, 'questDone');
 }
 

@@ -448,7 +448,7 @@ function frame(now) {
   const mode = state.landed ? 'planet' : viewMode();
   if (mode !== lastMode) {
     lastMode = mode;
-    document.getElementById('zoomInfo').textContent = { planet: 'Ansicht: Planet', system: 'Ansicht: System [1]', sector: 'Ansicht: Sektor [2]', galaxy: 'Ansicht: Galaxie [3]' }[mode];
+    // View mode is represented by the map itself.
   }
   requestAnimationFrame(frame);
 }
