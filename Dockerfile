@@ -11,7 +11,7 @@ RUN npm ci --omit=dev
 FROM node:24.13.0-bookworm-slim
 ENV NODE_ENV=production \
     PORT=3000 \
-    DB_FILE=/app/data/spacetrader.db
+    DB_FILE=/app/data/world-v5/spacetrader.db
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json ./

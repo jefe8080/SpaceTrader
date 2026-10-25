@@ -40,8 +40,13 @@ und [Package-Sichtbarkeit](https://docs.github.com/en/packages/learn-github-pack
 In deiner vorhandenen Compose-, Portainer- oder Container-Konfiguration nur die
 Image-Referenz auf `ghcr.io/jefe8080/spacetrader:latest` umstellen. Vorhandene Ports,
 Umgebungsvariablen, Neustartregeln und insbesondere das Daten-Volume unter `/app/data`
-beibehalten. Das Dockerfile verwendet weiterhin `DB_FILE=/app/data/spacetrader.db`;
-eine bereits gesetzte eigene `DB_FILE`-Variable ebenfalls beibehalten.
+beibehalten. Das Dockerfile verwendet `DB_FILE=/app/data/world-v5/spacetrader.db`.
+Falls deine Container-Konfiguration noch `DB_FILE=/app/data/spacetrader.db` setzt,
+entferne diese Überschreibung oder ändere sie auf `/app/data/world-v5/spacetrader.db`.
+Der alte Pfad wird vom aktuellen Weltprofil ausdrücklich abgewiesen. Alte Spielstände
+werden nicht automatisch übernommen; die bisherige Datenbank bleibt im Volume erhalten.
+Wenn du bereits einen gültigen PRD-5-Spielstand unter einem anderen eigenen Pfad nutzt,
+behalte diesen Pfad bei.
 
 Nach der Umstellung bei Docker Compose im Verzeichnis deiner Compose-Datei:
 
