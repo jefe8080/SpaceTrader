@@ -54,7 +54,8 @@ $('btnMarker').onclick = () => {
 };
 
 export function renderTop() {
-  $('btnHome').textContent = state.homeworld ? '⌂ Heimat' : '⌂ Start';
+  $('btnHome').textContent = state.homeworld ? '⌂ Heimat anzeigen' : '⌂ Start anzeigen';
+  $('profileInfo').textContent = `${state.me?.name || ''} · Level ${state.level || 1} · Pilotenlizenz P${state.pilot || 1} · Gouverneur ${state.governor || 0}`;
   $('btnHome').title = state.homeworld ? 'Zur persönlichen Heimatwelt' : 'Zum Startpunkt';
   $('btnMarker').textContent = state.markerMode === 'state' ? '◆ Marker: Zustand' : '◆ Marker: Farbe';
   $('credits').textContent = fmt(state.credits) + ' Cr';

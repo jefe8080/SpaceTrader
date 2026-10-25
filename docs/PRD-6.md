@@ -1,6 +1,6 @@
 # PRD 6 – Aufgeräumte Benutzeroberfläche und Handelsübersicht
 
-Stand: 2026-10-25 · Status: Planung nach Grilling-Interview freigegeben; Umsetzung nicht beauftragt
+Stand: 2026-10-25 · Status: Umsetzung beauftragt und begonnen
 
 ## 1. Ziel, Freigabe und Geltung
 
@@ -138,7 +138,7 @@ Planung:
 
 - [x] Bestand und grafische Referenzen identifiziert; Anforderungen Q1–Q18 geklärt.
 - [x] Gemeinsames Verständnis durch den Nutzer bestätigt; PRD erstellt.
-- [ ] Umsetzung separat beauftragt.
+- [x] Umsetzung separat beauftragt (2026-10-25).
 
 Die folgenden Schritte sind geplant, noch nicht umgesetzt:
 
@@ -175,3 +175,7 @@ Nach jedem fachlich abgeschlossenen Schritt werden Fortschritt und Prüfergebnis
 Für die spätere Umsetzung werden gezielte funktionale Prüfungen für Filter-/Sortierlogik, Datenaktualisierung und Routenentwürfe mit den vorhandenen passenden Regressionstests kombiniert. Visuelle Browserprüfungen decken Navigation, Ortsinformationen, Handelsvergleich und Routenverwaltung auf Desktop und in schmalen Fenstern ab. Aufklappzustände, Tastaturfokus, unbekannte Daten, leere Trefferlisten und laufende Routen werden ausdrücklich geprüft.
 
 Für diesen Dokumentationsauftrag: Inhalt gegen die bestätigten Interviewentscheidungen und Umfangsgrenzen prüfen, Links kontrollieren und `git diff --check` ausführen. Spieltests sind für die reine PRD-Erstellung nicht erforderlich. Umsetzung und visuelle Abnahme sind offen.
+
+## Umsetzungsprotokoll
+
+U1: Vier native, per Tastatur/Touch bedienbare Navigationsgruppen und gemeinsamer Instrumententafelstil eingerichtet. Referenzbilder style-sample.png und civilian-approved.png vor der Gestaltung betrachtet. Zuordnung: Besitz/B, Konsortium/K und Heimat/Start → Pilotenprofil mit Lizenz-/Levelinformationen; Favoriten/F → Orte & Waren; Routen/R → Meine Routen; Nachfrage und Stop-Loss → Handel & Routen; Almanach/A und Hilfe → Wissen & Hilfe; Audio → Einstellungen; Marker/Zoom → kompakte Kartenfunktion; Flotte/Gruppen bleiben direkt sichtbar. Syntax und Diff geprüft; visuelle Gesamtprüfung folgt in U6.

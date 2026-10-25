@@ -36,20 +36,27 @@
       <div class="stat" id="levelStat" title="Pilotenlevel und Erfahrung"><span class="label">Level</span><span id="levelValue" class="value">1</span><span class="xpbar"><span id="xpFill"></span></span></div>
       <span id="dogBuff" class="dog-buff" title="Hunde-Buff: bessere Chancen bei Minispielen" hidden></span>
       <div class="stat" title="Pilotenlizenz (Kauf am Handels-Hub, erfordert das gleiche Pilotenlevel)"><span class="label">Lizenz</span><span id="pilotLevel" class="value">P1</span></div>
-      <button id="stopLossBtn" class="small">Stop-Loss aus</button>
-      <div id="onlinePlayers"></div>
       <div class="spacer"></div>
-      <span id="zoomInfo" class="zoom-info" title="Zoomstufen: 1 System, 2 Sektor, 3 Galaxie"></span>
-      <button id="btnMarker" class="small" title="Schiffsmarker in eigener Farbe oder nach Zustand">◆ Marker</button>
-      <button id="btnRoutes" title="Routenübersicht (R)">↻ Routen <kbd>R</kbd></button>
-      <button id="btnFavs" title="Favoriten (F)">★ Favoriten <kbd>F</kbd></button>
-      <button id="btnAlmanac" title="Almanach (A)">📖 Almanach <kbd>A</kbd></button>
-      <button id="btnProps" title="Besitz (B)">🏠 Besitz <kbd>B</kbd></button>
-      <button id="btnCons" title="Konsortium (K)">🤝 Konsortium <kbd>K</kbd></button>
-      <button id="btnEvents" title="Sondernachfrage in bekannten Sektoren">⚡ Nachfrage</button>
-      <button id="btnHome" title="Zum Startpunkt">⌂ Start</button>
-      <button id="btnAudio" title="Ton: Musik und Effekte">🔊</button>
-      <button id="btnHelp" title="Hilfe">?</button>
+      <nav class="main-nav" aria-label="Hauptnavigation">
+        <details id="pilotProfile"><summary>Pilotenprofil</summary><div class="nav-content">
+          <div id="profileInfo"></div>
+          <button id="btnProps">Besitz <kbd>B</kbd></button>
+          <button id="btnCons">Konsortium <kbd>K</kbd></button>
+          <button id="btnHome">Heimat anzeigen</button><div id="onlinePlayers"></div>
+        </div></details>
+        <details><summary>Handel &amp; Routen</summary><div class="nav-content">
+          <button id="btnTrade">Orte &amp; Waren <kbd>F</kbd></button>
+          <button id="btnRoutes">Meine Routen <kbd>R</kbd></button>
+          <button id="btnEvents">Sondernachfrage</button><button id="stopLossBtn">Stop-Loss aus</button>
+        </div></details>
+        <details><summary>Wissen &amp; Hilfe</summary><div class="nav-content">
+          <button id="btnAlmanac">Almanach <kbd>A</kbd></button><button id="btnHelp">Hilfe</button>
+        </div></details>
+        <details><summary>Einstellungen</summary><div class="nav-content">
+          <button id="btnAudio" aria-label="Audio einstellen">Audio</button>
+        </div></details>
+      </nav>
+      <div class="map-tools"><span id="zoomInfo" class="zoom-info"></span><button id="btnMarker" class="small">◆ Marker</button></div>
     </div>
     <div id="fleet" class="panel">
       <div class="panel-head"><h2>Flotte</h2><span style="flex:1"></span><button id="btnNewGroup" class="small" title="Neue Gruppe (mit Auswahl)">＋ Gruppe</button></div>
@@ -100,7 +107,7 @@
         <li><b>Rechtsklick</b>: Befehl an alle gewählten Schiffe (ersetzt die Queue), <b>Mittelklick</b> oder <b>Shift+Rechtsklick</b>: Befehl anhängen</li>
         <li><b>Ziehen</b> mit linker Maustaste: Karte verschieben, <b>Mausrad</b>: Zoom</li>
         <li><b>1 / 2 / 3</b> Zoom: System, Sektor, Galaxie. Klick auf System oder Sektor zoomt hinein</li>
-        <li><b>R</b> Routenübersicht, <b>F</b> Favoriten, <b>A</b> Almanach, <b>B</b> Besitz, <b>K</b> Konsortium, <b>Leertaste</b> Kamera folgen, <b>Esc</b> schließen bzw. Auswahl aufheben</li>
+        <li><b>R</b> Routenübersicht, <b>F</b> Orte &amp; Waren, <b>A</b> Almanach, <b>B</b> Besitz, <b>K</b> Konsortium, <b>Leertaste</b> Kamera folgen, <b>Esc</b> schließen bzw. Auswahl aufheben</li>
       </ul>
       <h2>Wirtschaft</h2>
       <ul>
