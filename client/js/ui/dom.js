@@ -26,8 +26,8 @@ export const typing = () => document.activeElement?.matches?.('input, select, te
 const modals = new Map(); // id -> { render, onClose, live }
 
 /** live = false: kein automatisches Neuzeichnen bei Updates (z.B. Editoren) */
-export function registerModal(id, render, onClose, { live = true } = {}) {
-  modals.set(id, { render, onClose, live });
+export function registerModal(id, render, onClose, { live = true, liveWhileTyping = false } = {}) {
+  modals.set(id, { render, onClose, live, liveWhileTyping });
   const ov = $(id);
   ov.addEventListener('mousedown', (ev) => { if (ev.target === ov) closeModal(id); });
 }
@@ -39,8 +39,13 @@ export function openModal(id) {
     $('tradeHub').hidden=false;
     if(id!=='routeEditor') {
       tradeTab=id;
-      for(const tab of ['favorites','routesOverview']) $(tab).hidden=tab!==id;
+      for(const tab of ['favorites','routesOverview']) {
+        const wasOpen=!$(tab).hidden;
+        $(tab).hidden=tab!==id;
+        if(wasOpen && tab!==id)modals.get(tab)?.onClose?.();
+      }
       modals.get(id)?.render();
+      if(!$('tradeHub').contains(document.activeElement))$(id).querySelector('button')?.focus({preventScroll:true});
       return;
     }
     if($('favorites').hidden && $('routesOverview').hidden) openModal(tradeTab);
@@ -66,7 +71,7 @@ export function toggleModal(id) { isOpen(id) ? closeModal(id) : openModal(id); }
 
 /** Alle offenen Modale neu zeichnen (z.B. nach Marktupdate) */
 export function refreshModals() {
-  for (const [id, m] of modals) if (m.live && isOpen(id) && !typing()) m.render();
+  for (const [id, m] of modals) if (m.live && isOpen(id) && (!typing() || m.liveWhileTyping)) m.render();
 }
 
 /** Oberstes offenes Modal schließen; true, wenn eines offen war */
@@ -96,4 +101,17 @@ $('tradeHub').addEventListener('mousedown',ev=>{if(ev.target===$('tradeHub'))clo
 $('tradeHub').addEventListener('click',ev=>{
   const tab=ev.target.closest('[data-trade-tab]');
   if(tab)openModal(tab.dataset.tradeTab==='routes'?'routesOverview':'favorites');
+});
+
+$('tradeHub').addEventListener('keydown',ev=>{
+  if(ev.key==='Escape') {
+    ev.preventDefault();ev.stopPropagation();
+    if(isOpen('routeEditor'))closeModal('routeEditor');else closeModal(tradeTab);
+  }
+  if(ev.key==='Tab') {
+    const controls=[...$('tradeHub').querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),summary,textarea')].filter(el=>el.getClientRects().length);
+    const first=controls[0],last=controls.at(-1);
+    if(ev.shiftKey&&document.activeElement===first){ev.preventDefault();last?.focus();}
+    else if(!ev.shiftKey&&document.activeElement===last){ev.preventDefault();first?.focus();}
+  }
 });

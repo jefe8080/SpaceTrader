@@ -35,7 +35,8 @@ const card = $('routeCard');
 
 export function openRouteEditor(routeId = null, { stops = null, assign = [] } = {}) {
   const r = routeId ? state.routes.get(routeId) : null;
-  if(ed && (routeId!==ed.id || stops)) {
+  if(ed && routeId && routeId===ed.id && !stops) {openModal('routeEditor');return;}
+  if(ed) {
     if(!confirm('Offenen Routenentwurf verwerfen?'))return;
   }
   ed = {
@@ -44,8 +45,10 @@ export function openRouteEditor(routeId = null, { stops = null, assign = [] } = 
     minBalance: r?.minBalance || 0,
     stops: structuredClone(stops || r?.stops || []),
     assign: new Set(assign),
+    unassign: new Set(),
   };
   openModal('routeEditor');
+  $('routeEditor').scrollIntoView({block:'start'});
 }
 
 function refShip() {
@@ -121,19 +124,19 @@ function renderEditor() {
       <button class="small" data-a="down" data-i="${i}" ${i === ed.stops.length - 1 ? 'disabled' : ''}>↓</button>
       <button class="small danger" data-a="del" data-i="${i}">✕</button></div>`;
     st.actions.forEach((a, j) => { h += actionRow(a, i, j, e); });
-    h += `<div class="action">${allowedOps(e).map((o) => `<button class="small" data-a="addAct" data-op="${o}" data-i="${i}">+ ${OP_NAMES[o]}</button>`).join(' ')}</div></div>`;
+    h += `<div class="action">${allowedOps(e).map((o) => `<button class="small" data-a="addAct" data-op="${o}" data-i="${i}" ${st.actions.length>=8?'disabled':''}>+ ${OP_NAMES[o]}</button>`).join(' ')}</div></div>`;
   });
 
   const known = [...state.entities.values()].sort((a, b) => (ship ? dist(a, ship) - dist(b, ship) : 0));
-  h += `<div class="add-stop"><select id="reAddSel">${known.filter(e=>['planet','station','belt','wormhole'].includes(e.kind)).map((e) => `<option value="${e.id}">${state.favorites[e.id] ? '★ ' : ''}${esc(e.name)} · ${typeName(e)}${ship ? ' · ' + Math.round(dist(e, ship)) : ''}</option>`).join('')}</select>
+  h += `<div class="add-stop"><select id="reAddSel">${known.map((e) => `<option value="${e.id}">${state.favorites[e.id] ? '★ ' : ''}${esc(e.name)} · ${typeName(e)}${ship ? ' · ' + Math.round(dist(e, ship)) : ''}</option>`).join('')}</select>
     <button data-a="add" ${ed.stops.length>=16?'disabled':''}>+ Stopp (${ed.stops.length}/16)</button><button data-a="pick">◎ Auf Karte wählen</button></div>`;
 
   const onRoute = ed.id ? new Set(shipsOnRoute(ed.id).map((s) => s.id)) : new Set();
   h += `<div class="section"><div class="section-title">Schiffe zuweisen</div><div class="chips">
     ${fleetOrder().filter((s) => !s.main).map((s) => {
-      const on = onRoute.has(s.id);
-      return `<label class="chip${on ? ' on' : ''}"><input type="checkbox" data-assign="${s.id}" ${on || ed.assign.has(s.id) ? 'checked' : ''} ${on ? 'disabled' : ''}> ${shipSymbol(s)} ${esc(s.name)}</label>`;
-    }).join('')}</div><div class="muted small-note">Zugewiesene Schiffe ersetzen ihre Queue durch diese Route (endlos). Das Hauptschiff fährt keine Routen.</div></div>
+      const on = onRoute.has(s.id) && !ed.unassign.has(s.id);
+      return `<label class="chip${on ? ' on' : ''}"><input type="checkbox" data-assign="${s.id}" ${on || ed.assign.has(s.id) ? 'checked' : ''}> ${shipSymbol(s)} ${esc(s.name)}</label>`;
+    }).join('')}</div><div class="muted small-note">Zugewiesene Schiffe ersetzen ihre Queue durch diese Route (endlos). Abgewählte Schiffe verlieren beim Speichern nur die Befehle dieser Route; andere Queue-Einträge bleiben erhalten. Das Hauptschiff fährt keine Routen.</div></div>
     <div class="route-footer">
       ${ed.id ? '<button class="danger" data-a="delete">Route löschen</button>' : ''}
       <span style="flex:1"></span>
@@ -175,7 +178,7 @@ card.addEventListener('click', (ev) => {
       return;
     case 'cancel': closeModal('routeEditor'); return;
     case 'save': {
-      cmd('routeSave', { id: ed.id, name: ed.name.trim() || 'Route', stops: ed.stops, minBalance: ed.minBalance || 0, assign: [...ed.assign] });
+      cmd('routeSave', { id: ed.id, name: ed.name.trim() || 'Route', stops: ed.stops, minBalance: ed.minBalance || 0, assign: [...ed.assign], unassign: [...ed.unassign] });
       closeModal('routeEditor');
       return;
     }
@@ -188,7 +191,12 @@ card.addEventListener('change', (ev) => {
   if (!ed) return;
   if (el.id === 'reName') { ed.name = el.value; return; }
   if (el.id === 'reMin') { ed.minBalance = Math.max(0, Math.floor(Number(el.value) || 0)); return; }
-  if (el.dataset.assign) { if (el.checked) ed.assign.add(el.dataset.assign); else ed.assign.delete(el.dataset.assign); return; }
+  if (el.dataset.assign) {
+    const id=el.dataset.assign, existing=ed.id && shipsOnRoute(ed.id).some(s=>s.id===id);
+    if(existing) {if(el.checked)ed.unassign.delete(id);else ed.unassign.add(id);}
+    else {if(el.checked)ed.assign.add(id);else ed.assign.delete(id);}
+    return;
+  }
   if (!el.dataset.f) return;
   const st = ed.stops[Number(el.dataset.i)];
   const a = st.actions[Number(el.dataset.j)];
@@ -218,6 +226,10 @@ registerModal('routeEditor', renderEditor, () => {
 
 /** Stopp zu bestehender Route hinzufügen */
 export function addStopToRoute(routeId, entityId) {
+  if(routeId==='draft') {
+    if(!ed) {openRouteEditor(null,{stops:[{targetId:entityId,actions:[]}]});return;}
+    addStop(entityId);openModal('routeEditor');return;
+  }
   const r = state.routes.get(routeId);
   const e = state.entities.get(entityId);
   if (!r || !e) return;

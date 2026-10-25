@@ -39,6 +39,9 @@ function rows() {
   });
 }
 function shell() {
+  const active=document.activeElement;
+  const focusKey=card.contains(active)?active.dataset.filter:null;
+  const scroll=card.closest('.trade-hub-card')?.scrollTop||0;
   const all=rows();
   const unique=k=>[...new Set(all.map(r=>r[k]))].sort().map(s=>[s,s]);
   const sorts=[['name','Name'],['type','Ortstyp'],['system','System'],['sector','Sektor'],['distance','Entfernung'],['time','Flugzeit'],['buy','Einkaufspreis'],['sell','Verkaufspreis'],['quantity','Warenmenge']];
@@ -63,13 +66,15 @@ function shell() {
     <p id="tradeStatus" role="status"></p><div class="trade-scroll"><table class="trade-table"><thead><tr><th>Favorit</th><th>Ort / Typ</th><th>System / Sektor</th><th>Entfernung</th><th>Flugzeit</th><th>Einkauf</th><th>Verkauf</th><th>Menge</th><th>Aktionen</th></tr></thead><tbody id="tradeRows"></tbody></table></div><div id="favBuy" class="inline-form" hidden></div>`;
   rowIds=null;
   update(true);
+  if(focusKey)card.querySelector(`[data-filter="${focusKey}"]`)?.focus({preventScroll:true});
+  if(card.closest('.trade-hub-card'))card.closest('.trade-hub-card').scrollTop=scroll;
 }
 function rowHtml(r) {
   return `<tr data-place="${esc(r.id)}"><td><button data-f="star" data-id="${r.id}" aria-label="Favorit ${esc(r.name)} umschalten" aria-pressed="${r.favorite}">${r.favorite?'★':'☆'}</button></td>
   <td><button data-f="show" data-id="${r.id}">${esc(r.name)}</button><div class="muted">${esc(r.type)}</div><details><summary>Details & Notiz</summary><p>${esc(r.e.ownerName||'NPC')}</p><label>Notiz <input class="fav-note" data-id="${r.id}" maxlength="120" value="${esc(state.favorites[r.id]?.note||'')}" placeholder="Notiz speichern markiert als Favorit"></label></details></td>
   <td>${esc(r.system)}<br><span class="muted">${esc(r.sector)}</span></td>
   <td data-value="distance"></td><td data-value="time"></td><td data-value="buy"></td><td data-value="sell"></td><td data-value="quantity"></td>
-  <td><button data-f="fly" data-id="${r.id}" ${view.ship?'':'disabled'}>Anfliegen</button><details><summary>Aktionen</summary><div class="trade-actions"><button data-f="buy" data-id="${r.id}">Einkauf einreihen</button><button data-f="show" data-id="${r.id}">Karte & Handel</button><button data-f="route" data-id="${r.id}">Neue Route ab hier</button><label>Zu Route hinzufügen <select data-f="toRoute" data-id="${r.id}"><option value="">Route wählen</option>${[...state.routes.values()].map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('')}</select></label></div></details></td></tr>`;
+  <td><button data-f="fly" data-id="${r.id}" ${view.ship?'':'disabled'}>Anfliegen</button><details><summary>Aktionen</summary><div class="trade-actions"><button data-f="buy" data-id="${r.id}">Einkauf einreihen</button><button data-f="show" data-id="${r.id}">Karte & Handel</button><button data-f="route" data-id="${r.id}">Neue Route ab hier</button><label>Zu Route hinzufügen <select data-f="toRoute" data-id="${r.id}"><option value="">Route wählen</option><option value="draft">Offener / neuer Entwurf</option>${[...state.routes.values()].map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('')}</select></label></div></details></td></tr>`;
 }
 function update(explicit=false) {
   if(!initialized){view.ship=selectedShips()[0]?.id||'';initialized=true;}
@@ -80,6 +85,7 @@ function update(explicit=false) {
   if(explicit) $('tradeRows').innerHTML=rowIds.map(id=>rowHtml(byId.get(id))).join('');
   for(const tr of $('tradeRows').children){
     const r=byId.get(tr.dataset.place);
+    for(const button of tr.querySelectorAll('button'))button.disabled=!r || (button.dataset.f==='fly' && !view.ship);
     for(const cell of tr.querySelectorAll('[data-value]')) {
       const k=cell.dataset.value,v=r?.[k];
       cell.textContent=!view.good&&['buy','sell','quantity'].includes(k)?'—':k==='time'?(v==null?'unbekannt':fmtDuration(v)):number(v);
@@ -121,6 +127,6 @@ function showBuy(e){
  if(!goods.length)return toast('Kein verfügbares Angebot.');
  const f=$('favBuy');f.hidden=false;f.innerHTML=`<b>Einkaufen bei ${esc(e.name)}</b><select id="favBuyGood">${options(goods.map(g=>[g,GOODS[g].name]),view.good)}</select><input id="favBuyAmt" type="number" min="0" placeholder="Menge (0 = max.)"><button data-f="doBuy" data-id="${e.id}">In Queue einreihen</button><button data-f="cancelBuy">Abbrechen</button>`;f.scrollIntoView({block:'nearest'});
 }
-registerModal('favorites',()=>{if(!$('tradeRows')){if(!initialized){view.ship=selectedShips()[0]?.id||'';initialized=true;}shell();}else update();},()=>extraSubs.favorites.clear());
+registerModal('favorites',()=>{if(!$('tradeRows')){if(!initialized){view.ship=selectedShips()[0]?.id||'';initialized=true;}shell();}else update();},()=>extraSubs.favorites.clear(),{liveWhileTyping:true});
 export const openFavorites=()=>openModal('favorites');
 export const favoritesOpen=()=>isOpen('favorites');

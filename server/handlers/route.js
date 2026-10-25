@@ -47,9 +47,10 @@ export default {
       name: V.str(32, 1),
       stops: V.arr(stop, 16),
       minBalance: V.opt(V.int(0, 1e12), 0),
+      unassign: V.opt(V.arr(V.ownShip(), 100), []),
       assign: V.opt(V.arr(V.ownShip(), 100), []), // leer = nur Route bearbeiten
     },
-    run({ game, player }, { id: route, name, stops, minBalance, assign }) {
+    run({ game, player }, { id: route, name, stops, minBalance, assign, unassign = [] }) {
       if (!stops.length) return 'Eine Route braucht mindestens einen Stopp.';
       if(game.profile==='homeworld'){
         if(stops.some(stop=>game.world.entities.get(stop.targetId)?.market?.homeworld?.warp))return 'Eine Routenstation bereitet einen Warptransfer vor.';
@@ -62,6 +63,7 @@ export default {
         game.routes.set(route.id, route);
       }
       Object.assign(route, { name, stops, minBalance });
+      for(const s of unassign) s.queue=s.queue.filter(c=>!(c.t==='route' && c.route===route.id));
       // Laufende Schiffe auf gültigen Stopp setzen
       for (const s of shipsOnRoute(game, route.id)) for (const c of s.queue) if (c.route === route.id && c.idx >= stops.length) { c.idx = 0; c.phase = 'travel'; }
       for (const s of new Set(assign)) if (!s.main) {

@@ -80,3 +80,7 @@ for (const group of document.querySelectorAll('.main-nav > details')) {
     if (group.open) for (const other of document.querySelectorAll('.main-nav > details')) if (other !== group) other.open = false;
   });
 }
+
+document.querySelector('.main-nav').addEventListener('click',ev=>{
+  if(ev.target.closest('button')) for(const group of document.querySelectorAll('.main-nav>details'))group.open=false;
+});

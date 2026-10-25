@@ -1,12 +1,12 @@
 # PRD 6 – Aufgeräumte Benutzeroberfläche und Handelsübersicht
 
-Stand: 2026-10-25 · Status: Umsetzung beauftragt und begonnen
+Stand: 2026-10-25 · Status: U1–U6 umgesetzt und geprüft
 
 ## 1. Ziel, Freigabe und Geltung
 
 Die Benutzeroberfläche soll weniger gleichzeitig sichtbare Knöpfe, Informationen und Optionen zeigen. Zusammengehörige Funktionen werden gebündelt; vertiefende Informationen und seltene Aktionen liegen in aufklappbaren Bereichen. Häufige Aktionen bleiben direkt erreichbar. Eine gemeinsame, gut filter- und sortierbare Handelsübersicht verbindet bekannte Orte, Warenvergleich, Favoriten und Routenverwaltung.
 
-Die Entscheidungen Q1–Q18 und die anschließende Zusammenfassung wurden vom Nutzer bestätigt. Dieser Auftrag umfasst ausschließlich Erstellung und Commit dieses PRD. Die Umsetzung beginnt erst nach einem gesonderten Auftrag. Ein Push benötigt gesonderte Zustimmung.
+Die Entscheidungen Q1–Q18 und die anschließende Zusammenfassung wurden vom Nutzer bestätigt. Das PRD wurde zunächst als eigenständiger Planungsauftrag erstellt und committet. Mit dem gesonderten Auftrag vom 2026-10-25 ist die Umsetzung freigegeben. Ein Push benötigt weiterhin gesonderte Zustimmung.
 
 Dieses Dokument ergänzt die bisherigen PRDs für die hier beschriebenen UI-Themen. Das abgeschlossene [PRD 6 zu Schiffsdesigns](PRD-6-schiffsdesigns.md) bleibt erhalten und dient als gestalterische Referenz. Die gemeinsame Nummerierung ist ausdrücklich abgestimmt.
 
@@ -140,7 +140,7 @@ Planung:
 - [x] Gemeinsames Verständnis durch den Nutzer bestätigt; PRD erstellt.
 - [x] Umsetzung separat beauftragt (2026-10-25).
 
-Die folgenden Schritte sind geplant, noch nicht umgesetzt:
+Die folgenden Schritte sind umgesetzt; Ergebnisse und Prüfungen stehen im Umsetzungsprotokoll:
 
 | Schritt | Ergebnis | Prüfungen vor dem jeweiligen Commit |
 |---|---|---|
@@ -172,9 +172,9 @@ Nach jedem fachlich abgeschlossenen Schritt werden Fortschritt und Prüfergebnis
 
 ## 11. Prüfstrategie und Dokumentationsstand
 
-Für die spätere Umsetzung werden gezielte funktionale Prüfungen für Filter-/Sortierlogik, Datenaktualisierung und Routenentwürfe mit den vorhandenen passenden Regressionstests kombiniert. Visuelle Browserprüfungen decken Navigation, Ortsinformationen, Handelsvergleich und Routenverwaltung auf Desktop und in schmalen Fenstern ab. Aufklappzustände, Tastaturfokus, unbekannte Daten, leere Trefferlisten und laufende Routen werden ausdrücklich geprüft.
+Für die Umsetzung wurden gezielte funktionale Prüfungen für Filter-/Sortierlogik, Datenaktualisierung und Routenentwürfe mit den vorhandenen passenden Regressionstests kombiniert. Visuelle Browserprüfungen decken Navigation, Ortsinformationen, Handelsvergleich und Routenverwaltung auf Desktop und in schmalen Fenstern ab. Aufklappzustände, Tastaturfokus, unbekannte Daten, leere Trefferlisten und laufende Routen werden ausdrücklich geprüft.
 
-Für diesen Dokumentationsauftrag: Inhalt gegen die bestätigten Interviewentscheidungen und Umfangsgrenzen prüfen, Links kontrollieren und `git diff --check` ausführen. Spieltests sind für die reine PRD-Erstellung nicht erforderlich. Umsetzung und visuelle Abnahme sind offen.
+Für diesen Dokumentationsauftrag: Inhalt gegen die bestätigten Interviewentscheidungen und Umfangsgrenzen prüfen, Links kontrollieren und `git diff --check` ausführen. Spieltests sind für die reine PRD-Erstellung nicht erforderlich. Die Umsetzung und visuelle Prüfung sind im folgenden Protokoll sowie unter [QA PRD 6](qa/prd6/README.md) dokumentiert.
 
 ## Umsetzungsprotokoll
 
@@ -185,3 +185,7 @@ U2: Orts-Hover auf Identität, Besitzer und schiffsbezogene Entfernung/Flugzeit 
 U3/U4: Die bisherige Favoritenoberfläche ist durch Orte & Waren für alle bekannten Planeten und Stationen ersetzt. Kombinierbare Namens-, Typ-, System-, Sektor-, Waren-, Richtungs-, Preis-, Mengen- und Favoritenfilter; neun Sortierungen in beiden Richtungen, stabile Gleichstände und unbekannte Werte am Ende. Sichtbarer Referenzschiffsselektor, Zoll/eigene Lager/Konsortiumspreise, direkte Favoritensterne und aufklappbare Notizen/Aktionen integriert. Liveupdates ändern nur Werte/Zustand der vorhandenen DOM-Zeilen; neue Treffermenge und Reihenfolge werden bis Liste aktualisieren vorgemerkt. Aufklappzustand, Notizeingabe und Scrollposition bleiben dabei erhalten. Vier gezielte Modelltests erfolgreich (Filter, Preisrichtung, Sortierungen, unbekannte Werte, Live-Reihenfolge); Syntax und Diff geprüft. U3/U4 bilden wegen des gemeinsamen Ersatzes der Favoritenansicht einen zusammenhängenden Commit.
 
 U5: Gemeinsamer Handelsdialog mit umschaltbaren Bereichen Orte & Waren / Meine Routen und unabhängig einklappbarem Editor. Hinzufügen zu einer Route öffnet einen geklonten Entwurf und speichert nicht mehr sofort. Stopplimit 16 wird vor dem Ergänzen geprüft; bestehende Aktions-, Preis-, Mengen-, Bedingungs-, Zeitlimit-, Mindestkonto- und Zuweisungsfelder bleiben erhalten. Abbrechen verwirft den Entwurf. Speichern beschreibt die bestehende Serverwirkung; Löschbestätigung nennt betroffene Schiffe und erklärt anhand server/handlers/route.js die Entfernung ausschließlich der passenden Routenbefehle. 8 gezielte Handels-/Routentests und die gesamte Suite (294/294) erfolgreich. Browserprüfung von Bearbeiten/Verwerfen/Ergänzen/Speichern erfolgreich, ohne Änderung des Originalobjekts vor Speichern.
+
+U6: Desktop (1440 × 1000) und schmales Fenster (390 × 844) in Edge visuell gegen die freigegebenen Bildreferenzen geprüft. Getrennte ruhige Tabellen, Türkis/Ocker-Rahmen und sichtbare Fokus-/Auswahlzustände; keine neuen Welt-, Schiffs- oder Dialoggrafiken. Rubrikenwechsel synchronisiert, Tastaturfokus im Handelsdialog gehalten, Escape auch aus Eingaben möglich, native Touch-/Tastaturbedienung geprüft. Marktwerte aktualisieren sich auch während der Notizeingabe ohne DOM-Austausch. Navigation klappt nach Aktionen zu; schmale Profilmenüs bleiben innerhalb des Viewports. RouteSave übernimmt vorgemerkte Schiffsabwahl gemeinsam mit dem Entwurf und entfernt ausschließlich passende Routenbefehle, mit bestehender Eigentumsprüfung. Weitere Routenzieltypen bleiben vollständig im Editor erhalten; maximal acht Aktionen je Stopp werden in der Oberfläche berücksichtigt.
+
+Abschluss: U1, U2, U3, U4, U5 und U6 abgeschlossen. 297/297 automatisierte Tests erfolgreich; wiederholbarer Browserlauf einschließlich Preisrichtung/Zoll, Favoriten, Notizen unter Liveupdates, fehlendem Referenzschiff, leerer Trefferliste, Routenentwürfen und Schiffsabwahl, Planeten-/Stations-Hover, Ortsrubriken, Tastatur und Touch erfolgreich. Keine JavaScript-Laufzeitfehler. Screenshots und Grenzen der Prüfung: [QA-Bericht](qa/prd6/README.md). Alle Abnahmekriterien A1–A14 umgesetzt und durch diese Prüfungen abgedeckt; Schätzflugzeiten und bestehende Handels-/Abdeckungsregeln bleiben unverändert. Kein Push ausgeführt.

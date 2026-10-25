@@ -433,3 +433,15 @@ details[open]>summary { color:var(--accent2); }
 .route-footer { position:sticky; bottom:0; padding:12px 0; background:#14252a; }
 #routeCard .action { flex-wrap:wrap; }
 #routeCard input,#routeCard select { max-width:100%; }
+
+@media(max-width:600px) {
+  .main-nav>details .nav-content,.main-nav>details:first-child .nav-content { position:fixed; left:8px; right:8px; top:90px; min-width:0; max-width:none; }
+  .route-footer { flex-wrap:wrap; }
+  .route-footer button { min-height:32px; }
+  #routeCard .add-stop { flex-wrap:wrap; }
+}
+.toast.info { background:#254c48; border:1px solid #a98c59; }
+
+.main-nav>details[open] { z-index:10; }
+#toasts { pointer-events:none; }
+#toasts .toast.info { background:#254c48; border:1px solid #a98c59; }

@@ -100,7 +100,7 @@ export function updateTooltip(mx, my) {
     const e = state.entities.get(hov.id);
     if (e) {
       html = `<div class="tt-title">${state.favorites[e.id] ? '★ ' : ''}${esc(e.name)}</div><div class="muted">${typeName(e)}</div>`;
-      html += `<div class="muted">Besitzer: ${esc(e.ownerName || playerName(e.owner))}</div>`;
+      html += `<div class="muted">Besitzer: ${esc(e.ownerName || (e.owner ? playerName(e.owner) : 'NPC'))}</div>`;
       const ship=selectedShips()[0];
       if(ship) html += `<div class="muted">Entfernung ${Math.round(Math.hypot(ship.x-e.x,ship.y-e.y))} · Flugzeit ${fmtDuration(flightSecs(ship,e))}</div>`;
     }
