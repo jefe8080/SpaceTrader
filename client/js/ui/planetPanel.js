@@ -181,6 +181,7 @@ panel.addEventListener('click', (ev) => {
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'homeTradeMode':cmd('propMode',{target:e.id,mode:d.mode});return;
     case 'homeRename':cmd('homeRename',{target:e.id,name:document.getElementById('homePlanetName')?.value});return;
     case 'homeQuestDeliver':cmd('homeQuestDeliver',{target:e.id,quest:d.quest,good:d.good,amount:Number(document.getElementById(`questDelivery-${d.quest}-${d.good}`)?.value)});return;
     case 'homeSite':{

@@ -20,7 +20,7 @@ am Hub und ersetzt dort die NPC-Beschaffung.
 
 - [x] Planung: historische Rollen, Sollwerte und Drift vor f5baf9b geprüft;
   Rathaus und rollenspezifische Wiederherstellung vom Nutzer bestätigt.
-- [ ] U1: Rathaus-Schalter für Hauptheimat und weitere eigene Ruinenwelten;
+- [x] U1: Rathaus-Schalter für Hauptheimat und weitere eigene Ruinenwelten;
   bestehenden autorisierten propMode-Befehl verwenden, Verhalten prüfen.
 - [ ] U2: Historische Hub-Drift einschließlich Treibstoffrolle/-rate auch für
   bereits gespeicherte Märkte reaktivieren; Beschaffung und Wirtschaftstests
@@ -43,3 +43,7 @@ am Hub und ersetzt dort die NPC-Beschaffung.
 ## Validierung
 
 Wird mit den Umsetzungsschritten ergänzt.
+
+- U1: 14 Tests erfolgreich (Rathaus-Handelsmodus und reale Wirtschaft),
+  einschließlich Eigentumsschutz, NPC-Abholung mit Reserven und Persistenz.
+  Syntaxprüfung beider geänderter UI-Dateien erfolgreich.
