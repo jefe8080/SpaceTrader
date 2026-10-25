@@ -5,7 +5,7 @@ import { $, registerModal, openModal, closeModal, setHtml } from './dom.js';
 
 function renderProfile(){
   const p=state.profile, flagship=mainShip({...state.me,relic:state.relic},state.ships);
-  if(!p)return;
+  if(!p){setHtml($('pilotInfoBody'),'<p role="status">Profildaten werden geladen …</p>');return;}
   let html=`<h3>${esc(state.me.name)}</h3><div class="kv"><span>Level / EP</span><span>${state.level} / ${fmt(state.xp)}</span><span>Pilotenlizenz / Gouverneursstufe</span><span>P${state.pilot} / ${state.governor}</span><span>Credits</span><span>${fmt(state.credits)} Cr</span><span>Handelsumsatz</span><span>${fmt(p.revenue)} Cr</span><span>Handelsgewinn</span><span>${p.profit==null?'Unvollständig – Einkaufskosten fehlen':fmt(p.profit)+' Cr'}</span></div>`;
   if(p.profit==null)html+=`<p>Bekannter Gewinnanteil: ${fmt(p.knownProfit)} Cr. Für ${fmt(p.unknownRevenue)} Cr Verkaufserlös sind die Einkaufskosten unbekannt.</p>`;
   html+='<p class="muted">Handelswerte seit Einführung erfasst. Nur realisierte Warenverkäufe; Käufe werden erst beim Verkauf als Kosten berücksichtigt. Unbekannte Einkaufskosten bleiben offen.</p><h3>Fraktionsruf</h3>';

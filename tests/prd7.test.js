@@ -12,6 +12,8 @@ import { pilotProfile, recordInventoryTrade } from '../server/pilot-profile.js';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { Net } from '../server/net.js';
+import { GAME_PROTOCOL, serverVersionError } from '../shared/protocol.js';
 
 function fixture() {
   const game = new Game(':memory:', { profile: 'homeworld', seed: 42 });
@@ -20,6 +22,35 @@ function fixture() {
   const ship = game.shipsOf(player.id)[0];
   return { game, player, home, ship };
 }
+
+test('PRD7: mismatched or pre-PRD7 servers produce an explicit version error', () => {
+  assert.equal(serverVersionError(GAME_PROTOCOL),null);
+  for(const version of [undefined,null,6,8])assert.match(serverVersionError(version),/Spielserver neu starten/);
+});
+
+test('PRD7: old saved pilot receives active H00 and a populated profile on actual welcome', () => {
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'spacetrader-old-entry-')),file=path.join(directory,'world.db');
+  let game;
+  try {
+    game=new Game(file,{profile:'homeworld',seed:42});
+    const player=game.createPlayer('Old Pilot'),id=player.id;
+    delete player.homeQuest.active;delete player.homeQuest.pending;delete player.homeQuest.introduction;
+    delete player.profileStats;
+    game.close();game=new Game(file,{profile:'homeworld'});
+    const loaded=game.players.get(id),messages={};
+    const net=new Net({on(){},emit(){}},game);
+    net.sendConsortium=()=>{};net.sendEvents=()=>{};
+    net.welcome({player:loaded,socket:{emit:(event,data)=>{messages[event]=data;}},sentDetail:new Map(),view:null});
+    assert.equal(messages.welcome.protocol,GAME_PROTOCOL);
+    assert.equal(messages.welcome.onboardingRequired,true);
+    assert.ok(messages.welcome.onboardingKey.endsWith(':'+id));
+    assert.equal(messages.me.homeQuest.introduction,'H00');
+    assert.ok(messages.me.homeQuest.active.H00);
+    assert.equal(messages.me.homeQuest.journal.filter(entry=>entry.id==='H00').length,1);
+    assert.ok(messages.me.profile);assert.equal(messages.me.profile.ships,1);
+    assert.equal(messages.me.profile.revenue,0);
+  } finally {game?.store.close();fs.rmSync(directory,{recursive:true,force:true});}
+});
 
 test('PRD7: introductions serialize actual starts and survive repeated synchronization', () => {
   const { game, player } = fixture();

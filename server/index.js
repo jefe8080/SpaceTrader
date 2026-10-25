@@ -7,12 +7,14 @@ import { NET } from '../shared/config.js';
 import { Game } from './game.js';
 import { Net } from './net.js';
 import { runtimeOptions } from './world-profile.js';
+import { GAME_PROTOCOL } from '../shared/protocol.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.env.PORT) || 3000;
 const { dbFile: DB_FILE, profile } = runtimeOptions(root);
 
 const app = express();
+app.get('/api/status', (req, res) => res.json({ protocol: GAME_PROTOCOL, profile }));
 app.use(express.static(path.join(root, 'client')));
 app.use('/vendor/three/addons', express.static(path.join(root, 'node_modules/three/examples/jsm')));
 app.use('/vendor/three', express.static(path.join(root, 'node_modules/three/build')));

@@ -1,4 +1,5 @@
 import { pilotProfile } from './pilot-profile.js';
+import { GAME_PROTOCOL } from '../shared/protocol.js';
 import { NET, NPC_OWNER, cellKey, cellOf, pilotLevel } from '../shared/config.js';
 import { runCommand } from './handlers/index.js';
 import { sectorSummary } from './game.js';
@@ -132,6 +133,9 @@ export class Net {
     for (const k of p.revealed) for (const id of this.game.world.entitiesInCell(k)) entities.push(serializeEntity(this.game.world.entities.get(id)));
     const w = this.game.world;
     s.socket.emit('welcome', {
+      protocol: GAME_PROTOCOL,
+      onboardingKey: `${w.seed}:${p.id}`,
+      onboardingRequired: !!(p.homeQuest && !p.homeQuest.completed?.H00 && !p.homeQuest.scenesSeen?.H00),
       you: { id: p.id, name: p.name, color: p.color },
       cells: [...p.revealed],
       entities,

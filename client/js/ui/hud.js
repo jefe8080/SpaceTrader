@@ -28,12 +28,14 @@ $('loginPlayers').addEventListener('click', (ev) => {
 });
 export const loginError = (msg) => { $('loginError').textContent = msg; };
 
-export function enterGame() {
+let helpStorageKey = 'st_help_seen_2';
+export function enterGame({ onboardingKey, onboardingRequired = false } = {}) {
   $('login').hidden = true;
   $('hud').hidden = false;
+  helpStorageKey = onboardingKey ? `st_help_seen_3:${onboardingKey}` : 'st_help_seen_2';
   try {
-    if (!localStorage.getItem('st_help_seen_2')) { $('help').hidden = false; localStorage.setItem('st_help_seen_2', '1'); }
-  } catch { /* Speicher nicht verfügbar */ }
+    $('help').hidden = !!localStorage.getItem(onboardingRequired ? helpStorageKey : 'st_help_seen_2');
+  } catch { $('help').hidden = false; }
 }
 
 export function leaveGame(msg) {
@@ -43,7 +45,10 @@ export function leaveGame(msg) {
 }
 
 $('btnHelp').onclick = () => { $('help').hidden = false; };
-$('btnHelpClose').onclick = () => { $('help').hidden = true; };
+$('btnHelpClose').onclick = () => {
+  $('help').hidden = true;
+  try { localStorage.setItem(helpStorageKey, '1'); localStorage.setItem('st_help_seen_2', '1'); } catch { /* Hilfe bleibt auch ohne Browserspeicher bedienbar. */ }
+};
 
 
 // ---------------- Topbar ----------------

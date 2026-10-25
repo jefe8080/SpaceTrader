@@ -1,4 +1,5 @@
 import { state, selectedShips } from './state.js';
+import { serverVersionError } from '/shared/protocol.js';
 import { socket } from './net.js';
 import { loadAssets } from './assets.js';
 import { initRenderer, render, screenToWorld, pickAt, viewMode, ZOOM_PRESETS, ZOOM_MIN, ZOOM_MAX } from './render.js';
@@ -23,8 +24,16 @@ socket.on('players', (list) => {
 });
 socket.on('loginError', ui.loginError);
 socket.on('welcome', (d) => {
+  const versionError = serverVersionError(d.protocol);
+  if (versionError) {
+    state.me = null;
+    socket.disconnect();
+    ui.leaveGame(versionError);
+    return;
+  }
   const first = !state.me;
   state.me = d.you;
+  Object.assign(state, { profile: null, homeworld: null, homeQuest: null, relic: null, manualShip: null, homeDialogReplay: false, quest: null });
   state.players = d.players;
   state.cells = new Set(d.cells);
   state.entities = new Map(d.entities.map((e) => [e.id, e]));
@@ -40,7 +49,7 @@ socket.on('welcome', (d) => {
   state.homeStoryShipClicked = false;
   lastSub = '';
   state.awaitCenter = first;
-  ui.enterGame();
+  ui.enterGame({ onboardingKey: d.onboardingKey, onboardingRequired: d.onboardingRequired });
   ui.renderAll();
 });
 socket.on('ships', (d) => {

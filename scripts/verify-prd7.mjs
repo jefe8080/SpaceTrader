@@ -5,19 +5,44 @@ import {fileURLToPath} from 'node:url';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'msedge',headless:true});
-const page=await browser.newPage({viewport:{width:1440,height:1000}});
+const context=await browser.newContext({viewport:{width:1440,height:1000}});
+const page=await context.newPage();
+const pilotName='PRD7-'+Date.now().toString(36);
 const errors=[];page.on('pageerror',error=>errors.push(String(error)));
-const output=new URL('../docs/qa/prd7/',import.meta.url);await fs.mkdir(output,{recursive:true});
+const output=new URL(process.env.PRD7_QA_DIR||'../docs/qa/prd7/',import.meta.url);await fs.mkdir(output,{recursive:true});
 try {
   await page.goto(process.env.PRD7_URL||'http://localhost:3007');
-  await page.locator('#loginName').fill('PRD7-'+Date.now().toString(36));await page.locator('#loginForm button').click();
+  assert.deepEqual(await (await page.request.get(new URL('/api/status',page.url()).href)).json(),{protocol:7,profile:'homeworld'});
+  await page.locator('#loginName').fill(pilotName);await page.locator('#loginForm button').click();
   await page.waitForSelector('#hud:not([hidden])',{state:'attached'});
   await page.waitForFunction(async()=>!!(await import('/js/state.js')).state.profile);
   await page.evaluate(async()=>{
     const {state}=await import('/js/state.js');window.qaState=state;
-    document.getElementById('help').hidden=true;state.homeStoryShipClicked=true;
-    (await import('/js/ui/index.js')).renderAll();
   });
+  // Exercise the actual first-entry flow; never inject tutorial acknowledgements.
+  await page.locator('#help:not([hidden])').waitFor();
+  assert.equal(await page.locator('#homeStory').isHidden(),true);
+  assert.ok(await page.evaluate(()=>qaState.homeQuest.active.H00));
+  await page.locator('#btnHelpClose').click();
+  const clickOwnShip=async()=>{
+    const [x,y]=await page.evaluate(async()=>{
+      const {state}=await import('/js/state.js'),{worldToScreen}=await import('/js/render.js');
+      const ship=[...state.ships.values()].find(s=>s.owner===state.me.id);
+      return worldToScreen(ship.x,ship.y);
+    });
+    await page.mouse.click(x,y);
+  };
+  await clickOwnShip();
+  await page.locator('#homeStory:not([hidden])').waitFor();
+  await page.locator('#homeStory img').evaluate(img=>img.decode());
+  await page.screenshot({path:fileURLToPath(new URL('first-contact.png',output))});
+  // Reload before acknowledgement: H00 remains active and its text is not lost.
+  await page.reload();
+  await page.locator('#loginName').fill(pilotName);await page.locator('#loginForm button').click();
+  await page.waitForFunction(async()=>!!(await import('/js/state.js')).state.profile);
+  await page.evaluate(async()=>{window.qaState=(await import('/js/state.js')).state;});
+  assert.equal(await page.locator('#help').isHidden(),true);
+  await clickOwnShip();
   await page.locator('#homeStory:not([hidden])').waitFor();
   await page.locator('#homeStory .primary[data-story-close]').click();
   await page.waitForFunction(()=>qaState.homeQuest.scenesSeen?.H00);
@@ -74,6 +99,19 @@ try {
   assert.ok((await page.locator('#planetBar').innerText()).includes('Fernverbindung aktiv'));
   assert.equal(await page.locator('[data-pp="homeRename"]').isEnabled(),true);
   await page.screenshot({path:fileURLToPath(new URL('remote-restored.png',output))});
+  const second=await page.context().newPage();
+  second.on('pageerror',error=>errors.push(String(error)));
+  await second.goto(process.env.PRD7_URL||'http://localhost:3007');
+  await second.locator('#loginName').fill(pilotName+'b');await second.locator('#loginForm button').click();
+  await second.locator('#help:not([hidden])').waitFor();
+  assert.equal(await second.evaluate(()=>localStorage.getItem('st_help_seen_2')),'1');
+  await second.screenshot({path:fileURLToPath(new URL('new-pilot-help.png',output))});
+  await second.close();
+  // Reproduce the legacy server payload without changing tutorial game state.
+  await page.evaluate(async()=>{(await import('/js/net.js')).socket.emitEvent(['welcome',{}]);});
+  assert.ok((await page.locator('#loginError').innerText()).includes('Spielserver neu starten'));
+  assert.equal(await page.locator('#hud').isHidden(),true);
+  await page.screenshot({path:fileURLToPath(new URL('server-version-mismatch.png',output))});
   assert.deepEqual(errors,[]);
   await fs.writeFile(new URL('browser-results.json',output),JSON.stringify({status:'passed',boxes,errors},null,2));
   console.log('PRD7 browser verification passed: profile, dialogue confirmation, town hall, connection loss and 5 viewports.');

@@ -22,7 +22,8 @@ export function syncHomeQuests(game, player) {
   if(id==='H04'&&!ensureQuestWreck(game,player)) {q.pending.unshift(id);return;}
   q.active[id] = { at: game.time };
   q.introduction = id;
-  q.journal.push({ id, at: game.time, speaker: HOME_STORY[id].speaker, text: HOME_STORY[id].text });
+  if (!q.journal.some(entry => entry.id === id && entry.text === HOME_STORY[id].text))
+    q.journal.push({ id, at: game.time, speaker: HOME_STORY[id].speaker, text: HOME_STORY[id].text });
   const home = game.world.entities.get(player.homeworld);
   revealQuestTarget(game, player, home);
   if (id === 'H04') revealQuestTarget(game, player, game.world.entities.get(q.salvage?.wreck));
