@@ -1,3 +1,4 @@
+import { HOME_STORY } from '../shared/home-story.js';
 import { HOMEWORLD } from '../shared/homeworld.js';
 
 export function grantRelic(game, player, home) {
@@ -8,6 +9,7 @@ export function grantRelic(game, player, home) {
 
 export function relicSalvage(game, player, ship, wreck) {
   const salvage = player.homeQuest?.salvage;
+  if (!player.homeQuest?.active?.H04) return 'Dieser Fund wurde noch nicht freigegeben.';
   if (!salvage || salvage.wreck !== wreck.id || wreck.salvageOwner !== player.id) return 'Hier liegt kein freigegebener persönlicher Fund.';
   if (salvage.phase !== 'available') return 'Dieser Fund wurde bereits geborgen.';
   if (player.manualShip !== ship.id || ship.dockedAt !== wreck.id || ship.manualDock !== wreck.id) return 'Das aktive manuelle Schiff muss das Wrack persönlich anfliegen.';
@@ -20,6 +22,8 @@ export function relicDeliver(game, player, ship, home) {
   if (home.id !== player.homeworld || home.market?.homeworld?.owner !== player.id) return 'Den versiegelten Fund nimmt nur deine Heimatwerkstatt an.';
   if (salvage?.phase !== 'sealed' || salvage.ship !== ship.id || ship.dockedAt !== home.id) return 'Der registrierte Fund muss mit seinem Bergungsschiff zur Heimat gebracht werden.';
   salvage.phase = 'workshop';
+  player.homeQuest.eventDialog = 'H04_MODULE';
+  player.homeQuest.journal.push({id:'H04_MODULE',at:game.time,speaker:HOME_STORY.H04_MODULE.speaker,text:HOME_STORY.H04_MODULE.text});
   Object.assign(home.market.homeworld.facilities.workshop, { status: 'building', readyAt: game.time + 60 });
   game.emit('entity', home);
 }

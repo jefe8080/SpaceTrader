@@ -13,6 +13,7 @@ const visited=(p,id)=>!!p.homeQuest.visits?.[id];
 
 export function deliverHomeQuest(game,p,e,id,good,amount){
   const error=homeAccess(game,p,e);if(error)return error;
+  if(!game.shipsOf(p.id).some(s=>s.dockedAt===e.id))return 'Für diese Lieferung muss ein eigenes Schiff hier angedockt sein.';
   if(e.id!==p.homeworld||!unlocked(p,id)||completed(p,id))return 'Kein offener freigeschalteter Auftrag an deiner Heimat.';
   const h=e.market.homeworld,required=QUEST_DELIVERIES[id]?.[good];if(!required)return 'Diese Ware wird für diesen Auftrag nicht benötigt.';
   h.questDeliveries||={};h.questDeliveries[id]||={};

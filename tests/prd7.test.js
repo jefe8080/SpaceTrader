@@ -5,6 +5,8 @@ import { runCommand } from '../server/handlers/index.js';
 import { syncHomeQuests } from '../server/quest-activation.js';
 import { findWreckPosition, correctQuestWreck } from '../server/quest-wreck.js';
 import { WORLD } from '../shared/config.js';
+import { homeAccess } from '../server/homeworld-operations.js';
+import { mainShip } from '../shared/planet-access.js';
 
 function fixture() {
   const game = new Game(':memory:', { profile: 'homeworld', seed: 42 });
@@ -31,6 +33,30 @@ test('PRD7: introductions serialize actual starts and survive repeated synchroni
   assert.ok(player.homeQuest.active.H04);
   runCommand(game, player, { cmd: 'homeDialogRead', scene: 'H03' });
   assert.equal(player.homeQuest.introduction, 'H04');
+  game.store.close();
+});
+
+test('PRD7: only installed owned flagship in own network grants remote management; local survives loss', () => {
+  const {game,player,home,ship}=fixture();
+  home.market.homeworld.controlLevel=1;
+  ship.dockedAt=null;ship.x=home.x;ship.y=home.y;
+  assert.match(homeAccess(game,player,home),/Keine Verbindung/);
+  player.relic={speed:4,location:{kind:'world',id:home.id}};
+  assert.equal(mainShip(player,game.ships),null);
+  player.relic.location={kind:'ship',id:ship.id};
+  assert.equal(mainShip(player,game.ships),ship);
+  assert.equal(homeAccess(game,player,home),null);
+  player.manualShip='unrelated';
+  assert.equal(homeAccess(game,player,home),null);
+  ship.x+=100000;
+  assert.match(homeAccess(game,player,home),/Keine Verbindung/);
+  ship.dockedAt=home.id;
+  assert.equal(homeAccess(game,player,home),null);
+  ship.dockedAt=null;ship.x=home.x;
+  player.relic.location={kind:'world',id:home.id};
+  assert.match(homeAccess(game,player,home),/Keine Verbindung/);
+  ship.owner='other';player.relic.location={kind:'ship',id:ship.id};
+  assert.match(homeAccess(game,player,home),/Keine Verbindung/);
   game.store.close();
 });
 

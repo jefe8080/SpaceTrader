@@ -438,7 +438,7 @@ function frame(now) {
       cam.y += (s.ry - cam.y) * k;
     } else state.follow = null;
   }
-  if (state.landed && !canLand(state.landed)) {
+  if (state.landed && !canLand(state.landed) && state.entities.get(state.landed)?.market?.homeworld?.owner!==state.me?.id) {
     // Das letzte angedockte eigene Schiff ist abgeflogen
     ui.leavePlanet();
     ui.toast('Kein eigenes Schiff mehr angedockt: zurück ins All.', 'info');

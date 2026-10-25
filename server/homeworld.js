@@ -182,7 +182,6 @@ export function homeQuestReady(game, player, entity, id) {
 
 export function completeHomeQuest(game, player, entity, id) {
   if (!ownHome(game, player, entity) || player.homeworld !== entity.id) return 'Kein eigener Hauptqueststandort.';
-  if (!homePresent(game, player, entity)) return 'Ein eigenes Schiff muss hier angedockt sein.';
   const accessError=homeAccess(game,player,entity);if(accessError)return accessError;
   if(Number(id.slice(1))>=7)return completeAdvancedQuest(game,player,entity,id);
   if (!homeQuestReady(game, player, entity, id)) return 'Voraussetzungen noch nicht erfüllt oder Belohnung bereits abgeholt.';

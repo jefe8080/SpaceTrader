@@ -1,6 +1,7 @@
 import { GOODS, RECIPES,REFINEMENT_RECIPES } from '../shared/goods.js';
 import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
-import { pointCovered } from './coverage.js';
+import { coverageAreas } from './coverage.js';
+import { planetAccess } from '../shared/planet-access.js';
 import {tickCivilMoney} from './real-economy.js';
 import {stat} from './markets.js';
 import {tickModuleProjects} from './modules.js';
@@ -23,7 +24,7 @@ export function initializeHomeOperations(home) {
 
 export function homeAccess(game, player, entity) {
   if (entity.type !== 'ruins' || entity.market?.homeworld?.owner !== player.id) return 'Nur auf deiner eigenen Ruinenwelt.';
-  if (!pointCovered(game,player,entity) && game.ships.get(player.manualShip)?.dockedAt !== entity.id) return 'Dafür brauchst du eigene Abdeckung oder dein manuelles Schiff vor Ort.';
+  if (!planetAccess(player,game.ships,entity,coverageAreas(game,player)).manage) return 'Keine Verbindung: Hauptschiff mit eingebautem Antrieb im eigenen Leitstellennetz oder eigenes Schiff vor Ort erforderlich.';
   if (entity.market.homeworld.warp) return 'Der Standort ist für den Warptransfer gesperrt.';
   return null;
 }

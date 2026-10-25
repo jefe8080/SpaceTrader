@@ -1,5 +1,6 @@
 // Surface state stays separate from the space map and its camera.
 import { GOODS, RECIPES, ENTERTAINMENT, RECIPE_CATS, planetFeatures, planetRng, factorySlots, recipeCat } from '/shared/config.js';
+import { planetAccess } from '/shared/planet-access.js';
 import { state, myShips } from './state.js';
 import { HOME_BUILDINGS } from '/shared/homeworld.js';
 export const scene = { scroll: 0, width: 0, items: [], hover: null, key: '', selected: null };
@@ -134,4 +135,5 @@ export function buildItems(e) {
 }
 
 const dockedHere = (id) => myShips().filter((s) => s.dockedAt === id);
-export const canLand = (id) => !state.entities.get(id)?.ruinsSite&&dockedHere(id).length > 0;
+export const accessTo = id => planetAccess({...state.me,relic:state.relic},state.ships,state.entities.get(id),state.coverage);
+export const canLand = id => !state.entities.get(id)?.ruinsSite && (dockedHere(id).length>0 || accessTo(id).manage);

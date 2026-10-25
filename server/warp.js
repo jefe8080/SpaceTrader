@@ -1,3 +1,4 @@
+import {homeAccess} from './homeworld-operations.js';
 import {GOODS,MODULES,NPC_OWNER,propertyBasePrice} from '../shared/config.js';
 import {HOMEWORLD} from '../shared/homeworld.js';
 import {hexAt,hexKey} from '../shared/hex.js';
@@ -43,7 +44,7 @@ function access(game,p,e){
   if(!p.homeQuest.completed.H16)return 'Warpservice wird durch H16 freigeschaltet.';
   if(h.warp)return 'Dieser Standort bereitet bereits seinen Transfer vor.';
   if((h.warpCooldownUntil||0)>game.time)return 'Für diesen Standort läuft die 24-Stunden-Sperrfrist in Serverzeit.';
-  if(!pointCovered(game,p,e)&&game.ships.get(p.manualShip)?.dockedAt!==e.id)return 'Eigene Abdeckung oder manuelle Anwesenheit erforderlich.';
+  const access=homeAccess(game,p,e);if(access)return access;
 }
 const affects=(game,s,e)=>s.queue.some(c=>c.target===e.id||c.stationId===e.id||c.sourceId===e.id||c.deliveryTargetId===e.id||game.routes.get(c.route)?.stops.some(stop=>stop.targetId===e.id))||s.logisticsJob&&[...game.world.entities.values()].some(home=>home.market?.homeworld?.logistics?.jobs?.some(j=>j.id===s.logisticsJob.id&&home.id===s.logisticsJob.home&&(j.source===e.id||j.destination===e.id)));
 export function quoteWarp(game,p,e,systemId,x,y){

@@ -7,7 +7,7 @@ import { goodTag } from '../util.js';
 import { $, setHtml, toast,confirmAction } from './dom.js';
 import { stockBar } from './charts.js';
 import { questBoardSection } from './quests.js';
-import { scene, canLand, resetPlanetside, selectBuilding, hidePlanetside } from '../planetside.js';
+import { scene, canLand, accessTo, resetPlanetside, selectBuilding, hidePlanetside } from '../planetside.js';
 import { sfx } from '../audio.js';
 import { homePanel } from './homeworld.js';
 import {handleModuleAction} from './modules.js';
@@ -31,7 +31,7 @@ export function enterPlanet(id) {
   if (e?.kind !== 'planet') return;
   if (!canLand(id)) { toast('Kein Schiff angedockt'); return; }
   state.landed = id;
-  if (e.type === 'ruins') cmd('homeLand', { target: id });
+  if (e.type === 'ruins' && accessTo(id).local) cmd('homeLand', { target: id });
   resetPlanetside(e);
   current = null;
   state.follow = null;
@@ -66,7 +66,9 @@ export function planetEscape() {
 }
 
 export function renderPlanetUi() {
-  if (panel.contains(document.activeElement) && document.activeElement.matches('input,select,textarea')) return;
+  const lost = state.landed && state.entities.get(state.landed)?.type==='ruins' && !accessTo(state.landed).manage;
+  for(const button of panel.querySelectorAll('button[data-pp]'))if(!['close','homeReplay','homeSite','homeWreck'].includes(button.dataset.pp)) { if(lost)button.disabled=true; }
+  if (!lost && panel.contains(document.activeElement) && document.activeElement.matches('input,select,textarea')) return;
   const e = state.landed && state.entities.get(state.landed);
   bar.hidden = !e;
   if (e && current) {
@@ -76,7 +78,7 @@ export function renderPlanetUi() {
   panel.hidden = !e || !current;
   document.body.classList.toggle('landed', !!e);
   if (!e) return;
-  setHtml(bar, `<b>${esc(e.name)}</b> <span class="muted">${PLANET_TYPES[e.type].name} · 2,5D · Ziehen: verschieben · Mausrad: Zoom</span>
+  setHtml(bar, `<b>${esc(e.name)}</b> <span class="muted">${PLANET_TYPES[e.type].name} ${e.type==='ruins' ? (accessTo(e.id).local?'· Lokaler Zugang':accessTo(e.id).remote?'· Fernverbindung aktiv':'· Verbindung verloren – Verwaltung gesperrt'):''} · 2,5D · Ziehen: verschieben · Mausrad: Zoom</span>
     <select id="planetBuildingSelect" aria-label="Gebäude auswählen"><option value="">Gebäude auswählen</option>${scene.items.map(it => `<option value="${esc(it.key)}">${esc(it.label)}</option>`).join('')}</select>
     <button class="small" data-pp="overview">Übersicht</button>
     <button class="small" data-pp="leave">Zurück ins All <kbd>Esc</kbd></button>`);
@@ -95,6 +97,7 @@ export function renderPlanetUi() {
   else body = panelKinds[it.kind]?.render(it, e, ship) ?? '<div class="muted">Hier ist gerade nichts los.</div>';
   const expanded=new Set([...panel.querySelectorAll('details[open]')].map(d=>d.querySelector('summary')?.textContent));
   setHtml(panel, `<div class="panel-head"><h2>${esc(it.label)}</h2><span style="flex:1"></span><button class="small ghost" data-pp="close">✕</button></div>${body}`);
+  if(lost)for(const b of panel.querySelectorAll('button[data-pp]'))if(!['close','homeReplay','homeSite','homeWreck'].includes(b.dataset.pp))b.disabled=true;
   for(const details of panel.querySelectorAll('details'))if(expanded.has(details.querySelector('summary')?.textContent))details.open=true;
 }
 

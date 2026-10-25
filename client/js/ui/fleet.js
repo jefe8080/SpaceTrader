@@ -1,3 +1,4 @@
+import { mainShip } from '/shared/planet-access.js';
 import { SHIP_TYPES } from '/shared/config.js';
 import { state, fleetOrder, esc, fmtK } from '../state.js';
 import { cmd } from '../net.js';
@@ -57,7 +58,7 @@ function shipRow(s) {
     <span class="sym">${shipSymbol(s)}</span>
     <img src="${shipSprite(s.type, state.me.color)}" alt="">
     <div class="fi-main">
-      <div class="name">${s.main ? '<span class="crown" title="Hauptschiff">♛</span> ' : ''}${state.homeworld && state.manualShip === s.id ? '<span class="badge" title="Aktiv manuell gesteuertes Schiff">● Manuell</span> ' : ''}${s.relicSpeed ? `<span class="badge" title="Reliktantrieb, treibstofffrei">×${s.relicSpeed}</span> ` : ''}${esc(s.name)} ${warn}<span class="muted type">${def.name} · ${def.cls}</span></div>
+      <div class="name">${(state.homeworld?mainShip({...state.me,relic:state.relic},state.ships)?.id===s.id:s.main) ? '<span class="crown" title="Hauptschiff">♛</span> ' : ''}${state.homeworld && state.manualShip === s.id ? '<span class="badge" title="Aktiv manuell gesteuertes Schiff">● Manuell</span> ' : ''}${s.relicSpeed ? `<span class="badge" title="Reliktantrieb, treibstofffrei">×${s.relicSpeed}</span> ` : ''}${esc(s.name)} ${warn}<span class="muted type">${def.name} · ${def.cls}</span></div>
       <div class="sub">${statusText(s)}</div>
       <div class="bar"><div style="width:${cargoFill(s) * 100}%"></div></div>
     </div>

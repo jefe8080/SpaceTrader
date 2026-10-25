@@ -157,7 +157,7 @@ Jeder Schritt wird mit passenden Prüfungen abgeschlossen. Fortschritt und Prüf
 | P0 | Anforderungen abstimmen, PRD erstellen und committen | – | Abgeschlossen (Planungscommit) |
 | U1 | Questaktivierungszustände und Dialogwarteschlange; H3-Einleitung; einheitliche Zielaufdeckung | P0, Umsetzungsauftrag | Abgeschlossen |
 | U2 | H4-Wrack lokal platzieren und vorhandene ungeborgene Ausreißer korrigieren | U1 | Abgeschlossen |
-| U3 | Hauptschiff ableiten, H4-Erklärung, Fernzugriff und Verbindungsverlust konsistent umsetzen | U1 | Offen |
+| U3 | Hauptschiff ableiten, H4-Erklärung, Fernzugriff und Verbindungsverlust konsistent umsetzen | U1 | Abgeschlossen |
 | U4 | Rathaus umbenennen, aktive Quests/Archiv trennen, Planetenübersicht und Namensänderung | U1, U3 | Offen |
 | U5 | Verlässliche Profilstatistiken, Handelszählung und neue Profilseite | U3 | Offen |
 | U6 | Gesamte Questredaktion und Karten-Topbar korrigieren | U1–U5 für finale Textbezüge | Offen |
@@ -222,3 +222,7 @@ Persistente aktive/pending Quests und explizite Dialogbestätigung steuern Start
 ### U2 – Umsetzung
 
 720 begrenzte Kandidaten: vier innere Ringe bis Radius 3.935, danach fester Ausweichring bei 4.400 Welteinheiten (Systemradius 4.000). Abstand zu Objekten: deren Radius plus 250. Kein unbegrenztes Ausweichen; bei vollständig versperrter Suche wird kein Fund erzeugt. Bestehende ungeborgene Ausreißer werden mit aktualisiertem Nebelzellenindex versetzt, gültige Positionen erhalten. Geometrie-, Platzmangel- und Migrationstest: `node --test tests/prd7.test.js`, 2/2 bestanden.
+
+### U3 – Umsetzung
+
+Gemeinsame fachliche Zugriffsfunktion für Client und Server: eigener eingebauter Antrieb und Hauptschiff im eigenen Netz, unabhängig von Auswahl und Zielplanetenabdeckung. Lokale Landung bleibt gültig. Geöffnete eigene Ruinenansichten bleiben bei Verbindungsverlust sichtbar und sperren Verwaltung; der Server prüft erneut. Werkstattübergabe erzeugt gespeicherten Kommunikationsdialog. Physische Lieferungen benötigen weiterhin ein Schiff am Ort. Hauptschiffkrone folgt dem Antrieb. Gezielte Berechtigungsprüfungen 3/3 bestanden; Syntaxprüfungen der geänderten Oberflächen bestanden.
