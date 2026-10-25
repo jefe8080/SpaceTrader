@@ -7,7 +7,7 @@ import { goodTag } from '../util.js';
 import { $, setHtml, toast,confirmAction } from './dom.js';
 import { stockBar } from './charts.js';
 import { questBoardSection } from './quests.js';
-import { scene, canLand, accessTo, resetPlanetside, selectBuilding, hidePlanetside } from '../planetside.js';
+import { scene, canLand, accessTo, resetPlanetside, selectBuilding, hidePlanetside, getPlanetView } from '../planetside.js';
 import { sfx } from '../audio.js';
 import { homePanel } from './homeworld.js';
 import {handleModuleAction} from './modules.js';
@@ -21,6 +21,7 @@ const panel = $('planetPanel');
 /** Zusätzliche Gebäudearten: kind -> { render(it, e, ship), click(d, it, e, ship) } */
 export const panelKinds = {};
 let current = null; // gewähltes Gebäude
+let cityNames = false;
 
 const shipsHere = (id) => myShips().filter((s) => s.dockedAt === id);
 const onBoard = (id, g) => shipsHere(id).reduce((a, s) => a + (s.cargo?.[g] || 0), 0);
@@ -90,11 +91,12 @@ export function renderPlanetUi() {
   panel.hidden = !e || !current;
   document.body.classList.toggle('landed', !!e);
   if (!e) return;
-  setHtml(bar, `<b>${esc(e.name)}</b> <span class="muted">${PLANET_TYPES[e.type].name} ${e.type==='ruins' ? (accessTo(e.id).local?'· Lokaler Zugang':accessTo(e.id).remote?'· Fernverbindung aktiv':'· Verbindung verloren – Verwaltung gesperrt'):''} · 2,5D · Ziehen: verschieben · Mausrad: Zoom</span>
-    <select id="planetBuildingSelect" aria-label="Gebäude auswählen"><option value="">Gebäude auswählen</option>${scene.items.map(it => `<option value="${esc(it.key)}">${esc(it.label)}</option>`).join('')}</select>
-    <button class="small" data-pp="overview">Übersicht</button>
-    <button class="small" data-pp="leave">Zurück ins All <kbd>Esc</kbd></button>`);
-  bar.querySelector('select').value = current?.key ?? '';
+  setHtml(bar, `<button class="small" data-pp="leave">Planet verlassen <kbd>Esc</kbd></button>
+    <button class="small" data-pp="overview" title="Zur gesamten Stadt zurückkehren">Übersicht</button>
+    <button class="small" data-pp="names" aria-pressed="${cityNames}" title="Namen aller Stadtorte anzeigen">Namen</button>`);
+  bar.setAttribute('aria-label', `${e.name} · ${PLANET_TYPES[e.type].name}`);
+  bar.style.top = `${Math.ceil($('topbar').getBoundingClientRect().bottom)+12}px`;
+  getPlanetView()?.setNames(cityNames);
   if (!current) return;
   // Gebäude kann nach Änderungen (Abriss, Bau) neu nummeriert sein
   const it = current;
@@ -108,7 +110,8 @@ export function renderPlanetUi() {
   else if (it.kind === 'plot') body = plotPanel(it, e);
   else body = panelKinds[it.kind]?.render(it, e, ship) ?? '<div class="muted">Hier ist gerade nichts los.</div>';
   const expanded=new Set([...panel.querySelectorAll('details[open]')].map(d=>d.querySelector('summary')?.textContent));
-  setHtml(panel, `<div class="panel-head"><h2>${esc(it.label)}</h2><span style="flex:1"></span><button class="small ghost" data-pp="close">✕</button></div>${body}`);
+  const connection = e.type==='ruins' ? `<div class="small-note ${lost?'neg':'muted'}">${accessTo(e.id).local?'Lokaler Zugang':accessTo(e.id).remote?'Fernverbindung aktiv':'Verbindung verloren – Verwaltung gesperrt'}</div>` : '';
+  setHtml(panel, `<div class="panel-head"><h2>${esc(it.label)}</h2><span style="flex:1"></span><button class="small ghost" data-pp="close" aria-label="Ort schließen">✕</button></div>${connection}${body}`);
   syncManagementControls(lost);
   for(const details of panel.querySelectorAll('details'))if(expanded.has(details.querySelector('summary')?.textContent))details.open=true;
 }
@@ -237,11 +240,7 @@ panel.addEventListener('click', (ev) => {
 bar.addEventListener('click', ev => {
   if (ev.target.closest('[data-pp=leave]')) leavePlanet();
   if (ev.target.closest('[data-pp=overview]')) closeBuilding(true);
-});
-bar.addEventListener('change', ev => {
-  if (ev.target.id !== 'planetBuildingSelect') return;
-  const it = scene.items.find(x => x.key === ev.target.value);
-  if (it) openBuilding(it); else closeBuilding();
+  if (ev.target.closest('[data-pp=names]')) { cityNames=!cityNames;getPlanetView()?.setNames(cityNames);renderPlanetUi(); }
 });
 panel.addEventListener('change',event=>{
   if(event.target.id==='homeRecipe'){

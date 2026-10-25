@@ -28,8 +28,8 @@ function status(message, retry = false) {
   el.querySelector('button').hidden = !retry;
 }
 async function ensureViewer() {
-  if (!boot) boot = import('./planetScene.js').then(({ PlanetScene }) => {
-    viewer = new PlanetScene(canvas, {
+  if (!boot) boot = import('./planetCityScene.js').then(({ PlanetCityScene }) => {
+    viewer = new PlanetCityScene(canvas, {
       select: key => {
         const it = scene.items.find(x => x.key === key);
         if (it) callbacks.select(it); else callbacks.deselect();
@@ -80,7 +80,7 @@ export function renderPlanetside(now, dt) {
       if (state.landed === id && scene.key === key) viewer?.select(scene.selected, true);
     }).catch(error => {
       console.error('Planetenoberfläche:', error);
-      if (state.landed === id && scene.key === key) status('3D-Ansicht konnte nicht geladen werden.', true);
+      if (state.landed === id && scene.key === key) status('Stadtansicht konnte nicht geladen werden.', true);
     });
   }
   if (viewer) { viewer.show(); viewer.render(dt); }

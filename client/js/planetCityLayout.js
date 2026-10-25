@@ -89,13 +89,13 @@ export function planCity(entity, items, previous = new Map()) {
   const records=items.map(item=>{
     const character=item.kind==='dog'||item.kind==='beggar';
     const p=item.kind==='questhouse'?{x:0,y:75}:character?{x:item.kind==='dog'?60:-52,y:185}:slotPosition(positions.get(item.key),type);
-    const w=character?46:158,h=character?55:158;
+    const w=character?46:item.kind==='questhouse'?190:180,h=character?55:135;
     return {key:item.key,item,...p,w,h,character,box:{x:p.x-w/2,y:p.y-h,width:w,height:h}};
   });
   const minX=Math.min(-720,...records.map(r=>r.box.x))-60, minY=Math.min(-460,...records.map(r=>r.box.y))-60;
   const maxX=Math.max(720,...records.map(r=>r.box.x+r.w))+60,maxY=Math.max(620,...records.map(r=>r.y))+90;
   const plaza={x:0,y:175};
-  const roads=records.filter(r=>!r.character).map(r=>({key:r.key,points:[{x:r.x,y:r.y+12},{x:r.x,y:r.y+42},{x:plaza.x,y:r.y+42},plaza]}));
+  const roads=records.filter(r=>!r.character).map(r=>({key:r.key,points:[{x:r.x,y:r.y+8},{x:r.x,y:r.y+22},{x:plaza.x,y:r.y+22},plaza]}));
   return {type,records,assignments:positions,roads,plaza,bounds:{x:minX,y:minY,width:maxX-minX,height:maxY-minY}};
 }
 /** World coordinates; reverse order agrees with the painter's rendering order. */

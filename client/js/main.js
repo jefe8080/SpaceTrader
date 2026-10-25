@@ -378,7 +378,7 @@ function endTouch(e) {
 canvas.addEventListener('touchend', endTouch, { passive: false });
 canvas.addEventListener('touchcancel', endTouch, { passive: false });
 addEventListener('keydown', (e) => {
-  if (!state.me || (ui.typing() && !(state.landed && e.key === 'Escape' && e.target.id === 'planetBuildingSelect'))) return;
+  if (!state.me || ui.typing()) return;
   if (ui.mgOpen()) { if (e.key === 'Escape') ui.closeGame(); return; }
   if (state.landed && (e.key === 'Escape' || ZOOM_PRESETS[e.key])) {
     // Planetare Ansicht verlassen: Esc bzw. Taste 1/2/3 (die Zoomstufe greift dann wie gewohnt)

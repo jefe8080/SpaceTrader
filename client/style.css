@@ -349,12 +349,11 @@ body.landed #details { display: none; }
 .bubble::after { content: ''; position: absolute; left: 18px; bottom: -8px; border: 8px solid transparent; border-top-color: #fff; border-bottom: 0; }
 .dog-buff { font-size: 12px; color: #ffcc80; border: 1px solid rgba(255, 204, 128, 0.4); border-radius: 10px; padding: 2px 8px; }
 
-/* The planetary WebGL canvas owns its input independently of the space map. */
+/* The planetary city canvas owns its input independently of the space map. */
 #planetView { position:fixed; inset:0; width:100vw; height:100vh; display:block; touch-action:none; }
 body.landed #view { visibility:hidden; }
 body.landed #questBox, body.landed #log { display:none; }
 body.landed #planetBar { top:56px; left:316px; right:16px; transform:none; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-#planetBuildingSelect { max-width:230px; padding:5px 8px; }
 body.landed #planetPanel { top:120px; bottom:auto; left:auto; right:16px; transform:none; width:350px; max-height:calc(100vh - 145px); overflow:auto; }
 #planetLabel { position:fixed; z-index:3; padding:5px 9px; border:1px solid #ffe2a080; border-radius:6px; background:#152337e8; color:#fff2c9; font-size:13px; pointer-events:none; transform:translateX(-50%); }
 #planetStatus { position:fixed; z-index:3; top:45%; left:50%; transform:translate(-50%,-50%); background:#152337ef; color:#f0f4ff; padding:16px 20px; border-radius:10px; display:flex; gap:12px; align-items:center; }
@@ -363,11 +362,22 @@ body.landed #planetPanel { top:120px; bottom:auto; left:auto; right:16px; transf
   body.landed #planetBar { left:12px; right:12px; top:56px; }
   body.landed #planetBar .muted { display:none; }
   body.landed #planetPanel { left:12px; right:12px; width:auto; top:auto; bottom:12px; max-height:38vh; }
-  #planetBuildingSelect { max-width:180px; }
 }
 
 .help-card { max-height:calc(100vh - 80px); overflow:auto; }
 body.landed #planetBar { white-space:normal; }
+/* PRD 8: floating controls, no building selector or enclosing toolbar. */
+body.landed #planetBar { left:auto; right:16px; top:60px; width:auto; padding:0; background:none; border:0; box-shadow:none; gap:7px; }
+body.landed #planetBar button { min-height:38px; background:#172e2eea; border:1px solid #b49b6a; box-shadow:0 2px 8px #0005; }
+body.landed #planetBar [aria-pressed=true] { color:#ffe1a3; border-color:#ffe1a3; }
+#planetCityTargets { position:fixed; inset:0; z-index:2; pointer-events:none; overflow:hidden; }
+#planetCityTargets .city-target { position:absolute; opacity:0; pointer-events:none; border:2px solid #ffe1a3; padding:4px; font-size:12px; }
+#planetCityTargets .city-target:focus-visible { opacity:1; background:#173331c9; color:#fff2ca; outline:2px solid #fff2ca; }
+@media(max-width:600px) {
+  body.landed #planetBar { right:10px; left:auto; top:62px; gap:5px; }
+  body.landed #planetBar button { min-height:40px; padding:5px 8px; }
+  body.landed #planetBar kbd { display:none; }
+}
 /* PRD 6: Instrumententafeln in Türkis und Ocker der freigegebenen Illustrationen. */
 :root { --panel:rgba(14,25,29,.97); --panel-border:#526665; --text:#eee8d9; --muted:#a9bab6; --accent:#83c8bb; --accent2:#dfb66f; }
 .panel,.card { border-radius:5px; border-top:2px solid #a98c59; box-shadow:0 8px 28px #0009,inset 0 0 0 2px #101a1d; }
