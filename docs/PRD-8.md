@@ -58,7 +58,7 @@ Bestätigte Entscheidungen am 25.10.2026:
 ### Korrekturschritte
 
 - [x] K1: Kritik, Architekturkorrektur und Agrar-Zwischenabnahme dokumentieren; Planungscommit.
-- [ ] K2: Zusammenhängende große Agrar-Stadtillustration, individuelle Funktionsstandorte und geplantes Erweiterungsviertel integrieren. Rasterstraßen, Dekorhausverteilung und Spiegelung für Agrar entfernen. Begrenzte Kamera und stabile funktionale Zuordnung prüfen; Umsetzungscommit.
+- [x] K2: Zusammenhängende große Agrar-Stadtillustration, individuelle Funktionsstandorte und geplantes Erweiterungsviertel integrieren. Rasterstraßen, Dekorhausverteilung und Spiegelung für Agrar entfernt. Die Kamera hält alle vier sichtbaren Bildecken innerhalb der Illustration. Feste gezeichnete Funktionsgebäude besitzen eigene Trefferflächen; vier dynamische Fabrikplätze teilen die vorherigen Bauplatzstandorte. 14 gezielte Tests erfolgreich, einschließlich maximaler Agrar-Ausstattung und Kameragrenzen in fünf Bildschirmformaten. Erste Browserprüfung aller 13 Typen ebenfalls erfolgreich; neue Komposition nur für Agrar. Produktionsdetails unter [agrar-revision.md](art/prd8/agrar-revision.md).
 - [ ] K3: Tatsächliche Agrar-Spielansicht auf Desktop und mobil visuell prüfen, unterschiedliche Ausstattung und Bauänderungen testen, Screenshots und Prüfergebnisse sichern; Abnahmevorlage committen.
 - [ ] K4: Nutzerfreigabe der tatsächlichen Agrar-Spielansicht einholen. Erst danach Übertragung auf andere Typen planen/umsetzen.
 

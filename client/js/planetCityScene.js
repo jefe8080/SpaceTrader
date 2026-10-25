@@ -1,11 +1,12 @@
 import {GOODS} from '/shared/config.js';
 import {CITY_TYPES, planCity, citySprite, cityDevelopment, hashCity, pickCity} from './planetCityLayout.js';
+import {constrainCityPose,fitCityOverview} from './planetCityCamera2D.js';
 
 let artPromise;
 const terrainPromises=new Map();
 const CITY_DECOR={urban:[8,20,14,8],industrial:[16,6,21,20],gasgiant:[8,6,21],mining:[3,16,20],jungle:[20,11,20],volcanic:[5,16,6],colony:[20,21,20]};
 function loadImage(src) { return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('Stadtgrafik fehlt: '+src));image.src=src;}); }
-function loadTerrain(type){if(!terrainPromises.has(type))terrainPromises.set(type,loadImage('/assets/art/cities/'+type+'.png').catch(error=>{terrainPromises.delete(type);throw error;}));return terrainPromises.get(type);}
+function loadTerrain(type){if(!terrainPromises.has(type))terrainPromises.set(type,loadImage('/assets/art/cities/'+(type==='agrar'?'agrar-city-v2':type)+'.png').catch(error=>{terrainPromises.delete(type);throw error;}));return terrainPromises.get(type);}
 function loadArt() {
   return artPromise ||= loadImage('/assets/art/cities/sprites.png')
     .then(atlas=>{
@@ -90,7 +91,7 @@ export class PlanetCityScene {
     const [art,terrain]=await Promise.all([loadArt(),loadTerrain(entity.type)]);if(epoch!==this.epoch||!valid())return;
     const changed=this.entity?.id!==entity.id;
     this.entity=entity;this.art={...art,terrain};this.theme=CITY_TYPES[entity.type]||CITY_TYPES.colony;
-    this.plan=planCity(entity,items,this.assignments.get(entity.id));this.assignments.set(entity.id,this.plan.assignments);
+    this.plan=planCity(entity,items,this.assignments.get(entity.id),recipeCategory);this.assignments.set(entity.id,this.plan.assignments);
     this.records=new Map(this.plan.records.map(r=>[r.key,r]));
     this.prepareScenery();this.targets.replaceChildren();
     for(const record of this.plan.records){
@@ -100,7 +101,7 @@ export class PlanetCityScene {
       button.addEventListener('blur',()=>{this.hover=null;this.mark();});
       button.addEventListener('click',()=>this.callbacks.select(record.key));this.targets.append(button);record.button=button;
     }
-    this.loading=false;this.sizeKey='';this.resize();if(changed)this.pose={...this.overview};
+    this.loading=false;this.sizeKey='';this.resize();if(changed)this.pose={...this.overview};this.clampPose();
     this.callbacks.status('');this.mark();
   }
   areaFor(w,h){
@@ -119,12 +120,18 @@ export class PlanetCityScene {
   resize(){
     const w=innerWidth,h=innerHeight,area=this.areaFor(w,h),dpr=Math.min(devicePixelRatio||1,2),key=JSON.stringify([w,h,dpr,area]);
     if(key===this.sizeKey)return;this.sizeKey=key;this.area=area;this.dpr=dpr;this.canvas.width=Math.round(w*dpr);this.canvas.height=Math.round(h*dpr);
-    const b=this.plan.bounds;this.overview={x:b.x+b.width/2,y:b.y+b.height/2,zoom:Math.min(area.width/b.width,area.height/b.height)*.95};
+    const b=this.plan.bounds;this.overview=this.plan.authored?fitCityOverview(b,this.plan.landscape,{width:w,height:h},area):{x:b.x+b.width/2,y:b.y+b.height/2,zoom:Math.min(area.width/b.width,area.height/b.height)*.95};
     this.fly(this.selected&&this.records.has(this.selected)?this.focusPose(this.records.get(this.selected)):this.overview);
   }
   focusPose(record){return{x:record.x,y:record.y-record.h*.38,zoom:Math.min(2.1,Math.max(this.overview.zoom*1.6,Math.min(this.area.width/410,this.area.height/310)))};}
-  fly(pose){if(this.reducedMotion){this.pose={...pose};this.flight=null;}else this.flight={from:{...this.pose},to:{...pose},elapsed:0};}
-  clampPose(){const b=this.plan?.bounds;if(!b)return;this.pose.x=Math.max(b.x,Math.min(b.x+b.width,this.pose.x));this.pose.y=Math.max(b.y,Math.min(b.y+b.height,this.pose.y));}
+  fly(pose){
+    if(this.plan?.authored)pose=constrainCityPose(pose,this.plan.landscape,{width:innerWidth,height:innerHeight},this.area);
+    if(this.reducedMotion){this.pose={...pose};this.flight=null;}else this.flight={from:{...this.pose},to:{...pose},elapsed:0};
+  }
+  clampPose(){
+    if(this.plan?.authored){this.pose=constrainCityPose(this.pose,this.plan.landscape,{width:innerWidth,height:innerHeight},this.area);return;}
+    const b=this.plan?.bounds;if(!b)return;this.pose.x=Math.max(b.x,Math.min(b.x+b.width,this.pose.x));this.pose.y=Math.max(b.y,Math.min(b.y+b.height,this.pose.y));
+  }
   zoomTo(zoom,x,y){if(!this.plan||this.loading)return;this.flight=null;const before=this.toWorld(x,y);this.pose.zoom=Math.max(this.overview.zoom*.8,Math.min(3,zoom));const after=this.toWorld(x,y);this.pose.x+=before.x-after.x;this.pose.y+=before.y-after.y;this.clampPose();}
   toWorld(x,y){const a=this.area;return{x:(x-a.x-a.width/2)/this.pose.zoom+this.pose.x,y:(y-a.y-a.height/2)/this.pose.zoom+this.pose.y};}
   toScreen(x,y){const a=this.area;return{x:a.x+a.width/2+(x-this.pose.x)*this.pose.zoom,y:a.y+a.height/2+(y-this.pose.y)*this.pose.zoom};}
@@ -136,6 +143,7 @@ export class PlanetCityScene {
     // Small figures remain tappable at overview scale; the closest centre resolves expanded targets.
     let closest=null,distance=Infinity;
     for(const r of this.records.values()){
+      if(this.plan.authored&&r.w*this.pose.zoom>=44&&r.h*this.pose.zoom>=44)continue;
       const s=this.toScreen(r.x,r.y-r.h/2),dx=Math.abs(x-s.x),dy=Math.abs(y-s.y);
       if(dx<=Math.max(22,r.w*this.pose.zoom/2)&&dy<=Math.max(22,r.h*this.pose.zoom/2)&&dx*dx+dy*dy<distance){closest=r.key;distance=dx*dx+dy*dy;}
     }
@@ -143,6 +151,8 @@ export class PlanetCityScene {
   }
   mark(){this.canvas.style.cursor=this.hover?'pointer':'grab';if(this.label)this.label.hidden=true;}
   prepareScenery(){
+    // The composed agricultural city is one painting: no generated roads, decor sprites or tiling.
+    if(this.plan.authored){this.scenery=null;this.surroundings=null;this.decorations=[];return;}
     const b=this.plan.bounds,padding=180;this.scenery=document.createElement('canvas');
     this.sceneryOrigin={x:b.x-padding,y:b.y-padding};this.scenery.width=Math.ceil(b.width+padding*2);this.scenery.height=Math.ceil(b.height+padding*2);
     const ctx=this.scenery.getContext('2d'),{terrain}=this.art;
@@ -198,8 +208,18 @@ export class PlanetCityScene {
   }
   drawRecord(ctx,r){
     const item=r.item,cell=citySprite(this.entity,item,GOODS),active=r.key===this.selected||r.key===this.hover;
-    if(active){ellipse(ctx,r.x,r.y+3,r.w*.56,r.character?11:19,'#f5d28c80');ctx.save();ctx.strokeStyle='#ffe1a3';ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.strokeRect(r.box.x-5,r.box.y-4,r.w+10,r.h+8);ctx.restore();}
+    if(active){
+      ellipse(ctx,r.x,r.y+3,r.w*.45,r.character?8:12,'#f5d28c70');
+      if(r.authored&&r.polygon)line(ctx,[...r.polygon,r.polygon[0]],'#ffe1a3bb',1.5/this.pose.zoom);
+      else if(!r.authored){ctx.save();ctx.strokeStyle='#ffe1a3';ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.strokeRect(r.box.x-5,r.box.y-4,r.w+10,r.h+8);ctx.restore();}
+    }
+    if(r.painted){if(active||this.names)this.drawName(ctx,r);return;}
     if(cell===null){
+      if(r.authored){
+        // The empty courtyard is already painted and connected; just a small timber site marker.
+        line(ctx,[{x:r.x,y:r.y-2},{x:r.x,y:r.y-16}],'#775d3a',2);ctx.fillStyle='#d3bc86';ctx.fillRect(r.x-8,r.y-16,16,7);
+        if(active||this.names)this.drawName(ctx,r);return;
+      }
       ctx.save();ctx.strokeStyle='#bda270';ctx.fillStyle='#9e936754';ctx.lineWidth=2;ctx.setLineDash([9,6]);ctx.fillRect(r.x-61,r.y-64,122,60);ctx.strokeRect(r.x-61,r.y-64,122,60);ctx.restore();
       for(const x of [-58,58])line(ctx,[{x:r.x+x,y:r.y},{x:r.x+x,y:r.y-31}],'#e3c08b',4);
     }else{
@@ -208,7 +228,7 @@ export class PlanetCityScene {
       drawSprite(ctx,this.art.sprites[cell],r.x,r.y+sway,r.w*orbitalScale,r.h*orbitalScale);
       if(this.entity.type==='ice'&&!r.character){line(ctx,[{x:r.x-39,y:r.y-r.h*.55},{x:r.x+30,y:r.y-r.h*.65}],'#edf1dbbb',5);}
     }
-    if(item.good){
+    if(item.good&&!r.authored){
       const color=GOODS[item.good]?.color||'#e6c98c';ctx.fillStyle='#253f3d';ctx.fillRect(r.x-17,r.y-6,34,13);ctx.fillStyle=color;ctx.fillRect(r.x-14,r.y-3,5,7);
       ctx.font='bold 7px system-ui';ctx.textAlign='left';ctx.fillStyle='#eee5cd';ctx.fillText((GOODS[item.good]?.name||item.good).slice(0,3).toUpperCase(),r.x-6,r.y+3);
     }
@@ -223,15 +243,19 @@ export class PlanetCityScene {
   render(dt){
     if(!this.active||this.loading||!this.plan)return;this.resize();this.time+=Math.min(dt||0,.06);
     if(this.flight){const f=this.flight;f.elapsed+=Math.min(dt||0,.06);const t=Math.min(1,f.elapsed/.5),k=1-(1-t)**3;for(const key of ['x','y','zoom'])this.pose[key]=f.from[key]+(f.to[key]-f.from[key])*k;if(t===1)this.flight=null;}
+    this.clampPose();
     const ctx=this.ctx,a=this.area,p=this.pose;ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.fillStyle=this.theme.ground;ctx.fillRect(0,0,innerWidth,innerHeight);
     ctx.save();ctx.translate(a.x+a.width/2,a.y+a.height/2);ctx.scale(p.zoom,p.zoom);ctx.translate(-p.x,-p.y);
-    // Repeat the painted surroundings beyond extreme pan/zoom bounds, never reveal a cutout edge.
+    // Authored cities use a single bounded painting; older types retain their renderer until approval.
+    if(this.plan.authored){const b=this.plan.landscape;ctx.drawImage(this.art.terrain,b.x,b.y,b.width,b.height);}
+    else {
     const image=this.surroundings,o=this.sceneryOrigin,lo=this.toWorld(0,0),hi=this.toWorld(innerWidth,innerHeight);
     for(let y=Math.floor((lo.y-o.y)/image.height);y<=Math.floor((hi.y-o.y)/image.height);y++)
       for(let x=Math.floor((lo.x-o.x)/image.width);x<=Math.floor((hi.x-o.x)/image.width);x++){
         const flipX=Math.abs(x)%2,flipY=Math.abs(y)%2;ctx.save();ctx.translate(o.x+(x+flipX)*image.width,o.y+(y+flipY)*image.height);ctx.scale(flipX?-1:1,flipY?-1:1);ctx.drawImage(image,0,0);ctx.restore();
       }
     ctx.drawImage(this.scenery,o.x,o.y);
+    }
     for(const r of [...this.records.values()].sort((a,b)=>a.y-b.y))this.drawRecord(ctx,r);
     if(!this.reducedMotion)for(const r of this.records.values()){
       if(r.item.kind!=='factory'||cityDevelopment(this.entity,r.item)!=='ready')continue;

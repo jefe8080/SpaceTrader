@@ -1,3 +1,4 @@
+import {planAgrarCity} from './planetAgrarLayout.js';
 /** Pure visual planning. Keys and economic state belong to buildItems, never to the renderer. */
 export const CITY_TYPES = {
   agrar: { name:'Agrarwelt', ground:'#8c9670', road:'#c5b08a', trim:'#849965', shape:0, terrain:0 },
@@ -69,7 +70,8 @@ function slotPosition(slot, type) {
   if ([5,11].includes(shape)) y += col%3*13;
   return {x,y};
 }
-export function planCity(entity, items, previous = new Map()) {
+export function planCity(entity, items, previous = new Map(), recipeCategory) {
+  if(entity.type==='agrar')return planAgrarCity(entity,items,previous,recipeCategory);
   const type=entity.type, positions=new Map(), used=new Set();
   const ordinary=items.filter(it=>!['questhouse','beggar','dog'].includes(it.kind));
   // Preserve occupied lots on updates, including factories added after the initial load.
@@ -101,6 +103,19 @@ export function planCity(entity, items, previous = new Map()) {
 /** World coordinates; reverse order agrees with the painter's rendering order. */
 export function pickCity(records,x,y) {
   const ordered=[...records].sort((a,b)=>a.y-b.y);
-  for (let i=ordered.length-1;i>=0;i--) { const r=ordered[i], b=r.box; if(x>=b.x&&x<=b.x+b.width&&y>=b.y&&y<=b.y+b.height)return r.key; }
+  for (let i=ordered.length-1;i>=0;i--) {
+    const r=ordered[i], b=r.box;
+    if(x<b.x||x>b.x+b.width||y<b.y||y>b.y+b.height)continue;
+    if(r.polygon&&!insideCityPolygon(r.polygon,x,y))continue;
+    return r.key;
+  }
   return null;
+}
+function insideCityPolygon(points,x,y){
+  let inside=false;
+  for(let i=0,j=points.length-1;i<points.length;j=i++){
+    const a=points[i],b=points[j];
+    if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)inside=!inside;
+  }
+  return inside;
 }
