@@ -32,7 +32,20 @@ export function registerModal(id, render, onClose, { live = true } = {}) {
   ov.addEventListener('mousedown', (ev) => { if (ev.target === ov) closeModal(id); });
 }
 
+const tradeIds = ['favorites','routesOverview','routeEditor'];
+let tradeTab='favorites';
 export function openModal(id) {
+  if(tradeIds.includes(id)) {
+    $('tradeHub').hidden=false;
+    if(id!=='routeEditor') {
+      tradeTab=id;
+      for(const tab of ['favorites','routesOverview']) $(tab).hidden=tab!==id;
+      modals.get(id)?.render();
+      return;
+    }
+    if($('favorites').hidden && $('routesOverview').hidden) openModal(tradeTab);
+    $('routeEditor').open=true;
+  }
   $(id).hidden = false;
   modals.get(id)?.render();
 }
@@ -41,9 +54,14 @@ export function closeModal(id) {
   if ($(id).hidden) return;
   $(id).hidden = true;
   modals.get(id)?.onClose?.();
+  if(id==='favorites'||id==='routesOverview') {
+    // Keep a collapsed draft when closing the workspace; explicit Cancel discards it.
+    $('tradeHub').hidden=true;
+  }
+
 }
 
-export const isOpen = (id) => !$(id).hidden;
+export const isOpen = (id) => !$(id).hidden && (!tradeIds.includes(id) || !$('tradeHub').hidden);
 export function toggleModal(id) { isOpen(id) ? closeModal(id) : openModal(id); }
 
 /** Alle offenen Modale neu zeichnen (z.B. nach Marktupdate) */
@@ -53,6 +71,7 @@ export function refreshModals() {
 
 /** Oberstes offenes Modal schließen; true, wenn eines offen war */
 export function closeTopModal() {
+  if(isOpen('routeEditor')) { closeModal('routeEditor'); return true; }
   const open = [...modals.keys()].filter(isOpen);
   if (!open.length) return false;
   closeModal(open[open.length - 1]);
@@ -72,3 +91,9 @@ export function confirmAction(message,onConfirm){
   $('gameConfirmAccept').onclick=()=>{closeModal('gameConfirm');onConfirm();};
   openModal('gameConfirm');$('gameConfirmCancel').focus();
 }
+
+$('tradeHub').addEventListener('mousedown',ev=>{if(ev.target===$('tradeHub'))closeModal(tradeTab);});
+$('tradeHub').addEventListener('click',ev=>{
+  const tab=ev.target.closest('[data-trade-tab]');
+  if(tab)openModal(tab.dataset.tradeTab==='routes'?'routesOverview':'favorites');
+});

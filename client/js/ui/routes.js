@@ -35,6 +35,9 @@ const card = $('routeCard');
 
 export function openRouteEditor(routeId = null, { stops = null, assign = [] } = {}) {
   const r = routeId ? state.routes.get(routeId) : null;
+  if(ed && (routeId!==ed.id || stops)) {
+    if(!confirm('Offenen Routenentwurf verwerfen?'))return;
+  }
   ed = {
     id: r?.id || null,
     name: r?.name || `Route ${state.routes.size + 1}`,
@@ -67,7 +70,8 @@ function defaultActions(e) {
 
 function addStop(id) {
   const e = state.entities.get(id);
-  if (!e || ed.stops.length >= 16) return;
+  if (!e) return;
+  if(ed.stops.length>=16)return toast('Maximal 16 Stopps pro Route.');
   ed.stops.push({ targetId: id, actions: defaultActions(e) });
   renderEditor();
 }
@@ -103,7 +107,7 @@ function renderEditor() {
   if (!ed) return;
   const ship = refShip();
   let h = `<h2>${ed.id ? 'Route bearbeiten' : 'Neue Route'}</h2>
-    <div class="muted">Eine Route ist eine Vorlage. Alle zugewiesenen Schiffe fliegen sie; Änderungen wirken sofort auf alle.
+    <div class="muted">Eine Route ist eine Vorlage. Alle zugewiesenen Schiffe fliegen sie. Erst Speichern ändert die Vorlage für alle; gültige Stoppindizes bleiben erhalten, ungültige werden auf den ersten Stopp gesetzt.
     Käufe ergänzen den Zielbestand der jeweiligen Ware an Bord. Verkäufe verwenden die zusätzliche Verkaufsmenge.
     Leer/0 = so viel wie möglich. Teilkäufe fahren weiter; Wartebedingungen gelten separat. Preisgrenzen verhindern Verlustgeschäfte.</div>
     <div class="form-row"><label>Name <input id="reName" maxlength="32" value="${esc(ed.name)}"></label>
@@ -121,8 +125,8 @@ function renderEditor() {
   });
 
   const known = [...state.entities.values()].sort((a, b) => (ship ? dist(a, ship) - dist(b, ship) : 0));
-  h += `<div class="add-stop"><select id="reAddSel">${known.map((e) => `<option value="${e.id}">${state.favorites[e.id] ? '★ ' : ''}${esc(e.name)} · ${typeName(e)}${ship ? ' · ' + Math.round(dist(e, ship)) : ''}</option>`).join('')}</select>
-    <button data-a="add">+ Stopp</button><button data-a="pick">◎ Auf Karte wählen</button></div>`;
+  h += `<div class="add-stop"><select id="reAddSel">${known.filter(e=>['planet','station','belt','wormhole'].includes(e.kind)).map((e) => `<option value="${e.id}">${state.favorites[e.id] ? '★ ' : ''}${esc(e.name)} · ${typeName(e)}${ship ? ' · ' + Math.round(dist(e, ship)) : ''}</option>`).join('')}</select>
+    <button data-a="add" ${ed.stops.length>=16?'disabled':''}>+ Stopp (${ed.stops.length}/16)</button><button data-a="pick">◎ Auf Karte wählen</button></div>`;
 
   const onRoute = ed.id ? new Set(shipsOnRoute(ed.id).map((s) => s.id)) : new Set();
   h += `<div class="section"><div class="section-title">Schiffe zuweisen</div><div class="chips">
@@ -157,17 +161,17 @@ card.addEventListener('click', (ev) => {
     }
     case 'add': addStop($('reAddSel').value); return;
     case 'pick':
-      $('routeEditor').hidden = true;
+      $('tradeHub').hidden = true;
       hint('Ziel auf der Karte anklicken (Esc bricht ab)');
       state.pickMode = (id) => {
         state.pickMode = null;
         hint(null);
-        $('routeEditor').hidden = false;
+        $('tradeHub').hidden = false;
         if (id) addStop(id);
       };
       return;
     case 'delete':
-      if (confirm(`Route "${ed.name}" löschen? Zugewiesene Schiffe werden untätig.`)) { cmd('routeDelete', { route: ed.id }); closeModal('routeEditor'); }
+      if (confirm(deleteMessage(ed))) { cmd('routeDelete', { route: ed.id }); closeModal('routeEditor'); }
       return;
     case 'cancel': closeModal('routeEditor'); return;
     case 'save': {
@@ -217,15 +221,23 @@ export function addStopToRoute(routeId, entityId) {
   const r = state.routes.get(routeId);
   const e = state.entities.get(entityId);
   if (!r || !e) return;
-  const stops = structuredClone(r.stops);
-  stops.push({ targetId: e.id, actions: [] });
-  cmd('routeSave', { id: r.id, name: r.name, stops, minBalance: r.minBalance || 0 });
-  toast(`${e.name} zu Route ${r.name} hinzugefügt`, 'info');
+  if(ed?.id===routeId) {
+    addStop(entityId);
+    openModal('routeEditor');
+    return;
+  }
+  if(r.stops.length>=16)return toast('Maximal 16 Stopps pro Route.');
+  openRouteEditor(routeId,{stops:[...structuredClone(r.stops),{targetId:e.id,actions:[]}]});
+  toast('Stopp im Entwurf ergänzt. Erst Speichern ändert die Route.','info');
 }
 
 // =====================================================================
 // Routenübersicht (Taste R)
 // =====================================================================
+function deleteMessage(r) {
+  const ships=shipsOnRoute(r.id);
+  return `Route "${r.name}" löschen? Betroffene Schiffe: ${ships.map(s=>s.name).join(', ')||'keine'}. Nur Befehle dieser Route werden aus den Queues entfernt. Andere Befehle bleiben erhalten; ohne weitere Befehle wird das Schiff nach seinem laufenden Flugabschnitt untätig.`;
+}
 const expanded = new Set();
 const ovCard = $('routesCard');
 
@@ -248,8 +260,8 @@ function priceSeries(entityId, good) {
 
 function renderOverview() {
   const routes = [...state.routes.values()].sort((a, b) => a.name.localeCompare(b.name));
-  let h = `<div class="modal-head"><h2>Routen</h2><span class="muted">${routes.length} Vorlagen</span><span style="flex:1"></span>
-    <button class="primary" data-r="new">＋ Neue Route</button><button data-r="close">✕</button></div>`;
+  let h = `<div class="modal-head"><h2>Handel & Routen · Meine Routen</h2><span class="muted">${routes.length} Vorlagen</span><span style="flex:1"></span>
+    <button class="primary" data-r="new">＋ Neue Route</button><button data-r="close">✕</button></div><div class="trade-tabs"><button data-trade-tab="places">Orte & Waren</button><button data-trade-tab="routes" aria-current="page">Meine Routen</button></div>`;
   if (!routes.length) h += `<div class="muted">Noch keine Routen. Lege eine an und weise ihr Schiffe zu.</div>`;
   for (const r of routes) {
     const ships = shipsOnRoute(r.id);
@@ -275,6 +287,7 @@ function renderOverview() {
         <button class="small" data-r="pause" data-id="${r.id}">${r.paused ? '▶ Fortsetzen' : '⏸ Pausieren'}</button>
         <button class="small danger" data-r="delete" data-id="${r.id}">🗑 Löschen</button>
       </div>`;
+    h += `<div class="muted">${r.stops.length} Stopps · ${ships.length} Schiffe · ${r.paused?'pausiert':'bereit / aktiv'}</div>`;
     if (open) {
       h += `<div class="rr-stops">`;
       routeGoods(r).forEach(({ st, goods }, i) => {
@@ -335,7 +348,7 @@ ovCard.addEventListener('click', (ev) => {
     }
     case 'unassign': cmd('routeUnassign', { route: id, ship: b.dataset.ship }); return;
     case 'pause': cmd('routePause', { route: id, paused: !r.paused }); return;
-    case 'delete': if (confirm(`Route "${r.name}" löschen?`)) cmd('routeDelete', { route: id }); return;
+    case 'delete': if (confirm(deleteMessage(r))) cmd('routeDelete', { route: id }); return;
   }
   renderOverview();
 });

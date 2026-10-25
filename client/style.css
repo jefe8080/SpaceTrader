@@ -425,3 +425,11 @@ details[open]>summary { color:var(--accent2); }
 .trade-table td:nth-child(2) { min-width:220px; }
 .trade-table details { max-width:240px; }
 .trade-actions { display:grid; gap:8px; }
+
+.trade-hub-card { width:min(1240px,calc(100vw - 24px)); max-height:calc(100dvh - 24px); overflow:auto; }
+#favCard { width:auto; }
+#routeEditor { margin-top:16px; padding:10px; border:1px solid var(--accent2); }
+#routeEditor>summary { font-size:16px; }
+.route-footer { position:sticky; bottom:0; padding:12px 0; background:#14252a; }
+#routeCard .action { flex-wrap:wrap; }
+#routeCard input,#routeCard select { max-width:100%; }

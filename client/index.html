@@ -73,14 +73,12 @@
     <div id="toasts"></div>
   </div>
 
-  <div id="routeEditor" class="overlay" hidden>
-    <div class="card route-card" id="routeCard"></div>
-  </div>
-  <div id="routesOverview" class="overlay" hidden>
-    <div class="card wide-card" id="routesCard"></div>
-  </div>
-  <div id="favorites" class="overlay" hidden>
-    <div class="card wide-card" id="favCard"></div>
+  <div id="tradeHub" class="overlay" hidden>
+    <div class="card trade-hub-card" role="dialog" aria-modal="true" aria-label="Handel und Routen">
+      <section id="favorites" hidden><div id="favCard"></div></section>
+      <section id="routesOverview" hidden><div id="routesCard"></div></section>
+      <details id="routeEditor" hidden><summary>Routenentwurf bearbeiten / einklappen</summary><div id="routeCard"></div></details>
+    </div>
   </div>
   <div id="almanac" class="overlay" hidden>
     <div class="card wide-card" id="almanacCard"></div>
