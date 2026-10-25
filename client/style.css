@@ -412,3 +412,16 @@ details[open]>summary { color:var(--accent2); }
 .location-orders { display:flex; flex-wrap:wrap; gap:6px; }
 .location-orders select { max-width:170px; }
 .location-section table { display:block; overflow:auto; }
+.trade-filters { display:flex; flex-wrap:wrap; gap:10px; padding:12px 0; border-bottom:1px solid var(--panel-border); }
+.trade-filters label { display:flex; flex-direction:column; gap:4px; font-size:12px; }
+.trade-filters input:not([type=checkbox]),.trade-filters select { max-width:170px; }
+.trade-tabs { display:flex; gap:8px; margin-bottom:10px; }
+.trade-tabs [aria-current] { border-color:var(--accent2); color:var(--accent2); }
+#favCard { width:min(1240px,calc(100vw - 24px)); }
+.trade-scroll { max-width:100%; overflow:auto; }
+.trade-table { border-collapse:collapse; width:100%; font-size:13px; }
+.trade-table th { text-align:left; color:var(--muted); white-space:nowrap; }
+.trade-table th,.trade-table td { padding:9px; border-bottom:1px solid var(--panel-border); vertical-align:top; min-width:85px; }
+.trade-table td:nth-child(2) { min-width:220px; }
+.trade-table details { max-width:240px; }
+.trade-actions { display:grid; gap:8px; }
