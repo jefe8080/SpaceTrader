@@ -277,81 +277,69 @@ function memberRow(e, g, sl, ship) {
 }
 
 // ---------- Objekt ----------
+let locationSection = '';
+let locationShip = '';
 function entityDetails(e) {
-  const fav = !!state.favorites[e.id];
-  let h = `<div class="det-head"><img src="${entitySprite(e)}" alt=""><div style="flex:1">
-    <div class="title">${esc(e.name)}</div><div class="type">${typeName(e)} · ${esc(systemName(e))} · ${esc(sectorName(e))}</div></div>
-    ${e.kind === 'planet' && e.market ? `<button class="small" data-act="land" data-ent="${e.id}" title="Planetare Ansicht (Doppelklick auf den Planeten)" ${dockedHereOwn(e.id) ? '' : 'disabled'}>🛬 Landen</button>` : ''}
-    <button class="star${fav ? ' on' : ''}" data-act="fav" data-ent="${e.id}" title="${fav ? 'Aus Favoriten entfernen' : 'Zu Favoriten (F)'}">${fav ? '★' : '☆'}</button></div>`;
-  const m = e.market;
+  const fav = !!state.favorites[e.id], m=e.market;
+  const ships=fleetOrder();
+  if (!ships.some(s=>s.id===locationShip)) locationShip=selectedShips()[0]?.id || ships[0]?.id || '';
+  const dockedHere=ships.filter(s=>s.dockedAt===e.id);
+  const myDocked=dockedHere.find(s=>s.id===locationShip) || dockedHere.find(s=>s.queue?.[0]?.t!=='route') || dockedHere[0];
+  let h=`<div class="det-head"><img src="${entitySprite(e)}" alt=""><div style="flex:1"><div class="title">${esc(e.name)}</div><div class="type">${typeName(e)} · ${esc(systemName(e))} · ${esc(sectorName(e))} · ${esc(e.ownerName || playerName(e.owner))}</div></div>
+  ${e.kind==='planet' && m?`<button data-act="land" data-ent="${e.id}" ${dockedHereOwn(e.id)?'':'disabled'}>Landen</button>`:''}
+  <button class="star" data-act="fav" data-ent="${e.id}" aria-label="Favorit umschalten" aria-pressed="${fav}">${fav?'★':'☆'}</button></div>`;
+  if(ships.length) h+=`<div class="location-orders"><label>Schiff <select id="locationShip">${ships.map(s=>`<option value="${s.id}" ${s.id===locationShip?'selected':''}>${esc(s.name)}${s.dockedAt===e.id?' · angedockt':''}</option>`).join('')}</select></label><button data-act="sendSelected" data-ent="${e.id}" title="Shift: anhängen">Anfliegen</button></div>`;
+  let infrastructure='';
   if (e.kind === 'planet') {
-    h += e.ruinsSite?colonyPanel(e):e.type === 'ruins' ? `<p>Persönliche, unverkäufliche Ruinenwelt. Lande für Heimatjournal, Reparaturen und Bauverwaltung.</p><div class="kv"><span>Einwohner / Wohnraum</span><span>${m.homeworld.population} / ${m.homeworld.housing}</span><span>Leitstelle</span><span>Stufe ${m.homeworld.controlLevel}</span><span>Reguläre Bauplätze</span><span>${m.homeworld.plots}</span></div>` : `<div class="muted">${PLANET_TYPES[e.type].desc}</div>
+    infrastructure += e.ruinsSite?colonyPanel(e):e.type === 'ruins' ? `<p>Persönliche, unverkäufliche Ruinenwelt. Lande für Heimatjournal, Reparaturen und Bauverwaltung.</p><div class="kv"><span>Einwohner / Wohnraum</span><span>${m.homeworld.population} / ${m.homeworld.housing}</span><span>Leitstelle</span><span>Stufe ${m.homeworld.controlLevel}</span><span>Reguläre Bauplätze</span><span>${m.homeworld.plots}</span></div>` : `<div class="muted">${PLANET_TYPES[e.type].desc}</div>
       <div class="kv" style="margin-top:6px"><span>Versorgung</span><span>${Math.round(m.eff * 100)} % Produktionsleistung</span></div>`;
   } else if (e.kind === 'station') {
     const def = STATION_TYPES[e.type];
     if (def.recipe) {
-      h += `<div class="kv"><span>Verarbeitung</span><span>${recipeText(def.recipe)} (${def.recipe.time}s)</span>
+      infrastructure += `<div class="kv"><span>Verarbeitung</span><span>${recipeText(def.recipe)} (${def.recipe.time}s)</span>
         <span>Status</span><span>${m.eff >= 1 ? 'läuft' : m.eff > 0 ? 'langsam (keine Nahrung)' : 'steht still'}</span>
         <span>Versorgung</span><span>${supplyText(m)}</span></div>`;
     } else if (def.consume) {
-      h += `<div class="muted">Kauft ${Object.keys(def.consume).map((g) => GOODS[g].name).join(', ')}.</div>`;
+      infrastructure += `<div class="muted">Kauft ${Object.keys(def.consume).map((g) => GOODS[g].name).join(', ')}.</div>`;
     } else if (def.buys) {
-      h += `<div class="muted">Kauft Baumaterial und baut daraus Schiffe.</div>`;
+      infrastructure += `<div class="muted">Kauft Baumaterial und baut daraus Schiffe.</div>`;
     } else if (def.extract) {
       const g = Object.keys(m.goods).find((x) => GOODS[x].ultra);
-      h += `<div class="kv"><span>Förderung</span><span>${g ? goodTag(g) : '?'} (ultraselten, nur am Hub verkäuflich)</span><span>Status</span><span>${m.eff >= 1 ? 'läuft' : 'langsam (keine Nahrung)'}</span></div>`;
+      infrastructure += `<div class="kv"><span>Förderung</span><span>${g ? goodTag(g) : '?'} (ultraselten, nur am Hub verkäuflich)</span><span>Status</span><span>${m.eff >= 1 ? 'läuft' : 'langsam (keine Nahrung)'}</span></div>`;
     } else if (def.outpost) {
-      h += `<div class="muted">${esc(FACTIONS[e.faction]?.desc || '')} Bietet Module an und fragt dauerhaft ${GOODS[FACTIONS[e.faction]?.currency]?.name || '?'} nach.</div>`;
+      infrastructure += `<div class="muted">${esc(FACTIONS[e.faction]?.desc || '')} Bietet Module an und fragt dauerhaft ${GOODS[FACTIONS[e.faction]?.currency]?.name || '?'} nach.</div>`;
     } else if (def.factionyard) {
-      h += `<div class="muted">Werft der ${esc(FACTIONS[e.faction]?.name || 'Fraktion')}. Das Fraktionsschiff kostet Credits und ${GOODS[FACTIONS[e.faction]?.currency]?.name || '?'}.</div>`;
+      infrastructure += `<div class="muted">Werft der ${esc(FACTIONS[e.faction]?.name || 'Fraktion')}. Das Fraktionsschiff kostet Credits und ${GOODS[FACTIONS[e.faction]?.currency]?.name || '?'}.</div>`;
     } else if (e.type === 'hub') {
-      h += `<div class="muted">Handelszentrum des Sektors: verkauft Schiffstreibstoff, kauft alle ultraseltenen Waren und handelt eine breite Auswahl.</div>`;
+      infrastructure += `<div class="muted">Handelszentrum des Sektors: verkauft Schiffstreibstoff, kauft alle ultraseltenen Waren und handelt eine breite Auswahl.</div>`;
     }
   } else if (e.kind === 'wormhole') {
     const w = state.wh.get(e.wh);
     const exit = w && (w.a.id === e.id ? w.b : w.a);
     const ex = exit && state.entities.get(exit.id);
-    h += `<div class="kv"><span>Ziel</span><span>${exit ? esc(ex ? ex.name + ' · ' + systemName(ex) + ' · ' + sectorName(ex) : 'bekannt (' + sectorOfPoint(exit) + ')') : 'unbekannt – erst durchfliegen'}</span>
+    infrastructure += `<div class="kv"><span>Ziel</span><span>${exit ? esc(ex ? ex.name + ' · ' + systemName(ex) + ' · ' + sectorName(ex) : 'bekannt (' + sectorOfPoint(exit) + ')') : 'unbekannt – erst durchfliegen'}</span>
       <span>Durchflug</span><span>5 s, kostenlos, kein Treibstoff</span></div>
       <div class="muted" style="margin-top:6px">Rechtsklick mit Schiff: hineinfliegen. Bekannte Verbindungen nutzt die Navigation automatisch.</div>`;
   } else if (e.kind === 'belt') {
-    h += `<div class="kv"><span>Rohstoff</span><span>${goodTag(BELT_TYPES[e.type].good)}</span><span>Ergiebigkeit</span><span>${Math.round(e.richness * 100)} %</span></div>
+    infrastructure += `<div class="kv"><span>Rohstoff</span><span>${goodTag(BELT_TYPES[e.type].good)}</span><span>Ergiebigkeit</span><span>${Math.round(e.richness * 100)} %</span></div>
       <div class="muted" style="margin-top:6px">Schiffe mit Bergbauausrüstung können hier abbauen (Rechtsklick).</div>`;
   }
-  if (fav) {
-    h += `<div class="section"><div class="section-title">Notiz</div><input class="fav-note" data-ent="${e.id}" maxlength="120" value="${esc(state.favorites[e.id].note || '')}" placeholder="eigene Notiz"></div>`;
-  }
-
-  const ships = myShips();
-  const dockedHere = ships.filter((s) => s.dockedAt === e.id);
-  if (m) {
-    const selShip = state.selected?.kind === 'ship' ? state.ships.get(state.selected.id) : null;
-    const tradeShip = dockedHere.find((s) => s === selShip) || dockedHere.find((s) => s.queue?.[0]?.t !== 'route') || dockedHere[0];
-    h += `<div class="section"><div class="section-title">Markt${tradeShip ? ' · handelt mit ' + esc(tradeShip.name) : ''}</div>${marketTable(e, tradeShip)}</div>`;
-  }
-  const myDocked = dockedHere.find((s) => state.selected?.kind === 'ship' && s.id === state.selected.id) || dockedHere[0];
-  if (e.salvageOwner === state.me.id) h += `<p>Persönlicher versiegelter Reliktfund. Nur das aktiv manuell gesteuerte Schiff kann ihn bergen und zur Heimatwerkstatt bringen.</p>
-    <button class="primary" data-act="relicSalvage" data-ent="${e.id}" data-ship="${state.manualShip || ''}" ${dockedHere.some(s=>s.id===state.manualShip) && state.homeQuest?.salvage?.phase==='available' ? '' : 'disabled'}>Versiegelten Fund bergen</button>`;
-  if (e.kind === 'planet') h += eventSection(e, dockedHere.find((s) => s.queue?.[0]?.t !== 'route') || myDocked);
-  if (e.faction && e.kind === 'planet') h += `<div class="muted small-note">${repLine(e.faction)}</div>`;
-  if (m && e.type !== 'ruins' && (e.kind === 'planet' || m.strategy === 'shipyard')) h += questBoardSection(e, myDocked);
-  if (m?.strategy === 'shipyard') h += shipyardSection(e, myDocked);
-  if (e.type === 'hub') h += hubSection(e, myDocked) + governorSection(myDocked);
-  if (m && e.type !== 'ruins') h += propertySection(e);
-  if(m?.homeworld)h+=warpPanel(e);
-  if(e.archiveOwner===state.me.id)h+=`<div class="section"><p>Persönliche Archiv-/Forschungsstelle. Das aktive manuelle Schiff muss hier persönlich anfliegen. Studienvorlagen benötigen 30 freie normale Frachteinheiten und werden einmalig geborgen.</p><button class="primary" data-act="homeArchiveVisit" data-ent="${e.id}" data-ship="${state.manualShip||''}" ${dockedHere.some(s=>s.id===state.manualShip)?'':'disabled'}>Archiv untersuchen / Vorlage bergen</button></div>`;
-  if (m?.strategy === 'factionyard') h += factionYardSection(e, myDocked);
-  if (e.type === 'outpost') h += outpostSection(e, myDocked);
-  if (m && e.type !== 'ruins') h += statsSection(e);
-
-  if (ships.length) {
-    h += `<div class="section"><div class="section-title">Schiff hierher schicken <span class="muted" style="text-transform:none;letter-spacing:0">· Shift: anhängen</span></div><div class="btnrow">
-      ${fleetOrder().map((s) => `<button class="small" data-act="send" data-ship="${s.id}" data-ent="${e.id}" ${s.dockedAt === e.id ? 'disabled' : ''} title="${fmtDuration(flightSecs(s, e))}">${shipSymbol(s)} ${esc(s.name)}</button>`).join('')}
-    </div></div>`;
-  }
+  if(m?.strategy==='shipyard') infrastructure+=shipyardSection(e,myDocked);
+  if(e.type==='hub') infrastructure+=hubSection(e,myDocked)+governorSection(myDocked);
+  if(m?.strategy==='factionyard') infrastructure+=factionYardSection(e,myDocked);
+  if(e.type==='outpost') infrastructure+=outpostSection(e,myDocked);
+  if(m?.homeworld) infrastructure+=warpPanel(e);
+  if(e.faction && e.kind==='planet') infrastructure+=`<div class="muted">${repLine(e.faction)}</div>`;
+  let quests=m && e.type!=='ruins' && (e.kind==='planet'||m.strategy==='shipyard')?questBoardSection(e,myDocked):'';
+  if(e.salvageOwner===state.me.id) quests+=`<p>Persönlicher versiegelter Reliktfund. Nur das aktive manuelle Schiff kann ihn bergen.</p><button data-act="relicSalvage" data-ent="${e.id}" data-ship="${state.manualShip||''}" ${dockedHere.some(s=>s.id===state.manualShip)&&state.homeQuest?.salvage?.phase==='available'?'':'disabled'}>Versiegelten Fund bergen</button>`;
+  if(e.archiveOwner===state.me.id) quests+=`<p>Persönliche Archiv-/Forschungsstelle. Studienvorlagen benötigen 30 freie Frachteinheiten.</p><button data-act="homeArchiveVisit" data-ent="${e.id}" data-ship="${state.manualShip||''}" ${dockedHere.some(s=>s.id===state.manualShip)?'':'disabled'}>Archiv untersuchen / Vorlage bergen</button>`;
+  const trade=m?marketTable(e,myDocked)+(e.kind==='planet'?eventSection(e,myDocked):'')+(e.type!=='ruins'?statsSection(e):''):'';
+  const management=(m && e.type!=='ruins'?propertySection(e):'')+(fav?`<label>Notiz <input class="fav-note" data-ent="${e.id}" maxlength="120" value="${esc(state.favorites[e.id].note||'')}"></label>`:'');
+  const sections=[['trade','Handel',trade],['services','Infrastruktur & Dienste',infrastructure],['quests','Aufträge',quests],['management','Besitz & Verwaltung',management]].filter(([,,body])=>body);
+  if(!sections.some(([id])=>id===locationSection)) locationSection='';
+  for(const [id,label,body] of sections) h+=`<details class="location-section" data-section="${id}" ${locationSection===id?'open':''}><summary>${label}</summary>${body}</details>`;
   return h;
 }
-
 
 // ---------- Marktstatistik ----------
 function chartSeries(e) {
@@ -422,6 +410,7 @@ det.addEventListener('click', (ev) => {
       break;
     }
     case 'mine': cmd('order', { ships: [d.ship], order: { t: 'mine', target: d.ent }, append: false }); break;
+    case 'sendSelected': { const ship=state.ships.get(locationShip); if(ship) orderShips([ship],state.entities.get(d.ent),ev.shiftKey); break; }
     case 'send': orderShips([state.ships.get(d.ship)], state.entities.get(d.ent), ev.shiftKey); break;
     case 'qup': cmd('queueMove', { ship: d.ship, qid: Number(d.qid), dir: -1 }); break;
     case 'qdown': cmd('queueMove', { ship: d.ship, qid: Number(d.qid), dir: 1 }); break;
@@ -468,6 +457,7 @@ det.addEventListener('click', (ev) => {
 
 det.addEventListener('change', (ev) => {
   const el = ev.target;
+  if(el.id==='locationShip') { locationShip=el.value; renderDetails(); return; }
   if (el.classList.contains('marker-color')) cmd('shipSettings', { ship: el.dataset.ship, marker: el.value });
   if (el.classList.contains('auto-refuel')) cmd('shipSettings', { ship: el.dataset.ship, autoRefuel: Number(el.value) });
   handlePropertyChange(el);
@@ -481,3 +471,12 @@ det.addEventListener('mouseover', (ev) => {
   if (ro) ro.textContent = t ? t.dataset.tip : ro.dataset.default;
 });
 
+
+det.addEventListener('toggle', ev=>{
+  const section=ev.target;
+  if(!section.matches('.location-section') || !section.isConnected) return;
+  if(section.open) {
+    locationSection=section.dataset.section;
+    for(const other of det.querySelectorAll('.location-section')) if(other!==section) other.open=false;
+  } else if(locationSection===section.dataset.section) locationSection='';
+},true);

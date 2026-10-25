@@ -179,3 +179,5 @@ Für diesen Dokumentationsauftrag: Inhalt gegen die bestätigten Interviewentsch
 ## Umsetzungsprotokoll
 
 U1: Vier native, per Tastatur/Touch bedienbare Navigationsgruppen und gemeinsamer Instrumententafelstil eingerichtet. Referenzbilder style-sample.png und civilian-approved.png vor der Gestaltung betrachtet. Zuordnung: Besitz/B, Konsortium/K und Heimat/Start → Pilotenprofil mit Lizenz-/Levelinformationen; Favoriten/F → Orte & Waren; Routen/R → Meine Routen; Nachfrage und Stop-Loss → Handel & Routen; Almanach/A und Hilfe → Wissen & Hilfe; Audio → Einstellungen; Marker/Zoom → kompakte Kartenfunktion; Flotte/Gruppen bleiben direkt sichtbar. Syntax und Diff geprüft; visuelle Gesamtprüfung folgt in U6.
+
+U2: Orts-Hover auf Identität, Besitzer und schiffsbezogene Entfernung/Flugzeit reduziert. Ortsfunktionen in bedarfsabhängige Rubriken überführt; native Aufklappbereiche mit höchstens einer offenen Rubrik und Übernahme beim Ortswechsel. Schiffsauswahl und direkter Anflug ersetzen die Knöpfe je Flottenschiff; angedockte Schiffsauswahl bestimmt Handelsaktionen. Landen/Favorit bleiben im Kopf. Syntax-/Diff-Prüfung erfolgreich; Interaktionsprüfung folgt U6.

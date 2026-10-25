@@ -100,17 +100,9 @@ export function updateTooltip(mx, my) {
     const e = state.entities.get(hov.id);
     if (e) {
       html = `<div class="tt-title">${state.favorites[e.id] ? '★ ' : ''}${esc(e.name)}</div><div class="muted">${typeName(e)}</div>`;
-      if (e.market) {
-        const sells = [], buys = [];
-        for (const [g, s] of Object.entries(e.market.goods)) {
-          if (canBuyFrom(s)) sells.push(`${GOODS[g].name} ${playerPrice(e, g, 'buy').toFixed(1)}`);
-          if (s.role !== 'produce') buys.push(`${GOODS[g].name} ${playerPrice(e, g, 'sell').toFixed(1)}`);
-        }
-        if (sells.length) html += `<div><span class="price-buy">Verkauft:</span> ${sells.join(', ')}</div>`;
-        if (buys.length) html += `<div><span class="price-sell">Kauft:</span> ${buys.join(', ')}</div>`;
-      }
-      const ships = selectedShips();
-      if (ships.length) html += `<div class="muted">Flugzeit ${fmtDuration(flightSecs(ships[0], e))} · Rechtsklick: hin, Shift: anhängen</div>`;
+      html += `<div class="muted">Besitzer: ${esc(e.ownerName || playerName(e.owner))}</div>`;
+      const ship=selectedShips()[0];
+      if(ship) html += `<div class="muted">Entfernung ${Math.round(Math.hypot(ship.x-e.x,ship.y-e.y))} · Flugzeit ${fmtDuration(flightSecs(ship,e))}</div>`;
     }
   } else if (hov?.kind === 'ship') {
     const s = state.ships.get(hov.id);

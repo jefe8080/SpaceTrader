@@ -406,3 +406,9 @@ details[open]>summary { color:var(--accent2); }
   .nav-content { min-width:190px; }
   .main-nav>details:first-child .nav-content { left:0; right:auto; }
 }
+
+.location-section { border-top:1px solid var(--panel-border); margin-top:10px; }
+.location-section>summary { font-weight:600; }
+.location-orders { display:flex; flex-wrap:wrap; gap:6px; }
+.location-orders select { max-width:170px; }
+.location-section table { display:block; overflow:auto; }
