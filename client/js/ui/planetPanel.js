@@ -65,9 +65,21 @@ export function planetEscape() {
   leavePlanet();
 }
 
+function syncManagementControls(lost){
+  for(const button of panel.querySelectorAll('button[data-pp]')){
+    if(['close','homeReplay','homeSite','homeWreck'].includes(button.dataset.pp))continue;
+    if(lost){
+      if(button.dataset.connectionDisabled===undefined)button.dataset.connectionDisabled=String(button.disabled);
+      button.disabled=true;
+    }else if(button.dataset.connectionDisabled!==undefined){
+      button.disabled=button.dataset.connectionDisabled==='true';delete button.dataset.connectionDisabled;
+    }
+  }
+}
+
 export function renderPlanetUi() {
   const lost = state.landed && state.entities.get(state.landed)?.type==='ruins' && !accessTo(state.landed).manage;
-  for(const button of panel.querySelectorAll('button[data-pp]'))if(!['close','homeReplay','homeSite','homeWreck'].includes(button.dataset.pp)) { if(lost)button.disabled=true; }
+  syncManagementControls(lost);
   if (!lost && panel.contains(document.activeElement) && document.activeElement.matches('input,select,textarea')) return;
   const e = state.landed && state.entities.get(state.landed);
   bar.hidden = !e;
@@ -97,7 +109,7 @@ export function renderPlanetUi() {
   else body = panelKinds[it.kind]?.render(it, e, ship) ?? '<div class="muted">Hier ist gerade nichts los.</div>';
   const expanded=new Set([...panel.querySelectorAll('details[open]')].map(d=>d.querySelector('summary')?.textContent));
   setHtml(panel, `<div class="panel-head"><h2>${esc(it.label)}</h2><span style="flex:1"></span><button class="small ghost" data-pp="close">✕</button></div>${body}`);
-  if(lost)for(const b of panel.querySelectorAll('button[data-pp]'))if(!['close','homeReplay','homeSite','homeWreck'].includes(b.dataset.pp))b.disabled=true;
+  syncManagementControls(lost);
   for(const details of panel.querySelectorAll('details'))if(expanded.has(details.querySelector('summary')?.textContent))details.open=true;
 }
 

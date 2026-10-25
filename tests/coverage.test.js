@@ -18,6 +18,7 @@ function fixture(file=':memory:'){
   const home=game.world.entities.get(player.homeworld),state=home.market.homeworld;
   state.facilities.control.status='ready';state.facilities.dock.status='ready';state.controlLevel=2;
   const ship=game.spawnShip(player,'spatz',home);ship.x=home.x;ship.y=home.y;ship.dockedAt=null;
+  const local=game.shipsOf(player.id)[0];local.dockedAt=home.id;
   return {game,player,home,state,ship};
 }
 const close=f=>f.game.store.close();

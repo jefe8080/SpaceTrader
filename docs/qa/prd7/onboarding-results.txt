@@ -1,0 +1,138 @@
+
+> space-trader@1.0.0 sim:homeworld
+> node sim/homeworld-onboarding.js
+
+{
+  "seed": 42,
+  "decisionSeconds": 0,
+  "decisions": 45,
+  "stages": [
+    {
+      "id": "H00",
+      "seconds": 1,
+      "credits": 5000,
+      "ships": 1
+    },
+    {
+      "id": "H01",
+      "seconds": 16,
+      "credits": 5500,
+      "ships": 1
+    },
+    {
+      "id": "H02",
+      "seconds": 417,
+      "credits": 5487,
+      "ships": 1
+    },
+    {
+      "id": "H04",
+      "seconds": 515,
+      "credits": 5493,
+      "ships": 1
+    },
+    {
+      "id": "H03",
+      "seconds": 575,
+      "credits": 5747,
+      "ships": 1
+    },
+    {
+      "id": "H05",
+      "seconds": 1175,
+      "credits": 6283,
+      "ships": 2
+    },
+    {
+      "id": "H06",
+      "seconds": 2001,
+      "credits": 8164,
+      "ships": 2
+    }
+  ],
+  "serverSeconds": 2001,
+  "credits": 8164,
+  "produced": {
+    "water": 30,
+    "food": 20,
+    "fuel": 22,
+    "ingots": 40
+  },
+  "stock": {
+    "ore": 4,
+    "tourists": 41,
+    "workers": 52,
+    "water": 88.96,
+    "food": 54.48,
+    "shipfuel": 40,
+    "fuel": 2,
+    "ingots": 92,
+    "plates": 40,
+    "electronics": 12,
+    "machinery": 4
+  },
+  "grants": [
+    {
+      "id": "home_p1:repairs",
+      "source": "start_exception",
+      "recipient": "p1",
+      "goods": {
+        "ingots": 80,
+        "plates": 40,
+        "electronics": 12,
+        "machinery": 4
+      }
+    },
+    {
+      "id": "home_p1:start-ship",
+      "source": "start_exception",
+      "recipient": "p1",
+      "ship": "s1",
+      "fuel": 6
+    },
+    {
+      "id": "home_p1:supplies",
+      "source": "start_exception",
+      "recipient": "p1",
+      "goods": {
+        "water": 80,
+        "food": 40,
+        "shipfuel": 40
+      }
+    },
+    {
+      "id": "p1:relic:H04",
+      "source": "quest_salvage",
+      "recipient": "p1",
+      "relic": "p1:relic"
+    },
+    {
+      "id": "home_p1:second-ship",
+      "source": "quest_H05",
+      "recipient": "p1",
+      "ship": "s2",
+      "fuel": 6
+    }
+  ],
+  "relic": {
+    "id": "p1:relic",
+    "speed": 4,
+    "location": {
+      "kind": "world",
+      "id": "home_p1"
+    },
+    "operation": null
+  },
+  "population": 101,
+  "civilianMoney": {
+    "budget": 0,
+    "taxRate": 0.2,
+    "gross": 124.3990555555537,
+    "taxes": 24.879811111110122,
+    "consumptionPayments": 99.51924444444049,
+    "unspentExpired": 0,
+    "incomePerHour": 228.93333333333334
+  },
+  "publicMarkets": 235,
+  "publicManufacturedStock": {}
+}

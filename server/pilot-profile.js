@@ -14,8 +14,8 @@ export function initializeProfile(game, player) {
   return player.profileStats;
 }
 
-export function syncInventoryBasis(game, player, good) {
-  const stats=initializeProfile(game,player),quantity=inventoryQuantity(game,player,good);
+export function syncInventoryBasis(game, player, good, quantity=inventoryQuantity(game,player,good)) {
+  const stats=initializeProfile(game,player);
   const entry=stats.inventory[good] ||= {quantity,known:0,cost:0};
   // Unexplained removals (production, fuel, quests) consume the same average mix.
   if(quantity<entry.quantity&&entry.quantity>0) {
@@ -23,6 +23,14 @@ export function syncInventoryBasis(game, player, good) {
   }
   entry.quantity=quantity;
   return entry;
+}
+
+// Marketplace/NPC paths mutate the warehouse directly rather than Game.trade.
+export function recordInventoryTrade(game, player, good, dir, n, total) {
+  if(!player||!n||!total)return;
+  const before=inventoryQuantity(game,player,good)+(dir==='sell'?n:-n);
+  syncInventoryBasis(game,player,good,before);
+  recordGoodsTrade(game,player,good,dir,{n,total},before);
 }
 
 export function recordGoodsTrade(game, player, good, dir, result, before) {

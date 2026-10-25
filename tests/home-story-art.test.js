@@ -1,3 +1,4 @@
+import {acknowledgeStories} from './home-story-helper.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
@@ -25,6 +26,9 @@ test('Bilddialoge sind freischaltbar und nachlesbar, ohne Spielzustand oder Kost
     assert.equal(read('H00'),undefined);assert.ok(read('H17'));
     for(const [id,scene] of Object.entries(HOME_STORY)){
       for(const prerequisite of scene.requires)p.homeQuest.completed[prerequisite]={at:0};
+      acknowledgeStories(game,p);
+      if(id==='H04_MODULE')p.homeQuest.salvage={phase:'workshop'};
+      if(id==='H04_MODULE')p.homeQuest.eventDialog=id;
       assert.ok(storyAvailable(p.homeQuest,id));assert.equal(read(id),undefined);assert.equal(read(id),undefined);
       assert.ok(p.homeQuest.scenesSeen[id]);
     }
@@ -35,7 +39,7 @@ test('Bilddialoge sind freischaltbar und nachlesbar, ohne Spielzustand oder Kost
 test('Siedlungswahl verändert nur widerrufbare Betriebsprioritäten und keine Preise',()=>{
   const game=new Game(':memory:',{profile:'homeworld',seed:42}),p=game.createPlayer('Priorität'),e=game.world.entities.get(p.homeworld),h=e.market.homeworld;
   try{
-    p.homeQuest.completed.H07={at:0};game.shipsOf(p.id)[0].dockedAt=e.id;
+    p.homeQuest.completed.H07={at:0};acknowledgeStories(game,p);game.shipsOf(p.id)[0].dockedAt=e.id;
     h.structures=[{id:'home',kind:'housing',priority:50}];
     const before=p.credits;
     for(const priority of ['housing','supply']){

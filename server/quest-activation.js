@@ -1,4 +1,4 @@
-import { correctQuestWreck } from './quest-wreck.js';
+import { correctQuestWreck, ensureQuestWreck } from './quest-wreck.js';
 import { HOME_QUESTS } from '../shared/homeworld.js';
 import { HOME_STORY } from '../shared/home-story.js';
 import { revealHomeSites } from './homequests.js';
@@ -19,6 +19,7 @@ export function syncHomeQuests(game, player) {
   if (q.introduction) return;
   const id = q.pending.shift();
   if (!id) return;
+  if(id==='H04'&&!ensureQuestWreck(game,player)) {q.pending.unshift(id);return;}
   q.active[id] = { at: game.time };
   q.introduction = id;
   q.journal.push({ id, at: game.time, speaker: HOME_STORY[id].speaker, text: HOME_STORY[id].text });

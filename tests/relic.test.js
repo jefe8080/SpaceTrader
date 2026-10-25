@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { Game } from '../server/game.js';
-import { runCommand } from '../server/handlers/index.js';
+import {runCommand,acknowledgeStories} from './home-story-helper.js';
 import { tickHomeworld } from '../server/homeworld.js';
 import { tickRelics } from '../server/relic.js';
 import { updateShip } from '../server/ships.js';
@@ -48,7 +48,7 @@ test('H04: versiegelter persönlicher Fund wird erst in der Heimatwerkstatt zu g
   assert.deepEqual(f.ship.cargo,{});
   assert.match(runCommand(f.game,f.player,{cmd:'relicSalvage',ship:f.ship.id,target:f.wreck.id}),/bereits/);
   assert.match(f.game.canGiveAway(f.player,f.ship),/versiegelten Fund/);
-  assert.match(runCommand(f.game,f.player,{cmd:'homeQuestComplete',target:f.home.id,quest:'H04'}),/angedockt/);
+  assert.match(runCommand(f.game,f.player,{cmd:'homeQuestComplete',target:f.home.id,quest:'H04'}),/Keine Verbindung/);
   go(f,f.home);
   assert.equal(runCommand(f.game,f.player,{cmd:'relicDeliver',ship:f.ship.id,target:f.home.id}),undefined);
   assert.equal(f.player.relic,undefined);

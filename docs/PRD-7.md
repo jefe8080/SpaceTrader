@@ -1,6 +1,6 @@
 # PRD 7 – Pilotenprofil, Questführung und planetare Fernverwaltung
 
-Stand: 2026-10-25 · Status: Umsetzung läuft
+Stand: 2026-10-25 · Status: Umsetzung abgeschlossen
 
 ## 1. Ziel und Freigabe
 
@@ -161,7 +161,7 @@ Jeder Schritt wird mit passenden Prüfungen abgeschlossen. Fortschritt und Prüf
 | U4 | Rathaus umbenennen, aktive Quests/Archiv trennen, Planetenübersicht und Namensänderung | U1, U3 | Abgeschlossen |
 | U5 | Verlässliche Profilstatistiken, Handelszählung und neue Profilseite | U3 | Abgeschlossen |
 | U6 | Gesamte Questredaktion und Karten-Topbar korrigieren | U1–U5 für finale Textbezüge | Abgeschlossen |
-| U7 | Integrierte Prüfung, verbleibende Fehler beheben, Abnahme dokumentieren | U1–U6 | Offen |
+| U7 | Integrierte Prüfung, verbleibende Fehler beheben, Abnahme dokumentieren | U1–U6 | Abgeschlossen |
 
 ## 11. Abnahmekriterien und Prüfplan
 
@@ -242,3 +242,15 @@ Prüfung: Profil-, Wirtschafts- und Questtests, 29/29 bestanden.
 ### U6 – Umsetzung
 
 Alle 18 Hauptquest-Einleitungen und individuellen Abschlüsse redigiert; gewöhnliche Missionen und Schmuggel atmosphärisch ergänzt, konkrete Bedingungen unverändert. Textinventar unter `docs/qa/prd7/README.md`. Dynamische Ortsnamen ersetzen gespeicherte Anzeigenamen. Kartenansichtsvermerk entfernt und Markerbedienung in den normalen Topbar-Layoutfluss gesetzt. Syntaxprüfungen und 19 gezielte Quest-/Profiltests bestanden. Visuelle Gesamtprüfung folgt in U7.
+
+### U7 – Integration und Abnahme
+
+- Gesamtsuite: `npm test`, **305/305 bestanden**. Altfixtures bestätigen Einleitungen nun ausdrücklich; technische Wirtschaftsprüfungen überspringen damit keine produktiven Zugriffskontrollen. Die Warteschlangentests verwenden unverändert die echten Handler ohne automatische Bestätigung.
+- Neustartprüfung mit echter SQLite-Datei: unbestätigtes H3, wartendes H4, einmaliger H4-Start, bleibende Aufdeckung, Planetennamen, reale Namenssperre und Handelszähler erhalten.
+- `npm run sim:homeworld`: erfolgreicher realer Einstieg H00–H06, einschließlich Bergung, Werkstatt und Relikt; keine injizierten Ressourcen.
+- `scripts/verify-prd7.mjs`: Browserprüfung mit Edge; Profil, Erstkontaktbestätigung, Rathaus und vollständig geladene Oberfläche, Funkverlust und Wiederherstellung ohne Schiffsauswahl, Markerbedienung bei 1440/1280/1024/768/390 Pixeln. Keine Browserfehler. Screenshots und Ergebnisprotokolle unter `docs/qa/prd7/`.
+- Fehler aus Zwischenläufen behoben: Radius-0-Aufdeckung, zu frühe H4-Erzeugung, kurz erneut geöffnete Dialoge während Serverbestätigung, nach Funkrückkehr deaktiviert bleibende Knöpfe. Routenplanung behält ihre eigene Netzprüfung; planetare Verwaltungsrechte werden dadurch nicht umgangen.
+- Direkte bezahlte Warenverkäufe aus eigenen Lagern an NPCs und Einwohner sind ebenfalls erfasst, Steuern bleiben ausgeschlossen. Passagierbeförderung gilt als Dienstleistung und zählt nicht als Warenhandel.
+- Namensanzeige und aktive Aufträge sind auch in weiteren Rathäusern verfügbar. Physische Lieferknöpfe benötigen ein angedocktes Schiff.
+
+Abnahme A–E durch gezielte Zustands-/Wirtschaftstests, bestehenden Gesamtprüfstand, redaktionelle Quellprüfung und Browserprüfung abgedeckt. Eine vollständige manuelle Langzeitdurchspielung H00–H17 wurde nicht durchgeführt; deren Bedingungen und Reliktstufen sind durch die vorhandenen Integrationsprüfungen abgesichert. Keine fehlgeschlagenen finalen Prüfungen. Kampfzahlen bleiben mangels vorhandener Kampfmechanik ausdrücklich unbekannt.

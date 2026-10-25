@@ -50,8 +50,8 @@ export function controlAdmissionCapacity(game,player){
   return total;
 }
 
-export function remoteManagementError(game,player,entity) {
-  if(game.profile==='homeworld'&&entity?.type==='ruins')return planetAccess(player,game.ships,entity,coverageAreas(game,player)).manage?null:'Keine Verbindung zum Hauptschiff im eigenen Leitstellennetz und kein eigenes Schiff vor Ort.';
+export function remoteManagementError(game,player,entity,planetary=true) {
+  if(planetary&&game.profile==='homeworld'&&entity?.type==='ruins')return planetAccess(player,game.ships,entity,coverageAreas(game,player)).manage?null:'Keine Verbindung zum Hauptschiff im eigenen Leitstellennetz und kein eigenes Schiff vor Ort.';
   if(game.profile!=='homeworld'||pointCovered(game,player,entity)||game.ships.get(player.manualShip)?.dockedAt===entity.id)return null;
   return 'Neue Fernänderungen brauchen eigene Leitstellenabdeckung oder dein manuelles Schiff vor Ort.';
 }

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {Game} from '../server/game.js';
-import {runCommand} from '../server/handlers/index.js';
+import {runCommand,acknowledgeStories} from './home-story-helper.js';
 import {siteError,tickColonies,colonyCost} from '../server/colonies.js';
 import {quoteWarp,startWarp,tickWarps,warpValuation} from '../server/warp.js';
 import {passengerTrade} from '../server/population.js';
@@ -22,6 +22,7 @@ function fixture(file=':memory:'){
   const site=[...game.world.entities.values()].find(e=>e.ruinsSite&&!siteError(game,p,e));assert(site);
   game.revealAround(p,site.x,site.y,1000);const system=[...game.world.systems.values()].find(s=>s.sector==='4,0'&&!s.faction&&!s.start);
   game.discover(p,'system',system.id);game.discover(p,'sector',system.sector);
+  acknowledgeStories(game,p);
   return {game,p,home,h,ship,site,system};
 }
 const command=(f,cmd,args={})=>runCommand(f.game,f.p,{cmd,...args});
@@ -37,7 +38,7 @@ function expedition(f){
   return {carrier,rootsurvivor,cost};
 }
 function prepareWarp(f){
-  f.p.homeQuest.completed.H16={at:0};f.ship.dockedAt=null;f.ship.x=f.home.x+f.home.radius+500;f.ship.y=f.home.y;
+  f.p.homeQuest.completed.H16={at:0};f.p.relic={id:'test-relic',speed:4,location:{kind:'ship',id:f.ship.id}};f.ship.relicSpeed=4;f.ship.dockedAt=null;f.ship.x=f.home.x+f.home.radius+500;f.ship.y=f.home.y;
   assert.equal(quoteWarp(f.game,f.p,f.home,f.system.id),undefined);return f.h.warpQuote;
 }
 
@@ -100,14 +101,14 @@ test('Vorbereitung friert Bestände und Fortschritt ein, sperrt Waren-/Modultran
 
 test('Warp bewegt dieselbe Welt und ihre Lager, keine Flottenschiffe; Index, Abdeckung und Reliktort bleiben konsistent',()=>{
   const f=fixture(),old={x:f.home.x,y:f.home.y},oldCell=cellKey(...cellOf(old.x,old.y)),q=prepareWarp(f),shipPosition={x:f.ship.x,y:f.ship.y};
-  f.p.relic={id:'unique',speed:4,location:{kind:'world',id:f.home.id}};f.home.market.goods.ore.stock=0;const id=f.home.id;assert.equal(startWarp(f.game,f.p,f.home,q.id,true),undefined);
+  f.p.relic={id:'unique',speed:4,location:{kind:'world',id:f.home.id}};assert.match(startWarp(f.game,f.p,f.home,q.id,true),/Keine Verbindung/);f.p.relic.location={kind:'ship',id:f.ship.id};f.home.market.goods.ore.stock=0;const id=f.home.id;assert.equal(startWarp(f.game,f.p,f.home,q.id,true),undefined);
   f.game.time+=300;tickWarps(f.game,300);assert.equal(f.home.id,id);assert.equal(f.home.system,f.system.id);assert.equal(f.home.x,q.target.x);assert.equal(f.game.world.entitiesInCell(oldCell).includes(id),false);assert.equal(f.game.world.entitiesInCell(cellKey(...cellOf(f.home.x,f.home.y))).filter(i=>i===id).length,1);
-  assert.deepEqual({x:f.ship.x,y:f.ship.y},shipPosition);assert.equal(f.p.relic.location.id,id);assert(pointCovered(f.game,f.p,f.home));assert.equal(pointCovered(f.game,f.p,old),false);assert.equal(f.h.warpCooldownUntil,f.game.time+86400);assert.match(quoteWarp(f.game,f.p,f.home,f.system.id),/Sperrfrist/);close(f);
+  assert.deepEqual({x:f.ship.x,y:f.ship.y},shipPosition);assert.equal(f.p.relic.location.id,f.ship.id);assert(pointCovered(f.game,f.p,f.home));assert.equal(pointCovered(f.game,f.p,old),false);assert.equal(f.h.warpCooldownUntil,f.game.time+86400);assert.match(quoteWarp(f.game,f.p,f.home,f.system.id),/Sperrfrist/);close(f);
 });
 
 test('Anfliegender Frachter beendet den begonnenen Abschnitt und pausiert ohne Verlust nach Relokation',()=>{
   const f=fixture();f.p.homeQuest.completed.H16={at:0};f.ship.dockedAt=null;f.ship.x=f.home.x+3000;f.ship.y=f.home.y;
-  const manual=f.game.spawnShip(f.p,'spatz',f.home);manual.dockedAt=null;f.p.manualShip=manual.id;
+  const manual=f.game.spawnShip(f.p,'spatz',f.home);manual.dockedAt=null;f.p.manualShip=manual.id;f.p.relic={id:'unique',speed:4,location:{kind:'ship',id:manual.id}};manual.relicSpeed=4;
   assert.equal(giveOrder(f.game,f.ship,{t:'goto',target:f.home.id},false),undefined);updateShip(f.ship,1,f.game);const endpoint={...f.ship.coverageLeg};
   assert.equal(quoteWarp(f.game,f.p,f.home,f.system.id),undefined);assert.equal(startWarp(f.game,f.p,f.home,f.h.warpQuote.id,true),undefined);f.game.time+=300;tickWarps(f.game,300);
   for(let i=0;i<100;i++)updateShip(f.ship,1,f.game);assert.equal(f.ship.relocationHold.state,'waiting');assert.equal(f.ship.x,endpoint.x);assert.equal(f.ship.y,endpoint.y);assert.equal(f.ship.dockedAt,null);assert(f.ship.queue.length);
@@ -127,7 +128,7 @@ test('Unerschlossene, belegte und fremde Warpziele werden vor Kostenbindung abge
 
 test('Warpziel wird exklusiv reserviert und kann nicht durch einen zweiten Transfer oder eine Gründung belegt werden',()=>{
   const f=fixture(),q=prepareWarp(f);assert.equal(startWarp(f.game,f.p,f.home,q.id,true),undefined);
-  const other=f.game.createPlayer('Zweites Warp'),world=f.game.world.entities.get(other.homeworld);other.homeQuest.completed.H16={at:0};world.market.homeworld.controlLevel=1;other.known.system.add(f.system.id);
+  const other=f.game.createPlayer('Zweites Warp'),world=f.game.world.entities.get(other.homeworld);other.homeQuest.completed.H16={at:0};world.market.homeworld.controlLevel=1;other.known.system.add(f.system.id);f.game.shipsOf(other.id)[0].dockedAt=world.id;
   assert.match(quoteWarp(f.game,other,world,f.system.id),/keine geeignete/);
   const hypothetical={...f.site,system:q.target.system,x:q.target.x,y:q.target.y};assert.match(siteError(f.game,f.p,hypothetical),/Warptransfer/);close(f);
 });

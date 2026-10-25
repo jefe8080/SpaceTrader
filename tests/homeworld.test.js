@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { Game } from '../server/game.js';
-import { runCommand } from '../server/handlers/index.js';
+import {runCommand,acknowledgeStories} from './home-story-helper.js';
 import { createHomeworld, tickHomeworld, ringCoordinates } from '../server/homeworld.js';
 import { HOMEWORLD } from '../shared/homeworld.js';
 import { ruinsLayout, createRuinsTerrain } from '../client/js/ruinsTerrain.js';

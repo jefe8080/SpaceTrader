@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {Game} from '../server/game.js';
-import {runCommand} from '../server/handlers/index.js';
+import {runCommand,acknowledgeStories} from './home-story-helper.js';
 import {pointCovered} from '../server/coverage.js';
 import {HOMEWORLD} from '../shared/homeworld.js';
 

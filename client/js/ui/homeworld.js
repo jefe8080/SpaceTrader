@@ -11,7 +11,7 @@ import {QUEST_DELIVERIES,STUDY_FINDS} from '/shared/advanced-homequests.js';
 import {SHIP_TYPES,SHIPYARD} from '/shared/config.js';
 import {warpPanel} from './colonies.js';
 
-let dialog, currentScene;
+let dialog, currentScene, closingScene;
 export function renderHomeDialog() {
   if (!dialog) {
     dialog = document.createElement('div'); dialog.className = 'overlay'; dialog.id = 'homeStory'; dialog.hidden = true;
@@ -21,6 +21,7 @@ export function renderHomeDialog() {
       if (!event.target.closest('[data-story-close]')&&!choice) return;
       state.homeDialogReplay = false;
       if (state.homeQuest) { state.homeQuest.scenesSeen ||= {}; state.homeQuest.scenesSeen[currentScene] = true; }
+      closingScene=currentScene;
       dialog.hidden = true; cmd('homeDialogRead', { scene: currentScene });currentScene=null;
     });
     document.addEventListener('keydown', (event) => {
@@ -28,12 +29,15 @@ export function renderHomeDialog() {
     }, true);
     document.body.append(dialog);
   }
+  if(!state.me){dialog.hidden=true;currentScene=null;closingScene=null;return;}
   if(currentScene && !dialog.hidden) return;
   const requested=typeof state.homeDialogReplay==='string'?state.homeDialogReplay:state.homeDialogReplay?'H00':null;
   if (!storyDialogReady(state.homeQuest, state.homeStoryShipClicked, !document.getElementById('help').hidden)) {
     dialog.hidden = true; currentScene = null; return;
   }
   const id=requested&&storyAvailable(state.homeQuest,requested)?requested:state.homeQuest?.eventDialog||state.homeQuest?.introduction;
+  if(id===closingScene&&!requested)return;
+  if(id!==closingScene)closingScene=null;
   if(!state.me||!id){dialog.hidden=true;currentScene=null;return;}
   if(currentScene!==id){
     currentScene=id;const scene=HOME_STORY[id];
@@ -49,22 +53,20 @@ export function homePanel(entity, item, ship) {
   if (home.owner !== state.me.id) return '<div class="muted">Persönliche Ruinenwelt eines anderen Kapitäns.</div>';
   if (item.kind === 'questhouse') {
     const overview='<details><summary>Planetenübersicht</summary>'+homeBalance(entity)+'</details>'+planetNamePanel(entity);
-    if(entity.id!==state.homeworld)return overview+ `<p>Weiterer persönlicher Ruinenstandort. Dock und Infrastruktur stammen aus der bezahlten Expedition. Keine erneuten Einstiegspakete und kein zweites Tutorial.</p>`+homeBalance(entity)+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} nachgewiesene eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+warpPanel(entity);
+    if(entity.id!==state.homeworld)return overview+'<h3>Laufende Quests</h3>'+(state.quest?'<p>'+questText(state.quest)+'</p>':'')+Object.entries(HOME_QUESTS).filter(([id])=>state.homeQuest?.active?.[id]&&!completed(id)).map(([id,q])=>'<p><b>'+id+' · '+esc(q.title)+'</b><br>'+esc(q.goal)+'</p>').join('')+'<button class="small" data-pp="homeSite" data-id="'+state.homeworld+'">Zur Hauptheimat zeigen</button>'+historyPanel()+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+warpPanel(entity);
     let html = overview+(state.quest?'<h3>Laufender Auftrag</h3><p>'+questText(state.quest)+'</p>':'')+`<div class="muted">Hauptquests laufen unabhängig von normalen Quests. Mehrere freigeschaltete Zweige können gleichzeitig fortschreiten.</div>`;
-    html += `<div class="kv"><span>Einwohner / Wohnraum</span><span>${home.population} / ${home.housing}</span><span>Grundenergie</span><span>${home.power}</span><span>Leitstelle</span><span>Stufe ${home.controlLevel}</span>
-      <span>Eigenproduktion</span><span>${fmt(home.produced.water || 0)} Wasser · ${fmt(home.produced.food || 0)} Nahrung · ${fmt(home.produced.ingots || 0)} Barren</span>
-      <span>Versorgter Betrieb nach H03</span><span>${Math.floor(home.suppliedSeconds)} / 600 s</span></div>`;
     for (const [id, quest] of Object.entries(HOME_QUESTS)) {
       if(completed(id)||!state.homeQuest?.active?.[id])continue;
       const unlocked = true;
       html += `<div class="quest-offer"><b>${id} · ${esc(quest.title)} ${completed(id) ? '✓' : ''}</b><p>${esc(quest.goal)}</p>
       <div class="muted">${quest.credits} Cr · ${quest.xp} XP${unlocked ? '' : ' · Voraussetzung: ' + quest.requires.join(', ')}</div>
       ${completed(id) ? '' : `<button class="small primary" data-pp="homeQuest" data-quest="${id}" ${unlocked ? '' : 'disabled'}>Fortschritt prüfen und abschließen</button>`}</div>`;
+      if(id==='H05')html+=`<p>Versorgter Betrieb: ${Math.floor(home.suppliedSeconds)} / 600 s</p>`;
       if (id === 'H04' && state.homeQuest?.salvage?.phase === 'available') html += '<button class="small" data-pp="homeWreck">Markiertes Wrack zeigen</button>';
       if(unlocked&&!completed(id)){
         for(const [g,n] of Object.entries(QUEST_DELIVERIES[id]||{})){
           const have=home.questDeliveries?.[id]?.[g]||0,remaining=n-have;
-          html+=`<p>${GOODS[g].name}: ${have} / ${n} unwiderruflich für diesen Auftrag gebunden</p>${remaining>0?`<input aria-label="Liefermenge ${id} ${GOODS[g].name}" id="questDelivery-${id}-${g}" type="number" min="1" max="${remaining}" value="${Math.min(10,remaining)}"><button class="small" data-pp="homeQuestDeliver" data-quest="${id}" data-good="${g}">Teilmenge liefern</button>`:''}`;
+          html+=`<p>${GOODS[g].name}: ${have} / ${n} unwiderruflich für diesen Auftrag gebunden</p>${remaining>0?`<input aria-label="Liefermenge ${id} ${GOODS[g].name}" id="questDelivery-${id}-${g}" type="number" min="1" max="${remaining}" value="${Math.min(10,remaining)}"><button class="small" data-pp="homeQuestDeliver" ${ship?'':'disabled title="Ein eigenes Schiff muss für die Lieferung hier angedockt sein"'} data-quest="${id}" data-good="${g}">Teilmenge liefern</button>`:''}`;
         }
         const site=state.homeQuest?.sites?.[id];
         if(site)html+=`<p>Archivbesuch: ${state.homeQuest.visits?.[id]?'aufgezeichnet':'offen'}</p><button class="small" data-pp="homeSite" data-id="${site}">Archivstelle zeigen</button>`;
@@ -75,7 +77,7 @@ export function homePanel(entity, item, ship) {
     html+='<h3>Eigene Welten und Expeditionen</h3>';
     for(const world of [...state.entities.values()].filter(e=>e.ruinsSite||e.market?.homeworld?.owner===state.me.id))html+=`<p>${esc(world.name)} · ${world.ruinsSite?'unbewohnter Standort':`Leitstelle ${world.market.homeworld.controlLevel}`}</p><button class="small" data-pp="homeSite" data-id="${world.id}">Standort zeigen</button>`;
     html+=warpPanel(entity);
-    html += '<details><summary>Archiv – erlebte Geschichten</summary>'+Object.entries(HOME_STORY).filter(([id])=>state.homeQuest?.scenesSeen?.[id]||completed(id)).map(([id,scene])=>`<button class="small" data-pp="homeReplay" data-scene="${id}">${id} · ${esc(scene.title)} ansehen</button><p><b>${esc(scene.speaker)}</b>: ${esc(scene.text)}</p>`).join('') + (state.homeQuest?.journal || []).map((entry) => `<p><b>${esc(entry.speaker || entry.id)}</b> · ${esc(entry.text)}</p>`).join('') + '</details>';
+    html += historyPanel();
     return html;
   }
   if (item.homeStructure) return structurePanel(entity,item.homeStructure);
@@ -91,7 +93,7 @@ export function homePanel(entity, item, ship) {
     <button class="primary" data-pp="homeRepair" data-facility="${facility}">Reparieren</button>`;
   if (facility === 'workshop') {
     const salvage = state.homeQuest?.salvage;
-    if (salvage?.phase === 'sealed') html += `<button class="primary" data-pp="relicDeliver" data-ship="${salvage.ship}">Versiegelten Fund übergeben · Werkstatt 60 s</button>`;
+    if (salvage?.phase === 'sealed') html += `<button class="primary" data-pp="relicDeliver" ${ship?.id===salvage.ship?'':'disabled'} data-ship="${salvage.ship}">Versiegelten Fund übergeben · Werkstatt 60 s</button>`;
     if (state.relic) {
       const relic = state.relic, location = relic.location;
       const where = location.kind === 'ship' ? state.ships.get(location.id)?.name || location.id : state.entities.get(location.id)?.name || location.id;
@@ -142,6 +144,8 @@ export function homePanel(entity, item, ship) {
   }
   return html;
 }
+
+function historyPanel(){return '<details><summary>Archiv – erlebte Geschichten</summary>'+Object.entries(HOME_STORY).filter(([id])=>state.homeQuest?.scenesSeen?.[id]||completed(id)).map(([id,scene])=>`<button class="small" data-pp="homeReplay" data-scene="${id}">${id} · ${esc(scene.title)} ansehen</button><p><b>${esc(scene.speaker)}</b>: ${esc(scene.text)}</p>`).join('') + (state.homeQuest?.journal || []).map((entry) => `<p><b>${esc(entry.speaker || entry.id)}</b> · ${esc(entry.text)}</p>`).join('') + '</details>';}
 
 function planetNamePanel(entity){
   const until=(entity.market.homeworld.renamedAt??0)+86400000;

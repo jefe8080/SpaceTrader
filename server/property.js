@@ -1,3 +1,4 @@
+import {recordInventoryTrade} from './pilot-profile.js';
 import { RECIPES, PLANET_TYPES, PROP_UPGRADES, FIXED, SHIP_TYPES, buyPrice, sellPrice,
   priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref } from '../shared/config.js';
 import { stat, applyLevel } from './markets.js';
@@ -88,6 +89,7 @@ export function tickOwnedPlanet(game, e, prop, dt) {
     const money = n * fixedPrice(pmin, pmax, sv);
     owner.credits += money;
     propBook(game, prop, 'inc', money);
+    recordInventoryTrade(game,game.players.get(prop.player),g,'sell',n,money);
     stat(m, game.time, 'c', g, n);
   }
 }
@@ -113,6 +115,7 @@ export function payForDelivery(game, e, prop, good, n) {
     owner.credits -= pr; cost += pr; slot.stock += 1; k++;
   }
   propBook(game, prop, 'exp', cost);
+  recordInventoryTrade(game,game.players.get(prop.player),good,'buy',k,cost);
   return k;
 }
 
@@ -124,6 +127,7 @@ export function sellToSupplier(game, e, prop, good, n) {
   for (let i = 0; i < n; i++) { money += buyPrice(good, slot); slot.stock -= 1; }
   if (owner) owner.credits += money;
   propBook(game, prop, 'inc', money);
+  recordInventoryTrade(game,game.players.get(prop.player),good,'sell',n,money);
 }
 
 /** Werftklassen eigener Werften: normale Werft S (+M mit Zusatzproduktion), große Werft bis L (+XL) */

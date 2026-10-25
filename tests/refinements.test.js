@@ -15,6 +15,7 @@ function fixture(recipe){
   home.population=1000;home.workers={basic:100,skilled:30,specialist:20};home.facilities.dock.status='ready';home.facilities.control.status='ready';home.controlLevel=1;
   home.structures=[{id:'solar1',kind:'solar',status:'ready',plot:0},{id:'solar2',kind:'solar',status:'ready',plot:1}];
   if(recipe)home.structures.push({id:'refining',kind:'plant',recipe,buildGroup:industryGroup(recipe),status:'ready',enabled:true,plot:2,progress:0});
+  game.shipsOf(player.id)[0].dockedAt=entity.id;
   return {game,player,entity,home};
 }
 const advance=(f,dt)=>{f.game.time+=dt;tickHomeworld(f.game,f.entity,dt);};

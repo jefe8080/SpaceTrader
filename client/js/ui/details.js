@@ -1,3 +1,4 @@
+import {canLand,accessTo} from '../planetside.js';
 import { GOODS, SHIP_TYPES, STATION_TYPES, PLANET_TYPES, BELT_TYPES, SUPPLY, recipeText, canBuyFrom, canSellTo } from '/shared/config.js';
 import { state, myShips, fmt, fmtK, esc, playerColor, playerName, selectedShips, fleetOrder } from '../state.js';
 import { socket, cmd } from '../net.js';
@@ -286,12 +287,12 @@ function entityDetails(e) {
   const dockedHere=ships.filter(s=>s.dockedAt===e.id);
   const myDocked=dockedHere.find(s=>s.id===locationShip) || dockedHere.find(s=>s.queue?.[0]?.t!=='route') || dockedHere[0];
   let h=`<div class="det-head"><img src="${entitySprite(e)}" alt=""><div style="flex:1"><div class="title">${esc(e.name)}</div><div class="type">${typeName(e)} · ${esc(systemName(e))} · ${esc(sectorName(e))} · ${esc(e.ownerName || (e.owner ? playerName(e.owner) : 'NPC'))}</div></div>
-  ${e.kind==='planet' && m?`<button data-act="land" data-ent="${e.id}" ${dockedHereOwn(e.id)?'':'disabled'}>Landen</button>`:''}
+  ${e.kind==='planet' && m?`<button data-act="land" data-ent="${e.id}" ${canLand(e.id)?'':'disabled'}>${accessTo(e.id).remote&&!accessTo(e.id).local?'Fernverwaltung öffnen':'Landen'}</button>`:''}
   <button class="star" data-act="fav" data-ent="${e.id}" aria-label="Favorit umschalten" aria-pressed="${fav}">${fav?'★':'☆'}</button></div>`;
   if(ships.length) h+=`<div class="location-orders"><label>Schiff <select id="locationShip">${ships.map(s=>`<option value="${s.id}" ${s.id===locationShip?'selected':''}>${esc(s.name)}${s.dockedAt===e.id?' · angedockt':''}</option>`).join('')}</select></label><button data-act="sendSelected" data-ent="${e.id}" title="Shift: anhängen">Anfliegen</button></div>`;
   let infrastructure='';
   if (e.kind === 'planet') {
-    infrastructure += e.ruinsSite?colonyPanel(e):e.type === 'ruins' ? `<p>Persönliche, unverkäufliche Ruinenwelt. Lande für Rathaus, Reparaturen und Bauverwaltung.</p><div class="kv"><span>Einwohner / Wohnraum</span><span>${m.homeworld.population} / ${m.homeworld.housing}</span><span>Leitstelle</span><span>Stufe ${m.homeworld.controlLevel}</span><span>Reguläre Bauplätze</span><span>${m.homeworld.plots}</span></div>` : `<div class="muted">${PLANET_TYPES[e.type].desc}</div>
+    infrastructure += e.ruinsSite?colonyPanel(e):e.type === 'ruins' ? `<p>Persönliche, unverkäufliche Ruinenwelt. Rathaus, Reparaturen und Bauverwaltung sind bei Landung oder über dein Hauptschiff im eigenen Leitstellennetz erreichbar.</p><div class="kv"><span>Einwohner / Wohnraum</span><span>${m.homeworld.population} / ${m.homeworld.housing}</span><span>Leitstelle</span><span>Stufe ${m.homeworld.controlLevel}</span><span>Reguläre Bauplätze</span><span>${m.homeworld.plots}</span></div>` : `<div class="muted">${PLANET_TYPES[e.type].desc}</div>
       <div class="kv" style="margin-top:6px"><span>Versorgung</span><span>${Math.round(m.eff * 100)} % Produktionsleistung</span></div>`;
   } else if (e.kind === 'station') {
     const def = STATION_TYPES[e.type];

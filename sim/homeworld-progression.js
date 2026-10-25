@@ -2,7 +2,7 @@
 // quest reward, passenger and hull uses the real server. No injected resources.
 import fs from 'node:fs';
 import {simulateOnboarding} from './homeworld-onboarding.js';
-import {runCommand} from '../server/handlers/index.js';
+import {runCommand} from './story-command.js';
 import {HOME_BUILDINGS,industrySpec,availableHomeStock} from '../shared/homeworld.js';
 import {GOODS,RECIPES,shipStats,freeFor,SHIP_TYPES,sellPrice,buyPrice} from '../shared/config.js';
 import {MODULE_RECIPES} from '../shared/module-production.js';

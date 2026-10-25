@@ -8,7 +8,10 @@ import { WORLD } from '../shared/config.js';
 import { homeAccess } from '../server/homeworld-operations.js';
 import { mainShip } from '../shared/planet-access.js';
 import { renamePlanet, PLANET_RENAME_COOLDOWN } from '../server/planet-name.js';
-import { pilotProfile } from '../server/pilot-profile.js';
+import { pilotProfile, recordInventoryTrade } from '../server/pilot-profile.js';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 function fixture() {
   const game = new Game(':memory:', { profile: 'homeworld', seed: 42 });
@@ -25,6 +28,7 @@ test('PRD7: introductions serialize actual starts and survive repeated synchroni
   syncHomeQuests(game, player);
   assert.equal(player.homeQuest.introduction, 'H03');
   assert.equal(player.homeQuest.active.H04, undefined);
+  assert.equal(player.homeQuest.salvage, undefined);
   assert.deepEqual(player.homeQuest.pending, ['H04']);
   const journal = player.homeQuest.journal.length;
   syncHomeQuests(game, player);
@@ -33,9 +37,38 @@ test('PRD7: introductions serialize actual starts and survive repeated synchroni
   assert.equal(runCommand(game, player, { cmd: 'homeDialogRead', scene: 'H03' }), undefined);
   assert.equal(player.homeQuest.introduction, 'H04');
   assert.ok(player.homeQuest.active.H04);
+  assert.ok(player.homeQuest.salvage.wreck);
   runCommand(game, player, { cmd: 'homeDialogRead', scene: 'H03' });
   assert.equal(player.homeQuest.introduction, 'H04');
   game.store.close();
+});
+
+test('PRD7: restart retains unconfirmed introductions, pending starts, names and accounting', () => {
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'spacetrader-prd7-')),file=path.join(directory,'world.db');
+  let game;
+  try {
+    game=new Game(file,{profile:'homeworld',seed:42});
+    const p=game.createPlayer('Persistent'),home=game.world.entities.get(p.homeworld),ship=game.shipsOf(p.id)[0];
+    ship.dockedAt=home.id;
+    renamePlanet(game,p,home,'Neue Heimat',Date.now());
+    p.homeQuest.completed={H00:{},H01:{},H02:{}};p.homeQuest.introduction=null;syncHomeQuests(game,p);
+    const profile=pilotProfile(game,p),renamedAt=home.market.homeworld.renamedAt;
+    p.profileStats.revenue=123;p.profileStats.knownProfit=45;
+    const journalLength=p.homeQuest.journal.length;
+    game.close();game=new Game(file,{profile:'homeworld'});
+    const loaded=game.players.get(p.id),world=game.world.entities.get(home.id);
+    assert.equal(loaded.homeQuest.introduction,'H03');assert.deepEqual(loaded.homeQuest.pending,['H04']);
+    assert.equal(loaded.homeQuest.journal.length,journalLength);assert.equal(loaded.homeQuest.salvage,undefined);
+    assert.equal(world.name,'Neue Heimat');assert.equal(world.market.homeworld.renamedAt,renamedAt);
+    assert.match(renamePlanet(game,loaded,world,'Zu früh'),/24 Stunden/);
+    assert.equal(pilotProfile(game,loaded).revenue,123);assert.equal(pilotProfile(game,loaded).profit,45);
+    assert.equal(pilotProfile(game,loaded).since,profile.since);
+    runCommand(game,loaded,{cmd:'homeDialogRead',scene:'H03'});game.close();game=new Game(file,{profile:'homeworld'});
+    const active=game.players.get(p.id);assert.equal(active.homeQuest.introduction,'H04');
+    const count=active.homeQuest.journal.filter(e=>e.id==='H04').length;
+    assert.equal(count,1);assert.ok(active.homeQuest.salvage.wreck);
+    assert.ok(game.isKnown(active,game.world.entities.get(active.homeQuest.salvage.wreck)));
+  } finally {game?.store.close();fs.rmSync(directory,{recursive:true,force:true});}
 });
 
 test('PRD7: actual manual and automated sales count once; partial weighted costs and unknown goods', () => {
@@ -87,6 +120,10 @@ test('PRD7: only installed owned flagship in own network grants remote managemen
   player.relic.location={kind:'ship',id:ship.id};
   assert.equal(mainShip(player,game.ships),ship);
   assert.equal(homeAccess(game,player,home),null);
+  const remoteWorld={...home,id:'remote-world',system:'remote-system',sector:'far-away',x:home.x+200000,market:structuredClone(home.market)};
+  remoteWorld.market.homeworld.controlLevel=0;game.world.addEntity(remoteWorld);
+  assert.equal(homeAccess(game,player,remoteWorld),null);
+  assert.equal(runCommand(game,player,{cmd:'homeQuestDeliver',target:home.id,quest:'H08',good:'plates',amount:1}), 'Für diese Lieferung muss ein eigenes Schiff hier angedockt sein.');
   player.manualShip='unrelated';
   assert.equal(homeAccess(game,player,home),null);
   ship.x+=100000;
@@ -98,6 +135,20 @@ test('PRD7: only installed owned flagship in own network grants remote managemen
   assert.match(homeAccess(game,player,home),/Keine Verbindung/);
   ship.owner='other';player.relic.location={kind:'ship',id:ship.id};
   assert.match(homeAccess(game,player,home),/Keine Verbindung/);
+  game.store.close();
+});
+
+test('PRD7: paid warehouse/NPC goods transactions count without counting tax income', () => {
+  const {game,player,home,ship}=fixture();ship.cargo={};
+  home.market.goods.ore.stock=10;
+  recordInventoryTrade(game,player,'ore','buy',10,100);
+  assert.equal(pilotProfile(game,player).revenue,0);
+  home.market.goods.ore.stock-=4;
+  recordInventoryTrade(game,player,'ore','sell',4,60);
+  assert.equal(pilotProfile(game,player).revenue,60);
+  assert.equal(pilotProfile(game,player).profit,20);
+  player.credits+=50;
+  assert.equal(pilotProfile(game,player).revenue,60);
   game.store.close();
 });
 

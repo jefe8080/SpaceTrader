@@ -2,6 +2,17 @@ import { WORLD, cellKey, cellOf } from '../shared/config.js';
 import { hexAt, hexKey } from '../shared/hex.js';
 
 export const WRECK_MARGIN = 400;
+export function ensureQuestWreck(game,player) {
+  const q=player.homeQuest;
+  if(q.salvage)return true;
+  const home=game.world.entities.get(player.homeworld),point=findWreckPosition(game,home);
+  if(!point)return false;
+  const wreck={id:`${home.id}_relic_wreck`,kind:'station',type:'wreck',name:'Wrack ohne Kennung',radius:65,
+    ...point,sector:home.sector,system:home.system,noBuy:true,salvageOwner:player.id};
+  game.world.addEntity(wreck);
+  q.salvage={id:`${player.id}:relic:H04`,wreck:wreck.id,phase:'available'};
+  return true;
+}
 export function wreckPositionValid(game, home, point, ignore) {
   const system = game.world.systems.get(home.system);
   if (!system || Math.hypot(point.x-system.x, point.y-system.y) > WORLD.SYSTEM_RADIUS+WRECK_MARGIN) return false;

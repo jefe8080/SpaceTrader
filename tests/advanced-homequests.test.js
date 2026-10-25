@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {Game} from '../server/game.js';
-import {runCommand} from '../server/handlers/index.js';
+import {runCommand,acknowledgeStories} from './home-story-helper.js';
 import {tickHomeworld,homeQuestReady} from '../server/homeworld.js';
 import {revealHomeSites} from '../server/homequests.js';
 import {HOME_QUESTS} from '../shared/homeworld.js';
@@ -19,13 +19,13 @@ function fixture(file=':memory:'){
   h.population=1000;h.workers={basic:400,skilled:100,specialist:30};h.controlLevel=1;
   for(const id of ['dock','control'])h.facilities[id].status='ready';
   h.structures=Array.from({length:6},(_,i)=>({id:`solar${i}`,kind:'solar',status:'ready',plot:i}));
-  s.dockedAt=e.id;s.queue=[];return {game,p,e,h,s};
+  s.dockedAt=e.id;s.queue=[];acknowledgeStories(game,p);return {game,p,e,h,s};
 }
 const close=f=>f.game.store.close();
 const command=(f,cmd,args={})=>runCommand(f.game,f.p,{cmd,target:f.e.id,...args});
 const finish=(f,id)=>command(f,'homeQuestComplete',{quest:id});
 const advance=(f,n)=>{f.game.time+=n;tickHomeworld(f.game,f.e,n);};
-const unlock=(f,...ids)=>{for(const id of ids)f.p.homeQuest.completed[id]={at:0};};
+const unlock=(f,...ids)=>{for(const id of ids)f.p.homeQuest.completed[id]={at:0};acknowledgeStories(f.game,f.p);};
 function deliver(f,id){for(const [g,n] of Object.entries(QUEST_DELIVERIES[id])){f.e.market.goods[g].stock=n;assert.equal(command(f,'homeQuestDeliver',{quest:id,good:g,amount:n}),undefined);}}
 
 test('Alle 18 Hauptquests haben feste Voraussetzungen, Belohnungen und nachvollziehbare Ziele',()=>{

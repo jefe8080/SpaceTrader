@@ -1,3 +1,4 @@
+import {recordInventoryTrade} from './pilot-profile.js';
 import {GOODS,SHIP_TYPES,SHIPYARD,WORLD,SUPPLY,buyPrice,sellPrice,canBuyFrom,canSellTo,NPC_OWNER} from '../shared/config.js';
 import {HOMEWORLD,availableHomeStock,homeStorageFree} from '../shared/homeworld.js';
 import {stat} from './markets.js';
@@ -104,6 +105,7 @@ export function tickCivilMoney(game,entity,dt,consumption={}){
     const price=game.fixedPriceOf(entity,prop,good),payment=Math.min(civil.budget,amount*price);
     civil.budget-=payment;civil.consumptionPayments+=payment;owner.credits+=payment;
     propBook(game,prop,'inc',payment);
+    recordInventoryTrade(game,game.players.get(prop.player),good,'sell',amount,payment);
   }
   if(prop)propBook(game,prop,'inc',tax);
   civil.incomePerHour=income;
@@ -148,6 +150,7 @@ export function loadRealSupply(game,ship,source,order){
   if(!slot||!canBuyFrom(slot)||prop?.mode==='private'||market.homeworld?.warp)return;
   if(handlingAllowance(game,source,ship)<1)return false;
   let amount=Math.min(order.amount,40,Math.floor(availableHomeStock(market,order.good)),handlingAllowance(game,source,ship)),loaded=0;
+  const cashBefore=order.cash;
   while(loaded<amount){
     const price=buyPrice(order.good,slot)*(1+(prop?.customs||0));if(price>order.cash)break;
     order.cash-=price;slot.stock--;loaded++;
@@ -155,6 +158,7 @@ export function loadRealSupply(game,ship,source,order){
     if(prop){const owner=game.accountOf(prop.player);if(owner)owner.credits+=price;propBook(game,prop,'inc',price);}
     else receiveMarketCash(source,price);
   }
+  if(loaded&&prop)recordInventoryTrade(game,game.players.get(prop.player),order.good,'sell',loaded,cashBefore-order.cash);
   if(loaded){ship.cargo[order.good]=(ship.cargo[order.good]||0)+loaded;stat(market,game.time,'o',order.good,loaded);}
   recordHandling(game,source,ship,loaded);
 }

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Game } from '../server/game.js';
-import { runCommand } from '../server/handlers/index.js';
+import { runCommand } from './story-command.js';
 import { rng } from '../server/worldgen.js';
 import {GOODS} from '../shared/goods.js';
 
