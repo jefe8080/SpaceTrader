@@ -1,5 +1,14 @@
 # Warenquelleninventar für PRD 5
 
+## Bestätigte Ausnahme seit PRD 9
+
+Öffentliche Hubs verwenden wieder die historische rollenabhängige Bestandsdrift
+(Verkauf 60–70 %, Ankauf 30–40 %, Handel 45–55 %, Halbwertszeit 45 Minuten).
+Dadurch können ausschließlich dort auch verarbeitete Waren abstrakt zufließen.
+Treibstoff wird wieder mit höchstens 1,2 Einheiten/s erzeugt. Individuelle
+Sollwerte und der Ausschluss roher Seltenwaren bleiben erhalten. Die folgenden
+U9-Nachweise beschreiben den historischen Stand vor dieser bestätigten Ausnahme.
+
 Stand: 2026-10-24, U17 abgeschlossen. Die Tabelle dokumentiert das ursprüngliche Quelleninventar und seine Umsetzungsschritte. Das aktive Profil `homeworld` erzeugt ausschließlich Rohstoffförderer, Abnehmer, Händler und Dienstleister; öffentliche Rezeptfabriken und zufällige Fertigwarenbestände entfallen. Die vollständige frische Generierung und der laufende Hauptstart sind geprüft.
 
 | Quelle / Senke | Bestehender Code und Verhalten | Ziel / Umsetzungsschritt |

@@ -477,6 +477,21 @@ function npcTick(e, m, dt, now) {
   }
 }
 
+/** Explicit hub exception: restore historical roles even in saved real markets. */
+export function tickHubEquilibrium(entity, dt, now) {
+  const market=entity.market,fuel=market.goods.shipfuel;
+  if(fuel){
+    fuel.role='produce';fuel.rate=1.2;fuel.baseRate=1.2;
+    if(!(fuel.target>=ECON.TARGET.produce[0]&&fuel.target<=ECON.TARGET.produce[1]))fuel.target=.65;
+  }
+  for(const [good,slot] of Object.entries(market.goods)){
+    if(slot.role==='consume'&&GOODS[good].ultra){
+      slot.rate=.02*(300/GOODS[good].base);slot.baseRate=slot.rate;
+    }
+  }
+  npcTick(entity,market,dt,now);
+}
+
 export function tickMarket(e, dt, now, game) {
   const m = e.market;
   if (!m) return;

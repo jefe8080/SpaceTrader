@@ -15,6 +15,8 @@ frühere Produktionsrate begrenzt. Veredelte Seltenwaren bleiben Ankaufswaren;
 rohe Seltenwaren bleiben ausgeschlossen. Andere öffentliche Märkte behalten
 ihre reale Beschaffung. Die Ausnahme erlaubt wieder abstrakten Warenzufluss
 am Hub und ersetzt dort die NPC-Beschaffung.
+Das Handelssortiment ist am Hub wieder ohne externe Zielnachfrage verkäuflich;
+Ankäufe bleiben durch die vorhandene öffentliche Kasse begrenzt.
 
 ## Schritte und Fortschritt
 
@@ -22,7 +24,7 @@ am Hub und ersetzt dort die NPC-Beschaffung.
   Rathaus und rollenspezifische Wiederherstellung vom Nutzer bestätigt.
 - [x] U1: Rathaus-Schalter für Hauptheimat und weitere eigene Ruinenwelten;
   bestehenden autorisierten propMode-Befehl verwenden, Verhalten prüfen.
-- [ ] U2: Historische Hub-Drift einschließlich Treibstoffrolle/-rate auch für
+- [x] U2: Historische Hub-Drift einschließlich Treibstoffrolle/-rate auch für
   bereits gespeicherte Märkte reaktivieren; Beschaffung und Wirtschaftstests
   auf die bestätigte Ausnahme abstimmen.
 
@@ -47,3 +49,10 @@ Wird mit den Umsetzungsschritten ergänzt.
 - U1: 14 Tests erfolgreich (Rathaus-Handelsmodus und reale Wirtschaft),
   einschließlich Eigentumsschutz, NPC-Abholung mit Reserven und Persistenz.
   Syntaxprüfung beider geänderter UI-Dateien erfolgreich.
+- U2: 26 gezielte Wirtschafts-/Handelstests erfolgreich, einschließlich
+  individueller Rollenziele, Annäherung von oben/unten, begrenztem
+  Treibstoffzufluss, Anpassung alter Marktrollen und tatsächlichem Hub-Handel.
+  Gesamtlauf: 317/318 erfolgreich. Ein Fehler in der parallel geänderten,
+  fremden Stadtansicht: `tests/planet-city.test.js:67`, Resort-Warenplätze
+  `workers` und `preserves` überlagern Dienste. Diese Dateien wurden nicht
+  für PRD 9 geändert oder aufgenommen. Kein visueller Laufzeittest durchgeführt.
