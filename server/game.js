@@ -1,3 +1,4 @@
+import { initializeProfile, syncInventoryBasis, recordGoodsTrade } from './pilot-profile.js';
 import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, FUEL, GOVERNOR_LICENSES, shipStats, freeFor, holdOf, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
   cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, slotPrice, supplyLoad, targetOf,
   XP, pilotLevel, pilotTitle, giverLevel, GIVER_TRADE_CR, factionRank, RANK_NAMES, FACTIONS, hasAbility, holdFor, priceWindow, fixedPrice, FIXED, recipeOf } from '../shared/config.js';
@@ -388,6 +389,7 @@ export class Game {
       for (const id of this.world.entitiesInCell(k)) {
         const e = this.world.entities.get(id);
         entities.push(e);
+        if(e.kind==='planet'){const stats=initializeProfile(this,p);if(!stats.discoveredPlanets.includes(e.id))stats.discoveredPlanets.push(e.id);}
         // Almanach: Rezept bzw. Planeten-/Feldtyp ist entdeckt, sobald der Markt in Sensorreichweite war
         const rk = recipeKey(e);
         if (rk) this.discover(p, 'recipe', rk);
@@ -680,6 +682,7 @@ export class Game {
         if (SUPPLIED.has(e.market.strategy)) this.checkSupply(e);
         else if (e.market.strategy === 'planet' && (propSectors.has(e.sector) || this.time - (this.activity.get(e.sector) ?? -Infinity) < SUPPLY.ACTIVITY)) this.checkHaul(e);
       }
+      for(const player of this.players.values())for(const good of Object.keys(player.profileStats?.inventory||{}))syncInventoryBasis(this,player,good);
       tickEvents(this, this.econAcc);
       this.econAcc = 0;
       flushRevenue(this);
@@ -707,6 +710,18 @@ export class Game {
    * opts.auto: automatischer Einkauf aus Routen (Stop-Loss greift), opts.route: Routenvorlage für die Statistik
    */
   trade(ship, e, good, amount, dir, limit = 0, opts = {}) {
+    const player=this.players.get(ship.owner);
+    if(!player || opts.profileAccounting || GOODS[good]?.cls==='passenger')return this.tradeHandled(ship,e,good,amount,dir,limit,opts);
+    const basis=syncInventoryBasis(this,player,good),before=basis.quantity;
+    const seller=this.players.get(this.ownership.get(e.id)?.player);
+    const sellerBefore=seller&&seller.id!==player.id?syncInventoryBasis(this,seller,good).quantity:null;
+    const result=this.tradeHandled(ship,e,good,amount,dir,limit,{...opts,profileAccounting:true});
+    recordGoodsTrade(this,player,good,dir,result,before);
+    if(sellerBefore!=null)recordGoodsTrade(this,seller,good,dir==='buy'?'sell':'buy',result,sellerBefore);
+    return result;
+  }
+
+  tradeHandled(ship, e, good, amount, dir, limit = 0, opts = {}) {
     if(e.market?.homeworld?.warp)return {n:0,reason:'Standort für Warp gesperrt.'};
     if(opts.handling||this.profile!=='homeworld')return this.tradeImpl(ship,e,good,amount,dir,limit,opts);
     const allowed=handlingAllowance(this,e,ship);

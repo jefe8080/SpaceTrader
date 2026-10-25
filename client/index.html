@@ -39,7 +39,7 @@
       <div class="spacer"></div>
       <nav class="main-nav" aria-label="Hauptnavigation">
         <details id="pilotProfile"><summary>Pilotenprofil</summary><div class="nav-content">
-          <div id="profileInfo"></div>
+          <div id="profileInfo"></div><button id="btnPilotInfo">Profil und Erfolge</button>
           <button id="btnProps">Besitz <kbd>B</kbd></button>
           <button id="btnCons">Konsortium <kbd>K</kbd></button>
           <button id="btnHome">Heimat anzeigen</button><div id="onlinePlayers"></div>
@@ -83,6 +83,7 @@
   <div id="almanac" class="overlay" hidden>
     <div class="card wide-card" id="almanacCard"></div>
   </div>
+  <div id="pilotInfoModal" class="overlay" hidden><section class="card wide-card"><div class="panel-head"><h2>Pilotenprofil</h2><button data-close="pilotInfoModal">✕</button></div><div id="pilotInfoBody"></div></section></div>
   <div id="propsModal" class="overlay" hidden>
     <div class="card wide-card" id="propsCard"></div>
   </div>

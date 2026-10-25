@@ -8,6 +8,7 @@ import { WORLD } from '../shared/config.js';
 import { homeAccess } from '../server/homeworld-operations.js';
 import { mainShip } from '../shared/planet-access.js';
 import { renamePlanet, PLANET_RENAME_COOLDOWN } from '../server/planet-name.js';
+import { pilotProfile } from '../server/pilot-profile.js';
 
 function fixture() {
   const game = new Game(':memory:', { profile: 'homeworld', seed: 42 });
@@ -34,6 +35,27 @@ test('PRD7: introductions serialize actual starts and survive repeated synchroni
   assert.ok(player.homeQuest.active.H04);
   runCommand(game, player, { cmd: 'homeDialogRead', scene: 'H03' });
   assert.equal(player.homeQuest.introduction, 'H04');
+  game.store.close();
+});
+
+test('PRD7: actual manual and automated sales count once; partial weighted costs and unknown goods', () => {
+  const game=new Game(':memory:',{seed:42}),player=game.createPlayer('Trader'),ship=game.shipsOf(player.id)[0];
+  const market={id:'accounting',kind:'station',name:'Handel',market:{goods:{ore:{role:'trade',stock:500,cap:1000,mod:1}}}};
+  player.credits=100000;ship.cargo={};ship.dockedAt=market.id;
+  const bought=game.trade(ship,market,'ore',20,'buy');
+  assert.equal(bought.n,20);assert.equal(pilotProfile(game,player).revenue,0);
+  const sold=game.trade(ship,market,'ore',5,'sell',0,{auto:true});
+  assert.equal(sold.n,5);
+  assert.equal(pilotProfile(game,player).revenue,sold.total);
+  assert.ok(Math.abs(pilotProfile(game,player).profit-(sold.total-bought.total/4))<1e-7);
+  const rest=game.trade(ship,market,'ore',15,'sell',0,{manual:true});
+  assert.equal(pilotProfile(game,player).revenue,sold.total+rest.total);
+  assert.ok(Math.abs(pilotProfile(game,player).profit-(sold.total+rest.total-bought.total))<1e-7);
+  player.credits+=10000; // quest and other income never count as sales
+  assert.equal(pilotProfile(game,player).revenue,sold.total+rest.total);
+  ship.cargo.ore=10;game.trade(ship,market,'ore',5,'sell');
+  assert.equal(pilotProfile(game,player).profit,null);
+  assert.ok(pilotProfile(game,player).unknownRevenue>0);
   game.store.close();
 });
 

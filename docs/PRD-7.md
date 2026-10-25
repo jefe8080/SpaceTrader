@@ -159,7 +159,7 @@ Jeder Schritt wird mit passenden Prüfungen abgeschlossen. Fortschritt und Prüf
 | U2 | H4-Wrack lokal platzieren und vorhandene ungeborgene Ausreißer korrigieren | U1 | Abgeschlossen |
 | U3 | Hauptschiff ableiten, H4-Erklärung, Fernzugriff und Verbindungsverlust konsistent umsetzen | U1 | Abgeschlossen |
 | U4 | Rathaus umbenennen, aktive Quests/Archiv trennen, Planetenübersicht und Namensänderung | U1, U3 | Abgeschlossen |
-| U5 | Verlässliche Profilstatistiken, Handelszählung und neue Profilseite | U3 | Offen |
+| U5 | Verlässliche Profilstatistiken, Handelszählung und neue Profilseite | U3 | Abgeschlossen |
 | U6 | Gesamte Questredaktion und Karten-Topbar korrigieren | U1–U5 für finale Textbezüge | Offen |
 | U7 | Integrierte Prüfung, verbleibende Fehler beheben, Abnahme dokumentieren | U1–U6 | Offen |
 
@@ -230,3 +230,11 @@ Gemeinsame fachliche Zugriffsfunktion für Client und Server: eigener eingebaute
 ### U4 – Umsetzung
 
 Rathaus zeigt aktive Aufträge und separates Archiv erlebter Geschichten. Aufklappbare Planetenübersicht verwendet Simulationsbestände, aktive Raten, Personal, Bau und Ausbildung; auf weiteren Ruinenwelten ebenfalls verfügbar. Namensänderungen validiert der Server ohne Vorabnormalisierung von Steuerzeichen; UTC-Epochenzeit erhält 24 reale Stunden pro Planet. Unveränderter Name bleibt ohne Zeitverbrauch. Vier gezielte Tests bestanden, inklusive Grenzwert, ungültigen Namen, Eigentum und unabhängigen Cooldowns.
+
+### U5 – Umsetzung und Kostenbewertung
+
+Eigene Informationsseite mit Rufschwellen, Fortschritt und höchstem Rang, Lizenzen, Besitz und Hauptschiff. Entdeckte Systeme stammen aus gespeicherten Entdeckungen; Planeten werden anhand bekannter Orts-IDs fortgeschrieben. Missionsabschlüsse übernehmen die vorhandenen Zähler inklusive Hauptquests. Es existiert keine Kampfmechanik und kein belastbarer Kampfzähler: Anzeige ausdrücklich „Nicht erfasst“.
+
+Neue persistente Handelszähler sind als „seit Einführung erfasst“ markiert. Bewertung: gleitender Durchschnitt pro Ware über eigene Schiffe und Lager. Kostenbekannte und unbekannte Mengen bleiben getrennt; Eigenproduktion, Bergbau und Altbestände erhalten keine erfundenen Kosten. Kostenanteile werden bei Teilverkäufen proportional realisiert; reine Entnahmen/Einlagerungen verändern den Gesamtbestand nicht. Anderweitiger Verbrauch reduziert den Kostenpool proportional; Produktion ohne belegte Einkaufskosten vergrößert nur die unbekannte Menge. Der vollständige Gewinn bleibt bei unbekannten verkauften Anteilen ausdrücklich offen, der belegte Teil wird getrennt gezeigt. Bestehende Handels-XP-Bewertung und Preise bleiben unverändert. Handelswrapper zählt tatsächlich bezahlte Verkäufe einschließlich Routen, Konsortiumslager und Sondernachfrage einmal; Questgeld zählt nicht.
+
+Prüfung: Profil-, Wirtschafts- und Questtests, 29/29 bestanden.
