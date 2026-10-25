@@ -7,6 +7,7 @@ import { grantRelic } from './relic.js';
 import {stat} from './markets.js';
 import { tickHomeOperations, homeAccess, homeConstructionError } from './homeworld-operations.js';
 import {advancedQuestReady,completeAdvancedQuest} from './homequests.js';
+import { syncHomeQuests } from './quest-activation.js';
 import { HOME_STORY } from '../shared/home-story.js';
 
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -108,6 +109,7 @@ export function createHomeworld(game, player) {
   game.revealAround(player, entity.x, entity.y, HOMEWORLD.placement.maxResourceDistance + 1000);
   game.discover(player, 'sector', entity.sector); game.discover(player, 'system', entity.system); game.discover(player, 'visit', entity.sector);
   game.world.sectors.get(entity.sector).firstVisit ||= player.id;
+  syncHomeQuests(game, player);
   return entity;
 }
 
@@ -164,7 +166,7 @@ export function repairHome(game, player, entity, facility) {
 
 export function homeQuestReady(game, player, entity, id) {
   const home = entity.market.homeworld;
-  if (!HOME_QUESTS[id] || done(player, id) || !HOME_QUESTS[id].requires.every((q) => done(player, q))) return false;
+  if (!player.homeQuest?.active?.[id] || !HOME_QUESTS[id] || done(player, id) || !HOME_QUESTS[id].requires.every((q) => done(player, q))) return false;
   switch (id) {
     case 'H00': return player.homeQuest.landed;
     case 'H01': return plantDone(home, 'dock');
@@ -202,7 +204,7 @@ export function completeHomeQuest(game, player, entity, id) {
       ...salvagePosition, sector: entity.sector, system: entity.system, noBuy: true, salvageOwner: player.id };
     game.world.addEntity(wreck);
     player.homeQuest.salvage = { id: `${player.id}:relic:H04`, wreck: wreck.id, phase: 'available' };
-    game.revealAround(player, wreck.x, wreck.y, 1000);
+    // Revealed only when H04 actually activates.
   }
   if (id === 'H04') { grantRelic(game, player, entity); player.homeQuest.salvage.phase = 'complete'; }
   if (id === 'H05') {

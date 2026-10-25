@@ -1,3 +1,4 @@
+import { revealQuestTarget } from './quest-activation.js';
 import { WORLD, GOODS, BELT_TYPES, QUEST, QUEST_TYPES, REP, RANKS, factionRank, questReward, flightMinutes, canBuyFrom, shipStats,
   giverLevel, giverXpOf, planetFeatures, EXTRAS, freeFor } from '../shared/config.js';
 import { hexAt, hexKey, hexNeighbors } from '../shared/hex.js';
@@ -201,9 +202,9 @@ export function acceptQuest(game, player, ship, e, questId, offers = null) {
   if (q.type === 'mine') quest.minedBase = minedBy(game, player, q.good);
   player.quest = quest;
   // Ziele auf der Karte sichtbar machen
-  for (const id of [q.source, q.pickup, q.dest, ...(q.stops || [])].filter(Boolean)) {
+  for (const id of [q.giver, q.source, q.pickup, q.dest, q.belt, ...(q.stops || [])].filter(Boolean)) {
     const t = game.world.entities.get(id);
-    if (t) game.revealAround(player, t.x, t.y, 600);
+    if (t) revealQuestTarget(game, player, t);
   }
   if (q.zone) game.discover(player, 'zone', q.zone);
   if (q.sector) game.discover(player, 'sector', q.sector);

@@ -20,6 +20,7 @@ import {passengerTrade} from './population.js';
 import {handlingAllowance,recordHandling} from './handling.js';
 import {tickColonies} from './colonies.js';
 import {tickWarps} from './warp.js';
+import { syncHomeQuests } from './quest-activation.js';
 import { tickRelics } from './relic.js';
 import { homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { coveredPath, pointCovered } from './coverage.js';
@@ -120,6 +121,7 @@ export class Game {
       applyProperty(this, e, r.data);
     }
     this.shipStats = groupRows(st.loadAll('ship_stats'), 'ship');
+    for (const player of this.players.values()) syncHomeQuests(this, player);
     this.routeStats = groupRows(st.loadAll('route_stats'), 'route');
     if (this.verbose) console.log(`Spielstand geladen: ${this.players.size} Spieler, ${this.world.entities.size} Objekte, ${this.ships.size} Schiffe`);
     return true;
@@ -371,7 +373,7 @@ export class Game {
     for (let cx = Math.floor((x - r) / C); cx <= Math.floor((x + r) / C); cx++) {
       for (let cy = Math.floor((y - r) / C); cy <= Math.floor((y + r) / C); cy++) {
         const mx = (cx + 0.5) * C, my = (cy + 0.5) * C;
-        if (Math.hypot(mx - x, my - y) > r + C * 0.35) continue;
+        if (r > 0 && Math.hypot(mx - x, my - y) > r + C * 0.35) continue;
         const k = cellKey(cx, cy);
         if (p.revealed.has(k)) continue;
         p.revealed.add(k);
@@ -646,6 +648,7 @@ export class Game {
     this.time += dt;
     if(this.profile==='homeworld'){tickColonies(this,dt);tickWarps(this,dt);}
     tickRelics(this);
+    for (const player of this.players.values()) syncHomeQuests(this, player);
     for (const s of this.ships.values()) {
       updateShip(s, dt, this);
       if (s.owner !== NPC_OWNER && (s.revX === undefined || Math.hypot(s.x - s.revX, s.y - s.revY) > 300)) {

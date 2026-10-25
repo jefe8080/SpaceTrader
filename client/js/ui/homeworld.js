@@ -27,11 +27,12 @@ export function renderHomeDialog() {
     }, true);
     document.body.append(dialog);
   }
+  if(currentScene && !dialog.hidden) return;
   const requested=typeof state.homeDialogReplay==='string'?state.homeDialogReplay:state.homeDialogReplay?'H00':null;
   if (!storyDialogReady(state.homeQuest, state.homeStoryShipClicked, !document.getElementById('help').hidden)) {
     dialog.hidden = true; currentScene = null; return;
   }
-  const id=requested&&storyAvailable(state.homeQuest,requested)?requested:Object.keys(HOME_STORY).find(key=>storyAvailable(state.homeQuest,key)&&!state.homeQuest.scenesSeen?.[key]);
+  const id=requested&&storyAvailable(state.homeQuest,requested)?requested:state.homeQuest?.eventDialog||state.homeQuest?.introduction;
   if(!state.me||!id){dialog.hidden=true;currentScene=null;return;}
   if(currentScene!==id){
     currentScene=id;const scene=HOME_STORY[id];

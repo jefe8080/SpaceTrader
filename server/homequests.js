@@ -6,7 +6,7 @@ import {chargeHome,homeAccess} from './homeworld-operations.js';
 import {hexAt,hexKey} from '../shared/hex.js';
 
 const completed=(p,id)=>!!p.homeQuest?.completed[id];
-const unlocked=(p,id)=>HOME_QUESTS[id]?.requires.every(id=>completed(p,id));
+const unlocked=(p,id)=>!!p.homeQuest?.active?.[id]&&HOME_QUESTS[id]?.requires.every(id=>completed(p,id));
 const has=(h,kind)=>h.structures?.some(b=>b.status==='ready'&&(b.kind===kind||b.upgrades?.includes(kind)));
 const delivered=(h,id)=>Object.entries(QUEST_DELIVERIES[id]||{}).every(([g,n])=>(h.questDeliveries?.[id]?.[g]||0)>=n);
 const visited=(p,id)=>!!p.homeQuest.visits?.[id];
@@ -49,7 +49,7 @@ function nodeAt(game,p,home,key,label){
     const x=home.x+Math.cos(angle)*radius,y=home.y+Math.sin(angle)*radius,hex=hexAt(x,y);
     if(hexKey(hex.q,hex.r)!==home.sector||game.world.sectorEntities(home.sector).some(e=>Math.hypot(e.x-x,e.y-y)<(e.radius||100)+450))continue;
     const node={id:`${p.id}:archive:${key}`,kind:'station',type:'wreck',name:label,radius:60,x,y,sector:home.sector,system:home.system,noBuy:true,archiveOwner:p.id,archiveKey:key};
-    game.world.addEntity(node);p.homeQuest.sites[key]=node.id;game.revealAround(p,x,y,600);game.emit('entity',node);return node;
+    game.world.addEntity(node);p.homeQuest.sites[key]=node.id;game.discover(p,'sector',node.sector);game.discover(p,'system',node.system);game.revealAround(p,x,y,0);game.emit('entity',node);return node;
   }
 }
 export function revealHomeSites(game,p,home){

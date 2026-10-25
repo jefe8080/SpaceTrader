@@ -1,3 +1,4 @@
+import { syncHomeQuests } from '../quest-activation.js';
 import { CmdError, parse } from './validate.js';
 import ship from './ship.js';
 import trade from './trade.js';
@@ -25,7 +26,10 @@ export function runCommand(game, player, msg) {
   const ctx = { game, player };
   try {
     const args = parse(h.args || {}, msg, ctx);
-    return h.run(ctx, args) || undefined;
+    syncHomeQuests(game, player);
+    const result = h.run(ctx, args) || undefined;
+    syncHomeQuests(game, player);
+    return result;
   } catch (e) {
     if (e instanceof CmdError) return e.message;
     throw e;

@@ -1,6 +1,6 @@
 # PRD 7 – Pilotenprofil, Questführung und planetare Fernverwaltung
 
-Stand: 2026-10-25 · Status: Planung abgeschlossen, Umsetzung ausstehend
+Stand: 2026-10-25 · Status: Umsetzung läuft
 
 ## 1. Ziel und Freigabe
 
@@ -155,7 +155,7 @@ Jeder Schritt wird mit passenden Prüfungen abgeschlossen. Fortschritt und Prüf
 | Schritt | Arbeitspaket | Abhängigkeit | Status |
 | --- | --- | --- | --- |
 | P0 | Anforderungen abstimmen, PRD erstellen und committen | – | Abgeschlossen (Planungscommit) |
-| U1 | Questaktivierungszustände und Dialogwarteschlange; H3-Einleitung; einheitliche Zielaufdeckung | P0, Umsetzungsauftrag | Offen |
+| U1 | Questaktivierungszustände und Dialogwarteschlange; H3-Einleitung; einheitliche Zielaufdeckung | P0, Umsetzungsauftrag | Abgeschlossen |
 | U2 | H4-Wrack lokal platzieren und vorhandene ungeborgene Ausreißer korrigieren | U1 | Offen |
 | U3 | Hauptschiff ableiten, H4-Erklärung, Fernzugriff und Verbindungsverlust konsistent umsetzen | U1 | Offen |
 | U4 | Rathaus umbenennen, aktive Quests/Archiv trennen, Planetenübersicht und Namensänderung | U1, U3 | Offen |
@@ -214,3 +214,7 @@ Die Umsetzung nutzt vorhandene Projektprüfungen und ergänzt gezielte Tests fü
 - Q14: Hauptschiffrolle folgt dem eingebauten Antrieb, sichtbare Kennzeichnung und Entfall beim Ausbau bestätigt.
 - Q15: Keine besondere Rücksicht auf abgeschlossene H4-Spielstände erforderlich; noch niemand hat H4 abgeschlossen.
 - Q16: Tatsächliche Warenverkäufe einschließlich Routen, Gewinn nach zugehörigen Einkaufskosten, keine Questbelohnungen und keine erfundenen historischen Gewinne bestätigt.
+
+### U1 – Umsetzung
+
+Persistente aktive/pending Quests und explizite Dialogbestätigung steuern Starts serverseitig in Questnummernfolge. Ziele veröffentlichen nur ihre Nebelzelle sowie System/Sektor; Bergbauziele sind eingeschlossen. Ein anfänglich fehlgeschlagener Kuriertest deckte einen Randfall bei Radius 0 auf; korrigiert. Prüfung: `node --test tests/prd7.test.js tests/quests.test.js`, 15/15 erfolgreich.

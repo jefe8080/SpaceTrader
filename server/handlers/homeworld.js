@@ -1,3 +1,4 @@
+import { acknowledgeHomeStory } from '../quest-activation.js';
 import { HOME_QUESTS, HOME_BUILDINGS, CONTROL_MODULES } from '../../shared/homeworld.js';
 import { GOODS, RECIPES } from '../../shared/goods.js';
 import { ownHome, homePresent, repairHome, completeHomeQuest } from '../homeworld.js';
@@ -87,12 +88,7 @@ export default {
   },
   homeDialogRead: {
     args: { scene: V.key(HOME_STORY) },
-    run({ player }, { scene }) {
-      if (!player.homeQuest) return 'Keine Heimatgeschichte verfügbar.';
-      if(!storyAvailable(player.homeQuest,scene))return 'Diese Szene ist noch nicht verfügbar.';
-      player.homeQuest.scenesSeen ||= {};
-      player.homeQuest.scenesSeen[scene] = true;
-    },
+    run({ game, player }, { scene }) { return acknowledgeHomeStory(game, player, scene); },
   },
   homeLand: {
     args: { target: V.entity() },
