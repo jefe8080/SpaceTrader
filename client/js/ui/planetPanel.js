@@ -12,6 +12,7 @@ import { sfx } from '../audio.js';
 import { homePanel } from './homeworld.js';
 import {handleModuleAction} from './modules.js';
 import { bus } from './bus.js';
+import { patchPanelContent } from './panelContent.js';
 import {handlePopulationAction} from './population.js';
 import {propertySection,handlePropertyAction,specializationPanel} from './property.js';
 import {handleColonyAction} from './colonies.js';
@@ -22,6 +23,7 @@ const panel = $('planetPanel');
 export const panelKinds = {};
 let current = null; // gewähltes Gebäude
 let cityNames = false;
+let panelContext = null;
 
 const shipsHere = (id) => myShips().filter((s) => s.dockedAt === id);
 const onBoard = (id, g) => shipsHere(id).reduce((a, s) => a + (s.cargo?.[g] || 0), 0);
@@ -111,7 +113,12 @@ export function renderPlanetUi() {
   else body = panelKinds[it.kind]?.render(it, e, ship) ?? '<div class="muted">Hier ist gerade nichts los.</div>';
   const expanded=new Set([...panel.querySelectorAll('details[open]')].map(d=>d.querySelector('summary')?.textContent));
   const connection = e.type==='ruins' ? `<div class="small-note ${lost?'neg':'muted'}">${accessTo(e.id).local?'Lokaler Zugang':accessTo(e.id).remote?'Fernverbindung aktiv':'Verbindung verloren – Verwaltung gesperrt'}</div>` : '';
-  setHtml(panel, `<div class="panel-head"><h2>${esc(it.label)}</h2><span style="flex:1"></span><button class="small ghost" data-pp="close" aria-label="Ort schließen">✕</button></div>${connection}${body}`);
+  const context = JSON.stringify([e.id, it.key]);
+  const updatePanel = context === panelContext ? patchPanelContent : (element, html) => { element.innerHTML = html; };
+  panelContext = context;
+  updatePanel(panel, `<div class="panel-head"><h2>${esc(it.label)}</h2><span style="flex:1"></span><button class="small ghost" data-pp="close" aria-label="Ort schließen">✕</button></div>${connection}${body}`);
+  const selectedRecipe = panel.querySelector('#homeRecipe');
+  if (selectedRecipe) selectedRecipe.dispatchEvent(new Event('change', { bubbles: true }));
   syncManagementControls(lost);
   for(const details of panel.querySelectorAll('details'))if(expanded.has(details.querySelector('summary')?.textContent))details.open=true;
 }
