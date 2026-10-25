@@ -42,3 +42,24 @@ Jeder abgeschlossene Schritt wird mit aktualisiertem Fortschritt separat committ
 ## Nicht im Umfang
 
 Neue Wirtschaftssysteme, geänderte Waren oder Aktionen, individuelle Stadtpläne je Einzelplanet, frei laufende Figuren, Veröffentlichung und Push.
+
+## Gestalterische Korrektur – Agrarwelt vor erneuter Freigabe
+
+Die erste technische Umsetzung wurde vom Nutzer gestalterisch abgelehnt: zu große Abweichung vom freigegebenen Testbild, rechteckiges Raster, ungeeignete und falsch platzierte Dekorhäuser, übereinander gezeichnete Straßen und offensichtlich gespiegelte Landschaft. P1–P4 dokumentieren die erste Umsetzung und stellen **keine gestalterische Nutzerabnahme** dar.
+
+Bestätigte Entscheidungen am 25.10.2026:
+
+- Zuerst die tatsächliche Agrar-Spielansicht überarbeiten und mit Screenshots zur gestalterischen Prüfung vorlegen. Die anderen zwölf Typen werden erst nach dieser Freigabe übertragen.
+- Wohnhäuser, Straßen, Plätze und Landschaft werden gemeinsam komponiert und gezeichnet, eng am ursprünglichen Entwurf. Keine separat verteilten Umgebungshäuser und kein rechteckiges Straßenraster.
+- Eine großzügig über die eigentliche Stadt hinausreichende Landschaft ersetzt die gespiegelten Kacheln. Kamera und minimaler Zoom werden so begrenzt, dass nie ein Bildrand sichtbar wird; die Stadt soll dabei natürlich in die Umgebung übergehen.
+- Funktionale Orte erhalten individuell gesetzte, überprüfte Standorte. Fest gezeichnete Gebäude dürfen über präzise Trefferflächen ihre bisherigen Panels öffnen; variable Bauten und Figuren bleiben eigene Ebenen. Bauplätze/Fabriken liegen in eigens gestalteten, angeschlossenen Erweiterungsvierteln.
+- Alle bisherigen Funktionen, Warenunterschiede, dynamischen Bauten und Bedienelemente bleiben erhalten. Visuelle Kontrolle prüft nun ausdrücklich auch Standorte gegen Wasser, Bebauung, Wege und Bildkomposition; überlappungsfreie mathematische Rechtecke allein reichen nicht aus.
+
+### Korrekturschritte
+
+- [x] K1: Kritik, Architekturkorrektur und Agrar-Zwischenabnahme dokumentieren; Planungscommit.
+- [ ] K2: Zusammenhängende große Agrar-Stadtillustration, individuelle Funktionsstandorte und geplantes Erweiterungsviertel integrieren. Rasterstraßen, Dekorhausverteilung und Spiegelung für Agrar entfernen. Begrenzte Kamera und stabile funktionale Zuordnung prüfen; Umsetzungscommit.
+- [ ] K3: Tatsächliche Agrar-Spielansicht auf Desktop und mobil visuell prüfen, unterschiedliche Ausstattung und Bauänderungen testen, Screenshots und Prüfergebnisse sichern; Abnahmevorlage committen.
+- [ ] K4: Nutzerfreigabe der tatsächlichen Agrar-Spielansicht einholen. Erst danach Übertragung auf andere Typen planen/umsetzen.
+
+Für diesen Auftrag ist die vollständig überprüfbare Agrar-Spielansicht bis einschließlich K3 das Lieferergebnis. K4 bleibt ausdrücklich offen, bis der Nutzer die Darstellung beurteilt hat. Kein automatischer Push.
