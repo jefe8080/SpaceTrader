@@ -981,7 +981,7 @@ export class Game {
   findSource(e, good, haul = false) {
     let best = null, bestD = Infinity;
     for (const s of this.world.sectorEntities(e.sector)) {
-      if (s === e || s.kind === 'wormhole') continue;
+      if (s === e || s.kind === 'wormhole' || (e.kind === 'planet' && s.type === 'hub')) continue;
       const d = Math.hypot(s.x - e.x, s.y - e.y);
       if (d > SUPPLY.RANGE || d >= bestD) continue;
       if (s.kind === 'belt') {

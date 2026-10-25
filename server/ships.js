@@ -389,11 +389,23 @@ function runRoute(ship, c, dt, game) {
 
 /** NPC-Versorger bzw. -Abholer: Quelle anfliegen, die bemessene Menge laden/abbauen, zum Ziel, entladen. */
 function runSupply(ship, o, dt, game) {
+  if (game.world.entities.get(o.stationId)?.kind === 'planet' && game.world.entities.get(o.deliveryTargetId)?.type === 'hub') {
+    delete o.deliveryTargetId;
+    o.phase = 'toStation';
+    ship.nav = null;
+  }
   const station = game.world.entities.get(o.deliveryTargetId||o.stationId);
   if(!station&&o.real){ship.state='waiting';setWarn(ship,'delivery','Lieferziel fehlt; bezahlte Fracht bleibt an Bord.');return false;}
   if (!station) { game.removeShip(ship); return true; }
   if (o.phase === 'toSource') {
     const src = game.world.entities.get(o.sourceId);
+    // Saved NPC planet orders must also stop buying from the synthetic hub.
+    // Return home through normal settlement so escrow and paid cargo survive.
+    if (src?.type === 'hub' && game.world.entities.get(o.stationId)?.kind === 'planet') {
+      o.phase = 'toStation';
+      ship.nav = null;
+      return false;
+    }
     if (!src) { o.phase = 'toStation'; return false; }
     if (!flyToEntity(ship, src, dt, game)) return false;
     if(o.real){if(loadRealSupply(game,ship,src,o)===false)return false;o.phase='toStation';}

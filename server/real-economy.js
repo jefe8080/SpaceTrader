@@ -131,7 +131,7 @@ export function dispatchRealSupply(game,entity){
     const wanted=Math.min(40,Math.floor(target-slot.stock));if(wanted<1)continue;
     let source=null,distance=Infinity;
     for(const candidate of game.world.sectorEntities(entity.sector)){
-      if(candidate.id===entity.id||!candidate.market)continue;
+      if(candidate.id===entity.id||!candidate.market||(entity.kind==='planet'&&candidate.type==='hub'))continue;
       const supply=candidate.market.goods[good],prop=game.ownership.get(candidate.id);
       if(!supply||!canBuyFrom(supply)||availableHomeStock(candidate.market,good)<1||prop?.mode==='private'||candidate.market.homeworld?.warp)continue;
       const d=Math.hypot(candidate.x-entity.x,candidate.y-entity.y);
@@ -152,6 +152,7 @@ export function dispatchRealSupply(game,entity){
 }
 
 export function loadRealSupply(game,ship,source,order){
+  if(source.type==='hub'&&game.world.entities.get(order.stationId)?.kind==='planet')return;
   const market=source.market,slot=market?.goods[order.good],prop=game.ownership.get(source.id);
   if(!slot||!canBuyFrom(slot)||prop?.mode==='private'||market.homeworld?.warp)return;
   if(handlingAllowance(game,source,ship)<1)return false;
@@ -192,7 +193,7 @@ export function finishRealSupply(game,ship,station){
     ship.state='waiting';market.supply={state:'waiting',shipId:ship.id,good:order.good,reason:'Ziellager voll; bezahlte Fracht bleibt an Bord'};
     order.blockedAt??=game.time;
     if(game.time-order.blockedAt>=60){
-      const alternative=game.world.sectorEntities(station.sector).filter(e=>e.id!==station.id&&!game.ownership.has(e.id)&&e.market?.goods[order.good]?.role==='consume'&&homeStorageFree(e.market,order.good)>=1&&ensureCash(e).cash>=sellPrice(order.good,e.market.goods[order.good])&&Math.hypot(e.x-ship.x,e.y-ship.y)<=SUPPLY.RANGE)
+      const alternative=game.world.sectorEntities(station.sector).filter(e=>e.id!==station.id&&!(primary.kind==='planet'&&e.type==='hub')&&!game.ownership.has(e.id)&&e.market?.goods[order.good]?.role==='consume'&&homeStorageFree(e.market,order.good)>=1&&ensureCash(e).cash>=sellPrice(order.good,e.market.goods[order.good])&&Math.hypot(e.x-ship.x,e.y-ship.y)<=SUPPLY.RANGE)
         .sort((a,b)=>Math.hypot(a.x-ship.x,a.y-ship.y)-Math.hypot(b.x-ship.x,b.y-ship.y))[0];
       if(alternative){order.deliveryTargetId=alternative.id;delete order.blockedAt;ship.dockedAt=null;ship.nav=null;ship.state='flying';}
     }

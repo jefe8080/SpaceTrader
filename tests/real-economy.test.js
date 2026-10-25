@@ -150,3 +150,48 @@ test('Dauerhaft blockierte Restladung wird einem anderen zahlungsfähigen Abnehm
   assert.equal(f.game.ships.has(id),false);assert.equal(alternative.market.goods.ingots.stock,10);
   approximately(target.market.economy.cash+alternative.market.economy.cash,cash);assert(target.market.economy.cash>0);close(f);
 });
+
+test('NPC-Planeten kaufen nicht am Hub, aber weiterhin bei echten Produzenten',()=>{
+  const f=fixture();try{
+    const hub=f.game.world.entities.get('origin_hub');
+    const target=market(f,'hub-ban-target',{water:slot('consume',0)});
+    target.x=hub.x+100;target.y=hub.y;ensureCash(target).cash=1e6;
+    hub.market.goods.water={...slot('trade',1000,0,2000)};
+    const producer=market(f,'hub-ban-producer',{water:slot('produce',100)});
+    producer.x=hub.x+200;producer.y=hub.y;
+    f.game.world.sectorEntities=()=>[target,hub];
+    dispatchRealSupply(f.game,target);
+    assert.equal([...f.game.ships.values()].filter(s=>s.owner===NPC_OWNER).length,0);
+    assert.equal(f.game.findSource(target,'water'),null);
+    target.market.supCd={};f.game.world.sectorEntities=()=>[target,hub,producer];
+    assert.equal(f.game.findSource(target,'water').id,producer.id);
+    dispatchRealSupply(f.game,target);
+    const transport=[...f.game.ships.values()].find(s=>s.owner===NPC_OWNER);
+    assert.equal(transport.queue[0].sourceId,producer.id);
+  }finally{close(f);}
+});
+
+test('Gespeicherter Hub-Einkauf kehrt ohne Einkauf zurück und erstattet das reservierte Geld',()=>{
+  const f=fixture();try{
+    const hub=f.game.world.entities.get('origin_hub');
+    const target=market(f,'saved-hub-target',{water:slot('consume',0)});
+    const transport=f.game.spawnNpcShip(target,true);
+    transport.queue=[{t:'supply',stationId:target.id,sourceId:hub.id,good:'water',amount:10,phase:'toSource',real:true,haul:true,cash:500}];
+    f.game.markNpc(transport,true);
+    const money=ensureCash(target).cash,stock=hub.market.goods.water.stock;
+    // Even a direct load call must enforce the restriction.
+    loadRealSupply(f.game,transport,hub,transport.queue[0]);
+    assert.deepEqual(transport.cargo,{});
+    updateShip(transport,1,f.game);
+    assert.equal(transport.queue[0].phase,'toStation');
+    assert.equal(hub.market.goods.water.stock,stock);
+    // Cargo already paid for before the update must still be delivered.
+    transport.cargo.water=3;
+    transport.queue[0].deliveryTargetId=hub.id;
+    updateShip(transport,1,f.game);
+    assert.equal(f.game.ships.has(transport.id),false);
+    assert.equal(ensureCash(target).cash,money+500);
+    assert.equal(target.market.goods.water.stock,3);
+    assert.equal(f.game.npcBusy.has(target.id+':water'),false);
+  }finally{close(f);}
+});
