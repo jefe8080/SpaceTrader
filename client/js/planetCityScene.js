@@ -3,6 +3,7 @@ import {CITY_TYPES, planCity, citySprite, cityDevelopment, hashCity, pickCity} f
 
 let artPromise;
 const terrainPromises=new Map();
+const CITY_DECOR={urban:[8,20,14,8],industrial:[16,6,21,20],gasgiant:[8,6,21],mining:[3,16,20],jungle:[20,11,20],volcanic:[5,16,6],colony:[20,21,20]};
 function loadImage(src) { return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('Stadtgrafik fehlt: '+src));image.src=src;}); }
 function loadTerrain(type){if(!terrainPromises.has(type))terrainPromises.set(type,loadImage('/assets/art/cities/'+type+'.png').catch(error=>{terrainPromises.delete(type);throw error;}));return terrainPromises.get(type);}
 function loadArt() {
@@ -175,8 +176,10 @@ export class PlanetCityScene {
       const box={x:x-50,y:y-92,width:100,height:104};
       const collides=this.plan.records.some(r=>box.x<r.box.x+r.w+28&&box.x+box.width>r.box.x-28&&box.y<r.y+34&&box.y+box.height>r.box.y-22);
       if(collides||Math.hypot(x,y-150)<195)continue;
-      const cell=this.entity.type==='ruins'&&col%3===0?18:this.entity.type==='industrial'?16:20;
+      const cells=CITY_DECOR[this.entity.type]||[20];
+      const cell=this.entity.type==='ruins'&&col%3===0?18:cells[n%cells.length];
       const width=92+n%21;drawSprite(ctx,this.art.sprites[cell],x,y,width,96);
+      if(this.entity.type==='ice')line(ctx,[{x:x-26,y:y-43},{x:x+22,y:y-49}],'#edf1dbcc',4);
       this.decorations.push({x,y});
     }
     if(this.entity.type!=='ruins'){
@@ -200,9 +203,9 @@ export class PlanetCityScene {
       ctx.save();ctx.strokeStyle='#bda270';ctx.fillStyle='#9e936754';ctx.lineWidth=2;ctx.setLineDash([9,6]);ctx.fillRect(r.x-61,r.y-64,122,60);ctx.strokeRect(r.x-61,r.y-64,122,60);ctx.restore();
       for(const x of [-58,58])line(ctx,[{x:r.x+x,y:r.y},{x:r.x+x,y:r.y-31}],'#e3c08b',4);
     }else{
-      const orbital=item.homeOrbital&&cityDevelopment(this.entity,item)==='orbital-large';
+      const orbitalScale=item.homeOrbital?(cityDevelopment(this.entity,item)==='orbital-large'?1.05:.82):1;
       const sway=r.character&&!this.reducedMotion?Math.sin(this.time*1.7+(r.key==='dog'?1:0))*1.5:0;
-      drawSprite(ctx,this.art.sprites[cell],r.x,r.y+sway,r.w,orbital?r.h*1.13:r.h);
+      drawSprite(ctx,this.art.sprites[cell],r.x,r.y+sway,r.w*orbitalScale,r.h*orbitalScale);
       if(this.entity.type==='ice'&&!r.character){line(ctx,[{x:r.x-39,y:r.y-r.h*.55},{x:r.x+30,y:r.y-r.h*.65}],'#edf1dbbb',5);}
     }
     if(item.good){

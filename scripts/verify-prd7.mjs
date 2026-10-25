@@ -86,7 +86,7 @@ try {
     (await import('/js/ui/index.js')).renderAll();
   });
   assert.equal(await page.locator('#planetPanel').isVisible(),true);
-  assert.ok((await page.locator('#planetBar').innerText()).includes('Verbindung verloren'));
+  assert.ok((await page.locator('#planetPanel').innerText()).includes('Verbindung verloren'));
   assert.equal(await page.locator('[data-pp="homeRename"]').isDisabled(),true);
   await page.screenshot({path:fileURLToPath(new URL('connection-lost.png',output))});
   await page.evaluate(async()=>{
@@ -96,7 +96,7 @@ try {
     qaState.coverage=[{kind:'circle',x:ship.x,y:ship.y,radius:1000}];
     (await import('/js/ui/index.js')).renderAll();
   });
-  assert.ok((await page.locator('#planetBar').innerText()).includes('Fernverbindung aktiv'));
+  assert.ok((await page.locator('#planetPanel').innerText()).includes('Fernverbindung aktiv'));
   assert.equal(await page.locator('[data-pp="homeRename"]').isEnabled(),true);
   await page.screenshot({path:fileURLToPath(new URL('remote-restored.png',output))});
   const second=await page.context().newPage();
