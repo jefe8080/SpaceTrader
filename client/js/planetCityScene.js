@@ -6,7 +6,7 @@ let artPromise;
 const terrainPromises=new Map();
 const CITY_DECOR={urban:[8,20,14,8],industrial:[16,6,21,20],gasgiant:[8,6,21],mining:[3,16,20],jungle:[20,11,20],volcanic:[5,16,6],colony:[20,21,20]};
 function loadImage(src) { return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('Stadtgrafik fehlt: '+src));image.src=src;}); }
-function loadTerrain(type){if(!terrainPromises.has(type))terrainPromises.set(type,loadImage('/assets/art/cities/'+(type==='agrar'?'agrar-city-v2':type)+'.png').catch(error=>{terrainPromises.delete(type);throw error;}));return terrainPromises.get(type);}
+function loadTerrain(type){if(!terrainPromises.has(type))terrainPromises.set(type,loadImage('/assets/art/cities/'+(type==='ruins'?type:type+'-city-v2')+'.png').catch(error=>{terrainPromises.delete(type);throw error;}));return terrainPromises.get(type);}
 function loadArt() {
   return artPromise ||= loadImage('/assets/art/cities/sprites.png')
     .then(atlas=>{

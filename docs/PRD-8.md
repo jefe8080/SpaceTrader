@@ -65,7 +65,7 @@ Bestätigte Entscheidungen am 25.10.2026:
 ### Übertragung auf die übrigen zwölf Typen
 
 - [x] T1: Freigabe und Übertragungsplan dokumentieren; Planungscommit.
-- [ ] T2: Elf weitere bewohnte Planetentypen erhalten eigene zusammenhängende Stadtillustrationen, passende Waren-/Servicegebäude, individuell gesetzte Trefferflächen, angeschlossene Fabrikhöfe und begrenzte Kamera. Keine generierten Rasterstraßen, separat verteilten Umgebungshäuser oder gespiegelten Ränder. Agrar-Freigabe bleibt Maßstab; geprüfter Umsetzungscommit.
+- [x] T2: Elf weitere bewohnte Planetentypen erhalten eigene zusammenhängende Stadtillustrationen, passende Waren-/Servicegebäude, individuell gesetzte Trefferflächen, angeschlossene Fabrikhöfe und begrenzte Kamera. Keine generierten Rasterstraßen, separat verteilten Umgebungshäuser oder gespiegelten Ränder. Metropole gezielt um Pendler-/Reiseterminals und höhere Bebauung ergänzt. 15 gezielte Tests erfolgreich; Browserprüfung aller Typen ohne Fehlertreffer/JavaScript-Fehler, Ruinen in diesem Schritt noch mit bisheriger Komposition. Maximal zulässige Zusatzwaren und Fabrikkategorien aller zwölf bewohnten Typen separat geprüft. [Produktionsprompts](art/prd8/rollout-prompts.md).
 - [ ] T3: Ruinen-Heimatwelt als zusammenhängende bewohnte Ruinenlandschaft integrieren. Alle Einrichtungen, Baustellen, freien Grundstücke, gebauten Strukturen und Orbitalstufen bleiben dynamisch an fest gestalteten Standorten; geprüfter Umsetzungscommit.
 - [ ] T4: Vollständige funktionale Regression, Browserprüfung aller Typen und Kameragrenzen, mobile Darstellung, variable Ausstattung und Bauänderungen sowie visuelle Kontrolle mit Übersicht und Einzelbildern. Befunde korrigieren, PRD und Abnahmeprotokoll aktualisieren; Abschlusscommit.
 

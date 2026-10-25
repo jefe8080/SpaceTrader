@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {CITY_TYPES, planCity, pickCity, storageFamily, citySprite, cityDevelopment} from '../client/js/planetCityLayout.js';
-import {PLANET_TYPES, GOODS, RECIPES, ENTERTAINMENT,recipeCat,extraOptions} from '../shared/config.js';
+import {PLANET_TYPES, GOODS, RECIPES, ENTERTAINMENT,recipeCat,extraOptions,factorySlots,RECIPE_CATS,PLANET_EXTRAS} from '../shared/config.js';
 
 function itemsFor(type) {
   const t=PLANET_TYPES[type];
@@ -10,8 +10,8 @@ function itemsFor(type) {
     ...Object.keys(t.consume).map(good=>({key:'consume:'+good,kind:'consume',good})),
     ...['dog','beggar','school','smuggler'].map(kind=>({key:kind,kind})),
     ...Object.keys(ENTERTAINMENT).map(building=>({key:'fun:'+building,kind:'fun',building})),
-    ...(type==='agrar'?['waterworks','foodplant','weavery','refinery']:Object.keys(RECIPES).slice(0,8)).map((recipe,index)=>({key:'factory:'+index,kind:'factory',recipe,index})),
-    ...Array.from({length:type==='agrar'?0:8},(_,i)=>({key:'plot:'+i,kind:'plot'}))];
+    ...Object.entries(factorySlots(type)).flatMap(([cat,count])=>Array.from({length:count},()=>RECIPE_CATS[cat].recipes[0])).map((recipe,index)=>({key:'factory:'+index,kind:'factory',recipe,index})),
+    ...Array.from({length:type==='ruins'?8:0},(_,i)=>({key:'plot:'+i,kind:'plot'}))];
 }
 test('city plans preserve all objects and provide unique unobscured clickable places for all 13 worlds',()=>{
   assert.equal(Object.keys(CITY_TYPES).length,13);
@@ -20,12 +20,13 @@ test('city plans preserve all objects and provide unique unobscured clickable pl
     const items=itemsFor(type),entity={id:'test',type},plan=planCity(entity,items,undefined,recipeCat);
     assert.equal(plan.records.length,items.length,type);
     assert.equal(new Set(plan.records.map(r=>r.key)).size,items.length);
-    assert.equal(plan.roads.length,type==='agrar'?0:items.length-2);
+    assert.equal(plan.roads.length,type==='ruins'?items.length-2:0);
     layouts.add(JSON.stringify(plan.records.map(r=>[r.x,r.y])));
     for(const r of plan.records) {
       assert.equal(pickCity(plan.records,r.x,r.y-r.h/2),r.key,type+' '+r.key);
       assert.equal(citySprite(entity,r.item,GOODS)===null,r.item.kind==='plot');
-      assert.ok(r.box.x>=plan.bounds.x&&r.y<=plan.bounds.y+plan.bounds.height);
+      const limit=plan.landscape||plan.bounds;
+      assert.ok(r.box.x>=limit.x&&r.y<=limit.y+limit.height,`${type}: ${r.key} outside artwork`);
       for(const other of plan.authored?[]:plan.records) {
         if(r.key===other.key)continue;
         const a=r.box,b=other.box;
@@ -62,6 +63,24 @@ test('agricultural layout accommodates maximum legacy extra production plus all 
   assert.equal(plan.records.length,items.length);assert.equal(new Set(plan.assignments.values()).size,items.length);
   assert.equal(plan.roads.length,0);assert.equal(plan.authored,true);
   for(const r of plan.records)assert.equal(pickCity(plan.records,r.x,r.y-r.h/2),r.key);
+});
+test('all painted inhabited cities retain every service at maximum legal goods and category capacity',()=>{
+  const failures=[];
+  for(const type of Object.keys(CITY_TYPES).filter(type=>type!=='ruins')){
+    const entity={type},items=itemsFor(type);
+    for(const good of extraOptions(entity).slice(0,7))items.push({key:'produce:'+good,kind:'produce',good});
+    for(const [i,good] of PLANET_EXTRAS[type].entries()){const kind=i===1?'consume':'produce';items.push({key:kind+':'+good,kind,good});}
+    const unique=[...new Map(items.map(it=>[it.key,it])).values()],plan=planCity(entity,unique,undefined,recipeCat);
+    assert.equal(plan.records.length,unique.length);assert.equal(plan.authored,true);assert.equal(plan.roads.length,0);
+    for(const r of plan.records)if(pickCity(plan.records,r.x,r.y-r.h/2)!==r.key)failures.push(type+' '+r.key+' @ '+r.id);
+    const next=planCity(entity,[...unique].reverse(),plan.assignments,recipeCat);
+    assert.deepEqual([...plan.assignments].sort(),[...next.assignments].sort());
+    const base=items.filter(it=>it.kind!=='factory'&&it.kind!=='plot'),plots=Object.entries(factorySlots(type)).flatMap(([cat,n])=>Array.from({length:n},(_,plotIndex)=>({key:`plot:${cat}:${plotIndex}`,kind:'plot',cat,plotIndex})));
+    const first=planCity(entity,[...base,...plots],undefined,recipeCat);
+    const full=planCity(entity,items,first.assignments,recipeCat);
+    for(const r of full.records.filter(r=>r.item.kind==='factory'))assert.ok(first.records.some(p=>p.item.kind==='plot'&&p.id===r.id),type+' factory must occupy its former courtyard');
+  }
+  assert.deepEqual(failures,[]);
 });
 test('warehouses cover goods and distinguish agricultural imports by silhouette',()=>{
   assert.equal(new Set(['water','fertilizer','machinery','consumer'].map(g=>storageFamily(g,GOODS))).size,4);

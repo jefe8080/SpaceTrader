@@ -1,4 +1,6 @@
 import {planAgrarCity} from './planetAgrarLayout.js';
+import {planPaintedCity} from './planetPaintedLayout.js';
+import {PAINTED_CITIES} from './planetCitySites.js';
 /** Pure visual planning. Keys and economic state belong to buildItems, never to the renderer. */
 export const CITY_TYPES = {
   agrar: { name:'Agrarwelt', ground:'#8c9670', road:'#c5b08a', trim:'#849965', shape:0, terrain:0 },
@@ -72,6 +74,7 @@ function slotPosition(slot, type) {
 }
 export function planCity(entity, items, previous = new Map(), recipeCategory) {
   if(entity.type==='agrar')return planAgrarCity(entity,items,previous,recipeCategory);
+  if(PAINTED_CITIES[entity.type])return planPaintedCity(entity,items,PAINTED_CITIES[entity.type],previous,recipeCategory);
   const type=entity.type, positions=new Map(), used=new Set();
   const ordinary=items.filter(it=>!['questhouse','beggar','dog'].includes(it.kind));
   // Preserve occupied lots on updates, including factories added after the initial load.
