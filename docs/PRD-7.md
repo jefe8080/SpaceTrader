@@ -156,7 +156,7 @@ Jeder Schritt wird mit passenden Prüfungen abgeschlossen. Fortschritt und Prüf
 | --- | --- | --- | --- |
 | P0 | Anforderungen abstimmen, PRD erstellen und committen | – | Abgeschlossen (Planungscommit) |
 | U1 | Questaktivierungszustände und Dialogwarteschlange; H3-Einleitung; einheitliche Zielaufdeckung | P0, Umsetzungsauftrag | Abgeschlossen |
-| U2 | H4-Wrack lokal platzieren und vorhandene ungeborgene Ausreißer korrigieren | U1 | Offen |
+| U2 | H4-Wrack lokal platzieren und vorhandene ungeborgene Ausreißer korrigieren | U1 | Abgeschlossen |
 | U3 | Hauptschiff ableiten, H4-Erklärung, Fernzugriff und Verbindungsverlust konsistent umsetzen | U1 | Offen |
 | U4 | Rathaus umbenennen, aktive Quests/Archiv trennen, Planetenübersicht und Namensänderung | U1, U3 | Offen |
 | U5 | Verlässliche Profilstatistiken, Handelszählung und neue Profilseite | U3 | Offen |
@@ -218,3 +218,7 @@ Die Umsetzung nutzt vorhandene Projektprüfungen und ergänzt gezielte Tests fü
 ### U1 – Umsetzung
 
 Persistente aktive/pending Quests und explizite Dialogbestätigung steuern Starts serverseitig in Questnummernfolge. Ziele veröffentlichen nur ihre Nebelzelle sowie System/Sektor; Bergbauziele sind eingeschlossen. Ein anfänglich fehlgeschlagener Kuriertest deckte einen Randfall bei Radius 0 auf; korrigiert. Prüfung: `node --test tests/prd7.test.js tests/quests.test.js`, 15/15 erfolgreich.
+
+### U2 – Umsetzung
+
+720 begrenzte Kandidaten: vier innere Ringe bis Radius 3.935, danach fester Ausweichring bei 4.400 Welteinheiten (Systemradius 4.000). Abstand zu Objekten: deren Radius plus 250. Kein unbegrenztes Ausweichen; bei vollständig versperrter Suche wird kein Fund erzeugt. Bestehende ungeborgene Ausreißer werden mit aktualisiertem Nebelzellenindex versetzt, gültige Positionen erhalten. Geometrie-, Platzmangel- und Migrationstest: `node --test tests/prd7.test.js`, 2/2 bestanden.

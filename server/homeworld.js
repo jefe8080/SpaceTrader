@@ -7,6 +7,7 @@ import { grantRelic } from './relic.js';
 import {stat} from './markets.js';
 import { tickHomeOperations, homeAccess, homeConstructionError } from './homeworld-operations.js';
 import {advancedQuestReady,completeAdvancedQuest} from './homequests.js';
+import { findWreckPosition } from './quest-wreck.js';
 import { syncHomeQuests } from './quest-activation.js';
 import { HOME_STORY } from '../shared/home-story.js';
 
@@ -186,8 +187,7 @@ export function completeHomeQuest(game, player, entity, id) {
   if(Number(id.slice(1))>=7)return completeAdvancedQuest(game,player,entity,id);
   if (!homeQuestReady(game, player, entity, id)) return 'Voraussetzungen noch nicht erfüllt oder Belohnung bereits abgeholt.';
   if (id === 'H05' && game.shipsOf(player.id).length >= PILOT_LICENSES[player.pilot || 1].maxShips) return 'Schiffslimit erreicht. Für den zweiten Frachter wird ein freier Lizenzplatz benötigt.';
-  const salvagePosition = id === 'H02' ? clearPosition(game.world, game.world.systems.get(entity.system), entity,
-    rng(hashN(game.world.seed, Number(player.id.slice(1)), 504)), 1600, 4500) : null;
+  const salvagePosition = id === 'H02' ? findWreckPosition(game, entity) : null;
   if (id === 'H02' && !salvagePosition) return 'Aktuell kein freier Bergungsstandort. Bitte erneut versuchen.';
   const quest = HOME_QUESTS[id], home = entity.market.homeworld;
   player.homeQuest.completed[id] = { at: game.time };
