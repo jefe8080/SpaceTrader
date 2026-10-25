@@ -1,7 +1,7 @@
 import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, ZONE_TYPES, GOODS, cellKey } from '/shared/config.js';
 import { hexAt, hexCorners, hexCenter, hexKey } from '/shared/hex.js';
 import { getSprite } from './assets.js';
-import { shipScreenSize } from './shipArt.js';
+import { shipScreenSize, shipVerticalScale } from './shipArt.js';
 import { state, playerColor, selectedShips } from './state.js';
 import { hasWarn, stationAccent } from './util.js';
 import { FACTIONS } from '/shared/factions.js';
@@ -361,6 +361,7 @@ function drawShip(s, now) {
     ctx.fill();
   }
   const spr = getSprite(def.sprite, s.owner === state.me?.id ? (s.marker || playerColor(s.owner)) : playerColor(s.owner), 256);
+  ctx.scale(1, shipVerticalScale(s.ra));
   if (spr) ctx.drawImage(spr, -size / 2, -size / 2, size, size);
   else { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, size / 4, 0, TAU); ctx.fill(); }
   ctx.restore();

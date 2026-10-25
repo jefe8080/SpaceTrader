@@ -2,7 +2,19 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {SHIP_TYPES} from '../shared/ships.js';
-import {PAINTED_SHIPS,shipArtUrl,shipScreenSize} from '../client/js/shipArt.js';
+import {PAINTED_SHIPS,shipArtUrl,shipScreenSize,shipVerticalScale} from '../client/js/shipArt.js';
+
+test('Schiffe behalten ihre Flugrichtung und zeigen ihre Oberseite möglichst nach oben',()=>{
+  assert.equal(shipVerticalScale(0),1);
+  assert.equal(shipVerticalScale(Math.PI),-1);
+  for(let degrees=-720;degrees<=720;degrees++){
+    const angle=degrees*Math.PI/180;
+    const scale=shipVerticalScale(angle);
+    // Die Oberseite (-Y) zeigt nach Rotation und Spiegelung am Bildschirm nach oben.
+    assert.ok(-Math.cos(angle)*scale<=1e-12);
+    assert.equal(Math.abs(scale),1);
+  }
+});
 
 test('Jeder Schiffstyp hat eine austauschbare quadratische PNG-Illustration mit Alpha',async()=>{
   assert.equal(PAINTED_SHIPS.size,Object.keys(SHIP_TYPES).length);
