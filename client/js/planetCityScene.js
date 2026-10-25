@@ -1,6 +1,6 @@
 import {GOODS} from '/shared/config.js';
 import {CITY_TYPES, planCity, citySprite, cityDevelopment, pickCity} from './planetCityLayout.js';
-import {constrainCityPose,fitCityOverview} from './planetCityCamera2D.js';
+import {constrainCityPose,fitCityOverview,fitCityFocus} from './planetCityCamera2D.js';
 
 let artPromise;
 const terrainPromises=new Map();
@@ -122,7 +122,7 @@ export class PlanetCityScene {
     const b=this.plan.bounds;this.overview=this.plan.authored?fitCityOverview(b,this.plan.landscape,{width:w,height:h},area):{x:b.x+b.width/2,y:b.y+b.height/2,zoom:Math.min(area.width/b.width,area.height/b.height)*.95};
     this.fly(this.selected&&this.records.has(this.selected)?this.focusPose(this.records.get(this.selected)):this.overview);
   }
-  focusPose(record){return{x:record.x,y:record.y-record.h*.38,zoom:Math.min(2.1,Math.max(this.overview.zoom*1.6,Math.min(this.area.width/410,this.area.height/310)))};}
+  focusPose(record){return fitCityFocus(record,this.plan.landscape,{width:innerWidth,height:innerHeight},this.area,this.overview.zoom);}
   fly(pose){
     if(this.plan?.authored)pose=constrainCityPose(pose,this.plan.landscape,{width:innerWidth,height:innerHeight},this.area);
     if(this.reducedMotion){this.pose={...pose};this.flight=null;}else this.flight={from:{...this.pose},to:{...pose},elapsed:0};
@@ -131,7 +131,7 @@ export class PlanetCityScene {
     if(this.plan?.authored){this.pose=constrainCityPose(this.pose,this.plan.landscape,{width:innerWidth,height:innerHeight},this.area);return;}
     const b=this.plan?.bounds;if(!b)return;this.pose.x=Math.max(b.x,Math.min(b.x+b.width,this.pose.x));this.pose.y=Math.max(b.y,Math.min(b.y+b.height,this.pose.y));
   }
-  zoomTo(zoom,x,y){if(!this.plan||this.loading)return;this.flight=null;const before=this.toWorld(x,y);this.pose.zoom=Math.max(this.overview.zoom*.8,Math.min(3,zoom));const after=this.toWorld(x,y);this.pose.x+=before.x-after.x;this.pose.y+=before.y-after.y;this.clampPose();}
+  zoomTo(zoom,x,y){if(!this.plan||this.loading)return;this.flight=null;const before=this.toWorld(x,y);this.pose.zoom=Math.max(this.overview.zoom*.8,Math.min(8,zoom));const after=this.toWorld(x,y);this.pose.x+=before.x-after.x;this.pose.y+=before.y-after.y;this.clampPose();}
   toWorld(x,y){const a=this.area;return{x:(x-a.x-a.width/2)/this.pose.zoom+this.pose.x,y:(y-a.y-a.height/2)/this.pose.zoom+this.pose.y};}
   toScreen(x,y){const a=this.area;return{x:a.x+a.width/2+(x-this.pose.x)*this.pose.zoom,y:a.y+a.height/2+(y-this.pose.y)*this.pose.zoom};}
   select(key,force=false){if(!force&&key===this.selected)return;this.selected=this.records.has(key)?key:null;if(this.overview)this.fly(this.selected?this.focusPose(this.records.get(this.selected)):this.overview);this.mark();}

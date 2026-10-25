@@ -38,14 +38,16 @@ try{
   await page.evaluate(async()=>{(await import('/js/net.js')).socket.disconnect();});
   for(const type of ['agrar','ocean','desert','mining','ice','urban','resort','gasgiant','jungle','volcanic','colony','industrial','ruins']){
     await page.evaluate(async type=>{
-      const {state}=await import('/js/state.js'),{PLANET_TYPES,planetFeatures}=await import('/shared/config.js');
+      const {state}=await import('/js/state.js'),{PLANET_TYPES,planetFeatures,factorySlots,RECIPE_CATS}=await import('/shared/config.js');
       const {leavePlanet,enterPlanet}=await import('/js/ui/planetPanel.js');leavePlanet();
       let id='qa8-'+type;
       for(let i=0;i<20000;i++){const candidate='qa8-'+type+i,f=planetFeatures(candidate);if(f.beggar&&f.dog&&f.school&&f.smuggler){id=candidate;break;}}
       const t=PLANET_TYPES[type],goods={};for(const role of ['produce','consume'])for(const good of Object.keys(t[role]))goods[good]={role,stock:100,cap:1000,rate:.1,baseRate:.1};
       const home=type==='ruins'?structuredClone(state.entities.get(state.homeworld).market.homeworld):null;
       if(home){home.structures=[{id:'housing',kind:'housing',plot:0,status:'ready'},{id:'solar',kind:'solar',plot:1,status:'building'}];home.orbital={small:1,large:1};}
-      const entity={id,type,kind:'planet',name:'Gestaltungsprüfung '+t.name,x:0,y:0,owner:state.me.id,market:{goods,bld:{fac:['foodplant'],lvl:{}},...(home?{homeworld:home}:{})}};
+      const firstCategory=Object.entries(factorySlots(type)).find(([,n])=>n>0)?.[0];
+      const recipe=type==='agrar'?'foodplant':firstCategory?RECIPE_CATS[firstCategory].recipes[0]:'foodplant';
+      const entity={id,type,kind:'planet',name:'Gestaltungsprüfung '+t.name,x:0,y:0,owner:state.me.id,market:{goods,bld:{fac:[recipe],lvl:{}},...(home?{homeworld:home}:{})}};
       state.entities.set(id,entity);state.props.set(id,{manage:true});
       const ship=[...state.ships.values()].find(s=>s.owner===state.me.id);Object.assign(ship,{dockedAt:id,x:0,y:0});
       enterPlanet(id);
@@ -54,9 +56,20 @@ try{
     const audit=await page.evaluate(async()=>{
       const {getPlanetView,scene}=await import('/js/planetside.js'),v=getPlanetView();v.flight=null;v.pose={...v.overview};v.render(0);
       const misses=[];for(const r of v.records.values()){const p=v.toScreen(r.x,r.y-r.h/2);if(v.pick(p.x,p.y)!==r.key)misses.push(r.key);}
-      return {type:v.entity.type,objects:scene.items.length,rendered:v.records.size,misses,zoom:v.pose.zoom,active:v.active,loading:v.loading,landed:window.qaState.landed};
+      const original=v.ctx.drawImage;let terrainDraws=0;
+      v.ctx.drawImage=function(...args){if(args[0]===v.art.terrain)terrainDraws++;return original.apply(this,args);};
+      try{v.render(0);}finally{v.ctx.drawImage=original;}
+      let cameraCases=0;const b=v.plan.landscape;
+      for(const zoom of [.001,3])for(const x of [-1e6,1e6])for(const y of [-1e6,1e6]){
+        v.pose={x,y,zoom};v.render(0);const lo=v.toWorld(0,0),hi=v.toWorld(innerWidth,innerHeight);
+        if(lo.x<b.x-1e-6||lo.y<b.y-1e-6||hi.x>b.x+b.width+1e-6||hi.y>b.y+b.height+1e-6)throw new Error('Visible painting edge: '+v.entity.type);cameraCases++;
+      }
+      v.pose={...v.overview};v.render(0);
+      return {type:v.entity.type,objects:scene.items.length,rendered:v.records.size,misses,zoom:v.pose.zoom,active:v.active,loading:v.loading,landed:window.qaState.landed,authored:v.plan.authored,terrainDraws,generatedRoads:v.plan.roads.length,decorHouses:v.decorations.length,cameraCases};
     });
-    console.log(JSON.stringify(audit));assert.equal(audit.type,type);assert.equal(audit.rendered,audit.objects);assert.deepEqual(audit.misses,[]);results.push(audit);
+    console.log(JSON.stringify(audit));assert.equal(audit.type,type);assert.equal(audit.rendered,audit.objects);assert.deepEqual(audit.misses,[]);
+    assert.equal(audit.authored,true);assert.equal(audit.terrainDraws,1);assert.equal(audit.generatedRoads,0);assert.equal(audit.decorHouses,0);results.push(audit);
+    await page.evaluate(()=>document.getElementById('toasts').replaceChildren());
     await page.screenshot({path:fileURLToPath(new URL(type+'.png',output))});
     if(type==='agrar'){
       await page.locator('[data-pp="names"]').click();assert.equal(await page.locator('[data-pp="names"]').getAttribute('aria-pressed'),'true');
@@ -90,6 +103,19 @@ try{
       await page.locator('[data-pp="overview"]').click();await page.waitForTimeout(650);
       await page.locator('.city-target').filter({hasText:'Hund'}).focus();await page.keyboard.press('Enter');await page.locator('#planetPanel:not([hidden])').waitFor();await page.keyboard.press('Escape');
     }
+    // Every type also gets a real mobile touch selection and a viewport boundary check.
+    await page.setViewportSize({width:390,height:844});await page.waitForTimeout(650);
+    const mobile=await page.evaluate(async()=>{
+      const v=(await import('/js/planetside.js')).getPlanetView(),r=v.records.get(v.entity.type==='ruins'?'home:waterworks':'questhouse');
+      v.select(r.key,true);v.flight=null;v.pose=v.focusPose(r);v.render(0);
+      const b=v.plan.landscape,lo=v.toWorld(0,0),hi=v.toWorld(innerWidth,innerHeight);
+      if(lo.x<b.x-1e-6||lo.y<b.y-1e-6||hi.x>b.x+b.width+1e-6||hi.y>b.y+b.height+1e-6)throw new Error('Mobile painting edge');
+      return v.toScreen(r.x,r.y-r.h/2);
+    });
+    await page.touchscreen.tap(mobile.x,mobile.y);await page.locator('#planetPanel:not([hidden])').waitFor();await page.waitForTimeout(650);
+    await page.screenshot({path:fileURLToPath(new URL(type+'-mobile.png',output))});
+    const leave=await page.locator('[data-pp="leave"]').boundingBox(),top=await page.locator('#topbar').boundingBox();assert.ok(leave.y>=top.y+top.height&&leave.x+leave.width<=390);
+    await page.keyboard.press('Escape');await page.setViewportSize({width:1600,height:1000});await page.waitForTimeout(650);
     console.log('OK '+type+' '+audit.objects+' objects');
   }
   const oldPositions=await page.evaluate(async()=>{
@@ -110,6 +136,20 @@ try{
   });
   for(const [key,x,y] of afterPositions){const old=oldPositions.find(r=>r[0]===key);if(old)assert.deepEqual([x,y],old.slice(1),'stable position '+key);}
   await page.screenshot({path:fileURLToPath(new URL('ruins-development.png',output))});
+  await page.evaluate(()=>{const h=qaState.entities.get(qaState.landed).market.homeworld;h.plots=48;h.structures=[];h.orbital={small:1};});
+  await settle();await page.locator('[data-pp="overview"]').click();await page.waitForTimeout(650);
+  await page.screenshot({path:fileURLToPath(new URL('ruins-48-plots.png',output))});
+  await page.evaluate(()=>{
+    const h=qaState.entities.get(qaState.landed).market.homeworld;
+    h.structures=Array.from({length:48},(_,plot)=>({id:'full-'+plot,plot,kind:['housing','solar','school','silo','safeStorage','moduleBench','spaceport','researchWorkshop'][plot%8],status:plot%3?'ready':'building'}));h.orbital={small:1,large:1};
+  });
+  await settle();
+  const fullHome=await page.evaluate(async()=>{
+    const v=(await import('/js/planetside.js')).getPlanetView(),misses=[];v.flight=null;v.pose={...v.overview};v.render(0);
+    for(const r of v.records.values()){const p=v.toScreen(r.x,r.y-r.h/2);if(v.pick(p.x,p.y)!==r.key)misses.push(r.key);}
+    return {objects:v.records.size,misses};
+  });assert.equal(fullHome.objects,58);assert.deepEqual(fullHome.misses,[]);
+  await page.screenshot({path:fileURLToPath(new URL('ruins-48-developed.png',output))});
   assert.deepEqual(errors,[]);
   // A browser-rendered contact sheet makes all 13 actual screenshots reviewable together.
   const gallery=await context.newPage();await gallery.setViewportSize({width:1600,height:1120});
@@ -117,6 +157,6 @@ try{
   await gallery.setContent(`<style>*{box-sizing:border-box}body{margin:0;background:#132827;color:#f0dfbc;font:16px system-ui;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px}figure{margin:0;background:#223b39}img{display:block;width:100%;aspect-ratio:1.6}figcaption{padding:5px 10px}</style>${cards.join('')}`);
   await gallery.evaluate(()=>Promise.all([...document.images].map(img=>img.decode())));
   await gallery.screenshot({path:fileURLToPath(new URL('all-types.png',output)),fullPage:true});await gallery.close();
-  await fs.writeFile(new URL('browser-results.json',output),JSON.stringify({status:'passed',results,errors,checks:['13 types and complete hit selection','real homeworld dialog and Escape','warehouse, beggar, dog, factory panels','mobile controls clear of header','touch tap and pinch without accidental selection','wheel, drag, focus and overview','spatial keyboard activation','live homeworld development updates and stable positions']},null,2));
+  await fs.writeFile(new URL('browser-results.json',output),JSON.stringify({status:'passed',results,fullHome,errors,checks:['13 authored types, one painting per frame, no generated roads or decor houses','104 desktop camera boundary cases and 13 mobile views','complete hit selection and 58-object developed homeworld','real homeworld dialog and Escape','warehouse, beggar, dog, factory panels','mobile touch selection and unobstructed leave controls for every type','touch tap and pinch without accidental selection','wheel, drag, focus and overview','spatial keyboard activation','live homeworld development updates and stable positions']},null,2));
   console.log('PRD8 browser verification passed');
 }finally{await browser.close();}

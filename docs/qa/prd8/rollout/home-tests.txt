@@ -1,0 +1,37 @@
+✔ Alle 18 Hauptquests haben feste Voraussetzungen, Belohnungen und nachvollziehbare Ziele (2.183ms)
+✔ H07 verlangt nachweisliche Ausbildung und Eigenproduktion; gekaufte oder umgeladene Ware genügt nicht (58.9243ms)
+✔ Teillieferungen verbrauchen tatsächlich verfügbare Ware und bleiben getrennt von Produktionsnachweisen (20.3451ms)
+✔ Archivbesuch benötigt tatsächlich manuell angedocktes Schiff; Forschungsfund ist einmalige physische Fracht (20.6912ms)
+✔ Persönliche Archivstelle kann über die reguläre Fluglogik manuell erreicht werden (18.2357ms)
+✔ H10 zählt tatsächlichen Veredelungsoutput, H11 dauerhaft angesammelte volle Versorgung (50.784ms)
+✔ Kleiner Ring verlangt bestätigte dauerhafte Schiffsabgabe; ein voller, angebotener oder Relikt-Spatz wird nicht gelöscht (30.1533ms)
+✔ Orbitalbau bindet tatsächliche Schiffmaterialien, pausiert ohne Betrieb und gibt einen leeren realen Rumpf aus (17.4007ms)
+✔ Großer Ring braucht zwei getrennte Abschnitte und bindet Questmaterialien nicht ein zweites Mal (23.3229ms)
+✔ Kleine und große Fertigung besitzen getrennte reale Bauplätze und teilen den Grundbetrieb ohne Doppelbelegung (19.133ms)
+✔ H14 und H17 verbessern denselben einzigartigen Antrieb auf ×5 und ×6, ohne Exemplar oder zweite Auszahlung (17.8855ms)
+✔ Neustart erhält Teillieferung, Ringbauabschnitt, abgegebenes Infrastrukturschiff und Studienfund (72.7791ms)
+✔ Orbitalbau von Fraktions-L/XL verlangt Rang und veredelte Währung zusätzlich zu realen Rumpfmaterialien (26.2318ms)
+✔ Bau bindet Material, Geld, gewählten Platz und Team; unabhängige Projekte laufen parallel (67.3755ms)
+✔ Lagerkapazität ist gemeinsam, Gefahrgut getrennt, Passagiere werden nicht als Lagerware abgelegt (25.0694ms)
+✔ Geschützte Reserven gelten für Entnahme, Bau und Produktion; Schiffsmaterial wird ohne Doppelabbuchung verwendet (19.9662ms)
+✔ Vollständige Rezeptzyklen erhalten Zutaten und passen auch bei vollem Lager mit mengenneutraler Umwandlung (19.8597ms)
+✔ Personal wird nicht doppelt zugeordnet; Energieknappheit pausiert nach Priorität (22.274ms)
+✔ Gasgenerator verbraucht reale Betriebsmittel, fällt ohne Brennstoff aus und löscht keine Infrastruktur (49.3557ms)
+✔ Ausbildung reserviert Bewohner, pausiert ohne Versorgung und wandelt Qualifikation ohne zusätzliche Einwohner um (24.2623ms)
+✔ Wachstum benötigt Versorgung und Wohnraum; eine Woche Mangel verliert keine Einwohner, Schiffe oder Fortschritte (1346.6308ms)
+✔ Flächenerweiterung, Baugruppen und Hypothesenprüfung verändern keine nicht freigeschalteten Plätze (18.2882ms)
+✔ Neustart erhält Baukosten und Ausbildungsrestzeit ohne Offlinefortschritt (78.0837ms)
+✔ Persönliche Heimat: gleichzeitige und spätere Spieler haben Abstand, getrennte Systeme und Grundquellen (383.0729ms)
+✔ Erschöpfte Startringe erweitern die Suche ringweise (134.7788ms)
+✔ H00–H06 ohne fremde Industrie: echte Transfers, Eigenproduktion, getrennte Quest, einmaliger zweiter Frachter (227.9ms)
+✔ Bau bindet Kosten genau einmal, Parallelreparaturen sind erlaubt und fremde Eingriffe bleiben gesperrt (31.2625ms)
+✔ Neustart erhält Reparaturtimer, Starthilfen und Heimatidentität ohne neue Pakete (68.7467ms)
+✔ Ruinenlandschaft: 48 getrennte reguläre Plätze und eigene Grundanlagenanker (8.3454ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1888.8563
