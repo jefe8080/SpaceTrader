@@ -94,7 +94,7 @@ export function renderQuestBox() {
   const q = state.quest;
   const box = $('questBox');
   box.hidden = !q && !state.homeworld;
-  const nextHome = Object.entries(HOME_QUESTS).find(([id, quest]) => !state.homeQuest?.completed[id] && quest.requires.every(id => state.homeQuest?.completed[id]));
+  const nextHome = Object.entries(HOME_QUESTS).find(([id, quest]) => !state.homeQuest?.completed[id] && state.homeQuest?.active?.[id]);
   const homeSummary = state.homeworld && nextHome ? `<div class="qb-head">⌂ Hauptquest · ${nextHome[0]}</div><p>${esc(nextHome[1].title)}: ${esc(nextHome[1].goal)}</p><button class="small" data-q="homeTarget">Heimat zeigen</button><hr>` : '';
   if (!q) { setHtml(box, homeSummary); return; }
   const t = questTarget(q);

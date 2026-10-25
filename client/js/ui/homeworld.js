@@ -1,3 +1,4 @@
+import {questText} from './quests.js';
 import {HOME_STORY,storyAvailable,storyDialogReady} from '/shared/home-story.js';
 import { GOODS, RECIPES,recipeText } from '/shared/config.js';
 import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock } from '/shared/homeworld.js';
@@ -36,7 +37,7 @@ export function renderHomeDialog() {
   if(!state.me||!id){dialog.hidden=true;currentScene=null;return;}
   if(currentScene!==id){
     currentScene=id;const scene=HOME_STORY[id];
-    dialog.innerHTML=`<section class="home-story" role="dialog" aria-modal="true" aria-labelledby="homeStoryTitle"><img src="/assets/art/homeworld/${scene.image}.png" alt="${esc(scene.title)} · gezeichnete Szene mit ${esc(scene.speaker)}"><div class="home-story-text"><div class="muted">HAUPTGESCHICHTE · ${id}</div><h2 id="homeStoryTitle">${esc(scene.title)}</h2><p><b>${esc(scene.speaker)}</b></p><p>„${esc(scene.text)}“</p><p class="muted">${esc(scene.hint)}</p>${scene.choice?'<button data-story-priority="housing">Wohnraum zuerst</button> <button data-story-priority="supply">Versorgung zuerst</button>':''}<button class="primary" data-story-close>Weiter</button> <button data-story-close>Überspringen</button><p class="muted small-note">Im Heimatjournal nachlesbar. Schiffe, Produktion und Lieferungen laufen weiter.</p></div></section>`;
+    dialog.innerHTML=`<section class="home-story" role="dialog" aria-modal="true" aria-labelledby="homeStoryTitle"><img src="/assets/art/homeworld/${scene.image}.png" alt="${esc(scene.title)} · gezeichnete Szene mit ${esc(scene.speaker)}"><div class="home-story-text"><div class="muted">HAUPTGESCHICHTE · ${id}</div><h2 id="homeStoryTitle">${esc(scene.title)}</h2><p><b>${esc(scene.speaker)}</b></p><p>„${esc(scene.text)}“</p><p class="muted">${esc(scene.hint)}</p>${scene.choice?'<button data-story-priority="housing">Wohnraum zuerst</button> <button data-story-priority="supply">Versorgung zuerst</button>':''}<button class="primary" data-story-close>Weiter</button> <button data-story-close>Überspringen</button><p class="muted small-note">Im Rathaus nachlesbar. Schiffe, Produktion und Lieferungen laufen weiter.</p></div></section>`;
   }
   dialog.hidden=false;
 }
@@ -47,13 +48,15 @@ export function homePanel(entity, item, ship) {
   const home = entity.market.homeworld;
   if (home.owner !== state.me.id) return '<div class="muted">Persönliche Ruinenwelt eines anderen Kapitäns.</div>';
   if (item.kind === 'questhouse') {
-    if(entity.id!==state.homeworld)return `<p>Weiterer persönlicher Ruinenstandort. Dock und Infrastruktur stammen aus der bezahlten Expedition. Keine erneuten Einstiegspakete und kein zweites Tutorial.</p>`+homeBalance(entity)+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} nachgewiesene eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+warpPanel(entity);
-    let html = `<div class="muted">Hauptquests laufen unabhängig von normalen Quests. Mehrere freigeschaltete Zweige können gleichzeitig fortschreiten.</div>`;
+    const overview='<details><summary>Planetenübersicht</summary>'+homeBalance(entity)+'</details>'+planetNamePanel(entity);
+    if(entity.id!==state.homeworld)return overview+ `<p>Weiterer persönlicher Ruinenstandort. Dock und Infrastruktur stammen aus der bezahlten Expedition. Keine erneuten Einstiegspakete und kein zweites Tutorial.</p>`+homeBalance(entity)+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} nachgewiesene eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+warpPanel(entity);
+    let html = overview+(state.quest?'<h3>Laufender Auftrag</h3><p>'+questText(state.quest)+'</p>':'')+`<div class="muted">Hauptquests laufen unabhängig von normalen Quests. Mehrere freigeschaltete Zweige können gleichzeitig fortschreiten.</div>`;
     html += `<div class="kv"><span>Einwohner / Wohnraum</span><span>${home.population} / ${home.housing}</span><span>Grundenergie</span><span>${home.power}</span><span>Leitstelle</span><span>Stufe ${home.controlLevel}</span>
       <span>Eigenproduktion</span><span>${fmt(home.produced.water || 0)} Wasser · ${fmt(home.produced.food || 0)} Nahrung · ${fmt(home.produced.ingots || 0)} Barren</span>
       <span>Versorgter Betrieb nach H03</span><span>${Math.floor(home.suppliedSeconds)} / 600 s</span></div>`;
     for (const [id, quest] of Object.entries(HOME_QUESTS)) {
-      const unlocked = quest.requires.every(completed);
+      if(completed(id)||!state.homeQuest?.active?.[id])continue;
+      const unlocked = true;
       html += `<div class="quest-offer"><b>${id} · ${esc(quest.title)} ${completed(id) ? '✓' : ''}</b><p>${esc(quest.goal)}</p>
       <div class="muted">${quest.credits} Cr · ${quest.xp} XP${unlocked ? '' : ' · Voraussetzung: ' + quest.requires.join(', ')}</div>
       ${completed(id) ? '' : `<button class="small primary" data-pp="homeQuest" data-quest="${id}" ${unlocked ? '' : 'disabled'}>Fortschritt prüfen und abschließen</button>`}</div>`;
@@ -72,7 +75,7 @@ export function homePanel(entity, item, ship) {
     html+='<h3>Eigene Welten und Expeditionen</h3>';
     for(const world of [...state.entities.values()].filter(e=>e.ruinsSite||e.market?.homeworld?.owner===state.me.id))html+=`<p>${esc(world.name)} · ${world.ruinsSite?'unbewohnter Standort':`Leitstelle ${world.market.homeworld.controlLevel}`}</p><button class="small" data-pp="homeSite" data-id="${world.id}">Standort zeigen</button>`;
     html+=warpPanel(entity);
-    html += '<details><summary>Journal nachlesen</summary>'+Object.entries(HOME_STORY).filter(([id])=>storyAvailable(state.homeQuest,id)).map(([id,scene])=>`<button class="small" data-pp="homeReplay" data-scene="${id}">${id} · ${esc(scene.title)} ansehen</button><p><b>${esc(scene.speaker)}</b>: ${esc(scene.text)}</p>`).join('') + (state.homeQuest?.journal || []).map((entry) => `<p><b>${esc(entry.speaker || entry.id)}</b> · ${esc(entry.text)}</p>`).join('') + '</details>';
+    html += '<details><summary>Archiv – erlebte Geschichten</summary>'+Object.entries(HOME_STORY).filter(([id])=>state.homeQuest?.scenesSeen?.[id]||completed(id)).map(([id,scene])=>`<button class="small" data-pp="homeReplay" data-scene="${id}">${id} · ${esc(scene.title)} ansehen</button><p><b>${esc(scene.speaker)}</b>: ${esc(scene.text)}</p>`).join('') + (state.homeQuest?.journal || []).map((entry) => `<p><b>${esc(entry.speaker || entry.id)}</b> · ${esc(entry.text)}</p>`).join('') + '</details>';
     return html;
   }
   if (item.homeStructure) return structurePanel(entity,item.homeStructure);
@@ -140,6 +143,12 @@ export function homePanel(entity, item, ship) {
   return html;
 }
 
+function planetNamePanel(entity){
+  const until=(entity.market.homeworld.renamedAt??0)+86400000;
+  const remaining=entity.market.homeworld.renamedAt==null?0:Math.max(0,Math.ceil((until-Date.now())/60000));
+  return '<h3>Planetenname</h3><p>'+esc(entity.name)+(remaining?' · Nächste Änderung in '+Math.floor(remaining/60)+' h '+remaining%60+' min':' · Namensänderung verfügbar')+'</p><label>Neuer Name <input id="homePlanetName" minlength="3" maxlength="32" value="'+esc(entity.name)+'"></label><button class="small" data-pp="homeRename">Namen speichern</button>';
+}
+
 const costLabel=cost=>`${fmt(cost.credits)} Cr · ${Object.entries(cost.goods).map(([g,n])=>`${n} ${GOODS[g]?.name||g}`).join(', ')} · ${cost.seconds||60} s`;
 function orbitalPanel(entity){
   const o=entity.market.homeworld.orbital;
@@ -184,7 +193,7 @@ function logisticsPanel(entity){
 }
 function homeBalance(entity){
   const home=entity.market.homeworld,used=homeStorageUsage(entity.market),work=home.workforce;
-  let html=`<div class="kv"><span>Einwohner / Wohnraum</span><span>${home.population} / ${home.housing}</span><span>Energie benutzt / verfügbar</span><span>${home.energy?.used||0} / ${home.energy?.generation||12}</span>
+  let html=`<div class="kv"><span>Einwohner / Wohnraum</span><span>${home.population} / ${home.housing}</span><span>Energie benutzt / verfügbar</span><span>${home.energy?.used||0} / ${home.energy?.generation??home.power??0}</span>
     <span>Normales Lager</span><span>${fmt(used.normal)} / ${home.storage}</span><span>Gefahrgutlager</span><span>${fmt(used.hazard)} / ${home.hazardStorage}</span>
     <span>Unzugeordnet: einfach / Fach / Spezial</span><span>${work?`${work.free.basic} / ${work.free.skilled} / ${work.free.specialist}`:'48 / 12 / 0'} · höchstens ${work?.freeSlots??Math.floor(home.population*.6)} weitere Arbeitsplätze</span>
     <span>Grundversorgung</span><span>${Math.round((home.supply?.basic||0)*100)} % · Notversorgung erhält Einwohner und Fortschritt</span></div>`;

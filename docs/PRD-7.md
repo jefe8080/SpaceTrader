@@ -158,7 +158,7 @@ Jeder Schritt wird mit passenden Prüfungen abgeschlossen. Fortschritt und Prüf
 | U1 | Questaktivierungszustände und Dialogwarteschlange; H3-Einleitung; einheitliche Zielaufdeckung | P0, Umsetzungsauftrag | Abgeschlossen |
 | U2 | H4-Wrack lokal platzieren und vorhandene ungeborgene Ausreißer korrigieren | U1 | Abgeschlossen |
 | U3 | Hauptschiff ableiten, H4-Erklärung, Fernzugriff und Verbindungsverlust konsistent umsetzen | U1 | Abgeschlossen |
-| U4 | Rathaus umbenennen, aktive Quests/Archiv trennen, Planetenübersicht und Namensänderung | U1, U3 | Offen |
+| U4 | Rathaus umbenennen, aktive Quests/Archiv trennen, Planetenübersicht und Namensänderung | U1, U3 | Abgeschlossen |
 | U5 | Verlässliche Profilstatistiken, Handelszählung und neue Profilseite | U3 | Offen |
 | U6 | Gesamte Questredaktion und Karten-Topbar korrigieren | U1–U5 für finale Textbezüge | Offen |
 | U7 | Integrierte Prüfung, verbleibende Fehler beheben, Abnahme dokumentieren | U1–U6 | Offen |
@@ -226,3 +226,7 @@ Persistente aktive/pending Quests und explizite Dialogbestätigung steuern Start
 ### U3 – Umsetzung
 
 Gemeinsame fachliche Zugriffsfunktion für Client und Server: eigener eingebauter Antrieb und Hauptschiff im eigenen Netz, unabhängig von Auswahl und Zielplanetenabdeckung. Lokale Landung bleibt gültig. Geöffnete eigene Ruinenansichten bleiben bei Verbindungsverlust sichtbar und sperren Verwaltung; der Server prüft erneut. Werkstattübergabe erzeugt gespeicherten Kommunikationsdialog. Physische Lieferungen benötigen weiterhin ein Schiff am Ort. Hauptschiffkrone folgt dem Antrieb. Gezielte Berechtigungsprüfungen 3/3 bestanden; Syntaxprüfungen der geänderten Oberflächen bestanden.
+
+### U4 – Umsetzung
+
+Rathaus zeigt aktive Aufträge und separates Archiv erlebter Geschichten. Aufklappbare Planetenübersicht verwendet Simulationsbestände, aktive Raten, Personal, Bau und Ausbildung; auf weiteren Ruinenwelten ebenfalls verfügbar. Namensänderungen validiert der Server ohne Vorabnormalisierung von Steuerzeichen; UTC-Epochenzeit erhält 24 reale Stunden pro Planet. Unveränderter Name bleibt ohne Zeitverbrauch. Vier gezielte Tests bestanden, inklusive Grenzwert, ungültigen Namen, Eigentum und unabhängigen Cooldowns.

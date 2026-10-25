@@ -7,6 +7,7 @@ import { findWreckPosition, correctQuestWreck } from '../server/quest-wreck.js';
 import { WORLD } from '../shared/config.js';
 import { homeAccess } from '../server/homeworld-operations.js';
 import { mainShip } from '../shared/planet-access.js';
+import { renamePlanet, PLANET_RENAME_COOLDOWN } from '../server/planet-name.js';
 
 function fixture() {
   const game = new Game(':memory:', { profile: 'homeworld', seed: 42 });
@@ -33,6 +34,24 @@ test('PRD7: introductions serialize actual starts and survive repeated synchroni
   assert.ok(player.homeQuest.active.H04);
   runCommand(game, player, { cmd: 'homeDialogRead', scene: 'H03' });
   assert.equal(player.homeQuest.introduction, 'H04');
+  game.store.close();
+});
+
+test('PRD7: names trim, reject controls, no-op and independent real-time cooldowns', () => {
+  const {game,player,home,ship}=fixture();ship.dockedAt=home.id;
+  const now=1000000;
+  assert.equal(renamePlanet(game,player,home,'  Ähren-Welt  ',now),undefined);
+  assert.equal(home.name,'Ähren-Welt');
+  assert.equal(renamePlanet(game,player,home,home.name,now+1),undefined);
+  assert.equal(home.market.homeworld.renamedAt,now);
+  assert.match(renamePlanet(game,player,home,'Andere Welt',now+PLANET_RENAME_COOLDOWN-1),/24 Stunden/);
+  for(const name of ['','ab','x'.repeat(33),'Neue\nWelt','Neue\u0000Welt'])assert.equal(typeof renamePlanet(game,player,home,name,now+PLANET_RENAME_COOLDOWN),'string');
+  assert.equal(renamePlanet(game,player,home,'Andere Welt',now+PLANET_RENAME_COOLDOWN),undefined);
+  const other={...home,id:'other',market:structuredClone(home.market)};
+  delete other.market.homeworld.renamedAt;game.world.addEntity(other);ship.dockedAt=other.id;
+  assert.equal(renamePlanet(game,player,other,'Andere Welt',now),undefined);
+  other.market.homeworld.owner='foreign';
+  assert.match(renamePlanet(game,player,other,'Fremde Welt',now),/eigenen/);
   game.store.close();
 });
 
