@@ -85,7 +85,7 @@ function actionRow(a, i, j, e) {
   let h = `<div class="action"><select data-f="op" data-i="${i}" data-j="${j}">
     ${ops.map((o) => `<option value="${o}" ${o === a.op ? 'selected' : ''}>${OP_NAMES[o]}</option>`).join('')}</select>`;
   if (a.op === 'mine') {
-    h += `<span class="hintp">bis der Laderaum voll ist</span>`;
+    h += `<span class="hintp">${ed.onlyWithTargetSpace ? 'bis der Laderaum oder der verfügbare Zielplatz ausgeschöpft ist' : 'bis der Laderaum voll ist'}</span>`;
   } else if (a.op === 'refuel') {
     h += `<span class="hintp">bis der Tank voll ist (${playerPrice(e, 'shipfuel', 'buy')?.toFixed(1)} Cr je Einheit)</span>`;
   } else {
@@ -115,7 +115,7 @@ function renderEditor() {
     Käufe ergänzen den Zielbestand der jeweiligen Ware an Bord. Verkäufe verwenden die zusätzliche Verkaufsmenge.
     Leer/0 = so viel wie möglich. Teilkäufe fahren weiter; Wartebedingungen gelten separat. Preisgrenzen verhindern Verlustgeschäfte.</div>
     <div class="form-row"><label>Name <input id="reName" maxlength="32" value="${esc(ed.name)}"></label>
-    <label title="Automatische Einkäufe dieser Route nur, solange der Kontostand darüber bleibt">Mindestkontostand <input id="reMin" type="number" min="0" placeholder="0 = aus" value="${ed.minBalance || ''}"></label></div><label><input id="reTargetSpace" type="checkbox" ${ed.onlyWithTargetSpace?'checked':''}> Nur bei Platz am Ziel kaufen</label><p class="muted">Begrenzt Käufe und eigene Beladungen auf spätere Abladeziele und reserviert deren freien Platz. Produktion und manuelle Lieferungen können den Platz danach verändern.</p>`;
+    <label title="Automatische Einkäufe dieser Route nur, solange der Kontostand darüber bleibt">Mindestkontostand <input id="reMin" type="number" min="0" placeholder="0 = aus" value="${ed.minBalance || ''}"></label></div><label><input id="reTargetSpace" type="checkbox" ${ed.onlyWithTargetSpace?'checked':''}> Nur bei Platz am Ziel kaufen</label><p class="muted">Begrenzt Käufe, eigene Beladungen und Rohstoffabbau auf spätere Abladeziele und reserviert deren freien Platz. Produktion und manuelle Lieferungen können den Platz danach verändern.</p>`;
 
   ed.stops.forEach((st, i) => {
     const e = state.entities.get(st.targetId);
@@ -191,7 +191,7 @@ card.addEventListener('change', (ev) => {
   const el = ev.target;
   if (!ed) return;
   if (el.id === 'reName') { ed.name = el.value; return; }
-  if (el.id === 'reTargetSpace') { ed.onlyWithTargetSpace=el.checked; return; }
+  if (el.id === 'reTargetSpace') { ed.onlyWithTargetSpace=el.checked; renderEditor(); return; }
   if (el.id === 'reMin') { ed.minBalance = Math.max(0, Math.floor(Number(el.value) || 0)); return; }
   if (el.dataset.assign) {
     const id=el.dataset.assign, existing=ed.id && shipsOnRoute(ed.id).some(s=>s.id===id);

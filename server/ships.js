@@ -143,6 +143,24 @@ function mineStep(ship, e, dt, limit = Infinity) {
   return extract(ship, BELT_TYPES[e.type].good, (e.richness || 1), dt, limit);
 }
 
+function routeMineStep(ship, e, dt, game, route) {
+  if (!route?.onlyWithTargetSpace || e.kind !== 'belt') return mineStep(ship, e, dt);
+  const good = BELT_TYPES[e.type].good, before = ship.cargo[good] || 0;
+  const plan = planRoutePurchase(game, ship, route, good, freeFor(ship, good));
+  const available = plan.reduce((sum, reservation) => sum + reservation.amount, 0);
+  if (available <= 0) {
+    game.shipLog(ship, 'Abbau beendet: kein freier Platz an den Abladezielen.');
+    return true;
+  }
+  const done = mineStep(ship, e, dt, before + available);
+  const extracted = (ship.cargo[good] || 0) - before;
+  if (extracted > 0) reserveRoutePurchase(ship, plan, extracted);
+  // Time spent beyond the reachable cargo target must not become banked ore
+  // for the next field. Keep only the fractional progress of the current unit.
+  if (done && ship.mineAcc) ship.mineAcc %= 1;
+  return done;
+}
+
 function extract(ship, g, richness, dt, limit = Infinity) {
   const rate = miningRate(ship, g);
   if (!rate) return true;
@@ -225,7 +243,7 @@ function runActions(ship, e, actions, st, dt, game, opts) {
   while (st.actionIdx < actions.length) {
     const a = actions[st.actionIdx];
     if (a.op === 'mine') {
-      if (!mineStep(ship, e, dt)) return false;
+      if (!routeMineStep(ship, e, dt, game, opts?.route)) return false;
       ship.state = 'docked';
     } else if (a.op === 'waitUntil') {
       st.waitStart ??= game.time;

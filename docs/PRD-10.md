@@ -78,7 +78,8 @@ müssen bei der Prüfung berücksichtigt werden.
 
 Jede Route erhält die speicherbare Checkbox **„Nur bei Platz am Ziel kaufen“**.
 Sie ist für neue und bestehende Routen zunächst ausgeschaltet. Eingeschaltet
-begrenzt sie den Einkauf sowie das Beladen aus eigenen Lagern pro Rohstoff.
+begrenzt sie den Einkauf, das Beladen aus eigenen Lagern sowie den Rohstoffabbau
+an Routenstopps pro Rohstoff (Korrektur K1).
 
 Vor dem Beladen werden ausschließlich spätere, für diesen Rohstoff
 konfigurierte Abladeziele bis zur nächsten Rückkehr zum aktuellen Einkaufsstopp
@@ -290,3 +291,24 @@ Slider lösen vor ihrem Änderungsabschluss keine Speicherung aus; Zahlenfelder,
 Fokus-Schutz, Sammeländerung und 800-/1440-Pixel-Ansichten wurden geprüft.
 `git diff --check` bestanden. Nachweise und reproduzierbarer Ablauf stehen in
 `docs/qa/prd10/README.md`. Abnahmekriterien 1–13 sind damit erfüllt.
+
+### K1: Zielkapazität auch beim Routenabbau (26.10.2026)
+
+- [x] Fehler behoben: Die Routenaktion „Abbauen“ umging bisher die Zielprüfung.
+  Sie nutzt jetzt dieselben Lagerlimits, physischen Kapazitäten, Ablademengen
+  und schiffsübergreifenden Reservierungen wie der Einkauf.
+- [x] Jede tatsächlich gewonnene Teilmenge wird sofort reserviert. Ohne weiteren
+  Zielplatz endet der Abbaustopp und die Route fährt weiter. Vorhandene Fracht
+  bleibt erhalten. Überschüssige ganze Abbaueinheiten im Zeitakkumulator werden
+  beim Erreichen der Grenze nicht für spätere Felder angespart.
+- [x] Alle neun Feldarten geprüft: Erz, Eis, Kristalle, Seltene Erden, Säure,
+  Gold, Diamanten, Uran und exotische Kristalle. Einkäufe bei Nebelgas-Sammlern
+  waren bereits an die Prüfung angeschlossen und sind zusätzlich abgesichert.
+  Manuelle Abbau-/Sammelbefehle besitzen keine Routenoption und bleiben erhalten.
+- [x] Routenhinweise erläutern den begrenzten Abbau und aktualisieren sich
+  unmittelbar beim Umschalten der Option.
+
+Prüfung: 18 gezielte Routen-/Abbauprüfungen bestanden, gesamte Testsuite
+**349/349 bestanden**, Syntaxprüfung der Routenoberfläche und
+`git diff --check` bestanden. Kleine, abgegrenzte Fehlerkorrektur im bestehenden
+PRD; kein neues Planungsdokument erforderlich.

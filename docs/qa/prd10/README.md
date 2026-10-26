@@ -4,7 +4,12 @@ Stand: 26.10.2026. Alle Umsetzungsschritte U1–U8 abgeschlossen.
 
 ## Automatisierte Prüfung
 
-`npm test`: **343 Tests bestanden, 0 fehlgeschlagen**.
+`npm test`: **349 Tests bestanden, 0 fehlgeschlagen** (einschließlich Korrektur K1).
+
+K1 ergänzt `tests/route-extraction.test.js`: alle neun Feldarten einschließlich
+Säure-/Tiefbohrerabbau, Null-/Teillimits, vorhandene Fracht, tatsächliche
+Einlagerung, Reservierung über mehrere Ticks, unveränderter manueller/ungeschützter
+Abbau sowie Nebelgas-Sammlereinkäufe mit gemeinsamem Zielplatz für Bergbau und Handel.
 
 | Abnahme im PRD | Nachweis |
 |---|---|
