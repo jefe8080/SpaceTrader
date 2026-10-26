@@ -194,7 +194,7 @@ Fortschritt und die Prüfergebnisse werden im selben Commit hier ergänzt.
   Folgenvorschau und Schutz der Lagerbestände implementieren.
 - [x] U4: Direkte Rohstoffregler und gemeinsame Limitänderung mit Vorschau
   implementieren; Eingabestabilität und Persistenz prüfen.
-- [ ] U5: Zielkapazitätsberechnung und schiffsübergreifende Reservierungen
+- [x] U5: Zielkapazitätsberechnung und schiffsübergreifende Reservierungen
   einschließlich Teilmengen, doppelter Ziele und Lebenszyklus implementieren.
 - [ ] U6: Routenoption in Oberfläche und Speicherung integrieren und den
   tatsächlichen Routenablauf einschließlich eigener Lager prüfen.
@@ -269,3 +269,5 @@ U3: Bestätigter Abriss eigener Gebäude und abhängiger Ausbauten mit Folgenvor
 U4: Slider und Zahlenfelder je Rohstoff für Limit/Sperrmenge, Warnhinweis und gemeinsame Limitänderung mit Vorschau implementiert. Speicherung über bestehende Heimatdaten; keine Migration bestehender Werte. Eingaben bleiben durch den vorhandenen Fokus-Schutz gegen Live-Updates stabil. Einlagerung und Produktion beachten Null-/Teillimits. Gezielte Heimat-, Logistik- und PRD-10-Tests bestanden; visuelle Laufzeitprüfung folgt in U8.
 
 U4-Prüfkorrektur: Der neue Sammellimit-Test erwartete Gefahrstoffkapazität vor dem ersten Betriebstick. Testvorbereitung korrigiert; anschließend alle 27 Heimat-, Logistik- und PRD-10-Tests bestanden. Der erste U4-Lauf hatte diesen einen Testfehler; der Commit erfolgte versehentlich vor dessen Korrektur.
+
+U5: Zielplaner und persistierbare Reservierungen an Routenbefehlen implementiert, mit Neuabgleich aus vorhandener Fracht. Physischer Platz, Limits, Ablademengen, doppelte Planeten und gemeinsame Lagerklassen werden berücksichtigt. Fünf gezielte Tests bestanden (100/50-Beispiele, 80+20, gemischte Klassen, Änderungen/Abbruch und Rekonstruktion). Einbindung in den tatsächlichen Handel folgt in U6.
