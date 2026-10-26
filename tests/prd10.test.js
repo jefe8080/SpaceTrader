@@ -101,7 +101,7 @@ test('PRD10: Lagerabriss berücksichtigt Waren, Gefahrstoffe, Module und reservi
 });
 
 test('PRD10: direkte Lagerregeln erlauben Null, erhalten Bestand und unabhängige Sperrmengen',()=>{
- const f=fixture();empty(f);f.entity.market.goods.ore.stock=50;f.ship.cargo={ore:10};
+ const f=fixture();advance(f,1);empty(f);f.entity.market.goods.ore.stock=50;f.ship.cargo={ore:10};
  assert.equal(command(f,'homeLimit',{good:'ore',amount:0}),undefined);
  assert.equal(homeStorageFree(f.entity.market,'ore'),0);assert.equal(f.game.ownerTransfer(f.ship,f.entity,'ore',10,'sell').n,0);
  assert.equal(f.entity.market.goods.ore.stock,50);
