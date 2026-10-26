@@ -154,12 +154,20 @@ export function homeStorageUsage(market) {
   return used;
 }
 
+export function homeGoodCapacity(market, good) {
+  return GOODS[good]?.cls==='normal'?market.homeworld.storage:GOODS[good]?.cls==='hazard'?market.homeworld.hazardStorage:0;
+}
+
+export function homeGoodLimit(market, good) {
+  return Math.min(homeGoodCapacity(market,good), market.homeworld.limits?.[good] ?? homeGoodCapacity(market,good));
+}
+
 export function homeStorageFree(market, good) {
   if (!market.homeworld) return Math.max(0, (market.goods[good]?.cap || 0) - (market.goods[good]?.stock || 0));
   const cls = GOODS[good]?.cls;
   if (cls !== 'normal' && cls !== 'hazard') return 0;
   const capacity = cls === 'normal' ? market.homeworld.storage : market.homeworld.hazardStorage;
-  return Math.max(0, capacity - homeStorageUsage(market)[cls]);
+  return Math.max(0, Math.min(capacity - homeStorageUsage(market)[cls], homeGoodLimit(market,good) - (market.goods[good]?.stock||0)));
 }
 
 export function availableHomeStock(market, good) {

@@ -1,7 +1,7 @@
 import {questText} from './quests.js';
 import {HOME_STORY,storyAvailable,storyDialogReady} from '/shared/home-story.js';
 import { GOODS, RECIPES,recipeText } from '/shared/config.js';
-import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '/shared/homeworld.js';
+import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock, homeGoodCapacity, homeGoodLimit, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '/shared/homeworld.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import {moduleStockPanel,moduleCraftPanel} from './modules.js';
@@ -133,9 +133,9 @@ export function homePanel(entity, item, ship) {
     }
   }
   if (facility === 'dock' && building.status === 'ready') {
-    const goods = Object.entries(entity.market.goods).filter(([g, slot]) => GOODS[g].cls!=='passenger'&&(slot.stock > 0 || ship?.cargo?.[g]));
-    html += homeBalance(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market"><tr><th>Ware</th><th>Lager / Schiff</th><th></th></tr>';
-    for (const [good, slot] of goods) html += `<tr><td>${GOODS[good].name}</td><td>${fmt(slot.stock)} / ${fmt(ship?.cargo?.[good] || 0)}</td><td>
+    const goods = Object.entries(entity.market.goods).filter(([g]) => ['normal','hazard'].includes(GOODS[g].cls));
+    html += homeBalance(entity)+storageBatchPanel(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market"><tr><th>Ware</th><th>Lager / Schiff</th><th>Lagerregeln</th><th></th></tr>';
+    for (const [good, slot] of goods) html += `<tr><td>${GOODS[good].name}</td><td>${fmt(slot.stock)} / ${fmt(ship?.cargo?.[good] || 0)}</td><td>${storageControls(entity,good)}</td><td>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${ship && slot.stock >= 1 ? '' : 'disabled'}>Laden</button>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Einlagern</button></td></tr>`;
     html += '</table>';
@@ -273,4 +273,13 @@ function homeBuildPanel(entity){
       <button class="small" data-pp="homeBuild" data-kind="${kind}" ${completed(spec.quest)?'':'disabled'}>${completed(spec.quest)?'Bauen':'Freischaltung '+spec.quest}</button></div>`;
   }
   return html;
+}
+
+function storageControls(entity,good){
+ const market=entity.market,cap=homeGoodCapacity(market,good),limit=homeGoodLimit(market,good),reserve=market.homeworld.reserves?.[good]||0;
+ return [['limit','Lagerlimit',limit],['reserve','Sperrmenge',reserve]].map(([kind,label,value])=>`<label>${label}<input type="range" min="0" max="${cap}" step="1" value="${Math.min(value,cap)}" data-storage-rule="${kind}" data-good="${good}" aria-label="${label} ${GOODS[good].name}"><input type="number" min="0" max="${cap}" step="1" value="${value}" data-storage-rule="${kind}" data-good="${good}" aria-label="${label} Zahl ${GOODS[good].name}"></label>`).join('')+(reserve>limit?'<p class="neg">Sperrmenge über Lagerlimit: Der geschützte Mindestbestand kann durch Einlagerung nicht erreicht werden.</p>':'');
+}
+function storageBatchPanel(entity){
+ const cap=Math.max(entity.market.homeworld.storage,entity.market.homeworld.hazardStorage);
+ return `<details><summary>Alle Lagerlimits gemeinsam ändern</summary><label>Neues Limit <input id="homeBatchRange" type="range" min="0" max="${cap}" value="0"><input id="homeBatchNumber" aria-label="Gemeinsames Lagerlimit" type="number" min="0" max="${cap}" value="0"></label><p id="homeBatchPreview">Alle Rohstofflimits werden auf 0 gesetzt. Neue Einlagerungen werden gesperrt. Bestände und Sperrmengen bleiben erhalten.</p><button class="small" data-pp="homeBatchLimits">Anwenden</button></details>`;
 }

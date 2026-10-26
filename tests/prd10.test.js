@@ -88,9 +88,9 @@ test('PRD10: Abriss verlangt Bestätigung, schützt Grundlagen, Abhängigkeiten 
 test('PRD10: Lagerabriss berücksichtigt Waren, Gefahrstoffe, Module und reservierte Ausgabeplätze',()=>{
  const f=fixture();empty(f);add(f,'silo','silo');add(f,'safeStorage','safe');advance(f,1);
  f.entity.market.goods.ore.stock=1990;f.entity.market.moduleInventory={cargo:1};
- assert.match(command(f,'homeDemolish',{id:'silo',confirmed:true}),/Kapazität/);
+ assert.match(command(f,'homeDemolish',{id:'silo',confirmed:true}),/[Kk]apazität/);
  f.entity.market.moduleInventory={};f.home.moduleOutputReserved=30;
- assert.match(command(f,'homeDemolish',{id:'silo',confirmed:true}),/Kapazität/);
+ assert.match(command(f,'homeDemolish',{id:'silo',confirmed:true}),/[Kk]apazität/);
  f.home.moduleOutputReserved=0;f.entity.market.goods.chemicals.stock=101;
  assert.match(command(f,'homeDemolish',{id:'safe',confirmed:true}),/Gefahrstoff/);
  f.entity.market.goods.chemicals.stock=100;
@@ -100,3 +100,18 @@ test('PRD10: Lagerabriss berücksichtigt Waren, Gefahrstoffe, Module und reservi
  assert.equal(f.entity.market.goods.ore.stock,1990);assert.equal(f.entity.market.goods.chemicals.stock,100);f.game.store.close();
 });
 
+test('PRD10: direkte Lagerregeln erlauben Null, erhalten Bestand und unabhängige Sperrmengen',()=>{
+ const f=fixture();empty(f);f.entity.market.goods.ore.stock=50;f.ship.cargo={ore:10};
+ assert.equal(command(f,'homeLimit',{good:'ore',amount:0}),undefined);
+ assert.equal(homeStorageFree(f.entity.market,'ore'),0);assert.equal(f.game.ownerTransfer(f.ship,f.entity,'ore',10,'sell').n,0);
+ assert.equal(f.entity.market.goods.ore.stock,50);
+ assert.equal(command(f,'homeReserve',{good:'ore',amount:80}),undefined);
+ assert.equal(command(f,'homeLimit',{good:'ore',amount:60}),undefined);
+ assert.equal(homeStorageFree(f.entity.market,'ore'),10);assert.equal(f.home.reserves.ore,80);
+ assert.match(command(f,'homeLimit',{good:'ore',amount:2001}),/[Kk]apazität/);
+ assert.match(command(f,'homeReserve',{good:'ore',amount:2001}),/[Kk]apazität/);
+ assert.equal(command(f,'homeLimit',{all:true,amount:500}),undefined);
+ assert.equal(f.home.limits.ore,500);assert.equal(f.home.limits.chemicals,100);assert.equal(f.home.reserves.ore,80);
+ assert.equal(command(f,'homeReserve',{good:'ore',amount:0}),undefined);assert.equal(f.home.reserves.ore,0);
+ f.game.store.close();
+});

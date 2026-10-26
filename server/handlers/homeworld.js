@@ -10,7 +10,7 @@ import {createLogistics,cancelLogistics} from '../logistics.js';
 import {deliverHomeQuest,visitHomeSite} from '../homequests.js';
 import {startOrbital,orbitalBuild,claimOrbital} from '../orbital.js';
 import {SHIP_TYPES} from '../../shared/config.js';
-import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess,changeRefinement,upgradeStorage,demolishHome } from '../homeworld-operations.js';
+import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess,changeRefinement,upgradeStorage,demolishHome,setHomeLimit } from '../homeworld-operations.js';
 
 export default {
   homeRename:{args:{target:V.entity(),name:v=>v},run({game,player},{target,name}){return renamePlanet(game,player,target,name);}},
@@ -61,6 +61,10 @@ export default {
   homeTrain: {
     args: { target: V.entity(), qualification: V.oneOf('skilled', 'specialist') },
     run({ game, player }, { target, qualification }) { return trainHome(game, player, target, qualification); },
+  },
+  homeLimit: {
+    args: {target:V.entity(), good:V.opt(V.key(GOODS)), amount:V.int(0,1e9), all:V.opt(V.bool(),false)},
+    run({game,player},{target,good,amount,all}) { if(!all&&!good)return 'Rohstoff auswählen.';return setHomeLimit(game,player,target,good,amount,all); },
   },
   homeReserve: {
     args: { target: V.entity(), good: V.key(GOODS), amount: V.int(0, 1e9) },

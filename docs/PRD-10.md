@@ -192,7 +192,7 @@ Fortschritt und die Prüfergebnisse werden im selben Commit hier ergänzt.
   Bauablauf, Bestandsmigration und Bedienung implementieren.
 - [x] U3: Abriss eigener Bodengebäude mit Eigentumsschutz, Abhängigkeiten,
   Folgenvorschau und Schutz der Lagerbestände implementieren.
-- [ ] U4: Direkte Rohstoffregler und gemeinsame Limitänderung mit Vorschau
+- [x] U4: Direkte Rohstoffregler und gemeinsame Limitänderung mit Vorschau
   implementieren; Eingabestabilität und Persistenz prüfen.
 - [ ] U5: Zielkapazitätsberechnung und schiffsübergreifende Reservierungen
   einschließlich Teilmengen, doppelter Ziele und Lebenszyklus implementieren.
@@ -265,3 +265,5 @@ U1: Leitstellenpreise angepasst; Erwerbswege und Anzeigen von der Lizenz-Schiffs
 U2: Einzelne Lagerstufen 1–5, exakte Kosten, Bauteams, 60-s-Projekte und stufenabhängiger Betrieb implementiert. Altgebäude werden als Stufe 1 normalisiert. Neue Kapazität gilt erst nach Abschluss. 13 Tests (PRD 10 und Heimatbetrieb) bestanden, einschließlich Speichern/Laden, Fremdzugriff, fehlender Mittel und mehrfacher Fertigstellung.
 
 U3: Bestätigter Abriss eigener Gebäude und abhängiger Ausbauten mit Folgenvorschau, ohne Erstattung. Schutz für ursprüngliche Einrichtungen, laufende Projekte, Antriebsarbeit und abhängige Industrie. Laufende Produktionszyklen müssen abgeschlossen oder durch Pausieren abgebrochen werden. Lagerprüfung berücksichtigt beide Klassen, Module und reservierte Modulausgaben. 15 gezielte Tests bestanden.
+
+U4: Slider und Zahlenfelder je Rohstoff für Limit/Sperrmenge, Warnhinweis und gemeinsame Limitänderung mit Vorschau implementiert. Speicherung über bestehende Heimatdaten; keine Migration bestehender Werte. Eingaben bleiben durch den vorhandenen Fokus-Schutz gegen Live-Updates stabil. Einlagerung und Produktion beachten Null-/Teillimits. Gezielte Heimat-, Logistik- und PRD-10-Tests bestanden; visuelle Laufzeitprüfung folgt in U8.

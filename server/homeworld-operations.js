@@ -1,5 +1,5 @@
 import { GOODS, RECIPES,REFINEMENT_RECIPES } from '../shared/goods.js';
-import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, homeStorageFree, availableHomeStock, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '../shared/homeworld.js';
+import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, homeStorageFree, availableHomeStock, homeGoodCapacity, homeGoodLimit, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '../shared/homeworld.js';
 import { coverageAreas } from './coverage.js';
 import { planetAccess } from '../shared/planet-access.js';
 import {tickCivilMoney} from './real-economy.js';
@@ -188,9 +188,18 @@ export function trainHome(game,player,entity,to) {
   notify(game,entity);
 }
 
+export function setHomeLimit(game,player,entity,good,amount,all=false) {
+  const error=homeAccess(game,player,entity);if(error)return error;
+  const home=entity.market.homeworld;home.limits||={};
+  if(!all&&amount>homeGoodCapacity(entity.market,good))return 'Lagerlimit darf die physische Lagerkapazität nicht überschreiten.';
+  for(const g of all?Object.keys(entity.market.goods):[good])if(['normal','hazard'].includes(GOODS[g]?.cls))home.limits[g]=Math.min(amount,homeGoodCapacity(entity.market,g));
+  notify(game,entity);
+}
+
 export function setHomeReserve(game,player,entity,good,amount) {
   const error=homeAccess(game,player,entity);if(error)return error;
   initializeHomeOperations(entity.market.homeworld);
+  if(amount>homeGoodCapacity(entity.market,good))return 'Sperrmenge darf die physische Lagerkapazität nicht überschreiten.';
   entity.market.homeworld.reserves[good]=amount;
   notify(game,entity);
 }
@@ -243,6 +252,7 @@ function productionAvailable(market,recipe,id) {
   const delta={normal:0,hazard:0};
   for(const [g,n] of Object.entries(recipe.out)){const cls=GOODS[g]?.cls;if(cls in delta)delta[cls]+=n;}
   for(const [g,n] of Object.entries(recipe.in)){const cls=GOODS[g]?.cls;if(cls in delta)delta[cls]-=n;}
+  for(const [g,n] of Object.entries(recipe.out))if(market.goods[g].stock+n-(recipe.in[g]||0)>homeGoodLimit(market,g)+1e-8)return false;
   const used=homeStorageUsage(market),home=market.homeworld;
   return used.normal+delta.normal<=home.storage+1e-8&&used.hazard+delta.hazard<=home.hazardStorage+1e-8;
 }

@@ -225,6 +225,7 @@ panel.addEventListener('click', (ev) => {
     case 'homeStorageUpgrade': cmd('homeStorageUpgrade', { target:e.id, id:d.id }); return;
     case 'homeRestore': cmd('homeRestore', { target:e.id, facility:d.facility }); return;
     case 'homeTrain': cmd('homeTrain', { target:e.id, qualification:d.qualification }); return;
+    case 'homeBatchLimits': cmd('homeLimit',{target:e.id,all:true,amount:Number(document.getElementById('homeBatchNumber').value)});return;
     case 'homeReserve': cmd('homeReserve', { target:e.id, good:document.getElementById('homeReserveGood')?.value, amount:Number(document.getElementById('homeReserveAmount')?.value) }); return;
     case 'homeOperation': {
       const building=e.market.homeworld.facilities[d.id]||e.market.homeworld.structures.find(s=>s.id===d.id);
@@ -259,7 +260,22 @@ bar.addEventListener('click', ev => {
   if (ev.target.closest('[data-pp=overview]')) closeBuilding(true);
   if (ev.target.closest('[data-pp=names]')) { cityNames=!cityNames;getPlanetView()?.setNames(cityNames);renderPlanetUi(); }
 });
+panel.addEventListener('input',event=>{
+  const el=event.target;
+  if(el.dataset.storageRule){for(const sibling of panel.querySelectorAll('[data-storage-rule="'+el.dataset.storageRule+'"][data-good="'+el.dataset.good+'"]'))if(sibling!==el)sibling.value=el.value;}
+  if(['homeBatchRange','homeBatchNumber'].includes(el.id)){
+    for(const id of ['homeBatchRange','homeBatchNumber'])if(id!==el.id)document.getElementById(id).value=el.value;
+    const home=state.entities.get(state.landed)?.market.homeworld,n=Number(el.value);
+    if(home)document.getElementById('homeBatchPreview').textContent='Alle Rohstofflimits: normal '+Math.min(n,home.storage)+', Gefahrstoffe '+Math.min(n,home.hazardStorage)+'. Bestände über dem neuen Limit bleiben erhalten; weitere Einlagerung wird gesperrt. Sperrmengen bleiben unverändert.';
+  }
+});
+panel.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.target.dataset.storageRule){event.target.dispatchEvent(new Event('change',{bubbles:true}));event.target.blur();}});
 panel.addEventListener('change',event=>{
+  const el=event.target;
+  if(el.dataset.storageRule){
+    if(!el.checkValidity())return;
+    cmd(el.dataset.storageRule==='limit'?'homeLimit':'homeReserve',{target:state.landed,good:el.dataset.good,amount:Number(el.value)});
+  }
   if(event.target.id==='homeRecipe'){
     const recipe=RECIPES[event.target.value],preview=document.getElementById('homeRecipePreview');
     if(recipe&&preview)preview.innerHTML=recipeText(recipe)+` · ${recipe.time} s je Zyklus`;
