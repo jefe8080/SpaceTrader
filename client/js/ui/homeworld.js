@@ -1,7 +1,7 @@
 import {questText} from './quests.js';
 import {HOME_STORY,storyAvailable,storyDialogReady} from '/shared/home-story.js';
 import { GOODS, RECIPES,recipeText } from '/shared/config.js';
-import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock, homeStructureSpec, storageLevel, storageUpgradeCost } from '/shared/homeworld.js';
+import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '/shared/homeworld.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import {moduleStockPanel,moduleCraftPanel} from './modules.js';
@@ -250,6 +250,11 @@ function structurePanel(entity,id){
   }
   if(building.kind==='researchWorkshop'&&!building.upgrades?.includes('researchCenter'))html+=`<p>Forschungszentrum: ${costLabel(HOME_BUILDINGS.researchCenter)}</p><button class="small" data-pp="homeBuild" data-kind="researchCenter" data-parent="${id}">Forschungszentrum ausbauen</button>`;
   if(['moduleBench','researchWorkshop'].includes(building.kind)&&building.status==='ready')html+=moduleCraftPanel(entity);
+  for(const upgrade of [...(building.upgrades||[]),null]) {
+    const preview=demolitionPreview(entity.market,id,upgrade);
+    const impact=preview.error||Object.entries(preview.losses).filter(([,n])=>n).map(([k,n])=>`−${n} ${({storage:'Lagerplatz',hazardStorage:'Gefahrstoffplatz',housing:'Wohnraum',power:'Strom'})[k]}`).join(', ')||'Bauplatz wird frei';
+    html+=`<p>${esc(impact)} · keine Erstattung</p><button class="small" data-pp="homeDemolish" data-id="${id}" data-upgrade="${upgrade||''}" ${preview.error?'disabled':''}>${upgrade?HOME_BUILDINGS[upgrade].name+' entfernen':'Gebäude abreißen'}</button>`;
+  }
   return html;
 }
 

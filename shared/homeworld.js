@@ -121,6 +121,27 @@ export function homeStructureSpec(structure) {
   return spec;
 }
 
+export function demolitionPreview(market, id, upgrade) {
+  const home = market.homeworld, building = home?.structures?.find(s => s.id === id);
+  const fail = error => ({ error });
+  if (!building) return fail('Ursprüngliche Einrichtungen und Orbitalringe sind geschützt.');
+  if (building.status !== 'ready' || building.upgrading || home.projects?.some(p => [p.target, p.facility, p.school].includes(id))) return fail('Zuerst laufende Bau-, Forschungs- oder Ausbildungsaufträge beenden.');
+  if (upgrade && !building.upgrades?.includes(upgrade)) return fail('Dieser Ausbau ist nicht vorhanden.');
+  if (!upgrade && building.upgrades?.length) return fail('Zuerst die abhängigen Ausbauten entfernen.');
+  const removedKind = upgrade || building.kind;
+  const remaining = home.structures.filter(s => s.id !== id && s.status === 'ready');
+  const hasFacility = kind => remaining.some(s => s.kind === kind || s.upgrades?.includes(kind)) || (upgrade && building.kind === kind);
+  if (home.structures.some(s => s.id !== id && s.kind === 'plant' && industrySpec(s.recipe)?.facility === removedKind) && !hasFacility(removedKind)) return fail('Zuerst die abhängigen Produktionsanlagen entfernen.');
+  if (building.kind === 'plant' && home.logistics?.orders?.some(o => o.kind === 'production' && o.recipe === building.recipe && !['cancelled', 'delivered'].includes(o.state))) return fail('Zuerst den betroffenen Produktionsauftrag beenden oder abbrechen.');
+  if (building.kind === 'plant' && building.enabled !== false && building.progress > 0) return fail('Zuerst den laufenden Produktionszyklus beenden oder den Betrieb pausieren und damit abbrechen.');
+  const spec = upgrade ? HOME_BUILDINGS[upgrade] : homeStructureSpec(building);
+  const losses = { storage: spec.storage || 0, hazardStorage: spec.hazardStorage || 0, housing: spec.housing || 0, power: spec.generation || 0 };
+  const used = homeStorageUsage(market);
+  if (losses.storage && used.normal > home.storage - losses.storage + 1e-8) return fail('Abriss blockiert: normaler Bestand einschließlich Modulen und Ausgabeplätzen übersteigt die verbleibende Kapazität.');
+  if (losses.hazardStorage && used.hazard > home.hazardStorage - losses.hazardStorage + 1e-8) return fail('Abriss blockiert: Gefahrstoffbestand übersteigt die verbleibende Kapazität.');
+  return { losses };
+}
+
 export function homeStorageUsage(market) {
   const used = { normal: 0, hazard: 0 };
   for (const [good, slot] of Object.entries(market.goods)) {

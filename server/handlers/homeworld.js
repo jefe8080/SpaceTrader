@@ -10,7 +10,7 @@ import {createLogistics,cancelLogistics} from '../logistics.js';
 import {deliverHomeQuest,visitHomeSite} from '../homequests.js';
 import {startOrbital,orbitalBuild,claimOrbital} from '../orbital.js';
 import {SHIP_TYPES} from '../../shared/config.js';
-import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess,changeRefinement,upgradeStorage } from '../homeworld-operations.js';
+import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess,changeRefinement,upgradeStorage,demolishHome } from '../homeworld-operations.js';
 
 export default {
   homeRename:{args:{target:V.entity(),name:v=>v},run({game,player},{target,name}){return renamePlanet(game,player,target,name);}},
@@ -41,6 +41,10 @@ export default {
   homeControlUpgrade:{
     args:{target:V.entity(),module:V.opt(V.key(CONTROL_MODULES))},
     run({game,player},{target,module}){return upgradeControl(game,player,target,module);},
+  },
+  homeDemolish: {
+    args: { target: V.entity(), id: V.str(40,1), upgrade: V.opt(V.key(HOME_BUILDINGS)), confirmed: V.opt(V.bool(),false) },
+    run({game,player},{target,id,upgrade,confirmed}) { return demolishHome(game,player,target,id,upgrade,confirmed); },
   },
   homeStorageUpgrade: {
     args: { target: V.entity(), id: V.str(40, 1) },

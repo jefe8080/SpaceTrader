@@ -190,7 +190,7 @@ Fortschritt und die Prüfergebnisse werden im selben Commit hier ergänzt.
   Erwerbswegen und zugehörigen Anzeigen entfernen; übrige Lizenzregeln prüfen.
 - [x] U2: Silo- und Sicherheitslager-Upgrades inklusive Kosten, Betrieb,
   Bauablauf, Bestandsmigration und Bedienung implementieren.
-- [ ] U3: Abriss eigener Bodengebäude mit Eigentumsschutz, Abhängigkeiten,
+- [x] U3: Abriss eigener Bodengebäude mit Eigentumsschutz, Abhängigkeiten,
   Folgenvorschau und Schutz der Lagerbestände implementieren.
 - [ ] U4: Direkte Rohstoffregler und gemeinsame Limitänderung mit Vorschau
   implementieren; Eingabestabilität und Persistenz prüfen.
@@ -263,3 +263,5 @@ mit Ursache dokumentiert und dem Nutzer mitgeteilt.
 U1: Leitstellenpreise angepasst; Erwerbswege und Anzeigen von der Lizenz-Schiffsanzahl entkoppelt. Klassen- und Upgradegrenzen bleiben bestehen. Gezielte Tests für Schiffe, Werften, Heimatbetrieb und Leitstellennetz ausgeführt. Bestehende Tests mit alten Sollpreisen bzw. Flottenlimit auf PRD 10 aktualisiert.
 
 U2: Einzelne Lagerstufen 1–5, exakte Kosten, Bauteams, 60-s-Projekte und stufenabhängiger Betrieb implementiert. Altgebäude werden als Stufe 1 normalisiert. Neue Kapazität gilt erst nach Abschluss. 13 Tests (PRD 10 und Heimatbetrieb) bestanden, einschließlich Speichern/Laden, Fremdzugriff, fehlender Mittel und mehrfacher Fertigstellung.
+
+U3: Bestätigter Abriss eigener Gebäude und abhängiger Ausbauten mit Folgenvorschau, ohne Erstattung. Schutz für ursprüngliche Einrichtungen, laufende Projekte, Antriebsarbeit und abhängige Industrie. Laufende Produktionszyklen müssen abgeschlossen oder durch Pausieren abgebrochen werden. Lagerprüfung berücksichtigt beide Klassen, Module und reservierte Modulausgaben. 15 gezielte Tests bestanden.

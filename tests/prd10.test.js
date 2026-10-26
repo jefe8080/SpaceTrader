@@ -66,3 +66,37 @@ test('PRD10: Lagerausbau prüft Zugang und Mittel und überlebt Neustart ohne Do
   game.time+=1;tickHomeworld(game,entity,1);assert.equal(entity.market.homeworld.storage,6000);
   game.store.close();fs.rmSync(folder,{recursive:true,force:true});
 });
+
+test('PRD10: Abriss verlangt Bestätigung, schützt Grundlagen, Abhängigkeiten und aktive Projekte',()=>{
+ const f=fixture(),b=add(f,'school','schule',{upgrades:['academy']});
+ assert.match(command(f,'homeDemolish',{id:'dock',confirmed:true}),/geschützt/);
+ assert.match(command(f,'homeDemolish',{id:b.id,confirmed:true}),/Ausbauten/);
+ f.home.projects.push({kind:'training',school:b.id});
+ assert.match(command(f,'homeDemolish',{id:b.id,upgrade:'academy',confirmed:true}),/aufträge/);f.home.projects=[];
+ assert.match(command(f,'homeDemolish',{id:b.id,upgrade:'academy'}),/bestätigt/);
+ assert.equal(command(f,'homeDemolish',{id:b.id,upgrade:'academy',confirmed:true}),undefined);
+ const credits=f.player.credits;
+ assert.equal(command(f,'homeDemolish',{id:b.id,confirmed:true}),undefined);
+ assert.equal(f.home.structures.length,0);assert.equal(f.player.credits,credits);
+ const lab=add(f,'researchWorkshop','lab'),plant=add(f,'plant','plant',{recipe:'machineworks'});
+ assert.match(command(f,'homeDemolish',{id:lab.id,confirmed:true}),/abhängigen/);
+ plant.progress=1;assert.match(command(f,'homeDemolish',{id:plant.id,confirmed:true}),/Produktionszyklus/);
+ command(f,'homeOperation',{id:plant.id,enabled:false,priority:50});
+ assert.equal(command(f,'homeDemolish',{id:plant.id,confirmed:true}),undefined);
+ assert.equal(command(f,'homeDemolish',{id:lab.id,confirmed:true}),undefined);f.game.store.close();
+});
+test('PRD10: Lagerabriss berücksichtigt Waren, Gefahrstoffe, Module und reservierte Ausgabeplätze',()=>{
+ const f=fixture();empty(f);add(f,'silo','silo');add(f,'safeStorage','safe');advance(f,1);
+ f.entity.market.goods.ore.stock=1990;f.entity.market.moduleInventory={cargo:1};
+ assert.match(command(f,'homeDemolish',{id:'silo',confirmed:true}),/Kapazität/);
+ f.entity.market.moduleInventory={};f.home.moduleOutputReserved=30;
+ assert.match(command(f,'homeDemolish',{id:'silo',confirmed:true}),/Kapazität/);
+ f.home.moduleOutputReserved=0;f.entity.market.goods.chemicals.stock=101;
+ assert.match(command(f,'homeDemolish',{id:'safe',confirmed:true}),/Gefahrstoff/);
+ f.entity.market.goods.chemicals.stock=100;
+ assert.equal(command(f,'homeDemolish',{id:'safe',confirmed:true}),undefined);
+ assert.equal(command(f,'homeDemolish',{id:'silo',confirmed:true}),undefined);
+ assert.equal(f.home.storage,2000);assert.equal(f.home.hazardStorage,100);
+ assert.equal(f.entity.market.goods.ore.stock,1990);assert.equal(f.entity.market.goods.chemicals.stock,100);f.game.store.close();
+});
+

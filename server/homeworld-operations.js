@@ -1,5 +1,5 @@
 import { GOODS, RECIPES,REFINEMENT_RECIPES } from '../shared/goods.js';
-import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, homeStorageFree, availableHomeStock, homeStructureSpec, storageLevel, storageUpgradeCost } from '../shared/homeworld.js';
+import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, homeStorageFree, availableHomeStock, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '../shared/homeworld.js';
 import { coverageAreas } from './coverage.js';
 import { planetAccess } from '../shared/planet-access.js';
 import {tickCivilMoney} from './real-economy.js';
@@ -83,6 +83,21 @@ export function homeConstructionError(home) {
 }
 
 const structureSpec = homeStructureSpec;
+
+export function demolishHome(game,player,entity,id,upgrade,confirmed) {
+  const error=homeAccess(game,player,entity);if(error)return error;
+  const preview=demolitionPreview(entity.market,id,upgrade);if(preview.error)return preview.error;
+  const home=entity.market.homeworld;
+  const relic=game.players.get(home.owner)?.relic;
+  if(home.structures.find(s=>s.id===id)?.kind==='workshop'&&relic?.operation?.world===entity.id)return 'Zuerst die laufende Antriebsarbeit beenden.';
+  if(!confirmed)return 'Abriss muss ausdrücklich bestätigt werden; keine Erstattung.';
+  if(upgrade){const b=home.structures.find(s=>s.id===id);b.upgrades=b.upgrades.filter(k=>k!==upgrade);}
+  else home.structures=home.structures.filter(s=>s.id!==id);
+  for(const key of ['storage','hazardStorage','housing'])home[key]-=preview.losses[key];
+  home.allocations=(home.allocations||[]).filter(a=>a.id!==id);
+  for(const [good,slot] of Object.entries(entity.market.goods))slot.cap=GOODS[good].cls==='normal'?home.storage:GOODS[good].cls==='hazard'?home.hazardStorage:0;
+  notify(game,entity);
+}
 
 export function upgradeStorage(game, player, entity, id) {
   const error = homeAccess(game, player, entity); if (error) return error;
@@ -188,6 +203,7 @@ export function setHomeOperation(game,player,entity,id,enabled,priority) {
   if((id==='workshop'||building.kind==='workshop')&&!enabled&&player.relic?.operation?.world===entity.id)return 'Während der Antriebsarbeit bleibt die Werkstatt reserviert.';
   if(['dock','control'].includes(id)&&!enabled)return 'Grundlegender Lager- und Leitstellenbetrieb bleibt durch Notversorgung erhalten.';
   building.enabled=enabled;building.priority=priority;
+  if(!enabled && building.kind==='plant')building.progress=0;
   notify(game,entity);
 }
 

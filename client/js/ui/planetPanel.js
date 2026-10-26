@@ -9,6 +9,7 @@ import { stockBar } from './charts.js';
 import { questBoardSection } from './quests.js';
 import { scene, canLand, accessTo, resetPlanetside, selectBuilding, hidePlanetside, getPlanetView } from '../planetside.js';
 import { sfx } from '../audio.js';
+import { demolitionPreview } from '/shared/homeworld.js';
 import { homePanel } from './homeworld.js';
 import {handleModuleAction} from './modules.js';
 import { bus } from './bus.js';
@@ -214,6 +215,13 @@ panel.addEventListener('click', (ev) => {
     case 'homeTax':cmd('homeTax',{target:e.id,percent:Number(document.getElementById('homeTaxPercent')?.value)});return;
     case 'homeControlUpgrade': cmd('homeControlUpgrade',{target:e.id,module:d.module});return;
     case 'homeBuild': cmd('homeBuild', { target:e.id, kind:d.kind, recipe:d.kind==='plant'?document.getElementById('homeRecipe')?.value:undefined, parent:d.parent, plot:current?.plotIndex }); return;
+    case 'homeDemolish': {
+      const preview=demolitionPreview(e.market,d.id,d.upgrade||undefined);
+      if(preview.error){toast(preview.error);return;}
+      const names={storage:'Lagerkapazität',hazardStorage:'Gefahrstoffkapazität',housing:'Wohnraum',power:'Strom'};
+      const impact=Object.entries(preview.losses).filter(([,n])=>n).map(([k,n])=>names[k]+': −'+n).join(', ');
+      confirmAction('Endgültig entfernen? '+impact+'. Keine Erstattung. Ein Bauplatz wird beim Gebäudeabriss frei.',()=>cmd('homeDemolish',{target:e.id,id:d.id,upgrade:d.upgrade||undefined,confirmed:true}));return;
+    }
     case 'homeStorageUpgrade': cmd('homeStorageUpgrade', { target:e.id, id:d.id }); return;
     case 'homeRestore': cmd('homeRestore', { target:e.id, facility:d.facility }); return;
     case 'homeTrain': cmd('homeTrain', { target:e.id, qualification:d.qualification }); return;
