@@ -1,3 +1,4 @@
+import {drawPlanetExterior} from './planetExterior.js';
 import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, ZONE_TYPES, GOODS, cellKey } from '/shared/config.js';
 import { hexAt, hexCorners, hexCenter, hexKey } from '/shared/hex.js';
 import { getSprite } from './assets.js';

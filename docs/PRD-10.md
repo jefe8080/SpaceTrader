@@ -198,7 +198,7 @@ Fortschritt und die Prüfergebnisse werden im selben Commit hier ergänzt.
   einschließlich Teilmengen, doppelter Ziele und Lebenszyklus implementieren.
 - [x] U6: Routenoption in Oberfläche und Speicherung integrieren und den
   tatsächlichen Routenablauf einschließlich eigener Lager prüfen.
-- [ ] U7: Äußere Planetenentwicklung und sichtbare tatsächliche Orbitalringe
+- [x] U7: Äußere Planetenentwicklung und sichtbare tatsächliche Orbitalringe
   implementieren; alle Stufen visuell prüfen.
 - [ ] U8: Zusammenspiel und bestehende Spielstände prüfen; Abnahmekriterien
   abschließend dokumentieren und PRD-Fortschritt vervollständigen.
@@ -273,3 +273,5 @@ U4-Prüfkorrektur: Der neue Sammellimit-Test erwartete Gefahrstoffkapazität vor
 U5: Zielplaner und persistierbare Reservierungen an Routenbefehlen implementiert, mit Neuabgleich aus vorhandener Fracht. Physischer Platz, Limits, Ablademengen, doppelte Planeten und gemeinsame Lagerklassen werden berücksichtigt. Fünf gezielte Tests bestanden (100/50-Beispiele, 80+20, gemischte Klassen, Änderungen/Abbruch und Rekonstruktion). Einbindung in den tatsächlichen Handel folgt in U6.
 
 U6: Checkbox „Nur bei Platz am Ziel kaufen“ im Routeneditor und Routenkennzeichnung ergänzt; neue/alte Routen starten ohne Schutz. Reale Käufe und Eigentümerbeladungen verwenden die Zielplanung; nur tatsächlich geladene Mengen werden reserviert. Kommandoänderungen und Speichern/Laden gleichen Reservierungen ab. 21 gezielte Tests bestanden, darunter konkurrierende reale Beladungen, später volles Ziel ohne Frachtverlust und echter Datenbankneustart.
+
+U7: Deterministische äußere Bebauung für Ruinenstufen 0/4/12/24 und dezente Stufen anderer bebaubarer Typen ergänzt. Fertige Orbitalringe werden räumlich vor/hinter dem Planeten gezeichnet; der große Ring besitzt getrennte Decks und Anker. Originale fertig reparierte Bodeneinrichtungen zählen mit, Ausbauten und Ringe nicht als weitere Bodengebäude. Drei Schwellwert-/Serialisierungstests bestanden; 12 Zustände in Edge gerendert und visuell geprüft (`docs/qa/prd10/exterior-stages.png`). Gesamtregression bisher: 339/339 bestanden.
