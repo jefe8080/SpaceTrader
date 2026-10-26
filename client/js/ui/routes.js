@@ -43,6 +43,7 @@ export function openRouteEditor(routeId = null, { stops = null, assign = [] } = 
     id: r?.id || null,
     name: r?.name || `Route ${state.routes.size + 1}`,
     minBalance: r?.minBalance || 0,
+    onlyWithTargetSpace: !!r?.onlyWithTargetSpace,
     stops: structuredClone(stops || r?.stops || []),
     assign: new Set(assign),
     unassign: new Set(),
@@ -114,7 +115,7 @@ function renderEditor() {
     Käufe ergänzen den Zielbestand der jeweiligen Ware an Bord. Verkäufe verwenden die zusätzliche Verkaufsmenge.
     Leer/0 = so viel wie möglich. Teilkäufe fahren weiter; Wartebedingungen gelten separat. Preisgrenzen verhindern Verlustgeschäfte.</div>
     <div class="form-row"><label>Name <input id="reName" maxlength="32" value="${esc(ed.name)}"></label>
-    <label title="Automatische Einkäufe dieser Route nur, solange der Kontostand darüber bleibt">Mindestkontostand <input id="reMin" type="number" min="0" placeholder="0 = aus" value="${ed.minBalance || ''}"></label></div>`;
+    <label title="Automatische Einkäufe dieser Route nur, solange der Kontostand darüber bleibt">Mindestkontostand <input id="reMin" type="number" min="0" placeholder="0 = aus" value="${ed.minBalance || ''}"></label></div><label><input id="reTargetSpace" type="checkbox" ${ed.onlyWithTargetSpace?'checked':''}> Nur bei Platz am Ziel kaufen</label><p class="muted">Begrenzt Käufe und eigene Beladungen auf spätere Abladeziele und reserviert deren freien Platz. Produktion und manuelle Lieferungen können den Platz danach verändern.</p>`;
 
   ed.stops.forEach((st, i) => {
     const e = state.entities.get(st.targetId);
@@ -178,7 +179,7 @@ card.addEventListener('click', (ev) => {
       return;
     case 'cancel': closeModal('routeEditor'); return;
     case 'save': {
-      cmd('routeSave', { id: ed.id, name: ed.name.trim() || 'Route', stops: ed.stops, minBalance: ed.minBalance || 0, assign: [...ed.assign], unassign: [...ed.unassign] });
+      cmd('routeSave', { id: ed.id, name: ed.name.trim() || 'Route', stops: ed.stops, minBalance: ed.minBalance || 0, onlyWithTargetSpace: ed.onlyWithTargetSpace, assign: [...ed.assign], unassign: [...ed.unassign] });
       closeModal('routeEditor');
       return;
     }
@@ -190,6 +191,7 @@ card.addEventListener('change', (ev) => {
   const el = ev.target;
   if (!ed) return;
   if (el.id === 'reName') { ed.name = el.value; return; }
+  if (el.id === 'reTargetSpace') { ed.onlyWithTargetSpace=el.checked; return; }
   if (el.id === 'reMin') { ed.minBalance = Math.max(0, Math.floor(Number(el.value) || 0)); return; }
   if (el.dataset.assign) {
     const id=el.dataset.assign, existing=ed.id && shipsOnRoute(ed.id).some(s=>s.id===id);
@@ -286,6 +288,7 @@ function renderOverview() {
         <b class="rr-name">${esc(r.name)}</b>
         ${r.paused ? '<span class="badge">pausiert</span>' : ''}
         ${warned.length ? `<span class="badge warn" title="${esc(warned.map((s) => s.name + ': ' + Object.values(s.warn).join(', ')).join('\n'))}">⚠ ${warned.length}</span>` : ''}
+        ${r.onlyWithTargetSpace ? '<span class="badge">Zielplatz geschützt</span>' : ''}
         ${r.minBalance ? `<span class="badge" title="Mindestkontostand">≥ ${fmtK(r.minBalance).replace('+', '')}</span>` : ''}
         <span style="flex:1"></span>
         <span class="rr-sal" title="Saldo 1 h">1 h <b class="${sum.h1 < 0 ? 'neg' : 'pos'}">${fmtK(sum.h1)}</b></span>

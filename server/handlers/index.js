@@ -1,3 +1,4 @@
+import {syncRouteReservations} from '../route-capacity.js';
 import { syncHomeQuests } from '../quest-activation.js';
 import { CmdError, parse } from './validate.js';
 import ship from './ship.js';
@@ -28,6 +29,7 @@ export function runCommand(game, player, msg) {
     const args = parse(h.args || {}, msg, ctx);
     syncHomeQuests(game, player);
     const result = h.run(ctx, args) || undefined;
+    syncRouteReservations(game);
     syncHomeQuests(game, player);
     return result;
   } catch (e) {

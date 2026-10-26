@@ -77,3 +77,23 @@ test('Routenkauf hält Preisgrenze und Mindestkonto ein; separate Wartebedingung
     game.store.db.close();
   }
 });
+
+test('PRD10: geschützte Route begrenzt reale Eigentümerbeladung und konkurrierende Schiffe',()=>{
+ const {game,player,ship,entity,route}=fixture(0,80);ship.cargo={};
+ game.ownership.set(entity.id,{player:player.id});entity.market.goods.ore={role:'produce',stock:500,cap:1000,mod:1};
+ const destination=game.world.entities.get('origin_yard');destination.market.goods.ore={role:'consume',stock:0,cap:100,mod:1};
+ route.onlyWithTargetSpace=true;route.stops.push({targetId:destination.id,actions:[{op:'sell',good:'ore',amount:0}]});
+ const second=structuredClone(ship);second.id='prd10-second';second.queue=structuredClone(ship.queue);game.ships.set(second.id,second);
+ const credits=player.credits;updateShip(ship,1,game);updateShip(second,1,game);
+ assert.equal(ship.cargo.ore,80);assert.equal(second.cargo.ore,20);assert.equal(entity.market.goods.ore.stock,400);assert.equal(player.credits,credits);
+ // Later manual deliveries can fill the destination: protected cargo stays aboard.
+ destination.market.goods.ore.stock=100;game.ownership.set(destination.id,{player:player.id});
+ second.queue[0].idx=1;second.queue[0].phase='act';second.queue[0].actionIdx=0;second.dockedAt=destination.id;
+ updateShip(second,1,game);assert.equal(second.cargo.ore,20);assert.equal(destination.market.goods.ore.stock,100);
+ assert.equal(second.queue[0].phase,'wait');game.store.close();
+});
+test('PRD10: ohne geeigneten Zielplatz wird Kauf übersprungen und Route fortgesetzt',()=>{
+ const {game,ship,route}=fixture(0);ship.cargo={};route.onlyWithTargetSpace=true;
+ let calls=0;game.trade=()=>{calls++;return {n:0};};updateShip(ship,1,game);
+ assert.equal(calls,0);assert.equal(ship.queue[0].phase,'wait');assert.equal(Object.keys(ship.fails||{}).length,0);game.store.close();
+});

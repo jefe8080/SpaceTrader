@@ -1,3 +1,4 @@
+import {planRoutePurchase,reserveRoutePurchase,releaseRouteDelivery} from './route-capacity.js';
 import { SHIP_TYPES, BELT_TYPES, WORLD, GOODS, FUEL, ZONE_TYPES, slotPrice, fuelBurn, shipStats, freeFor, hasAbility } from '../shared/config.js';
 import { stat } from './markets.js';
 import { sellToSupplier as sellToSupplierImpl } from './property.js';
@@ -188,13 +189,21 @@ function actionOk(ship, key) {
  */
 function doTrade(ship, e, a, game, opts = {}) {
   const key = actionKey(a, e.id);
-  const amount = a.amount > 0
+  let amount = a.amount > 0
     ? (opts.route && a.op === 'buy' ? Math.max(0, a.amount - (ship.cargo[a.good] || 0)) : a.amount)
     : Infinity;
   if (amount === 0) { actionOk(ship, key); return; }
   if (a.op === 'buy' && freeFor(ship, a.good) <= 0) return;      // voll: nichts zu tun, kein Fehler
   if (a.op === 'sell' && !(ship.cargo[a.good] > 0)) return;      // nichts geladen: kein Fehler
+  let destinationPlan;
+  if (a.op==='buy' && opts.route?.onlyWithTargetSpace) {
+    destinationPlan=planRoutePurchase(game,ship,opts.route,a.good,amount);
+    amount=destinationPlan.reduce((n,r)=>n+r.amount,0);
+    if(amount<=0){actionOk(ship,key);game.shipLog(ship,'Einkauf übersprungen: kein freier Platz an den Abladezielen.');return;}
+  }
   const res = game.trade(ship, e, a.good, amount, a.op, a.limit || 0, opts);
+  if(res.n>0 && destinationPlan)reserveRoutePurchase(ship,destinationPlan,res.n);
+  if(res.n>0 && a.op==='sell' && opts.route?.onlyWithTargetSpace)releaseRouteDelivery(ship,e.id,a.good,res.n);
   if (res.n > 0) { actionOk(ship, key); return; }
   if (res.reason === 'stoploss') return; // Stop-Loss ist kein Fehler der Aktion, Warnung setzt trade()
   actionFailed(ship, key, `${a.op === 'buy' ? 'Kauf' : 'Verkauf'} ${GOODS[a.good].name} bei ${e.name}${res.reason ? ': ' + res.reason : ''}`, game);

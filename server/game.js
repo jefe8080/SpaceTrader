@@ -1,3 +1,4 @@
+import {syncRouteReservations} from './route-capacity.js';
 import { initializeProfile, syncInventoryBasis, recordGoodsTrade } from './pilot-profile.js';
 import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, FUEL, GOVERNOR_LICENSES, shipStats, freeFor, holdOf, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
   cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, slotPrice, supplyLoad, targetOf,
@@ -123,6 +124,7 @@ export class Game {
     }
     this.shipStats = groupRows(st.loadAll('ship_stats'), 'ship');
     for (const player of this.players.values()) syncHomeQuests(this, player);
+    syncRouteReservations(this);
     this.routeStats = groupRows(st.loadAll('route_stats'), 'route');
     if (this.verbose) console.log(`Spielstand geladen: ${this.players.size} Spieler, ${this.world.entities.size} Objekte, ${this.ships.size} Schiffe`);
     return true;

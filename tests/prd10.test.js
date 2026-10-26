@@ -115,3 +115,20 @@ test('PRD10: direkte Lagerregeln erlauben Null, erhalten Bestand und unabhängig
  assert.equal(command(f,'homeReserve',{good:'ore',amount:0}),undefined);assert.equal(f.home.reserves.ore,0);
  f.game.store.close();
 });
+
+test('PRD10: Routenoption und Reservierungen bleiben nach echtem Speichern und Laden konsistent',()=>{
+ const folder=fs.mkdtempSync(path.join(os.tmpdir(),'prd10-route-')),file=path.join(folder,'world.db');
+ const game=new Game(file,{seed:3}),p=game.createPlayer('Route'),ship=game.shipsOf(p.id)[0];
+ const a=game.world.entities.get('origin_hub'),b=game.world.entities.get('origin_yard');
+ a.market.goods.ore={role:'produce',stock:100,cap:1000,mod:1};b.market.goods.ore={role:'consume',stock:0,cap:100,mod:1};
+ const stops=[{targetId:a.id,actions:[{op:'buy',good:'ore',amount:80}]},{targetId:b.id,actions:[{op:'sell',good:'ore',amount:0}]}];
+ assert.equal(runCommand(game,p,{cmd:'routeSave',name:'Geschützt',stops,onlyWithTargetSpace:true}),undefined);
+ const route=[...game.routes.values()][0];assert.equal(route.onlyWithTargetSpace,true);
+ b.market.goods.ore={role:'consume',stock:0,cap:100,mod:1};ship.cargo={ore:80};ship.queue=[{t:'route',route:route.id,idx:0}];
+ game.save();game.store.close();
+ const loaded=new Game(file),s=loaded.ships.get(ship.id),r=loaded.routes.get(route.id);
+ assert.equal(r.onlyWithTargetSpace,true);assert.equal(s.queue[0].destinationReservations.reduce((n,r)=>n+r.amount,0),80);
+ assert.equal(runCommand(loaded,loaded.players.get(p.id),{cmd:'routeSave',id:r.id,name:r.name,stops,onlyWithTargetSpace:false}),undefined);
+ assert.equal(s.queue[0].destinationReservations,undefined);assert.equal(s.cargo.ore,80);
+ loaded.store.close();fs.rmSync(folder,{recursive:true,force:true});
+});

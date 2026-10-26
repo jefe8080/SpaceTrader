@@ -196,7 +196,7 @@ Fortschritt und die Prüfergebnisse werden im selben Commit hier ergänzt.
   implementieren; Eingabestabilität und Persistenz prüfen.
 - [x] U5: Zielkapazitätsberechnung und schiffsübergreifende Reservierungen
   einschließlich Teilmengen, doppelter Ziele und Lebenszyklus implementieren.
-- [ ] U6: Routenoption in Oberfläche und Speicherung integrieren und den
+- [x] U6: Routenoption in Oberfläche und Speicherung integrieren und den
   tatsächlichen Routenablauf einschließlich eigener Lager prüfen.
 - [ ] U7: Äußere Planetenentwicklung und sichtbare tatsächliche Orbitalringe
   implementieren; alle Stufen visuell prüfen.
@@ -271,3 +271,5 @@ U4: Slider und Zahlenfelder je Rohstoff für Limit/Sperrmenge, Warnhinweis und g
 U4-Prüfkorrektur: Der neue Sammellimit-Test erwartete Gefahrstoffkapazität vor dem ersten Betriebstick. Testvorbereitung korrigiert; anschließend alle 27 Heimat-, Logistik- und PRD-10-Tests bestanden. Der erste U4-Lauf hatte diesen einen Testfehler; der Commit erfolgte versehentlich vor dessen Korrektur.
 
 U5: Zielplaner und persistierbare Reservierungen an Routenbefehlen implementiert, mit Neuabgleich aus vorhandener Fracht. Physischer Platz, Limits, Ablademengen, doppelte Planeten und gemeinsame Lagerklassen werden berücksichtigt. Fünf gezielte Tests bestanden (100/50-Beispiele, 80+20, gemischte Klassen, Änderungen/Abbruch und Rekonstruktion). Einbindung in den tatsächlichen Handel folgt in U6.
+
+U6: Checkbox „Nur bei Platz am Ziel kaufen“ im Routeneditor und Routenkennzeichnung ergänzt; neue/alte Routen starten ohne Schutz. Reale Käufe und Eigentümerbeladungen verwenden die Zielplanung; nur tatsächlich geladene Mengen werden reserviert. Kommandoänderungen und Speichern/Laden gleichen Reservierungen ab. 21 gezielte Tests bestanden, darunter konkurrierende reale Beladungen, später volles Ziel ohne Frachtverlust und echter Datenbankneustart.
