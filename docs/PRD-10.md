@@ -186,7 +186,7 @@ Fortschritt und die Prüfergebnisse werden im selben Commit hier ergänzt.
 
 - [x] P0: Anforderungen mit grilling geklärt und vom Nutzer bestätigt;
   PRD mit Regeln, Schritten und Abnahmekriterien erstellt.
-- [ ] U1: Leitstellenpreise anpassen und Flottenobergrenze in sämtlichen
+- [x] U1: Leitstellenpreise anpassen und Flottenobergrenze in sämtlichen
   Erwerbswegen und zugehörigen Anzeigen entfernen; übrige Lizenzregeln prüfen.
 - [ ] U2: Silo- und Sicherheitslager-Upgrades inklusive Kosten, Betrieb,
   Bauablauf, Bestandsmigration und Bedienung implementieren.
@@ -259,3 +259,5 @@ Persistenz vorgesehen. Für die Lagerbedienung und U7 sind zusätzlich visuelle
 Laufzeitprüfungen erforderlich. U8 prüft das Zusammenspiel und die relevante
 Regressionstestsuite. Fehlgeschlagene oder nicht ausführbare Prüfungen werden
 mit Ursache dokumentiert und dem Nutzer mitgeteilt.
+
+U1: Leitstellenpreise angepasst; Erwerbswege und Anzeigen von der Lizenz-Schiffsanzahl entkoppelt. Klassen- und Upgradegrenzen bleiben bestehen. Gezielte Tests für Schiffe, Werften, Heimatbetrieb und Leitstellennetz ausgeführt. Bestehende Tests mit alten Sollpreisen bzw. Flottenlimit auf PRD 10 aktualisiert.

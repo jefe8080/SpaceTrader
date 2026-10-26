@@ -123,7 +123,6 @@ export function buyShipOffer(game, p, shipId) {
   const d = SHIP_TYPES[ship.type];
   const lic = PILOT_LICENSES[p.pilot || 1];
   if (!lic.classes.includes(d.cls)) return `Für Klasse ${SHIP_CLASSES[d.cls].name} brauchst du Pilotenlizenz ${SHIP_CLASSES[d.cls].license}.`;
-  if (game.shipsOf(p.id).length >= lic.maxShips) return `Pilotenlizenz ${lic.level} erlaubt höchstens ${lic.maxShips} Schiffe.`;
   if (d.faction && factionRank(p.rep?.[d.faction]) < d.rank) return `${d.name} erfordert Rang ${d.rank} (${RANK_NAMES[d.rank]}) bei ${FACTIONS[d.faction].name}.`;
   if (p.credits < o.price) return 'Nicht genug Credits.';
   const seller = game.players.get(o.seller);

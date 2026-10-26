@@ -82,7 +82,7 @@ function shipOffer(bot) {
   const lic = PILOT_LICENSES[bot.p.pilot || 1];
   const own = game.shipsOf(bot.p.id);
   // Am Limit: nur Schiffe, die deutlich größer sind als das kleinste eigene (wird dafür verkauft)
-  const atLimit = own.length >= lic.maxShips;
+  const atLimit = false;
   const smallest = own.filter((s) => s.id !== bot.qship).reduce((m, s) => (!m || SHIP_TYPES[s.type].cargo < SHIP_TYPES[m.type].cargo ? s : m), null);
   if (atLimit && !smallest) return null;
   const minCargo = atLimit ? SHIP_TYPES[smallest.type].cargo * 2.5 : 0;
@@ -161,7 +161,7 @@ function botThink(bot) {
   // Lizenz: kaufen, wenn das Schiffslimit erreicht ist und das Geld reicht
   const lic = PILOT_LICENSES[p.pilot || 1];
   const next = PILOT_LICENSES[(p.pilot || 1) + 1];
-  if (next && game.shipsOf(p.id).length >= lic.maxShips && p.credits > next.cost * 1.5 && pilotLevel(p.xp) >= next.level && !bot.goingHub && ships.length) {
+  if (next && ships.some(s => !lic.classes.includes(SHIP_TYPES[s.type].cls)) && p.credits > next.cost * 1.5 && pilotLevel(p.xp) >= next.level && !bot.goingHub && ships.length) {
     const s = ships.find((x) => !x.queue.length) || ships[0];
     runCommand(game, p, { cmd: 'order', ships: [s.id], order: { t: 'goto', target: home.hub }, append: false });
     bot.goingHub = s.id;

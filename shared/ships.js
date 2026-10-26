@@ -131,12 +131,12 @@ export const moduleMiningRate = (base, n) => (n > 0 ? base * n * (1 + MINING_COM
 // ---------- Pilotenlizenz ----------
 export const PILOT_LICENSES = [
   null,
-  { level: 1, maxShips: 3, classes: ['S'], maxUpgrade: 1, cost: 0 },
-  { level: 2, maxShips: 6, classes: ['S', 'M'], maxUpgrade: 2, cost: 20000 },
-  { level: 3, maxShips: 12, classes: ['S', 'M', 'L'], maxUpgrade: 3, cost: 150000 },
-  { level: 4, maxShips: 20, classes: ['S', 'M', 'L'], maxUpgrade: 4, cost: 1000000 },
-  { level: 5, maxShips: 35, classes: ['S', 'M', 'L', 'XL', 'F'], maxUpgrade: 5, cost: 6000000 },
-  { level: 6, maxShips: 60, classes: ['S', 'M', 'L', 'XL', 'F'], maxUpgrade: 6, cost: 30000000 },
+  { level: 1, classes: ['S'], maxUpgrade: 1, cost: 0 },
+  { level: 2, classes: ['S', 'M'], maxUpgrade: 2, cost: 20000 },
+  { level: 3, classes: ['S', 'M', 'L'], maxUpgrade: 3, cost: 150000 },
+  { level: 4, classes: ['S', 'M', 'L'], maxUpgrade: 4, cost: 1000000 },
+  { level: 5, classes: ['S', 'M', 'L', 'XL', 'F'], maxUpgrade: 5, cost: 6000000 },
+  { level: 6, classes: ['S', 'M', 'L', 'XL', 'F'], maxUpgrade: 6, cost: 30000000 },
 ];
 
 // ---------- Abgeleitete Werte eines Schiffes ----------

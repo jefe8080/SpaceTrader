@@ -27,10 +27,9 @@ export function shipyardSection(e, dockedShip) {
   (m.forSale || []).forEach((it, i) => {
     const d = SHIP_TYPES[it.type];
     const allowed = L.classes.includes(d.cls);
-    const full = myShips().length >= L.maxShips;
     const reserved = it.reservedFor && it.reservedFor !== state.me.id && state.time < it.reservedUntil;
     const why = !dockedShip ? 'Ein eigenes Schiff muss hier angedockt sein' : reserved ? `Reserviert für ${it.reservedName} (noch ${Math.ceil((it.reservedUntil - state.time) / 60)} min)`
-      : !allowed ? `Pilotenlizenz ${SHIP_CLASSES[d.cls].license} nötig` : full ? `Lizenz erlaubt max. ${L.maxShips} Schiffe` : state.credits < it.price ? 'Nicht genug Credits' : '';
+      : !allowed ? `Pilotenlizenz ${SHIP_CLASSES[d.cls].license} nötig` : state.credits < it.price ? 'Nicht genug Credits' : '';
     const resTag = it.reservedFor && state.time < it.reservedUntil ? ` <span class="badge" title="Vorkaufsrecht des Bestellers">bestellt von ${esc(it.reservedName || '?')}</span>` : '';
     h += `<div class="forsale"><img src="${shipSprite(it.type, state.me.color)}" alt=""><div class="info"><b>${d.name}</b> ${clsBadge(d.cls)}${it.upg ? ' <span class="badge">aufgerüstet</span>' : ''}${bonusBadge(it)}${resTag}<br>
       ${typeLine(it.type, it.bonus)}<br><span class="muted">${d.desc}</span></div>
@@ -146,7 +145,7 @@ export function factionYardSection(e, dockedShip) {
     const have = docked.reduce((a, s) => a + (s.cargo?.[it.currency.good] || 0), 0);
     const rankOk = myRank(d.faction) >= d.rank, licOk = L.classes.includes(d.cls);
     const why = !dockedShip ? 'Ein eigenes Schiff muss hier angedockt sein' : !rankOk ? `Fraktionsrang ${d.rank} (${RANK_NAMES[d.rank]}) nötig`
-      : !licOk ? `Pilotenlizenz ${SHIP_CLASSES[d.cls].license} nötig` : myShips().length >= L.maxShips ? `Lizenz erlaubt max. ${L.maxShips} Schiffe`
+      : !licOk ? `Pilotenlizenz ${SHIP_CLASSES[d.cls].license} nötig`
         : have < it.currency.n ? `Es fehlen ${it.currency.n - have} ${GOODS[it.currency.good].name}` : state.credits < it.price ? 'Nicht genug Credits' : '';
     h += `<div class="forsale"><img src="${shipSprite(it.type, state.me.color)}" alt=""><div class="info"><b>${d.name}</b> ${clsBadge(d.cls)}
       <span class="badge${rankOk ? '' : ' neg'}" title="Nötiger Fraktionsrang">Rang ${d.rank}</span><br>
@@ -178,11 +177,11 @@ export function hubSection(e, dockedShip) {
   const cur = lic();
   const next = PILOT_LICENSES[cur.level + 1];
   let h = `<div class="section"><div class="section-title">Pilotenlizenz</div>
-    <div class="kv"><span>Aktuell</span><span><b>Stufe ${cur.level}</b> · max. ${cur.maxShips} Schiffe · Klassen ${cur.classes.map((c) => SHIP_CLASSES[c].name).join(', ')} · Upgrades bis Stufe ${cur.maxUpgrade}</span>`;
+    <div class="kv"><span>Aktuell</span><span><b>Stufe ${cur.level}</b> · Klassen ${cur.classes.map((c) => SHIP_CLASSES[c].name).join(', ')} · Upgrades bis Stufe ${cur.maxUpgrade}</span>`;
   if (next) {
     const lvlOk = (state.level || 1) >= next.level;
     const why = !dockedShip ? 'Ein eigenes Schiff muss am Hub angedockt sein' : !lvlOk ? `Erfordert Pilotenlevel ${next.level}` : state.credits < next.cost ? 'Nicht genug Credits' : '';
-    h += `<span>Nächste</span><span>Stufe ${next.level}: ${next.maxShips} Schiffe, Klassen ${next.classes.map((c) => SHIP_CLASSES[c].name).join(', ')}, Upgrades bis ${next.maxUpgrade}</span>
+    h += `<span>Nächste</span><span>Stufe ${next.level}: Klassen ${next.classes.map((c) => SHIP_CLASSES[c].name).join(', ')}, Upgrades bis ${next.maxUpgrade}</span>
       <span>Voraussetzung</span><span class="${lvlOk ? '' : 'neg'}">Pilotenlevel ${next.level} (aktuell ${state.level || 1})</span></div>
       <button class="primary small" data-act="buyLicense" data-kind="pilot" ${why ? 'disabled' : ''} title="${esc(why)}">Lizenz ${next.level} kaufen: ${fmt(next.cost)} Cr</button>`;
   } else h += `</div><div class="muted">Höchste Stufe erreicht.</div>`;

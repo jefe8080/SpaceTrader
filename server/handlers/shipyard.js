@@ -33,7 +33,6 @@ export default {
       const lic = pilotLicense(player);
       const cls = SHIP_TYPES[item.type].cls;
       if (!lic.classes.includes(cls)) return `Für Klasse ${SHIP_CLASSES[cls].name} brauchst du Pilotenlizenz ${SHIP_CLASSES[cls].license}.`;
-      if (game.shipsOf(player.id).length >= lic.maxShips) return `Pilotenlizenz ${lic.level} erlaubt höchstens ${lic.maxShips} Schiffe.`;
       if (player.credits < item.price) return 'Nicht genug Credits.';
       player.credits -= item.price;
       if (m.owner && m.owner !== player.id) game.accountOf(m.owner).credits += item.price; // Verkauf aus Spieler- oder Konsortiumswerft
@@ -68,7 +67,6 @@ export default {
       if (rank < d.rank) return `${d.name} erfordert Rang ${d.rank} (${RANK_NAMES[d.rank]}) bei ${FACTIONS[d.faction].name}, du hast Rang ${rank}.`;
       const lic = pilotLicense(player);
       if (!lic.classes.includes(d.cls)) return `${d.name} erfordert Pilotenlizenz ${SHIP_CLASSES[d.cls].license}.`;
-      if (game.shipsOf(player.id).length >= lic.maxShips) return `Pilotenlizenz ${lic.level} erlaubt höchstens ${lic.maxShips} Schiffe.`;
       const { good, n } = item.currency;
       const have = docked.reduce((s, x) => s + (x.cargo[good] || 0), 0);
       if (have < n) return `Es fehlen ${n - have} ${GOODS[good].name} (in den Laderäumen der angedockten Schiffe).`;

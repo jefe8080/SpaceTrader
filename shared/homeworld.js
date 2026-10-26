@@ -55,8 +55,8 @@ export function industrySpec(recipe){
 
 export function controlUpgradeCost(level) {
   if(!Number.isSafeInteger(level)||level<2)return null;
-  const cost=level===2?{credits:8000,goods:{plates:10,wires:4},seconds:60}
-    :{credits:Math.round(30000*1.5**(level-3)),goods:{plates:Math.ceil(20*1.3**(level-3)),electronics:Math.ceil(10*1.3**(level-3)),computers:Math.ceil(2*1.3**(level-3))},seconds:Math.min(180,120+15*(level-3))};
+  const cost=level===2?{credits:20000,goods:{plates:10,wires:4},seconds:60}
+    :{credits:100000*2**(level-3),goods:{plates:Math.ceil(20*1.3**(level-3)),electronics:Math.ceil(10*1.3**(level-3)),computers:Math.ceil(2*1.3**(level-3))},seconds:Math.min(180,120+15*(level-3))};
   return [cost.credits,...Object.values(cost.goods)].every(Number.isSafeInteger)?cost:null;
 }
 

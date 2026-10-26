@@ -183,7 +183,6 @@ export function completeHomeQuest(game, player, entity, id) {
   const accessError=homeAccess(game,player,entity);if(accessError)return accessError;
   if(Number(id.slice(1))>=7)return completeAdvancedQuest(game,player,entity,id);
   if (!homeQuestReady(game, player, entity, id)) return 'Voraussetzungen noch nicht erfüllt oder Belohnung bereits abgeholt.';
-  if (id === 'H05' && game.shipsOf(player.id).length >= PILOT_LICENSES[player.pilot || 1].maxShips) return 'Schiffslimit erreicht. Für den zweiten Frachter wird ein freier Lizenzplatz benötigt.';
   const quest = HOME_QUESTS[id], home = entity.market.homeworld;
   player.homeQuest.completed[id] = { at: game.time };
   player.homeQuest.journal.push({ id, at: game.time, text: HOME_STORY[id].completion });

@@ -60,8 +60,8 @@ test('Verkaufswert: 60 % Marktpreis plus 50 % der Upgrades', () => {
   assert.equal(sellValue({ type: 'spatz', upgValue: 1000 }, 4000), 2400 + 500);
 });
 
-test('Pilotenlizenz: Klassen, Schiffslimit, Kauf nur am Hub', () => {
-  assert.equal(PILOT_LICENSES[1].maxShips, 3);
+test('Pilotenlizenz: Klassen, unbegrenzte Flotte, Kauf nur am Hub', () => {
+  assert.equal('maxShips' in PILOT_LICENSES[1], false);
   assert.deepEqual(PILOT_LICENSES[2].classes, ['S', 'M']);
   const g = new Game(':memory:', { seed: 3 });
   const p = g.createPlayer('Anna');

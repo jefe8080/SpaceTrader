@@ -214,7 +214,6 @@ export default {
       const item = e.market.forSale[index];
       if (!item?.own) return 'Kein Schiff im Werftbestand.';
       const lic = PILOT_LICENSES[player.pilot || 1];
-      if (game.shipsOf(player.id).length >= lic.maxShips) return `Pilotenlizenz ${lic.level} erlaubt höchstens ${lic.maxShips} Schiffe.`;
       if (!lic.classes.includes(SHIP_TYPES[item.type].cls)) return 'Für diese Klasse fehlt dir die Pilotenlizenz.';
       e.market.forSale.splice(index, 1);
       const s = game.spawnShip(player, item.type, e);

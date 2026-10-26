@@ -64,7 +64,7 @@ export function renderTop() {
   $('btnHome').title = state.homeworld ? 'Zur persönlichen Heimatwelt' : 'Zum Startpunkt';
   $('btnMarker').textContent = state.markerMode === 'state' ? '◆ Marker: Zustand' : '◆ Marker: Farbe';
   $('credits').textContent = fmt(state.credits) + ' Cr';
-  $('shipCount').textContent = `${myShips().length} / ${PILOT_LICENSES[state.pilot || 1].maxShips}`;
+  $('shipCount').textContent = `${myShips().length}`;
   $('pilotLevel').textContent = 'P' + (state.pilot || 1);
   const L = state.level || 1, cur = PILOT_LEVELS[L], next = PILOT_LEVELS[L + 1];
   $('levelValue').textContent = String(L);

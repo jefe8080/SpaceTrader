@@ -99,7 +99,7 @@ test('Leitstellenausbau bindet tatsächliche Materialien, bleibt unter drei Minu
   const f=fixture();f.state.controlLevel=1;f.player.credits=1e7;
   for(const [g,n] of Object.entries({plates:100,wires:10,electronics:100,computers:30}))f.home.market.goods[g].stock=n;
   const upgrade=()=>runCommand(f.game,f.player,{cmd:'homeControlUpgrade',target:f.home.id});
-  assert.equal(upgrade(),undefined);assert.equal(f.player.credits,1e7-8000);assert.equal(f.home.market.goods.wires.stock,6);
+  assert.equal(upgrade(),undefined);assert.equal(f.player.credits,1e7-20000);assert.equal(f.home.market.goods.wires.stock,6);
   assert.match(upgrade(),/bereits/);f.game.time+=60;tickHomeworld(f.game,f.home,60);assert.equal(f.state.controlLevel,2);
   for(let level=3;level<=20;level++){const cost=controlUpgradeCost(level);assert(cost.seconds<=180);assert(Number.isSafeInteger(cost.credits));}
   assert.equal(controlUpgradeCost(1000),null);assert.equal(upgrade(),undefined);
@@ -109,7 +109,7 @@ test('Leitstellenausbau bindet tatsächliche Materialien, bleibt unter drei Minu
 test('Neustart erhält Freigabe für begonnenen Abschnitt und laufenden Leitstellenausbau',()=>{
   const folder=fs.mkdtempSync(path.join(os.tmpdir(),'prd5-net-')),file=path.join(folder,'world.db');
   const f=fixture(file);giveOrder(f.game,f.ship,{t:'move',x:f.ship.x+1000,y:f.ship.y},false);updateShip(f.ship,1,f.game);
-  f.state.controlLevel=1;f.player.credits=10000;f.home.market.goods.plates.stock=10;f.home.market.goods.wires.stock=4;
+  f.state.controlLevel=1;f.player.credits=22000;f.home.market.goods.plates.stock=10;f.home.market.goods.wires.stock=4;
   assert.equal(runCommand(f.game,f.player,{cmd:'homeControlUpgrade',target:f.home.id}),undefined);
   f.state.controlLevel=0;f.game.save();close(f);
   const game=new Game(file,{profile:'homeworld'}),ship=game.ships.get(f.ship.id);

@@ -44,7 +44,7 @@ export function orbitalBuild(game,p,e,type){
 export function claimOrbital(game,p,e,id){
   const error=homeAccess(game,p,e);if(error)return error;
   const o=e.market.homeworld.orbital,item=o?.inventory.find(i=>i.id===id);if(!item)return 'Kein vorhandener Rumpf mit dieser Kennung.';
-  const license=PILOT_LICENSES[p.pilot||1];if(!license.classes.includes(SHIP_TYPES[item.type].cls)||game.shipsOf(p.id).length>=license.maxShips)return 'Passende Pilotenlizenz und freier Flottenplatz erforderlich.';
+  const license=PILOT_LICENSES[p.pilot||1];if(!license.classes.includes(SHIP_TYPES[item.type].cls))return 'Passende Pilotenlizenz erforderlich.';
   const type=SHIP_TYPES[item.type];if(type.faction&&factionRank(p.rep?.[type.faction]||0)<type.rank)return 'Der erforderliche Fraktionsrang fehlt.';
   const ship=game.spawnShip(p,item.type,e);applyPhysicalHull(ship,item);o.inventory.splice(o.inventory.indexOf(item),1);game.emit('entity',e);
 }
