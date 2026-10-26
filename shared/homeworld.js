@@ -133,7 +133,7 @@ export function demolitionPreview(market, id, upgrade) {
   const hasFacility = kind => remaining.some(s => s.kind === kind || s.upgrades?.includes(kind)) || (upgrade && building.kind === kind);
   if (home.structures.some(s => s.id !== id && s.kind === 'plant' && industrySpec(s.recipe)?.facility === removedKind) && !hasFacility(removedKind)) return fail('Zuerst die abhängigen Produktionsanlagen entfernen.');
   if (building.kind === 'plant' && home.logistics?.orders?.some(o => o.kind === 'production' && o.recipe === building.recipe && !['cancelled', 'delivered'].includes(o.state))) return fail('Zuerst den betroffenen Produktionsauftrag beenden oder abbrechen.');
-  if (building.kind === 'plant' && building.enabled !== false && building.progress > 0) return fail('Zuerst den laufenden Produktionszyklus beenden oder den Betrieb pausieren und damit abbrechen.');
+  if (building.kind === 'plant' && building.progress > 0) return fail('Zuerst den laufenden Produktionszyklus beenden oder ausdrücklich abbrechen.');
   const spec = upgrade ? HOME_BUILDINGS[upgrade] : homeStructureSpec(building);
   const losses = { storage: spec.storage || 0, hazardStorage: spec.hazardStorage || 0, housing: spec.housing || 0, power: spec.generation || 0 };
   const used = homeStorageUsage(market);

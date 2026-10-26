@@ -37,6 +37,7 @@ function available(game, target, good, reservations) {
   if (!market.homeworld) return Math.max(0, homeStorageFree(market, good) - ownGood);
   const shared = reservations.filter(r => r.target === target && GOODS[r.good]?.cls === GOODS[good]?.cls).reduce((n, r) => n + r.amount, 0);
   const home = market.homeworld, cls = GOODS[good]?.cls;
+  if(!['normal','hazard'].includes(cls))return 0;
   // homeStorageFree includes the per-good limit; subtract shared usage only
   // from physical space and same-good reservations from the per-good limit.
   const physical = cls === 'normal' ? home.storage : home.hazardStorage;

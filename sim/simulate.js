@@ -80,20 +80,14 @@ function bestTrade(bot, ship) {
 /** Nächste Werft mit einem Schiff, das die Lizenz erlaubt und bezahlbar ist */
 function shipOffer(bot) {
   const lic = PILOT_LICENSES[bot.p.pilot || 1];
-  const own = game.shipsOf(bot.p.id);
-  // Am Limit: nur Schiffe, die deutlich größer sind als das kleinste eigene (wird dafür verkauft)
-  const atLimit = false;
-  const smallest = own.filter((s) => s.id !== bot.qship).reduce((m, s) => (!m || SHIP_TYPES[s.type].cargo < SHIP_TYPES[m.type].cargo ? s : m), null);
-  if (atLimit && !smallest) return null;
-  const minCargo = atLimit ? SHIP_TYPES[smallest.type].cargo * 2.5 : 0;
   let best = null;
   for (const e of game.world.sectorEntities(home.key)) {
     if (e.market?.strategy !== 'shipyard' || e.market.owner || !known(bot.p, e)) continue;
     e.market.forSale.forEach((it, index) => {
       const d = SHIP_TYPES[it.type];
-      if (!lic.classes.includes(d.cls) || it.price * 1.3 > bot.p.credits || d.cargo < minCargo) return;
+      if (!lic.classes.includes(d.cls) || it.price * 1.3 > bot.p.credits) return;
       const value = d.cargo * d.speed; // größtes leistbares Schiff
-      if (!best || value > best.value) best = { e, index, value, type: it.type, price: it.price, sell: atLimit ? smallest.id : null };
+      if (!best || value > best.value) best = { e, index, value, type: it.type, price: it.price, sell: null };
     });
   }
   return best;
@@ -158,10 +152,9 @@ function botThink(bot) {
   const p = bot.p;
   if (bot.buying?.ship !== bot.qship) questThink(bot);
   const ships = game.shipsOf(p.id).filter((s) => s.id !== bot.qship);
-  // Lizenz: kaufen, wenn das Schiffslimit erreicht ist und das Geld reicht
-  const lic = PILOT_LICENSES[p.pilot || 1];
+  // Lizenz: weitere Klassen freischalten, wenn das Geld reicht
   const next = PILOT_LICENSES[(p.pilot || 1) + 1];
-  if (next && ships.some(s => !lic.classes.includes(SHIP_TYPES[s.type].cls)) && p.credits > next.cost * 1.5 && pilotLevel(p.xp) >= next.level && !bot.goingHub && ships.length) {
+  if (next && p.credits > next.cost * 1.5 && pilotLevel(p.xp) >= next.level && !bot.goingHub && ships.length) {
     const s = ships.find((x) => !x.queue.length) || ships[0];
     runCommand(game, p, { cmd: 'order', ships: [s.id], order: { t: 'goto', target: home.hub }, append: false });
     bot.goingHub = s.id;

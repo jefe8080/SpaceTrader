@@ -1,4 +1,7 @@
 {
-  "exterior": "12 Zustände gerendert",
+  "exterior": "12 Zustände gerendert und visuell geprüft",
+  "storage": "Zahlenfeld, Fokus-Schutz, Sammelvorschau, Entwurfserhalt bei Live-Update, Überlaufprüfung bei 1440 und 800 Pixeln",
+  "demolition": "Lagerkapazitätsverlust im Bestätigungsdialog geprüft",
+  "routes": "Checkbox bis zum routeSave-Payload geprüft",
   "errors": []
 }

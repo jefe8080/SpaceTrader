@@ -464,3 +464,13 @@ details[open]>summary { color:var(--accent2); }
   .main-nav { gap:3px; }
   .main-nav summary { padding:6px 4px; font-size:11px; }
 }
+
+/* PRD 10: storage rules fit the narrow city panel and touch screens. */
+.home-storage { table-layout:fixed; }
+.home-storage th:first-child { width:34%; }
+.home-storage td { vertical-align:top; overflow-wrap:anywhere; }
+.home-storage label { display:grid; grid-template-columns:minmax(0,1fr) 66px; gap:5px; margin:0 0 10px; }
+.home-storage label span { grid-column:1 / -1; }
+.home-storage input { min-width:0; width:100%; box-sizing:border-box; margin:0; }
+.home-storage input[type=range] { padding:0; }
+.home-storage button { display:block; margin:4px 0; }

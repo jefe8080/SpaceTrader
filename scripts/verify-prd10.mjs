@@ -57,11 +57,30 @@ try{
  await ore.press('Enter');
  assert((await page.evaluate(()=>window.qaCommands)).some(c=>c.cmd==='homeLimit'&&c.good==='ore'&&c.amount===37));
  await page.locator('#planetPanel').screenshot({path:new URL('storage-controls.png',out).pathname.replace(/^\/([A-Z]:)/,'$1')});
+ const slider=page.locator('[data-storage-rule="limit"][data-good="ore"][type="range"]');
+ await slider.focus();
+ const before=await page.evaluate(()=>window.qaCommands.length);
+ await slider.evaluate(el=>{el.value='22';el.dispatchEvent(new Event('input',{bubbles:true}));});
+ assert.equal(await page.evaluate(()=>window.qaCommands.length),before);
+ assert.equal(await ore.inputValue(),'22');
+ await slider.dispatchEvent('change');
+ assert((await page.evaluate(()=>window.qaCommands)).some(c=>c.cmd==='homeLimit'&&c.good==='ore'&&c.amount===22));
+ await slider.blur();
  await page.locator('summary').filter({hasText:'Alle Lagerlimits gemeinsam ändern'}).click();
  await page.locator('#homeBatchNumber').fill('250');
  assert.match(await page.locator('#homeBatchPreview').innerText(),/normal 250, Gefahrstoffe 250/);
+ await page.locator('#homeBatchNumber').blur();
+ await page.evaluate(async()=>{(await import('/js/ui/planetPanel.js')).renderPlanetUi();});
+ assert.equal(await page.locator('#homeBatchNumber').inputValue(),'250');
+ assert.match(await page.locator('#homeBatchPreview').innerText(),/normal 250, Gefahrstoffe 250/);
  await page.locator('[data-pp="homeBatchLimits"]').click();
  assert((await page.evaluate(()=>window.qaCommands)).some(c=>c.cmd==='homeLimit'&&c.all&&c.amount===250));
+ assert(await page.locator('#planetPanel').evaluate(p=>p.scrollWidth<=p.clientWidth+1));
+ await page.setViewportSize({width:800,height:900});
+ await ore.scrollIntoViewIfNeeded();
+ await page.locator('#planetPanel').screenshot({path:new URL('storage-narrow.png',out).pathname.replace(/^\/([A-Z]:)/,'$1')});
+ assert(await page.locator('#planetPanel').evaluate(p=>p.scrollWidth<=p.clientWidth+1));
+ await page.setViewportSize({width:1440,height:1100});
  await page.evaluate(async()=>{
   const {scene}=await import('/js/planetside.js'),ui=await import('/js/ui/planetPanel.js');ui.openBuilding(scene.items.find(i=>i.homeStructure==='qa-silo'));
  });
@@ -70,9 +89,11 @@ try{
  assert.match(await page.locator('#gameConfirmMessage').innerText(),/Lagerkapazität: −4000/);
  await page.locator('#gameConfirmCancel').click();
  await page.locator('#planetPanel').screenshot({path:new URL('storage-upgrade.png',out).pathname.replace(/^\/([A-Z]:)/,'$1')});
- await page.evaluate(async()=>{(await import('/js/ui/planetPanel.js')).leavePlanet();(await import('/js/ui/routes.js')).openRouteEditor();});
+ await page.evaluate(async()=>{(await import('/js/ui/planetPanel.js')).leavePlanet();const {state}=await import('/js/state.js');(await import('/js/ui/routes.js')).openRouteEditor(null,{stops:[{targetId:state.homeworld,actions:[]}]});});
  await page.locator('#reTargetSpace').check();
  await page.locator('#routeCard').screenshot({path:new URL('route-option.png',out).pathname.replace(/^\/([A-Z]:)/,'$1')});
- await fs.writeFile(new URL('results.json',out),JSON.stringify({exterior:'12 Zustände gerendert',errors},null,2));
+ await page.locator('#routeCard [data-a="save"]').click();
+ assert((await page.evaluate(()=>window.qaCommands)).some(c=>c.cmd==='routeSave'&&c.onlyWithTargetSpace===true));
+ await fs.writeFile(new URL('results.json',out),JSON.stringify({exterior:'12 Zustände gerendert und visuell geprüft',storage:'Zahlenfeld, Fokus-Schutz, Sammelvorschau, Entwurfserhalt bei Live-Update, Überlaufprüfung bei 1440 und 800 Pixeln',demolition:'Lagerkapazitätsverlust im Bestätigungsdialog geprüft',routes:'Checkbox bis zum routeSave-Payload geprüft',errors},null,2));
  assert.deepEqual(errors,[]);
 }finally{await browser.close();}

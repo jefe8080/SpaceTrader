@@ -97,3 +97,15 @@ test('PRD10: ohne geeigneten Zielplatz wird Kauf übersprungen und Route fortges
  let calls=0;game.trade=()=>{calls++;return {n:0};};updateShip(ship,1,game);
  assert.equal(calls,0);assert.equal(ship.queue[0].phase,'wait');assert.equal(Object.keys(ship.fails||{}).length,0);game.store.close();
 });
+
+test('PRD10: mehrere Waren teilen beim tatsächlichen Einkauf denselben Zielplatz',()=>{
+ const {game,player,ship,entity,route}=fixture(0,80);ship.cargo={};
+ game.ownership.set(entity.id,{player:player.id});
+ entity.market.goods.ore={role:'produce',stock:500,cap:1000,mod:1};entity.market.goods.grain={role:'produce',stock:500,cap:1000,mod:1};
+ const target=game.world.entities.get('origin_yard');target.market.goods={ore:{role:'consume',stock:0,cap:100},grain:{role:'consume',stock:0,cap:100}};
+ target.market.homeworld={storage:100,hazardStorage:0,limits:{ore:90,grain:90}};
+ route.onlyWithTargetSpace=true;route.stops[0].actions.push({op:'buy',good:'grain',amount:80});
+ route.stops.push({targetId:target.id,actions:[{op:'sell',good:'ore'},{op:'sell',good:'grain'}]});
+ updateShip(ship,1,game);assert.equal(ship.cargo.ore,80);assert.equal(ship.cargo.grain,20);
+ assert.equal(ship.queue[0].destinationReservations.reduce((n,r)=>n+r.amount,0),100);game.store.close();
+});

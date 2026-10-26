@@ -84,6 +84,14 @@ export function homeConstructionError(home) {
 
 const structureSpec = homeStructureSpec;
 
+export function abortHomeCycle(game,player,entity,id,confirmed) {
+  const error=homeAccess(game,player,entity);if(error)return error;
+  const building=entity.market.homeworld.structures?.find(s=>s.id===id&&s.kind==='plant'&&s.status==='ready');
+  if(!building)return 'Eigene fertiggestellte Produktionsanlage auswählen.';
+  if(!confirmed)return 'Zyklusabbruch ausdrücklich bestätigen.';
+  building.progress=0;building.enabled=false;notify(game,entity);
+}
+
 export function demolishHome(game,player,entity,id,upgrade,confirmed) {
   const error=homeAccess(game,player,entity);if(error)return error;
   const preview=demolitionPreview(entity.market,id,upgrade);if(preview.error)return preview.error;
@@ -212,7 +220,6 @@ export function setHomeOperation(game,player,entity,id,enabled,priority) {
   if((id==='workshop'||building.kind==='workshop')&&!enabled&&player.relic?.operation?.world===entity.id)return 'Während der Antriebsarbeit bleibt die Werkstatt reserviert.';
   if(['dock','control'].includes(id)&&!enabled)return 'Grundlegender Lager- und Leitstellenbetrieb bleibt durch Notversorgung erhalten.';
   building.enabled=enabled;building.priority=priority;
-  if(!enabled && building.kind==='plant')building.progress=0;
   notify(game,entity);
 }
 

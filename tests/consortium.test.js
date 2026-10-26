@@ -204,6 +204,7 @@ test('Schiffshandel: Sperre, Bedingungen, Übergang an Ort und Stelle', () => {
   s2.cargo = {};
   assert.equal(cmd(g, a, 'cShipOffer', { ship: s2.id, price: 1000 }), undefined);
   assert.match(cmd(g, a, 'stop', { ships: [s2.id] }), /angeboten/);
+  for(let i=0;i<4;i++)g.spawnShip(b,'spatz',g.world.entities.get('origin_yard'));
   const bc = b.credits, ac = a.credits;
   assert.equal(cmd(g, b, 'cShipBuy', { ship: s2.id }), undefined);
   assert.equal(s2.owner, b.id);

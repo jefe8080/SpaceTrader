@@ -1,4 +1,4 @@
-import { GOODS, RECIPES, PILOT_LICENSES,propertyBasePrice } from '../shared/config.js';
+import { GOODS, RECIPES,propertyBasePrice } from '../shared/config.js';
 import { HOMEWORLD, HOME_QUESTS, availableHomeStock } from '../shared/homeworld.js';
 import { hexAt, hexKey } from '../shared/hex.js';
 import { rng, hashN } from './worldgen.js';

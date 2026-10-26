@@ -9,8 +9,7 @@ Leitstellen erhalten eine deutlich steilere Preiskurve; die zusätzliche
 Flottenobergrenze durch die Pilotenlizenz entfällt.
 
 Die Planung wurde mit dem Skill `grilling` in den Fragen Q1–Q21 abgestimmt
-und am 26.10.2026 vollständig bestätigt. Beauftragt ist zunächst dieses PRD
-einschließlich Commit. Die Umsetzung des Spielcodes erfolgt anschließend.
+und am 26.10.2026 vollständig bestätigt. Die Umsetzung des Spielcodes wurde mit dem Folgeauftrag zu PRD 10 beauftragt.
 PRD 9 (Rathaus-Handel und Hub-Gleichgewicht) ist ein separates Arbeitspaket.
 
 ## Verbindlicher Umfang
@@ -200,7 +199,7 @@ Fortschritt und die Prüfergebnisse werden im selben Commit hier ergänzt.
   tatsächlichen Routenablauf einschließlich eigener Lager prüfen.
 - [x] U7: Äußere Planetenentwicklung und sichtbare tatsächliche Orbitalringe
   implementieren; alle Stufen visuell prüfen.
-- [ ] U8: Zusammenspiel und bestehende Spielstände prüfen; Abnahmekriterien
+- [x] U8: Zusammenspiel und bestehende Spielstände prüfen; Abnahmekriterien
   abschließend dokumentieren und PRD-Fortschritt vervollständigen.
 
 ## Abnahmekriterien
@@ -264,7 +263,7 @@ U1: Leitstellenpreise angepasst; Erwerbswege und Anzeigen von der Lizenz-Schiffs
 
 U2: Einzelne Lagerstufen 1–5, exakte Kosten, Bauteams, 60-s-Projekte und stufenabhängiger Betrieb implementiert. Altgebäude werden als Stufe 1 normalisiert. Neue Kapazität gilt erst nach Abschluss. 13 Tests (PRD 10 und Heimatbetrieb) bestanden, einschließlich Speichern/Laden, Fremdzugriff, fehlender Mittel und mehrfacher Fertigstellung.
 
-U3: Bestätigter Abriss eigener Gebäude und abhängiger Ausbauten mit Folgenvorschau, ohne Erstattung. Schutz für ursprüngliche Einrichtungen, laufende Projekte, Antriebsarbeit und abhängige Industrie. Laufende Produktionszyklen müssen abgeschlossen oder durch Pausieren abgebrochen werden. Lagerprüfung berücksichtigt beide Klassen, Module und reservierte Modulausgaben. 15 gezielte Tests bestanden.
+U3: Bestätigter Abriss eigener Gebäude und abhängiger Ausbauten mit Folgenvorschau, ohne Erstattung. Schutz für ursprüngliche Einrichtungen, laufende Projekte, Antriebsarbeit und abhängige Industrie. Laufende Produktionszyklen müssen abgeschlossen oder ausdrücklich über den bestätigten Zyklusabbruch beendet werden; normales Pausieren erhält ihren Fortschritt. Lagerprüfung berücksichtigt beide Klassen, Module und reservierte Modulausgaben. 15 gezielte Tests bestanden.
 
 U4: Slider und Zahlenfelder je Rohstoff für Limit/Sperrmenge, Warnhinweis und gemeinsame Limitänderung mit Vorschau implementiert. Speicherung über bestehende Heimatdaten; keine Migration bestehender Werte. Eingaben bleiben durch den vorhandenen Fokus-Schutz gegen Live-Updates stabil. Einlagerung und Produktion beachten Null-/Teillimits. Gezielte Heimat-, Logistik- und PRD-10-Tests bestanden; visuelle Laufzeitprüfung folgt in U8.
 
@@ -275,3 +274,19 @@ U5: Zielplaner und persistierbare Reservierungen an Routenbefehlen implementiert
 U6: Checkbox „Nur bei Platz am Ziel kaufen“ im Routeneditor und Routenkennzeichnung ergänzt; neue/alte Routen starten ohne Schutz. Reale Käufe und Eigentümerbeladungen verwenden die Zielplanung; nur tatsächlich geladene Mengen werden reserviert. Kommandoänderungen und Speichern/Laden gleichen Reservierungen ab. 21 gezielte Tests bestanden, darunter konkurrierende reale Beladungen, später volles Ziel ohne Frachtverlust und echter Datenbankneustart.
 
 U7: Deterministische äußere Bebauung für Ruinenstufen 0/4/12/24 und dezente Stufen anderer bebaubarer Typen ergänzt. Fertige Orbitalringe werden räumlich vor/hinter dem Planeten gezeichnet; der große Ring besitzt getrennte Decks und Anker. Originale fertig reparierte Bodeneinrichtungen zählen mit, Ausbauten und Ringe nicht als weitere Bodengebäude. Drei Schwellwert-/Serialisierungstests bestanden; 12 Zustände in Edge gerendert und visuell geprüft (`docs/qa/prd10/exterior-stages.png`). Gesamtregression bisher: 339/339 bestanden.
+
+U8: Abgeschlossen. Lagerbedienung für das schmale Stadtpanel überarbeitet;
+Sammelvorschau und Entwurf bleiben auch nach Fokuswechsel/Live-Update konsistent.
+Der Produktionszyklusabbruch erfolgt ausdrücklich und bestätigt, getrennt vom
+normalen Pausieren. Alle Erwerbswege über dem früheren Lizenzlimit geprüft,
+einschließlich Quest, Orbital, eigener/öffentlicher/fraktioneller Werft und
+Konsortiumshandel. Altspielstandprüfung erhält Lagerwerte, Waren, Gebäude und
+die 8.000-Cr-Konditionen eines bereits laufenden Leitstellenprojekts.
+
+Abschlussprüfungen: `npm test` mit **343/343 bestandenen Tests**;
+`scripts/verify-prd10.mjs` in Edge erfolgreich und ohne Browserfehler;
+visuelle Prüfung der Planetenstufen, Ringe, Lager-/Ausbaudialoge und Routenoption.
+Slider lösen vor ihrem Änderungsabschluss keine Speicherung aus; Zahlenfelder,
+Fokus-Schutz, Sammeländerung und 800-/1440-Pixel-Ansichten wurden geprüft.
+`git diff --check` bestanden. Nachweise und reproduzierbarer Ablauf stehen in
+`docs/qa/prd10/README.md`. Abnahmekriterien 1–13 sind damit erfüllt.

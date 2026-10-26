@@ -10,7 +10,7 @@ import { questBoardSection } from './quests.js';
 import { scene, canLand, accessTo, resetPlanetside, selectBuilding, hidePlanetside, getPlanetView } from '../planetside.js';
 import { sfx } from '../audio.js';
 import { demolitionPreview } from '/shared/homeworld.js';
-import { homePanel } from './homeworld.js';
+import { homePanel, setStorageBatchDraft } from './homeworld.js';
 import {handleModuleAction} from './modules.js';
 import { bus } from './bus.js';
 import { patchPanelContent } from './panelContent.js';
@@ -118,6 +118,7 @@ export function renderPlanetUi() {
   const updatePanel = context === panelContext ? patchPanelContent : (element, html) => { element.innerHTML = html; };
   panelContext = context;
   updatePanel(panel, `<div class="panel-head"><h2>${esc(it.label)}</h2><span style="flex:1"></span><button class="small ghost" data-pp="close" aria-label="Ort schließen">✕</button></div>${connection}${body}`);
+  for(const input of panel.querySelectorAll('[data-storage-rule]'))input.value=input.getAttribute('value');
   const selectedRecipe = panel.querySelector('#homeRecipe');
   if (selectedRecipe) selectedRecipe.dispatchEvent(new Event('change', { bubbles: true }));
   syncManagementControls(lost);
@@ -215,6 +216,7 @@ panel.addEventListener('click', (ev) => {
     case 'homeTax':cmd('homeTax',{target:e.id,percent:Number(document.getElementById('homeTaxPercent')?.value)});return;
     case 'homeControlUpgrade': cmd('homeControlUpgrade',{target:e.id,module:d.module});return;
     case 'homeBuild': cmd('homeBuild', { target:e.id, kind:d.kind, recipe:d.kind==='plant'?document.getElementById('homeRecipe')?.value:undefined, parent:d.parent, plot:current?.plotIndex }); return;
+    case 'homeAbortCycle': confirmAction('Laufenden Zyklusfortschritt verwerfen und Produktion pausieren? Unverarbeitete Zutaten bleiben im Lager.',()=>cmd('homeAbortCycle',{target:e.id,id:d.id,confirmed:true}));return;
     case 'homeDemolish': {
       const preview=demolitionPreview(e.market,d.id,d.upgrade||undefined);
       if(preview.error){toast(preview.error);return;}
@@ -225,8 +227,7 @@ panel.addEventListener('click', (ev) => {
     case 'homeStorageUpgrade': cmd('homeStorageUpgrade', { target:e.id, id:d.id }); return;
     case 'homeRestore': cmd('homeRestore', { target:e.id, facility:d.facility }); return;
     case 'homeTrain': cmd('homeTrain', { target:e.id, qualification:d.qualification }); return;
-    case 'homeBatchLimits': cmd('homeLimit',{target:e.id,all:true,amount:Number(document.getElementById('homeBatchNumber').value)});return;
-    case 'homeReserve': cmd('homeReserve', { target:e.id, good:document.getElementById('homeReserveGood')?.value, amount:Number(document.getElementById('homeReserveAmount')?.value) }); return;
+    case 'homeBatchLimits': {const field=document.getElementById('homeBatchNumber');if(field.reportValidity())cmd('homeLimit',{target:e.id,all:true,amount:Number(field.value)});return;}
     case 'homeOperation': {
       const building=e.market.homeworld.facilities[d.id]||e.market.homeworld.structures.find(s=>s.id===d.id);
       cmd('homeOperation',{target:e.id,id:d.id,enabled:d.enabled==='true',priority:building?.priority??50});return;
@@ -266,6 +267,7 @@ panel.addEventListener('input',event=>{
   if(['homeBatchRange','homeBatchNumber'].includes(el.id)){
     for(const id of ['homeBatchRange','homeBatchNumber'])if(id!==el.id)document.getElementById(id).value=el.value;
     const home=state.entities.get(state.landed)?.market.homeworld,n=Number(el.value);
+    if(el.checkValidity())setStorageBatchDraft(state.landed,n);
     if(home)document.getElementById('homeBatchPreview').textContent='Alle Rohstofflimits: normal '+Math.min(n,home.storage)+', Gefahrstoffe '+Math.min(n,home.hazardStorage)+'. Bestände über dem neuen Limit bleiben erhalten; weitere Einlagerung wird gesperrt. Sperrmengen bleiben unverändert.';
   }
 });

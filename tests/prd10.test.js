@@ -82,6 +82,8 @@ test('PRD10: Abriss verlangt Bestätigung, schützt Grundlagen, Abhängigkeiten 
  assert.match(command(f,'homeDemolish',{id:lab.id,confirmed:true}),/abhängigen/);
  plant.progress=1;assert.match(command(f,'homeDemolish',{id:plant.id,confirmed:true}),/Produktionszyklus/);
  command(f,'homeOperation',{id:plant.id,enabled:false,priority:50});
+ assert.equal(plant.progress,1);assert.match(command(f,'homeAbortCycle',{id:plant.id}),/bestätigen/);
+ assert.equal(command(f,'homeAbortCycle',{id:plant.id,confirmed:true}),undefined);
  assert.equal(command(f,'homeDemolish',{id:plant.id,confirmed:true}),undefined);
  assert.equal(command(f,'homeDemolish',{id:lab.id,confirmed:true}),undefined);f.game.store.close();
 });
@@ -131,4 +133,39 @@ test('PRD10: Routenoption und Reservierungen bleiben nach echtem Speichern und L
  assert.equal(runCommand(loaded,loaded.players.get(p.id),{cmd:'routeSave',id:r.id,name:r.name,stops,onlyWithTargetSpace:false}),undefined);
  assert.equal(s.queue[0].destinationReservations,undefined);assert.equal(s.cargo.ore,80);
  loaded.store.close();fs.rmSync(folder,{recursive:true,force:true});
+});
+
+test('PRD10: Quest- und Orbitalrümpfe übersteigen die alte Flottenobergrenze ohne Klassenfreigabe zu ändern',()=>{
+ const f=fixture();for(let i=0;i<6;i++)f.game.spawnShip(f.player,'spatz',f.entity);
+ f.home.suppliedSeconds=600;f.player.homeQuest.active.H05={at:0};
+ const before=f.game.shipsOf(f.player.id).length;
+ assert.equal(command(f,'homeQuestComplete',{quest:'H05'}),undefined);assert.equal(f.game.shipsOf(f.player.id).length,before+1);
+ f.home.orbital={small:true,jobs:{},inventory:[{id:'s1',type:'spatz',fuel:0},{id:'m1',type:'lastesel',fuel:0}]};
+ assert.equal(command(f,'homeOrbitalClaim',{id:'s1'}),undefined);assert.equal(f.game.shipsOf(f.player.id).length,before+2);
+ assert.match(command(f,'homeOrbitalClaim',{id:'m1'}),/Pilotenlizenz/);assert.equal(f.home.orbital.inventory.length,1);f.game.store.close();
+});
+test('PRD10: öffentliche und eigene Werften erlauben Erwerb über dem alten Flottenlimit',()=>{
+ const game=new Game(':memory:',{seed:3}),p=game.createPlayer('Flotte'),yard=game.world.entities.get('origin_yard');
+ for(let i=0;i<6;i++)game.spawnShip(p,'spatz',yard);
+ const ship=game.shipsOf(p.id)[0];ship.dockedAt=yard.id;ship.x=yard.x;ship.y=yard.y;p.credits=1e6;
+ yard.market.forSale=[{type:'spatz',price:100}];const before=game.shipsOf(p.id).length;
+ assert.equal(runCommand(game,p,{cmd:'buyShip',target:yard.id,index:0}),undefined);assert.equal(game.shipsOf(p.id).length,before+1);
+ game.ownership.set(yard.id,{player:p.id});yard.market.owner=p.id;yard.market.forSale=[{type:'spatz',own:true,price:0}];
+ assert.equal(runCommand(game,p,{cmd:'yardClaim',target:yard.id,index:0}),undefined);assert.equal(game.shipsOf(p.id).length,before+2);game.store.close();
+});
+
+test('PRD10: alte laufende Leitstellenprojekte und gespeicherte Lagerwerte bleiben unverändert',()=>{
+ const folder=fs.mkdtempSync(path.join(os.tmpdir(),'prd10-old-')),file=path.join(folder,'world.db'),f=fixture(file);
+ const silo=add(f,'silo','alt');delete silo.level;
+ f.home.projects.push({id:'alt-control',kind:'control',level:2,until:60,bound:{credits:8000,goods:{plates:10,wires:4}}});
+ f.home.reserves={ore:900};f.home.limits={ore:40};f.entity.market.goods.ore.stock=75;
+ const credits=f.player.credits;f.game.save();f.game.store.close();
+ const game=new Game(file,{profile:'homeworld'}),entity=game.world.entities.get(f.entity.id),h=entity.market.homeworld;
+ assert.equal(h.reserves.ore,900);assert.equal(h.limits.ore,40);assert.equal(entity.market.goods.ore.stock,75);
+ game.time=60;tickHomeworld(game,entity,60);
+ assert.equal(h.structures[0].level,1);assert.equal(h.storage,4000);assert.equal(h.controlLevel,2);
+ assert.equal(h.capitalCosts.find(c=>c.id==='alt-control').cost.credits,8000);
+ assert.ok(Math.abs(game.players.get(f.player.id).credits-h.civil.taxes-h.civil.consumptionPayments-credits)<1e-7);
+ assert.equal(h.reserves.ore,900);assert.equal(h.limits.ore,40);
+ game.store.close();fs.rmSync(folder,{recursive:true,force:true});
 });

@@ -195,6 +195,7 @@ test('Fraktionswerft: doppelt gesperrt durch Rang und Lizenz, Währung aus dem L
   p.credits = 1e9;
   p.pilot = 3;
   assert.match(runCommand(g, p, { cmd: 'buyFactionShip', target: yard.id, index: lIdx }), /Rang 1/);
+  for(let i=0;i<13;i++)g.spawnShip(p,'spatz',yard);
   p.rep = { [yard.faction]: 100 };
   p.pilot = 2;
   assert.match(runCommand(g, p, { cmd: 'buyFactionShip', target: yard.id, index: lIdx }), /Pilotenlizenz 3/);
@@ -204,7 +205,7 @@ test('Fraktionswerft: doppelt gesperrt durch Rang und Lizenz, Währung aus dem L
   ship.modules = ['shielded', 'shielded', 'shielded', 'shielded'];
   ship.cargo[it.currency.good] = it.currency.n;
   assert.equal(runCommand(g, p, { cmd: 'buyFactionShip', target: yard.id, index: lIdx }), undefined);
-  assert.equal(g.shipsOf(p.id).length, 2);
+  assert.equal(g.shipsOf(p.id).length, 15);
   assert.equal(yard.market.forSale.length, 3, 'dauerhaft im Angebot');
   assert.match(runCommand(g, p, { cmd: 'buyShip', target: yard.id, index: 0 }), /Fraktionswerft/);
 });

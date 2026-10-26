@@ -134,15 +134,13 @@ export function homePanel(entity, item, ship) {
   }
   if (facility === 'dock' && building.status === 'ready') {
     const goods = Object.entries(entity.market.goods).filter(([g]) => ['normal','hazard'].includes(GOODS[g].cls));
-    html += homeBalance(entity)+storageBatchPanel(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market"><tr><th>Ware</th><th>Lager / Schiff</th><th>Lagerregeln</th><th></th></tr>';
-    for (const [good, slot] of goods) html += `<tr><td>${GOODS[good].name}</td><td>${fmt(slot.stock)} / ${fmt(ship?.cargo?.[good] || 0)}</td><td>${storageControls(entity,good)}</td><td>
+    html += homeBalance(entity)+storageBatchPanel(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market home-storage"><tr><th>Ware / Bestand</th><th>Lagerregeln</th></tr>';
+    for (const [good, slot] of goods) html += `<tr><td><b>${GOODS[good].name}</b><p>${fmt(slot.stock)} im Lager<br>${fmt(ship?.cargo?.[good] || 0)} an Bord</p>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${ship && slot.stock >= 1 ? '' : 'disabled'}>Laden</button>
-      <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Einlagern</button></td></tr>`;
+      <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Einlagern</button></td><td>${storageControls(entity,good)}</td></tr>`;
     html += '</table>';
     html+=moduleStockPanel(entity,ship,'pp')+populationPanel(entity);
-    html += `<label>Reserve für <select id="homeReserveGood" aria-label="Ware für Reserve">${Object.keys(entity.market.goods).filter(g=>GOODS[g].cls!=='passenger').map(g=>`<option value="${g}">${GOODS[g].name}</option>`).join('')}</select></label>
-      <input id="homeReserveAmount" type="number" min="0" max="1000000000" value="0" aria-label="Geschützte Reservemenge"><button class="small" data-pp="homeReserve">Reserve setzen / freigeben</button>
-      <p class="muted">Zwei Stunden Grundbedarf: ${Math.ceil(home.population*.4)} Wasser und ${Math.ceil(home.population*.2)} Nahrung. Reserven sind Teil des Lagerbestands, kein zusätzliches Lager.</p>`;
+    html += `<p class="muted">Zwei Stunden Grundbedarf: ${Math.ceil(home.population*.4)} Wasser und ${Math.ceil(home.population*.2)} Nahrung. Reserven sind Teil des Lagerbestands, kein zusätzliches Lager.</p>`;
   }
   return html;
 }
@@ -239,6 +237,7 @@ function structurePanel(entity,id){
   }
   if(building.recipe)html+=`<p>${recipeText(RECIPES[building.recipe])} · ${RECIPES[building.recipe].time} s je vollständigem Zyklus</p>`;
   if(building.status==='ready')html+=operationPanel(entity,id,building);
+  if(building.kind==='plant'&&building.progress>0)html+=`<button class="small" data-pp="homeAbortCycle" data-id="${id}">Laufenden Produktionszyklus abbrechen</button>`;
   if(building.status==='ready'&&REFINEMENT_RECIPES.includes(building.recipe)){
     html+='<p>Rezeptwechsel setzt den laufenden Zyklusfortschritt zurück. Bereits verarbeitete Ware wird nicht erstattet.</p><select id="homeRefiningRecipe" aria-label="Veredelungsrezept">'+REFINEMENT_RECIPES.map(recipe=>`<option value="${recipe}" ${recipe===building.recipe?'selected':''}>${RECIPES[recipe].name} · Gruppe ${industryGroup(recipe)}</option>`).join('')+'</select>';
     html+=`<button class="small" data-pp="homeRecipeChange" data-id="${id}">Rezeptwechsel bestätigen</button>`;
@@ -277,9 +276,11 @@ function homeBuildPanel(entity){
 
 function storageControls(entity,good){
  const market=entity.market,cap=homeGoodCapacity(market,good),limit=homeGoodLimit(market,good),reserve=market.homeworld.reserves?.[good]||0;
- return [['limit','Lagerlimit',limit],['reserve','Sperrmenge',reserve]].map(([kind,label,value])=>`<label>${label}<input type="range" min="0" max="${cap}" step="1" value="${Math.min(value,cap)}" data-storage-rule="${kind}" data-good="${good}" aria-label="${label} ${GOODS[good].name}"><input type="number" min="0" max="${cap}" step="1" value="${value}" data-storage-rule="${kind}" data-good="${good}" aria-label="${label} Zahl ${GOODS[good].name}"></label>`).join('')+(reserve>limit?'<p class="neg">Sperrmenge über Lagerlimit: Der geschützte Mindestbestand kann durch Einlagerung nicht erreicht werden.</p>':'');
+ return [['limit','Lagerlimit',limit],['reserve','Sperrmenge',reserve]].map(([kind,label,value])=>`<label><span>${label}</span><input type="range" min="0" max="${cap}" step="1" value="${Math.min(value,cap)}" data-storage-rule="${kind}" data-good="${good}" aria-label="${label} ${GOODS[good].name}"><input type="number" min="0" max="${cap}" step="1" value="${value}" data-storage-rule="${kind}" data-good="${good}" aria-label="${label} Zahl ${GOODS[good].name}"></label>`).join('')+(reserve>limit?'<p class="neg">Sperrmenge über Lagerlimit: Der geschützte Mindestbestand kann durch Einlagerung nicht erreicht werden.</p>':'');
 }
+const storageBatchDrafts=new Map();
+export function setStorageBatchDraft(id,amount){storageBatchDrafts.set(id,amount);}
 function storageBatchPanel(entity){
- const cap=Math.max(entity.market.homeworld.storage,entity.market.homeworld.hazardStorage);
- return `<details><summary>Alle Lagerlimits gemeinsam ändern</summary><label>Neues Limit <input id="homeBatchRange" type="range" min="0" max="${cap}" value="0"><input id="homeBatchNumber" aria-label="Gemeinsames Lagerlimit" type="number" min="0" max="${cap}" value="0"></label><p id="homeBatchPreview">Alle Rohstofflimits werden auf 0 gesetzt. Neue Einlagerungen werden gesperrt. Bestände und Sperrmengen bleiben erhalten.</p><button class="small" data-pp="homeBatchLimits">Anwenden</button></details>`;
+ const home=entity.market.homeworld,cap=Math.max(home.storage,home.hazardStorage),amount=Math.min(cap,storageBatchDrafts.get(entity.id)||0);
+ return `<details><summary>Alle Lagerlimits gemeinsam ändern</summary><label>Neues Limit <input id="homeBatchRange" type="range" min="0" max="${cap}" value="${amount}"><input id="homeBatchNumber" aria-label="Gemeinsames Lagerlimit" type="number" min="0" max="${cap}" value="${amount}"></label><p id="homeBatchPreview">Alle Rohstofflimits: normal ${Math.min(amount,home.storage)}, Gefahrstoffe ${Math.min(amount,home.hazardStorage)}. Bestände über dem neuen Limit bleiben erhalten; weitere Einlagerung wird gesperrt. Sperrmengen bleiben unverändert.</p><button class="small" data-pp="homeBatchLimits">Anwenden</button></details>`;
 }
