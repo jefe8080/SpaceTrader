@@ -1,5 +1,5 @@
 import { GOODS, RECIPES,REFINEMENT_RECIPES } from '../shared/goods.js';
-import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
+import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, homeStorageFree, availableHomeStock, homeStructureSpec, storageLevel, storageUpgradeCost } from '../shared/homeworld.js';
 import { coverageAreas } from './coverage.js';
 import { planetAccess } from '../shared/planet-access.js';
 import {tickCivilMoney} from './real-economy.js';
@@ -17,7 +17,9 @@ const notify = (game, entity) => { entity.market.rev = (entity.market.rev || 0) 
 const shipsHere = (game, player, entity) => game.shipsOf(player.id).filter(ship => ship.dockedAt === entity.id);
 
 export function initializeHomeOperations(home) {
-  home.structures ||= []; home.projects ||= []; home.reserves ||= {}; home.reservations ||= {};
+  home.structures ||= [];
+  for (const s of home.structures) if (['silo', 'safeStorage'].includes(s.kind)) s.level = storageLevel(s);
+  home.projects ||= []; home.reserves ||= {}; home.reservations ||= {};
   home.trained ||= { skilled: 0, specialist: 0 }; home.nextProject ||= 0; home.expansions ||= 0;
   home.productionCycles ||= {}; home.growthProgress ||= 0;
 }
@@ -80,11 +82,21 @@ export function homeConstructionError(home) {
     ? 'Zwei freie einfache Kräfte für ein weiteres Bauteam erforderlich. Ggf. eine Anlage pausieren.' : null;
 }
 
-function structureSpec(structure) {
-  const base=structure.kind==='plant'?industrySpec(structure.recipe):HOME_BUILDINGS[structure.kind];
-  const spec={...base,workers:{...base.workers}};
-  for(const id of structure.upgrades||[]){const upgrade=HOME_BUILDINGS[id];spec.power+=upgrade.power;for(const q of QUALIFICATIONS)spec.workers[q]=(spec.workers[q]||0)+(upgrade.workers[q]||0);}
-  return spec;
+const structureSpec = homeStructureSpec;
+
+export function upgradeStorage(game, player, entity, id) {
+  const error = homeAccess(game, player, entity); if (error) return error;
+  const home = entity.market.homeworld; initializeHomeOperations(home);
+  const building = home.structures.find(s => s.id === id);
+  if (!building || building.status !== 'ready') return 'Ein fertiggestelltes eigenes Lager auswählen.';
+  const level = storageLevel(building) + 1, cost = storageUpgradeCost(building.kind, level);
+  if (!cost) return 'Dieses Lager ist nicht weiter ausbaubar (höchstens Stufe 5).';
+  if (building.upgrading || home.projects.some(p => p.target === id)) return 'Ein Ausbau läuft bereits.';
+  const teamError = homeConstructionError(home); if (teamError) return teamError;
+  const costError = charge(game, player, entity, cost); if (costError) return costError;
+  const project = 'storage_' + ++home.nextProject; building.upgrading = project;
+  home.projects.push({id:project, kind:'storageUpgrade', target:id, level, until:game.time+cost.seconds, bound:structuredClone(cost)});
+  notify(game, entity);
 }
 
 export function homeBuild(game,player,entity,kind,recipe,parentId,requestedPlot) {
@@ -193,6 +205,8 @@ function completeConstruction(game,entity,now) {
     home.capitalCosts||=[];home.capitalCosts.push({id:project.id,cost:structuredClone(project.bound||{credits:0,goods:{}})});
     if(project.kind==='construction'){
       const building=home.structures.find(s=>s.id===project.target);building.status='ready';building.completedAt=project.until;delete building.readyAt;building.bound=project.bound;
+    }else if(project.kind==='storageUpgrade'){
+      const building=home.structures.find(s=>s.id===project.target);building.level=project.level;delete building.upgrading;
     }else if(project.kind==='upgrade'){
       const building=home.structures.find(s=>s.id===project.target);building.upgrades||=[];building.upgrades.push(project.upgrade);delete building.upgrading;
     }else if(project.kind==='restore'){

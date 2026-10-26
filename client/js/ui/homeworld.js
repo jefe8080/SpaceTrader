@@ -1,7 +1,7 @@
 import {questText} from './quests.js';
 import {HOME_STORY,storyAvailable,storyDialogReady} from '/shared/home-story.js';
 import { GOODS, RECIPES,recipeText } from '/shared/config.js';
-import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock } from '/shared/homeworld.js';
+import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock, homeStructureSpec, storageLevel, storageUpgradeCost } from '/shared/homeworld.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import {moduleStockPanel,moduleCraftPanel} from './modules.js';
@@ -228,9 +228,15 @@ function operationPanel(entity,id,building){
 
 function structurePanel(entity,id){
   const home=entity.market.homeworld,building=home.structures.find(s=>s.id===id);if(!building)return '';
-  const spec=building.recipe?industrySpec(building.recipe):HOME_BUILDINGS[building.kind];
+  const spec=homeStructureSpec(building);
   let html=`<p>${building.status==='building'?`Bau läuft · ${Math.max(0,Math.ceil(building.readyAt-state.time))} s · Material und zwei einfache Kräfte gebunden`:'Betriebsbereite Anlage'}</p>
     <p>${spec.power} Energie · ${spec.workers.basic||0} einfach / ${spec.workers.skilled||0} Fach / ${spec.workers.specialist||0} Spezial</p>`;
+  if (['silo','safeStorage'].includes(building.kind)) {
+    const level=storageLevel(building), cost=storageUpgradeCost(building.kind,level+1);
+    html+=`<p>Stufe ${level} / 5 · Kapazität ${spec.storage||spec.hazardStorage}</p>`;
+    if(building.upgrading) html+='<p>Ausbau läuft; bisherige Kapazität bleibt nutzbar.</p>';
+    else if(cost&&building.status==='ready') html+=`<p>${costLabel(cost)}</p><button class="small" data-pp="homeStorageUpgrade" data-id="${id}">Auf Stufe ${level+1} ausbauen</button>`;
+  }
   if(building.recipe)html+=`<p>${recipeText(RECIPES[building.recipe])} · ${RECIPES[building.recipe].time} s je vollständigem Zyklus</p>`;
   if(building.status==='ready')html+=operationPanel(entity,id,building);
   if(building.status==='ready'&&REFINEMENT_RECIPES.includes(building.recipe)){

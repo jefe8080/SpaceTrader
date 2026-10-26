@@ -214,6 +214,7 @@ panel.addEventListener('click', (ev) => {
     case 'homeTax':cmd('homeTax',{target:e.id,percent:Number(document.getElementById('homeTaxPercent')?.value)});return;
     case 'homeControlUpgrade': cmd('homeControlUpgrade',{target:e.id,module:d.module});return;
     case 'homeBuild': cmd('homeBuild', { target:e.id, kind:d.kind, recipe:d.kind==='plant'?document.getElementById('homeRecipe')?.value:undefined, parent:d.parent, plot:current?.plotIndex }); return;
+    case 'homeStorageUpgrade': cmd('homeStorageUpgrade', { target:e.id, id:d.id }); return;
     case 'homeRestore': cmd('homeRestore', { target:e.id, facility:d.facility }); return;
     case 'homeTrain': cmd('homeTrain', { target:e.id, qualification:d.qualification }); return;
     case 'homeReserve': cmd('homeReserve', { target:e.id, good:document.getElementById('homeReserveGood')?.value, amount:Number(document.getElementById('homeReserveAmount')?.value) }); return;

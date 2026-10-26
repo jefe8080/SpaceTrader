@@ -95,6 +95,32 @@ export const HOME_BUILDINGS = freeze({
   land: { name: 'Fläche erschließen', credits: 3000, goods: { ingots: 10 }, seconds: 60, power: 0, workers: {}, quest: 'H02' },
 });
 
+export function storageLevel(structure) {
+  return Math.max(1, Math.min(5, Math.floor(structure.level || 1)));
+}
+
+export function storageUpgradeCost(kind, level) {
+  if (!['silo', 'safeStorage'].includes(kind) || !Number.isInteger(level) || level < 2 || level > 5) return null;
+  const factor = 2 ** (level - 2);
+  return kind === 'silo'
+    ? { credits: 6000 * factor, goods: { ingots: 20 * factor }, seconds: 60 }
+    : { credits: 10000 * factor, goods: { plates: 20 * factor, electronics: 8 * factor }, seconds: 60 };
+}
+
+export function homeStructureSpec(structure) {
+  const base = structure.kind === 'plant' ? industrySpec(structure.recipe) : HOME_BUILDINGS[structure.kind];
+  const spec = { ...base, workers: { ...base.workers } };
+  const level = storageLevel(structure);
+  if (structure.kind === 'silo') Object.assign(spec, { storage: 2000 * level, power: level, workers: { basic: level } });
+  if (structure.kind === 'safeStorage') Object.assign(spec, { hazardStorage: 500 * level, power: 2 * level, workers: { skilled: Math.max(2, level) } });
+  for (const id of structure.upgrades || []) {
+    const upgrade = HOME_BUILDINGS[id];
+    spec.power += upgrade.power;
+    for (const [q, n] of Object.entries(upgrade.workers)) spec.workers[q] = (spec.workers[q] || 0) + n;
+  }
+  return spec;
+}
+
 export function homeStorageUsage(market) {
   const used = { normal: 0, hazard: 0 };
   for (const [good, slot] of Object.entries(market.goods)) {

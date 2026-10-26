@@ -10,7 +10,7 @@ import {createLogistics,cancelLogistics} from '../logistics.js';
 import {deliverHomeQuest,visitHomeSite} from '../homequests.js';
 import {startOrbital,orbitalBuild,claimOrbital} from '../orbital.js';
 import {SHIP_TYPES} from '../../shared/config.js';
-import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess,changeRefinement } from '../homeworld-operations.js';
+import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess,changeRefinement,upgradeStorage } from '../homeworld-operations.js';
 
 export default {
   homeRename:{args:{target:V.entity(),name:v=>v},run({game,player},{target,name}){return renamePlanet(game,player,target,name);}},
@@ -41,6 +41,10 @@ export default {
   homeControlUpgrade:{
     args:{target:V.entity(),module:V.opt(V.key(CONTROL_MODULES))},
     run({game,player},{target,module}){return upgradeControl(game,player,target,module);},
+  },
+  homeStorageUpgrade: {
+    args: { target: V.entity(), id: V.str(40, 1) },
+    run({ game, player }, { target, id }) { return upgradeStorage(game, player, target, id); },
   },
   homeBuild: {
     args: { target: V.entity(), kind: V.oneOf(...Object.keys(HOME_BUILDINGS), 'plant'), recipe: V.opt(V.key(RECIPES)), parent: V.opt(V.str(40)), plot: V.opt(V.int(0, 47)) },

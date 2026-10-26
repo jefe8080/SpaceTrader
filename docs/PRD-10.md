@@ -188,7 +188,7 @@ Fortschritt und die Prüfergebnisse werden im selben Commit hier ergänzt.
   PRD mit Regeln, Schritten und Abnahmekriterien erstellt.
 - [x] U1: Leitstellenpreise anpassen und Flottenobergrenze in sämtlichen
   Erwerbswegen und zugehörigen Anzeigen entfernen; übrige Lizenzregeln prüfen.
-- [ ] U2: Silo- und Sicherheitslager-Upgrades inklusive Kosten, Betrieb,
+- [x] U2: Silo- und Sicherheitslager-Upgrades inklusive Kosten, Betrieb,
   Bauablauf, Bestandsmigration und Bedienung implementieren.
 - [ ] U3: Abriss eigener Bodengebäude mit Eigentumsschutz, Abhängigkeiten,
   Folgenvorschau und Schutz der Lagerbestände implementieren.
@@ -261,3 +261,5 @@ Regressionstestsuite. Fehlgeschlagene oder nicht ausführbare Prüfungen werden
 mit Ursache dokumentiert und dem Nutzer mitgeteilt.
 
 U1: Leitstellenpreise angepasst; Erwerbswege und Anzeigen von der Lizenz-Schiffsanzahl entkoppelt. Klassen- und Upgradegrenzen bleiben bestehen. Gezielte Tests für Schiffe, Werften, Heimatbetrieb und Leitstellennetz ausgeführt. Bestehende Tests mit alten Sollpreisen bzw. Flottenlimit auf PRD 10 aktualisiert.
+
+U2: Einzelne Lagerstufen 1–5, exakte Kosten, Bauteams, 60-s-Projekte und stufenabhängiger Betrieb implementiert. Altgebäude werden als Stufe 1 normalisiert. Neue Kapazität gilt erst nach Abschluss. 13 Tests (PRD 10 und Heimatbetrieb) bestanden, einschließlich Speichern/Laden, Fremdzugriff, fehlender Mittel und mehrfacher Fertigstellung.
