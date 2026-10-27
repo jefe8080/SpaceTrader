@@ -292,8 +292,10 @@ function drawPlanet(e) {
   const r = Math.max(e.radius, px(7));
   const s = r * 2.56;
   const spr = getSprite(def.sprite, null, 512);
-  if (spr) ctx.drawImage(spr, e.x - s / 2, e.y - s / 2, s, s);
-  else { ctx.fillStyle = '#556'; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, TAU); ctx.fill(); }
+  drawPlanetExterior(ctx, e, r, () => {
+    if (spr) ctx.drawImage(spr, e.x - s / 2, e.y - s / 2, s, s);
+    else { ctx.fillStyle = '#556'; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, TAU); ctx.fill(); }
+  });
 }
 
 function drawStation(e, t) {

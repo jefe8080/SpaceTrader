@@ -51,3 +51,15 @@ Die Bebauung zählt fertig reparierte ursprüngliche Bodeneinrichtungen mit.
 Ausbauten belegen keinen zusätzlichen Gebäudeplatz; Orbitalringe zählen separat.
 Bei normalen Planeten zählen vorhandene Rohstoffgebäude, Fabriken und fertig
 errichtete Infrastruktur. Die innere Planetenansicht wurde nicht umgestaltet.
+
+### Korrektur der Weltraumansicht (2026-10-27)
+
+Die ursprüngliche Bildprüfung rief den Außenansichtszeichner direkt auf und
+deckte dessen fehlenden Aufruf im eigentlichen Weltraumrenderer nicht ab.
+`drawPlanet` bindet ihn jetzt ein: Ringhälften erscheinen hinter und vor dem
+Planetenbild, erreichte Bebauungsstufen darüber. Bereits fertige Ringe werden
+beim nächsten Zeichnen aus dem vorhandenen Zustand berücksichtigt.
+`tests/planet-exterior-render.test.js` prüft den tatsächlichen `drawPlanet`-
+Einstieg zusammen mit dem Außenansichtszeichner für kleine und große Ringe,
+Bebauung sowie den Ersatzkreis bei fehlendem Sprite. Zusammen mit den drei
+Entwicklungs-/Serialisierungstests bestehen alle fünf gezielten Prüfungen.
