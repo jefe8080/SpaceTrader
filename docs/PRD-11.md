@@ -147,7 +147,7 @@ PRD-Fortschritt. Vor jedem Umsetzungscommit werden passende Prüfungen ausgefüh
 - [x] U4: Kleine/große Orbitalanlagen in Oberflächen- und Ersatzgrafik ändern.
 - [x] U5: Erstbetankung aller Bauwege und Korrektur unabgeholter neuer
   Bestände mit Schutz gebrauchter und bereits aktiver Schiffe umsetzen.
-- [ ] U6: Lebenszyklus persönlicher Questobjekte einschließlich Altbeständen,
+- [x] U6: Lebenszyklus persönlicher Questobjekte einschließlich Altbeständen,
   Referenzen und dauerhaftem Schutz vor Wiedererscheinen korrigieren.
 - [ ] U7: Schiffsdoppelklick mit Ansichtswechsel, Zentrierung und Normalzoom
   vervollständigen.
@@ -204,3 +204,5 @@ U3: Landeplatz und Zentrallager sowie Schiffbau-Begriffe korrigiert. Orbitaldock
 U4: Verankerte Aufzugspfeiler mit Bodenplattform und aufwärtsführenden Kabeln in Stadtansicht und 3D-Ersatzdarstellung; große Variante mit breiterer Basis und zusätzlicher Plattform. Außenansicht unverändert. Story-Art- und Stadt-Tests bestanden; visueller Nachweis folgt in U8.
 
 U5: Neubauten und Altinventare mit Herkunft materials/public_start_exception erhalten einmalig vollen Tank; Marker verhindert Wiederbetankung, player_sale und aktive Schiffe bleiben unverändert. Gemeinsame Ausgabe für öffentliche/eigene/Konsortiums-/Fraktionswerften und Orbitalbau. 22/22 betroffene Tests bestanden. Zwei alte Testerwartungen (leerer Tank, alte Rumpfmeldung) schlugen zunächst erwartungsgemäß fehl und wurden an PRD11 angepasst.
+
+U6: Persönliche Archivstellen nach Questabgabe, Studienfunde nach Bergung und Reliktwrack nach H04 entfernt. Bereinigung läuft beim Laden sowie Questsynchronisieren, erhält Fundfracht/Belohnungen und bereinigt Weltindizes, Schiffziele, Andockreferenzen, Routen und Client per vanish. Gespeicherte Entfernungskennungen verhindern Wiederanlage. 23/23 Quest-/Relikt-/PRD11-Tests bestanden. Alte Wiederholungsprüfung erwartet nun ein entferntes Ziel statt einer weiterhin sichtbaren Fundstelle; Testfixture um Routenbesitzer ergänzt.

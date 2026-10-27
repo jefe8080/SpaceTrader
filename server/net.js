@@ -51,6 +51,13 @@ export class Net {
         s.sentMarket.delete(e.id);s.socket.emit('vanish',{id:e.id});
       }
     });
+    game.on('entityRemoved',e=>{
+      for(const s of this.sessions.values()){
+        s.sentMarket.delete(e.id);
+        s.marketSubs?.delete?.(e.id);
+        if(game.isKnown(s.player,e))s.socket.emit('vanish',{id:e.id});
+      }
+    });
     game.on('mg', (p, d) => this.sessions.get(p.id)?.socket.emit('mg', d));
     game.on('events', () => { for (const s of this.sessions.values()) this.sendEvents(s); });
     io.on('connection', (socket) => this.onConnection(socket));

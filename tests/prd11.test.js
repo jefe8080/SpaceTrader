@@ -9,6 +9,8 @@ import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 import { migrateNewHullInventory, initializeNewHull, applyPhysicalHull } from '../server/physical-yards.js';
 import { shipStats } from '../shared/ships.js';
+import { cleanupPersonalSites } from '../server/quest-cleanup.js';
+import { revealHomeSites } from '../server/homequests.js';
 
 test('PRD11: registered object types have illustrated guides without location spoilers', () => {
   for (const [kind,prefix,types] of [['station','st:',STATION_TYPES],['planet','pl:',PLANET_TYPES],['belt','bt:',BELT_TYPES]]) {
@@ -24,6 +26,30 @@ test('PRD11: registered object types have illustrated guides without location sp
     assert.ok(!('coordinates' in entry));
   }
   assert.notEqual(buildingGuideKey({homeOrbital:true},{market:{homeworld:{orbital:{large:true}}}}), buildingGuideKey({homeOrbital:true},{}));
+});
+
+test('PRD11: quest cleanup keeps unlocked finds and pending archives, removes completed personal sites and references', () => {
+  const game=new Game(':memory:',{profile:'homeworld',seed:42});
+  const p=game.createPlayer('Sites A'), other=game.createPlayer('Sites B'), home=game.world.entities.get(p.homeworld);
+  p.homeQuest.completed.H09={at:0};
+  revealHomeSites(game,p,home);
+  const find=game.world.entities.get(p.homeQuest.sites.acidex); assert.ok(find);
+  cleanupPersonalSites(game,p);assert.ok(game.world.entities.has(find.id));
+  const archive={...find,id:'archive-completed',archiveKey:'H09'};
+  const pending={...find,id:'archive-pending',archiveKey:'H14'};
+  const foreign={...find,id:'foreign',archiveOwner:other.id};
+  for(const e of [archive,pending,foreign])game.world.addEntity(e);
+  const ship=game.shipsOf(p.id)[0];ship.dockedAt=find.id;ship.manualDock=find.id;ship.queue=[{t:'goto',target:archive.id}];ship.moduleCargo={acidex:1};
+  game.routes.set('cleanup-route',{id:'cleanup-route',owner:p.id,stops:[{targetId:archive.id},{targetId:home.id}]});
+  p.homeQuest.finds={acidex:{ship:ship.id}};
+  const removed=[];game.on('entityRemoved',e=>removed.push(e.id));cleanupPersonalSites(game,p);
+  assert.ok(!game.world.entities.has(find.id));assert.ok(!game.world.entities.has(archive.id));
+  assert.ok(game.world.entities.has(pending.id));assert.ok(game.world.entities.has(foreign.id));
+  assert.equal(ship.dockedAt,null);assert.equal(ship.manualDock,undefined);assert.deepEqual(ship.queue,[]);assert.equal(ship.moduleCargo.acidex,1);
+  assert.deepEqual(game.routes.get('cleanup-route').stops,[{targetId:home.id}]);
+  for(const ids of game.world.cellIndex.values())assert.ok(!ids.includes(find.id)&&!ids.includes(archive.id));
+  revealHomeSites(game,p,home);cleanupPersonalSites(game,p);assert.equal(removed.length,2);
+  game.close();
 });
 
 test('PRD11: old unclaimed new hulls get fuel once, used and active ships retain fuel', () => {

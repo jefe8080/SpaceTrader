@@ -55,7 +55,7 @@ test('Archivbesuch benötigt tatsächlich manuell angedocktes Schiff; Forschungs
   const find=f.game.world.entities.get(f.p.homeQuest.sites.acidex);f.s.dockedAt=find.id;f.s.manualDock=find.id;f.s.cargo.ore=1;
   assert.match(runCommand(f.game,f.p,{cmd:'homeArchiveVisit',target:find.id,ship:f.s.id}),/30 freie/);f.s.cargo={};
   assert.equal(runCommand(f.game,f.p,{cmd:'homeArchiveVisit',target:find.id,ship:f.s.id}),undefined);assert.equal(f.s.moduleCargo.acidex,1);
-  assert.match(runCommand(f.game,f.p,{cmd:'homeArchiveVisit',target:find.id,ship:f.s.id}),/bereits/);assert.equal(f.s.moduleCargo.acidex,1);assert.equal(f.h.grants.filter(g=>g.module==='acidex').length,1);close(f);
+  assert.match(runCommand(f.game,f.p,{cmd:'homeArchiveVisit',target:find.id,ship:f.s.id}),/Unbekanntes Ziel/);assert.equal(f.game.world.entities.has(find.id),false);assert.equal(f.s.moduleCargo.acidex,1);assert.equal(f.h.grants.filter(g=>g.module==='acidex').length,1);close(f);
 });
 
 test('Persönliche Archivstelle kann über die reguläre Fluglogik manuell erreicht werden',()=>{

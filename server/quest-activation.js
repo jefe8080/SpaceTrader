@@ -2,6 +2,7 @@ import { correctQuestWreck, ensureQuestWreck } from './quest-wreck.js';
 import { HOME_QUESTS } from '../shared/homeworld.js';
 import { HOME_STORY } from '../shared/home-story.js';
 import { revealHomeSites } from './homequests.js';
+import { cleanupPersonalSites } from './quest-cleanup.js';
 
 export function revealQuestTarget(game, player, entity) {
   if (!entity) return;
@@ -13,6 +14,7 @@ export function revealQuestTarget(game, player, entity) {
 export function syncHomeQuests(game, player) {
   const q = player.homeQuest;
   if (!q) return;
+  cleanupPersonalSites(game,player);
   correctQuestWreck(game, player);
   q.active ||= {}; q.scenesSeen ||= {}; q.journal ||= [];
   q.pending = Object.keys(HOME_QUESTS).filter(id => !q.completed[id] && !q.active[id] && HOME_QUESTS[id].requires.every(key => q.completed[key])).sort();

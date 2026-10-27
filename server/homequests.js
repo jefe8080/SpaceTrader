@@ -44,6 +44,7 @@ export function advancedQuestReady(game,p,e,id){
 const hasRecipe=(h,recipe)=>h.structures.some(b=>b.status==='ready'&&b.kind==='plant'&&b.recipe===recipe);
 
 function nodeAt(game,p,home,key,label){
+  if(p.homeQuest.removedSites?.includes(`${p.id}:archive:${key}`) || (STUDY_FINDS[key] ? p.homeQuest.finds?.[key] : completed(p,key)))return;
   p.homeQuest.sites||={};
   if(p.homeQuest.sites[key])return game.world.entities.get(p.homeQuest.sites[key]);
   for(let i=0;i<360;i++){
