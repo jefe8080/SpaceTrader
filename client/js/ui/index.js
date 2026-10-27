@@ -15,6 +15,7 @@ import './routes.js';
 import './favorites.js';
 import './almanac.js';
 import './almanacShips.js';
+import './objectGuide.js';
 import './property.js';
 import './audioMenu.js';
 import './consortium.js';

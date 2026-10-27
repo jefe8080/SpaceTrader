@@ -474,3 +474,8 @@ details[open]>summary { color:var(--accent2); }
 .home-storage input { min-width:0; width:100%; box-sizing:border-box; margin:0; }
 .home-storage input[type=range] { padding:0; }
 .home-storage button { display:block; margin:4px 0; }
+/* Shared object introduction and almanac illustrations. */
+.object-guide { line-height: 1.5; overflow-wrap: anywhere; }
+.object-guide img { display: block; width: 100%; max-width: 340px; height: 180px; object-fit: contain; margin: 12px auto; }
+.object-guide-dialog { background: #14202d; color: #e4edf4; border: 1px solid #63828e; border-radius: 12px; width: min(520px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); overflow: auto; padding: 20px; box-sizing: border-box; }
+.object-guide-dialog::backdrop { background: #000a; }

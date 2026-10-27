@@ -139,7 +139,7 @@ Jeder abgeschlossene Schritt erhält einen eigenen Commit mit aktualisiertem
 PRD-Fortschritt. Vor jedem Umsetzungscommit werden passende Prüfungen ausgeführt.
 
 - [x] P0: Planung mit `grilling` abstimmen und PRD erstellen.
-- [ ] U1: Gemeinsamen Erklärungskatalog mit vollständiger Typenabdeckung,
+- [x] U1: Gemeinsamen Erklärungskatalog mit vollständiger Typenabdeckung,
   Texten, Bildern und Almanachansichten ergänzen.
 - [ ] U2: Erstkontaktfenster, gespeicherten Gelesenstatus und Wiederaufruf
   integrieren; vorhandene Spielstände berücksichtigen.
@@ -194,3 +194,5 @@ hier und gegenüber dem Nutzer mit Ursache festgehalten.
 P0: Anforderungen Q1–Q13 und den ergänzten Schiffsdoppelklick gegen das PRD
 geprüft. Für den Planungscommit wird `git diff --check` ausgeführt. Spieltests
 folgen mit der Umsetzung; in diesem Schritt wurde nur das PRD erstellt.
+
+U1: Gemeinsamer Katalog und Almanachreiter ergänzt. Registrierte Stationen, Planeten und Felder sowie Bilddateien mit node --test tests/prd11.test.js geprüft (1/1 bestanden); git diff --check bestanden.
