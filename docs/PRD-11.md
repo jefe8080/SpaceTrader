@@ -143,7 +143,7 @@ PRD-Fortschritt. Vor jedem Umsetzungscommit werden passende Prüfungen ausgefüh
   Texten, Bildern und Almanachansichten ergänzen.
 - [x] U2: Erstkontaktfenster, gespeicherten Gelesenstatus und Wiederaufruf
   integrieren; vorhandene Spielstände berücksichtigen.
-- [ ] U3: Landeplatz-/Zentrallager- und Schiffbaubegriffe konsistent korrigieren.
+- [x] U3: Landeplatz-/Zentrallager- und Schiffbaubegriffe konsistent korrigieren.
 - [ ] U4: Kleine/große Orbitalanlagen in Oberflächen- und Ersatzgrafik ändern.
 - [ ] U5: Erstbetankung aller Bauwege und Korrektur unabgeholter neuer
   Bestände mit Schutz gebrauchter und bereits aktiver Schiffe umsetzen.
@@ -198,3 +198,5 @@ folgen mit der Umsetzung; in diesem Schritt wurde nur das PRD erstellt.
 U1: Gemeinsamer Katalog und Almanachreiter ergänzt. Registrierte Stationen, Planeten und Felder sowie Bilddateien mit node --test tests/prd11.test.js geprüft (1/1 bestanden); git diff --check bestanden.
 
 U2: Erstkontakt, Verstanden-Fortsetzung und Hilfe in Objekt-/Gebäudeansichten integriert. Gelesenstatus wird im Spieler gespeichert. Persistenz, Idempotenz, Validierung und Spielertrennung automatisiert geprüft (2/2 Tests bestanden). Visuelle Prüfung folgt in U8.
+
+U3: Landeplatz und Zentrallager sowie Schiffbau-Begriffe korrigiert. Orbitaldocks und Rumpfsegmente beibehalten. Betroffene Heimat-, Story- und PRD11-Tests: 13/13 bestanden.

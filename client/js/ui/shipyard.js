@@ -132,7 +132,7 @@ export function factionYardSection(e, dockedShip) {
   const docked = myShips().filter((s) => s.dockedAt === e.id);
   let h = `<div class="section"><div class="section-title">Fraktionsschiffe</div><div class="muted small-note">${repLine(e.faction)} · Ruf gibt es für Quests auf Planeten der Fraktion.</div>`;
   if(state.homeworld){
-    if(!items.length)h+='<p class="muted">Kein fertiger Rumpf im Bestand. Ein Auftrag ersetzt keine fehlenden Baumaterialien.</p>';
+    if(!items.length)h+='<p class="muted">Kein fertiges Schiff im Bestand. Ein Auftrag ersetzt keine fehlenden Baumaterialien.</p>';
     if(e.market.building)h+=`<p>Im realen Bau: ${SHIP_TYPES[e.market.building.type].name} · ${e.market.building.remaining} s</p>`;
     else if(e.market.order)h+=`<p>Bestellt: ${SHIP_TYPES[e.market.order.type].name} · wartet auf Material im Werftlager</p>`;
     else for(const type of e.market.yardCatalog||[]){

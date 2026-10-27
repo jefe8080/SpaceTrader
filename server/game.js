@@ -815,7 +815,7 @@ export class Game {
   ownerTransfer(ship, e, good, amount, dir) {
     if(e.market?.homeworld?.warp)return {n:0,reason:'Standort für Warp gesperrt.'};
     if(this.profile==='homeworld'&&GOODS[good]?.cls==='passenger')return passengerTrade(this,ship,e,good,amount,dir);
-    if (e.type === 'ruins' && e.market.homeworld?.facilities.dock.status !== 'ready') return { n: 0, reason: 'Zuerst das Dock reparieren' };
+    if (e.type === 'ruins' && e.market.homeworld?.facilities.dock.status !== 'ready') return { n: 0, reason: 'Zuerst den Landeplatz reparieren' };
     const slot = e.market.goods[good];
     let n;
     if (dir === 'buy') {

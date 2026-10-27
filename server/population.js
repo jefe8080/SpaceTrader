@@ -57,7 +57,7 @@ export function passengerTrade(game,ship,e,good,amount,dir,limit=0,free=false){
   if(e.kind!=='planet'||!h||!p||ship.dockedAt!==e.id)return {n:0,reason:'Personentransport benötigt einen bewohnten Planeten und ein angedocktes Schiff.'};
   if(prop?.mode==='private'&&!game.canUseStorage(prop,p.id))return {n:0,reason:'Privater Standort.'};
   if(h.warp)return {n:0,reason:'Standort im Warptransfer.'};
-  if(e.type==='ruins'&&h.facilities.dock.status!=='ready')return {n:0,reason:'Dock zuerst reparieren.'};
+  if(e.type==='ruins'&&h.facilities.dock.status!=='ready')return {n:0,reason:'Landeplatz zuerst reparieren.'};
   initializePopulation(e);ship.passengers||=[];
   if(dir==='buy'){
     updatePassengerOffers(e);

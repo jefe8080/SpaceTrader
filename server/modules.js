@@ -13,7 +13,7 @@ export const moduleStorageFree=market=>Math.max(0,market.homeworld?market.homewo
 
 function presence(game,player,ship,entity){
   if(!entity?.market||ship.dockedAt!==entity.id)return 'Ein eigenes Schiff muss hier angedockt sein.';
-  if(entity.market.homeworld&&entity.market.homeworld.facilities.dock.status!=='ready')return 'Zuerst das Dock reparieren.';
+  if(entity.market.homeworld&&entity.market.homeworld.facilities.dock.status!=='ready')return 'Zuerst den Landeplatz reparieren.';
   if(player.relic?.operation?.ship===ship.id)return 'Das Schiff ist für die Reliktarbeit reserviert.';
   return manualActionError(game,player,ship,entity);
 }
