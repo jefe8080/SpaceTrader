@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "errors": [],
+  "checks": [
+    "first-contact continuation",
+    "repeat without introduction",
+    "help reopen",
+    "390px dialog overflow",
+    "building almanac",
+    "small/large surface elevators",
+    "planet exit and same/other ship focus at four zooms",
+    "cancel running camera flight",
+    "no movement or paid commands"
+  ]
+}

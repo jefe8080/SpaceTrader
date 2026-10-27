@@ -50,7 +50,7 @@ export function renderAll() {
  */
 export function select(sel, { keepSelection = false, explained = false } = {}) {
   const object = sel && (sel.kind === 'entity' ? state.entities.get(sel.id) : state.ships.get(sel.id));
-  if (!explained && firstGuide(entityGuideKey(object), () => select(sel, { keepSelection, explained: true }))) return;
+  if (!explained && firstGuide(entityGuideKey(sel?.kind === 'ship' && object ? {...object,kind:'ship'} : object), () => select(sel, { keepSelection, explained: true }))) return;
   const changed = JSON.stringify(sel) !== JSON.stringify(state.selected);
   state.selected = sel;
   if (!keepSelection) state.selection.clear();

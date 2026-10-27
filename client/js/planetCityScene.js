@@ -38,7 +38,7 @@ function loadArt() {
         return {image,x:left,y:top,w:right-left+1,h:bottom-top+1};
       });
       return {sprites};
-    }).catch(error=>{artPromise=null;throw error;});
+    }).then(async art=>({...art,elevators:await Promise.all(['small','large'].map(size=>loadImage('/assets/orbital_elevator_'+size+'.svg')))})).catch(error=>{artPromise=null;throw error;});
 }
 function line(ctx,points,color,width) {ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();}
 function ellipse(ctx,x,y,rx,ry,fill) {ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill();}
@@ -161,19 +161,9 @@ export class PlanetCityScene {
       else if(!r.authored){ctx.save();ctx.strokeStyle='#ffe1a3';ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.strokeRect(r.box.x-5,r.box.y-4,r.w+10,r.h+8);ctx.restore();}
     }
     if(item.homeOrbital && ['orbital-small','orbital-large'].includes(cityDevelopment(this.entity,item))){
-      const large=cityDevelopment(this.entity,item)==='orbital-large',width=large?64:44,height=large?145:112;
-      ctx.save();ctx.translate(r.x,r.y);
-      ellipse(ctx,0,2,width,13,'#203d3b88');
-      ctx.fillStyle='#647c77';ctx.strokeStyle='#dfc99a';ctx.lineWidth=2;
-      ctx.fillRect(-width/2,-18,width,20);ctx.strokeRect(-width/2,-18,width,20);
-      for(const x of [-width*.32,width*.32]){
-        ctx.fillStyle='#a9ad94';ctx.fillRect(x-5,-height,10,height-12);
-        line(ctx,[{x,y:-height},{x:x*.7,y:-height-70}],'#8cb7af',3);
-      }
-      ctx.fillStyle='#3e6965';ctx.fillRect(-width*.5,-height,width,12);
-      ctx.fillStyle='#f1cb7c';ctx.fillRect(-9,-height*.58,18,23);
-      if(large){ctx.fillStyle='#78958d';ctx.fillRect(-width*.7,-40,width*1.4,15);}
-      ctx.restore();if(active||this.names)this.drawName(ctx,r);return;
+      const large=cityDevelopment(this.entity,item)==='orbital-large',w=large?112:88,h=w*1.5;
+      ctx.drawImage(this.art.elevators[large?1:0],r.x-w/2,r.y-h,w,h);
+      if(active||this.names)this.drawName(ctx,r);return;
     }
     if(r.painted){if(active||this.names)this.drawName(ctx,r);return;}
     if(cell===null){

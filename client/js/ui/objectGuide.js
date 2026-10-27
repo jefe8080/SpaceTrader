@@ -2,13 +2,17 @@ import { OBJECT_GUIDE } from '/shared/object-guide.js';
 import { state, esc } from '../state.js';
 import { cmd } from '../net.js';
 import { registerAlmanacTab } from './almanac.js';
+import { STATION_TYPES } from '/shared/goods.js';
+import { spriteUrl } from '../assets.js';
 
 export function guideHtml(key) {
   const d = OBJECT_GUIDE[key];
   if (!d) return '';
-  return `<article class="object-guide"><img src="${d.image}" alt="${esc(d.name)}"><h3>${esc(d.name)}</h3><p>${esc(d.intro)}</p><ul>${d.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul></article>`;
+  const station=key.startsWith('st:')&&STATION_TYPES[key.slice(3)];
+  const image=station ? spriteUrl(station.sprite,station.accent)||d.image : d.image;
+  return `<article class="object-guide"><img src="${image}" alt="${esc(d.name)}"><h3>${esc(d.name)}</h3><p>${esc(d.intro)}</p><ul>${d.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul></article>`;
 }
-for (const [id,label,categories] of [['buildings','Gebäude',['Gebäude','Stationen']],['objects','Weltobjekte',['Planeten','Ressourcenfelder','Schiffe']]]) {
+for (const [id,label,categories] of [['buildings','Gebäude',['Gebäude','Stationen']],['objects','Weltobjekte',['Planeten','Ressourcenfelder','Schiffe','Fundstellen','Weltobjekte']]]) {
   registerAlmanacTab(id,label,() => Object.values(OBJECT_GUIDE).filter(d => categories.includes(d.category)).map(d => `<details><summary>${esc(d.name)}</summary>${guideHtml(d.key)}</details>`).join(''));
 }
 

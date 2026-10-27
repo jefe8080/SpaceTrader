@@ -85,3 +85,24 @@ test('PRD11: guide acknowledgements are validated, idempotent, saved and player 
   assert.equal(restored.players.get(b.id).guideRead,undefined);
   restored.store?.close?.(); game.store?.close?.();
 });
+
+test('PRD11: loading legacy inventory and completed sites migrates once and stays consistent on a second reload',()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'prd11-migration-')),file=path.join(dir,'game.db');
+  let game=new Game(file,{profile:'homeworld',seed:42});
+  const p=game.createPlayer('Migration'),owner=p.id,home=game.world.entities.get(p.homeworld),ship=game.shipsOf(p.id)[0];
+  const activeId=ship.id;ship.fuel=1;
+  home.market.forSale=[{id:'new-stock',source:'materials',type:'spatz',fuel:0},{id:'used-stock',source:'player_sale',type:'spatz',fuel:2}];
+  const site={id:'legacy-site',kind:'station',type:'wreck',name:'Altarchiv',x:home.x+300,y:home.y,sector:home.sector,system:home.system,archiveOwner:p.id,archiveKey:'H09'};
+  game.world.addEntity(site);p.homeQuest.sites={H09:site.id};p.homeQuest.completed.H09={at:0};
+  ship.queue=[{t:'goto',target:site.id}];game.close();
+  for(let i=0;i<2;i++){
+    game=new Game(file,{profile:'homeworld',seed:42});
+    const player=game.players.get(owner),e=game.world.entities.get(player.homeworld);
+    assert.ok(!game.world.entities.has(site.id));assert.deepEqual(game.ships.get(activeId).queue,[]);
+    assert.equal(game.ships.get(activeId).fuel,1);
+    assert.equal(e.market.forSale[0].fuel,shipStats({type:'spatz',upg:{},modules:[]}).tank);
+    assert.equal(e.market.forSale[1].fuel,2);
+    revealHomeSites(game,player,e);assert.ok(!game.world.entities.has(site.id));game.close();
+  }
+  fs.rmSync(dir,{recursive:true,force:true});
+});

@@ -45,7 +45,7 @@ export function renderDetails() {
   }
   el.hidden = !html;
   const object = sel && (sel.kind === 'entity' ? state.entities.get(sel.id) : state.ships.get(sel.id));
-  const guide = entityGuideKey(object);
+  const guide = entityGuideKey(sel?.kind === 'ship' && object ? {...object,kind:'ship'} : object);
   if (html && OBJECT_GUIDE[guide]) html = `<button class="small ghost" data-guide-help="${guide}" aria-label="Erklärung anzeigen">? Hilfe</button>` + html;
   setHtml(el, html);
 }

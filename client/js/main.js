@@ -458,10 +458,10 @@ function frame(now) {
   if (!state.me) cam.x += dt * 25; // langsamer Flug im Login-Hintergrund
   if (state.follow) {
     const s = state.ships.get(state.follow);
-    if (s?.rx !== undefined) {
+    if (s) {
       const k = 1 - Math.exp(-dt * 6);
-      cam.x += (s.rx - cam.x) * k;
-      cam.y += (s.ry - cam.y) * k;
+      cam.x += ((s.rx ?? s.x) - cam.x) * k;
+      cam.y += ((s.ry ?? s.y) - cam.y) * k;
     } else state.follow = null;
   }
   if (state.landed && !canLand(state.landed) && state.entities.get(state.landed)?.market?.homeworld?.owner!==state.me?.id) {

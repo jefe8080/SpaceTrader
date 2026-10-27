@@ -11,7 +11,7 @@ zuverlässig zurück zum gewählten Schiff.
 Die Planung wurde am 27.10.2026 mit dem ausdrücklich gewünschten Skill
 `grilling` in Q1–Q13 abgestimmt und vollständig bestätigt. Anschließend wurde
 der Doppelklick auf die linke Schiffsliste als zusätzliche Anforderung genannt.
-Dieses Dokument hält die Planung fest; der Spielcode ist noch nicht umgesetzt.
+Dieses Dokument hält die bestätigte Planung und die abgeschlossene Umsetzung fest.
 
 ## Verbindliche Anforderungen
 
@@ -151,7 +151,7 @@ PRD-Fortschritt. Vor jedem Umsetzungscommit werden passende Prüfungen ausgefüh
   Referenzen und dauerhaftem Schutz vor Wiedererscheinen korrigieren.
 - [x] U7: Schiffsdoppelklick mit Ansichtswechsel, Zentrierung und Normalzoom
   vervollständigen.
-- [ ] U8: Zusammenspiel, bestehende Spielstände, Mehrspielertrennung und
+- [x] U8: Zusammenspiel, bestehende Spielstände, Mehrspielertrennung und
   relevante Regressionen prüfen; visuelle Nachweise dokumentieren.
 
 ## Abnahmekriterien und Prüfplan
@@ -208,3 +208,5 @@ U5: Neubauten und Altinventare mit Herkunft materials/public_start_exception erh
 U6: Persönliche Archivstellen nach Questabgabe, Studienfunde nach Bergung und Reliktwrack nach H04 entfernt. Bereinigung läuft beim Laden sowie Questsynchronisieren, erhält Fundfracht/Belohnungen und bereinigt Weltindizes, Schiffziele, Andockreferenzen, Routen und Client per vanish. Gespeicherte Entfernungskennungen verhindern Wiederanlage. 23/23 Quest-/Relikt-/PRD11-Tests bestanden. Alte Wiederholungsprüfung erwartet nun ein entferntes Ziel statt einer weiterhin sichtbaren Fundstelle; Testfixture um Routenbesitzer ergänzt.
 
 U7: Schiffsdoppelklick verlässt den Planeten samt Gebäudepanel, beendet Kameraflug/Zielwahl, setzt Systemzoom 0,3, zentriert und verfolgt das gewählte Schiff. Gleicher/anderer Eintrag verwenden denselben Pfad; Strg/Shift und Gruppenumbenennung bleiben erhalten. Syntax-, Kamera-, Ziel- und PRD11-Tests bestanden; Laufzeitnachweis folgt in U8.
+
+U8: Gesamtabnahme abgeschlossen: npm test 356/356 bestanden; Browserprüfung mit Edge für Erstkontakt, direkte Fortsetzung, Hilfe, schmale/breite Ansichten, beide Orbitalgrößen, gerenderte 3D-Ersatzdarstellung und Schiffsfokus inklusive bewegtem Schiff und unterbrochenem Kameraflug bestanden. Zusätzlich persistente doppelte Altspielstand-Migration geprüft. Im Zuge der Abnahme Versorger-/Fundstellenzuordnung, passende Gebäudebilder und konkrete Funktionspunkte vervollständigt, Orbitalaufzüge als gemeinsame SVG-Abbildungen ausgearbeitet und Kamerafolgen vor der ersten Renderinterpolation abgesichert. Alle Nachweise und zwischenzeitlich angepassten Testerwartungen: docs/qa/prd11/README.md. Keine offenen Prüfungsfehler.
