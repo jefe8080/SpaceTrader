@@ -1,7 +1,7 @@
 import {SHIP_TYPES,SHIPYARD,PILOT_LICENSES,factionRank} from '../shared/config.js';
 import {homeAccess,homeConstructionError,chargeHome} from './homeworld-operations.js';
 import {QUEST_DELIVERIES} from '../shared/advanced-homequests.js';
-import {applyPhysicalHull} from './physical-yards.js';
+import {applyPhysicalHull,initializeNewHull} from './physical-yards.js';
 
 export const ORBITAL_OPERATION={small:{power:20,workers:{basic:8,skilled:6}},large:{power:60,workers:{skilled:10,specialist:4}}};
 const readyMaterials=(h,id)=>Object.entries(QUEST_DELIVERIES[id]).every(([g,n])=>(h.questDeliveries?.[id]?.[g]||0)>=n);
@@ -58,6 +58,6 @@ export function tickOrbital(game,e,dt){
   for(const [slot,j] of Object.entries(o.jobs)){
     const running=slot==='small'?active('small'):active('large')&&(!o.jobs.small||active('small'));j.paused=!running;
     if(!running)continue;j.remaining=Math.max(0,j.remaining-dt);
-    if(j.remaining===0){o.inventory.push({id:j.id,type:j.type,source:'materials',materials:j.materials,currencyPaid:j.currency,fuel:0});delete o.jobs[slot];game.emit('entity',e);}
+    if(j.remaining===0){const item={id:j.id,type:j.type,source:'materials',materials:j.materials,currencyPaid:j.currency,fuel:0};initializeNewHull(item);o.inventory.push(item);delete o.jobs[slot];game.emit('entity',e);}
   }
 }

@@ -81,14 +81,14 @@ test('Kleiner Ring verlangt bestätigte dauerhafte Schiffsabgabe; ein voller, an
   advance(f,599);assert.equal(f.h.orbital.small,false);advance(f,1);assert.equal(f.h.orbital.small,true);assert.equal(finish(f,'H08'),undefined);close(f);
 });
 
-test('Orbitalbau bindet tatsächliche Schiffmaterialien, pausiert ohne Betrieb und gibt einen leeren realen Rumpf aus',()=>{
+test('Orbitalbau bindet tatsächliche Schiffmaterialien, pausiert ohne Betrieb und gibt ein vollgetanktes reales Schiff aus',()=>{
   const f=fixture();f.h.orbital={small:true,large:false,jobs:{},inventory:[],next:0,infrastructureShips:[]};
   for(const [g,n] of Object.entries(SHIP_TYPES.spatz.build))f.e.market.goods[g].stock=n;
   assert.equal(command(f,'homeOrbitalBuild',{type:'spatz'}),undefined);assert.match(command(f,'homeOrbitalBuild',{type:'spatz'}),/belegt/);
   for(const g of Object.keys(SHIP_TYPES.spatz.build))assert.equal(f.e.market.goods[g].stock,0);
   f.h.structures=[];advance(f,40);assert.equal(f.h.orbital.jobs.small.remaining,40);assert.equal(f.h.orbital.inventory.length,0);
   f.h.structures=[{id:'solar',kind:'solar',status:'ready',plot:0}];advance(f,40);assert.equal(f.h.orbital.inventory.length,1);const id=f.h.orbital.inventory[0].id;
-  assert.equal(command(f,'homeOrbitalClaim',{id}),undefined);const hull=f.game.shipsOf(f.p.id).find(s=>s.hullSource===id);assert(hull);assert.equal(hull.fuel,0);assert.match(command(f,'homeOrbitalClaim',{id}),/Kein vorhandener/);close(f);
+  assert.equal(command(f,'homeOrbitalClaim',{id}),undefined);const hull=f.game.shipsOf(f.p.id).find(s=>s.hullSource===id);assert(hull);assert.equal(hull.fuel,SHIP_TYPES[hull.type].tank);assert.match(command(f,'homeOrbitalClaim',{id}),/Kein vorhandenes Schiff/);close(f);
 });
 
 test('Großer Ring braucht zwei getrennte Abschnitte und bindet Questmaterialien nicht ein zweites Mal',()=>{

@@ -1,4 +1,5 @@
 import {syncRouteReservations} from './route-capacity.js';
+import {migrateNewHullInventory} from './physical-yards.js';
 import { initializeProfile, syncInventoryBasis, recordGoodsTrade } from './pilot-profile.js';
 import { WORLD, GOODS, BELT_TYPES, SHIP_TYPES, FUEL, GOVERNOR_LICENSES, shipStats, freeFor, holdOf, PLAYER_COLORS, SHIP_NAMES, SUPPLY, NPC_OWNER, STATS,
   cellKey, cellOf, buyPrice, sellPrice, canBuyFrom, canSellTo, slotPrice, supplyLoad, targetOf,
@@ -123,6 +124,7 @@ export class Game {
       applyProperty(this, e, r.data);
     }
     this.shipStats = groupRows(st.loadAll('ship_stats'), 'ship');
+    migrateNewHullInventory(this);
     for (const player of this.players.values()) syncHomeQuests(this, player);
     syncRouteReservations(this);
     this.routeStats = groupRows(st.loadAll('route_stats'), 'route');

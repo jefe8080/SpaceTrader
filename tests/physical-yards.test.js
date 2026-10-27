@@ -32,7 +32,7 @@ test('Öffentliche Werft wartet auf vollständiges Material, bindet es einmalig 
   for(const g of Object.keys(buildMaterials('spatz')))assert.equal(f.yard.market.goods[g].stock,0);
   advance(f,39);assert.equal(f.yard.market.forSale.length,0);advance(f,1);assert.equal(f.yard.market.forSale.length,1);assert.equal(f.yard.market.forSale[0].id,build.id);
   assert.equal(command(f,'buyShip',{index:0}),undefined);const bought=f.game.shipsOf(f.player.id).find(s=>s.hullSource===build.id);
-  assert.equal(bought.fuel,0);assert.equal(bought.bonus,0);advance(f,1000);assert.equal(f.yard.market.forSale.length,0);assert.equal(f.yard.market.building,null);close(f);
+  assert.equal(bought.fuel,SHIP_TYPES.spatz.tank);assert.equal(bought.bonus,0);advance(f,1000);assert.equal(f.yard.market.forSale.length,0);assert.equal(f.yard.market.building,null);close(f);
 });
 
 test('Bezahlte Bestellung erzeugt keine Materialien und reserviert erst den tatsächlich fertig gebauten Rumpf',()=>{

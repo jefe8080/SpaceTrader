@@ -168,7 +168,7 @@ function orbitalPanel(entity){
     for(const [id,d] of Object.entries(SHIP_TYPES).filter(([,d])=>!d.npc&&(o.large?['S','M','L','XL']:['S','M']).includes(d.cls)))html+=`<p>${d.name}: ${Object.entries(d.build).map(([g,n])=>`${n} ${GOODS[g].name}`).join(', ')}${d.currency?` + ${d.currency.n} ${GOODS[d.currency.good].name} · Fraktionsrang ${d.rank}`:''} · ${SHIPYARD.BUILD_TIME[d.cls]} s</p><button class="small" data-pp="homeOrbitalBuild" data-type="${id}">Schiff bauen</button>`;
     html+='</details>';
     for(const j of Object.values(o.jobs))html+=`<p>${SHIP_TYPES[j.type].name}: ${Math.ceil(j.remaining)} s · ${j.paused?'pausiert: Energie oder Personal fehlt':'in Fertigung'} · Ausgabeplatz reserviert.</p>`;
-    for(const i of o.inventory)html+=`<p>${SHIP_TYPES[i.type].name} · ${esc(i.id)} · Tank leer</p><button class="small" data-pp="homeOrbitalClaim" data-id="${i.id}">Vorhandenes Schiff in Flotte übernehmen</button>`;
+    for(const i of o.inventory)html+=`<p>${SHIP_TYPES[i.type].name} · ${esc(i.id)} · Tank voll bei Erstübernahme</p><button class="small" data-pp="homeOrbitalClaim" data-id="${i.id}">Vorhandenes Schiff in Flotte übernehmen</button>`;
   }
   return html;
 }

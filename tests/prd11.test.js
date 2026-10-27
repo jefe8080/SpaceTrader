@@ -7,6 +7,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
+import { migrateNewHullInventory, initializeNewHull, applyPhysicalHull } from '../server/physical-yards.js';
+import { shipStats } from '../shared/ships.js';
 
 test('PRD11: registered object types have illustrated guides without location spoilers', () => {
   for (const [kind,prefix,types] of [['station','st:',STATION_TYPES],['planet','pl:',PLANET_TYPES],['belt','bt:',BELT_TYPES]]) {
@@ -22,6 +24,24 @@ test('PRD11: registered object types have illustrated guides without location sp
     assert.ok(!('coordinates' in entry));
   }
   assert.notEqual(buildingGuideKey({homeOrbital:true},{market:{homeworld:{orbital:{large:true}}}}), buildingGuideKey({homeOrbital:true},{}));
+});
+
+test('PRD11: old unclaimed new hulls get fuel once, used and active ships retain fuel', () => {
+  const game = new Game(':memory:',{profile:'homeworld',seed:42});
+  const p = game.createPlayer('Fuel'), home = game.world.entities.get(p.homeworld);
+  const active = game.shipsOf(p.id)[0]; active.fuel=1;
+  const fresh = {id:'old:new',source:'materials',type:'spatz',fuel:0,upg:{tank:1}};
+  const used = {id:'old:used',source:'player_sale',type:'spatz',fuel:2};
+  const orbital = {id:'old:orbital',source:'materials',type:'spatz',fuel:0};
+  home.market.forSale=[fresh,used]; home.market.homeworld.orbital={inventory:[orbital]};
+  migrateNewHullInventory(game);
+  assert.equal(fresh.fuel,shipStats({...fresh,modules:[]}).tank);
+  assert.equal(orbital.fuel,shipStats({...orbital,upg:{},modules:[]}).tank);
+  assert.equal(used.fuel,2); assert.equal(active.fuel,1);
+  fresh.fuel=3; initializeNewHull(fresh); assert.equal(fresh.fuel,3);
+  const claimed=game.spawnShip(p,'spatz',home);applyPhysicalHull(claimed,fresh);assert.equal(claimed.fuel,3);
+  used.initialFuelGranted=false;applyPhysicalHull(claimed,used);assert.equal(claimed.fuel,2);
+  game.close();
 });
 
 test('PRD11: guide acknowledgements are validated, idempotent, saved and player specific', () => {

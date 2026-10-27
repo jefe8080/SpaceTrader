@@ -1,4 +1,4 @@
-import {SHIP_TYPES,SHIPYARD,GOODS,YARD_MARGIN} from '../shared/config.js';
+import {SHIP_TYPES,SHIPYARD,GOODS,YARD_MARGIN,shipStats} from '../shared/config.js';
 import {stat} from './markets.js';
 
 export function preparePhysicalYard(entity){
@@ -32,7 +32,7 @@ export function tickPhysicalYard(game,entity,dt){
     const build=m.building,d=SHIP_TYPES[build.type],item={id:build.id,source:'materials',type:build.type,price:build.price,materials:build.materials,fuel:0,...(m.owner?{own:true}:{})};
     if(d.faction)Object.assign(item,{faction:true,currency:structuredClone(d.currency)});
     if(build.order){const order=build.order;Object.assign(item,{ordered:true,reservedFor:order.player,reservedName:order.name,reservedUntil:game.time+SHIPYARD.RESERVE});m.order=null;}
-    m.forSale.push(item);m.building=null;stat(m,game.time,'n',null,1);m.rev=(m.rev||0)+1;return;
+    initializeNewHull(item);m.forSale.push(item);m.building=null;stat(m,game.time,'n',null,1);m.rev=(m.rev||0)+1;return;
   }
   if(m.owner||(!m.order&&m.forSale.length>=SHIPYARD.MAX_FOR_SALE))return;
   const catalog=m.order?[m.order.type]:m.yardCatalog||[];
@@ -47,4 +47,19 @@ export function tickPhysicalYard(game,entity,dt){
 export function applyPhysicalHull(ship,item){
   ship.fuel=item.fuel||0;ship.upg=structuredClone(item.upg||{});ship.modules=[...(item.modules||[])];ship.upgValue=item.upgValue||0;
   ship.bonus=item.bonus||0;ship.yardLvl=item.yardLvl||0;ship.hullSource=item.id;
+  initializeNewHull(item);
+  ship.fuel=item.fuel??0;
+}
+
+export function initializeNewHull(item){
+  if(item.initialFuelGranted || !['materials','public_start_exception'].includes(item.source))return;
+  item.fuel=shipStats({type:item.type,upg:item.upg||{},modules:item.modules||[],bonus:item.bonus||0}).tank;
+  item.initialFuelGranted=true;
+}
+
+export function migrateNewHullInventory(game){
+  for(const e of game.world.entities.values()){
+    for(const item of e.market?.forSale||[])initializeNewHull(item);
+    for(const item of e.market?.homeworld?.orbital?.inventory||[])initializeNewHull(item);
+  }
 }
