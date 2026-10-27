@@ -7,12 +7,25 @@ import * as ui from './ui/index.js';
 import { sfx, planetTone } from './audio.js';
 import { initPlanetside, renderPlanetside, canLand, hidePlanetside } from './planetside.js';
 import { resetGuide } from './ui/objectGuide.js';
+import { bus } from './ui/bus.js';
 
 await loadAssets();
 const canvas = document.getElementById('view');
 initRenderer(canvas);
 initPlanetside(document.getElementById('planetView'), { select: ui.openBuilding, deselect: ui.closeBuilding, changed: ui.renderPlanetUi });
 const cam = state.camera;
+bus.focusShip = id => {
+  const ship = state.ships.get(id);
+  if (!ship) return;
+  camAnim = null;
+  state.pickMode = null;
+  ui.leavePlanet();
+  cam.x = ship.rx ?? ship.x;
+  cam.y = ship.ry ?? ship.y;
+  cam.zoom = ZOOM_PRESETS[1];
+  state.follow = id;
+  ui.select({kind:'ship',id}, {explained:true});
+};
 
 // ---------------- Netzwerk ----------------
 socket.on('connect', () => {

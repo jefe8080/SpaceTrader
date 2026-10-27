@@ -3,6 +3,7 @@
  */
 export const bus = {
   select: () => {},       // (sel, { keepSelection }) Auswahl setzen
+  focusShip: () => {},    // Schiff in normaler Weltraumansicht verfolgen
   renderAll: () => {},    // Topbar, Flotte, Details neu zeichnen
   openRouteEditor: () => {}, // (routeId | null, { stops, assign })
 };

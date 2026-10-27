@@ -101,8 +101,8 @@ list.addEventListener('click', (ev) => {
 list.addEventListener('dblclick', (ev) => {
   const it = ev.target.closest('[data-ship]');
   if (it) {
-    bus.select({ kind: 'ship', id: it.dataset.ship });
-    state.follow = it.dataset.ship;
+    if (ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
+    bus.focusShip(it.dataset.ship);
     return;
   }
   const nm = ev.target.closest('.gname');
