@@ -160,6 +160,21 @@ export class PlanetCityScene {
       if(r.authored&&r.polygon)line(ctx,[...r.polygon,r.polygon[0]],'#ffe1a3bb',1.5/this.pose.zoom);
       else if(!r.authored){ctx.save();ctx.strokeStyle='#ffe1a3';ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.strokeRect(r.box.x-5,r.box.y-4,r.w+10,r.h+8);ctx.restore();}
     }
+    if(item.homeOrbital && ['orbital-small','orbital-large'].includes(cityDevelopment(this.entity,item))){
+      const large=cityDevelopment(this.entity,item)==='orbital-large',width=large?64:44,height=large?145:112;
+      ctx.save();ctx.translate(r.x,r.y);
+      ellipse(ctx,0,2,width,13,'#203d3b88');
+      ctx.fillStyle='#647c77';ctx.strokeStyle='#dfc99a';ctx.lineWidth=2;
+      ctx.fillRect(-width/2,-18,width,20);ctx.strokeRect(-width/2,-18,width,20);
+      for(const x of [-width*.32,width*.32]){
+        ctx.fillStyle='#a9ad94';ctx.fillRect(x-5,-height,10,height-12);
+        line(ctx,[{x,y:-height},{x:x*.7,y:-height-70}],'#8cb7af',3);
+      }
+      ctx.fillStyle='#3e6965';ctx.fillRect(-width*.5,-height,width,12);
+      ctx.fillStyle='#f1cb7c';ctx.fillRect(-9,-height*.58,18,23);
+      if(large){ctx.fillStyle='#78958d';ctx.fillRect(-width*.7,-40,width*1.4,15);}
+      ctx.restore();if(active||this.names)this.drawName(ctx,r);return;
+    }
     if(r.painted){if(active||this.names)this.drawName(ctx,r);return;}
     if(cell===null){
       if(r.authored){

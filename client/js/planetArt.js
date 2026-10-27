@@ -21,6 +21,7 @@ export function buildingIllustrationCell(item,entity){
 }
 
 export function illustrateBuilding(object,item,entity,atlas){
+  if(item.homeOrbital && entity.market?.homeworld?.orbital?.small) return developBuilding(object,item,entity);
   const cell=buildingIllustrationCell(item,entity);if(cell===null)return ()=>{};
   for(const child of object.children)child.visible=false;
   const texture=atlas.clone();texture.repeat.set(.25,1/3);texture.offset.set(cell%4/4,(2-Math.floor(cell/4))/3);texture.needsUpdate=true;
@@ -119,9 +120,15 @@ export function developBuilding(object,item,entity){
   }else if(item.homeOrbital){
     for(const child of object.children)child.visible=false;
     const large=status==='orbital-large';
-    const ring=solid(new THREE.TorusGeometry(large?10:7,.8,5,48,Math.PI*(large?2:1.55)),0x6a9993,0,16,0);ring.rotation.x=Math.PI/2;
-    for(const x of [-6,6])solid(new THREE.BoxGeometry(1.2,14,1.2),0xb5a27c,x,7,0);
-    solid(new THREE.BoxGeometry(9,2,7),0x5c7b7b,0,1,0);
+    const height=large?27:20,width=large?9:6;
+    solid(new THREE.BoxGeometry(width*2+5,2,10),0x5c7b7b,0,1,0);
+    for(const x of [-width,width]){
+      solid(new THREE.BoxGeometry(2,height,2),0xb5a27c,x,height/2,0);
+      solid(new THREE.CylinderGeometry(.25,.25,45,6),0x6a9993,x,height+22.5,0);
+    }
+    solid(new THREE.BoxGeometry(width*2+2,2,4),0x6a9993,0,height,0);
+    solid(new THREE.BoxGeometry(4,4,4),0xe3bd75,0,height*.5,0);
+    if(large)solid(new THREE.BoxGeometry(23,2,8),0x6a9993,0,7,0);
   }else if(home&&item.kind!=='plot'){
     solid(new THREE.BoxGeometry(1.2,.45,.5),0xffce79,0,3.5,5);
     if(item.homeStructure){const s=home.structures.find(s=>s.id===item.homeStructure);if(s?.kind==='housing')for(let i=0;i<3;i++)solid(new THREE.BoxGeometry(3,3+i%2,3),0xc2ad83,-4+i*4,1.5,-5);}

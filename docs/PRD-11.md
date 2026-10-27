@@ -144,7 +144,7 @@ PRD-Fortschritt. Vor jedem Umsetzungscommit werden passende Prüfungen ausgefüh
 - [x] U2: Erstkontaktfenster, gespeicherten Gelesenstatus und Wiederaufruf
   integrieren; vorhandene Spielstände berücksichtigen.
 - [x] U3: Landeplatz-/Zentrallager- und Schiffbaubegriffe konsistent korrigieren.
-- [ ] U4: Kleine/große Orbitalanlagen in Oberflächen- und Ersatzgrafik ändern.
+- [x] U4: Kleine/große Orbitalanlagen in Oberflächen- und Ersatzgrafik ändern.
 - [ ] U5: Erstbetankung aller Bauwege und Korrektur unabgeholter neuer
   Bestände mit Schutz gebrauchter und bereits aktiver Schiffe umsetzen.
 - [ ] U6: Lebenszyklus persönlicher Questobjekte einschließlich Altbeständen,
@@ -200,3 +200,5 @@ U1: Gemeinsamer Katalog und Almanachreiter ergänzt. Registrierte Stationen, Pla
 U2: Erstkontakt, Verstanden-Fortsetzung und Hilfe in Objekt-/Gebäudeansichten integriert. Gelesenstatus wird im Spieler gespeichert. Persistenz, Idempotenz, Validierung und Spielertrennung automatisiert geprüft (2/2 Tests bestanden). Visuelle Prüfung folgt in U8.
 
 U3: Landeplatz und Zentrallager sowie Schiffbau-Begriffe korrigiert. Orbitaldocks und Rumpfsegmente beibehalten. Betroffene Heimat-, Story- und PRD11-Tests: 13/13 bestanden.
+
+U4: Verankerte Aufzugspfeiler mit Bodenplattform und aufwärtsführenden Kabeln in Stadtansicht und 3D-Ersatzdarstellung; große Variante mit breiterer Basis und zusätzlicher Plattform. Außenansicht unverändert. Story-Art- und Stadt-Tests bestanden; visueller Nachweis folgt in U8.
