@@ -14,12 +14,21 @@ import fun from './fun.js';
 import homeworld from './homeworld.js';
 import modules from './modules.js';
 import colonies from './colonies.js';
+import { OBJECT_GUIDE } from '../../shared/object-guide.js';
+import { V } from './validate.js';
 
 /**
  * Befehls-Handler. Jeder Handler: { args: { feld: validator }, run(ctx, args) -> Fehlertext | undefined }
  * ctx = { game, player }
  */
 const HANDLERS = { ...ship, ...trade, ...route, ...fleet, ...shipyard, ...property, ...quest, ...consortium, ...planet, ...fun, ...homeworld, ...modules,...colonies };
+HANDLERS.guideRead = {
+  args: { key: V.key(OBJECT_GUIDE) },
+  run({player}, {key}) {
+    player.guideRead ||= [];
+    if (!player.guideRead.includes(key)) player.guideRead.push(key);
+  },
+};
 
 export function runCommand(game, player, msg) {
   const h = Object.hasOwn(HANDLERS, msg.cmd) ? HANDLERS[msg.cmd] : null;

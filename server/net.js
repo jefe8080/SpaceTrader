@@ -144,6 +144,7 @@ export class Net {
       zones: [...p.known.zone].map((id) => this.game.findZone(id)).filter(Boolean),
       wh: [...p.known.wh].filter((id) => w.wormholes.has(id)).map((id) => this.game.wormholeInfo(id)),
       recipes: [...p.known.recipe],
+      guideRead: p.guideRead || [],
       shipTypes: [...p.known.ship],
       moduleTypes: [...p.known.module],
       players: this.game.playerList(this.online()),
@@ -357,7 +358,7 @@ function shipDetail(s, game) {
 }
 
 function playerDetail(p) {
-  return { stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1, governor: p.governor || 0, faction: p.faction || null,
+  return { guideRead: p.guideRead || [], stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1, governor: p.governor || 0, faction: p.faction || null,
     homeworld: p.homeworld || null, homeQuest: p.homeQuest || null, manualShip: p.manualShip || null, relic: p.relic || null,moduleBlueprints:p.moduleBlueprints||[],
     flagshipAt: p.flagshipAt ?? null, xp: Math.floor(p.xp || 0), level: pilotLevel(p.xp), quest: p.quest || null, questLock: p.questLock || 0,
     rep: p.rep || {}, questsDone: p.questsDone || 0, dogUntil: p.dogUntil || 0, mg: p.mg || null };

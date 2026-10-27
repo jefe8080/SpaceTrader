@@ -8,6 +8,8 @@ import { refreshModals } from './dom.js';
 import { renderQuestBox } from './quests.js';
 import { renderEventsButton } from './events.js';
 import { renderPlanetUi } from './planetPanel.js';
+import { firstGuide } from './objectGuide.js';
+import { entityGuideKey } from '/shared/object-guide.js';
 import { renderDogBuff } from './minigames.js';
 import { renderHomeDialog } from './homeworld.js';
 import './pilotProfile.js';
@@ -46,7 +48,9 @@ export function renderAll() {
 /**
  * Auswahl setzen. Ohne keepSelection wird die Mehrfachauswahl zurückgesetzt.
  */
-export function select(sel, { keepSelection = false } = {}) {
+export function select(sel, { keepSelection = false, explained = false } = {}) {
+  const object = sel && (sel.kind === 'entity' ? state.entities.get(sel.id) : state.ships.get(sel.id));
+  if (!explained && firstGuide(entityGuideKey(object), () => select(sel, { keepSelection, explained: true }))) return;
   const changed = JSON.stringify(sel) !== JSON.stringify(state.selected);
   state.selected = sel;
   if (!keepSelection) state.selection.clear();

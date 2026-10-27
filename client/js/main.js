@@ -6,6 +6,7 @@ import { initRenderer, render, screenToWorld, pickAt, viewMode, ZOOM_PRESETS, ZO
 import * as ui from './ui/index.js';
 import { sfx, planetTone } from './audio.js';
 import { initPlanetside, renderPlanetside, canLand, hidePlanetside } from './planetside.js';
+import { resetGuide } from './ui/objectGuide.js';
 
 await loadAssets();
 const canvas = document.getElementById('view');
@@ -33,6 +34,8 @@ socket.on('welcome', (d) => {
   }
   const first = !state.me;
   state.me = d.you;
+  resetGuide();
+  state.guideRead = d.guideRead || [];
   Object.assign(state, { profile: null, homeworld: null, homeQuest: null, relic: null, manualShip: null, homeDialogReplay: false, quest: null });
   state.players = d.players;
   state.cells = new Set(d.cells);
@@ -76,6 +79,7 @@ socket.on('ships', (d) => {
   ui.scheduleRender();
 });
 socket.on('me', (d) => {
+  state.guideRead = [...new Set([...(state.guideRead || []), ...(d.guideRead || [])])];
   Object.assign(state, { profile:d.profile,questsDone:d.questsDone, homeworld: d.homeworld, homeQuest: d.homeQuest, manualShip: d.manualShip, relic: d.relic,moduleBlueprints:d.moduleBlueprints||[], coverage:d.coverage||[],controlCapacity:d.controlCapacity||0 });
   Object.assign(state, { stopLoss: d.stopLoss, groups: d.groups, favorites: d.favorites, pilot: d.pilot, governor: d.governor, faction: d.faction, flagshipAt: d.flagshipAt,
     xp: d.xp, level: d.level, quest: d.quest, questLock: d.questLock, rep: d.rep, dogUntil: d.dogUntil, mg: d.mg });

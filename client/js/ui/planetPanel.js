@@ -17,6 +17,8 @@ import { patchPanelContent } from './panelContent.js';
 import {handlePopulationAction} from './population.js';
 import {propertySection,handlePropertyAction,specializationPanel} from './property.js';
 import {handleColonyAction} from './colonies.js';
+import { firstGuide, showGuide } from './objectGuide.js';
+import { buildingGuideKey } from '/shared/object-guide.js';
 
 const bar = $('planetBar');
 const panel = $('planetPanel');
@@ -55,7 +57,12 @@ export function closeBuilding(force = false) {
   selectBuilding(null, force);
   renderPlanetUi();
 }
-export function openBuilding(it) {
+export function openBuilding(it, explained = false) {
+  const e = state.entities.get(state.landed);
+  if (!e) return;
+  if (!explained && firstGuide(buildingGuideKey(it,e), () => {
+    if (state.landed === e.id) openBuilding(it,true);
+  })) return;
   if (current?.key === it.key) { closeBuilding(); return; }
   current = it;
   selectBuilding(it);
@@ -117,13 +124,18 @@ export function renderPlanetUi() {
   const context = JSON.stringify([e.id, it.key]);
   const updatePanel = context === panelContext ? patchPanelContent : (element, html) => { element.innerHTML = html; };
   panelContext = context;
-  updatePanel(panel, `<div class="panel-head"><h2>${esc(it.label)}</h2><span style="flex:1"></span><button class="small ghost" data-pp="close" aria-label="Ort schließen">✕</button></div>${connection}${body}`);
+  updatePanel(panel, `<div class="panel-head"><h2>${esc(it.label)}</h2><button class="small ghost" data-guide-help aria-label="Erklärung anzeigen">?</button><span style="flex:1"></span><button class="small ghost" data-pp="close" aria-label="Ort schließen">✕</button></div>${connection}${body}`);
   for(const input of panel.querySelectorAll('[data-storage-rule]'))input.value=input.getAttribute('value');
   const selectedRecipe = panel.querySelector('#homeRecipe');
   if (selectedRecipe) selectedRecipe.dispatchEvent(new Event('change', { bubbles: true }));
   syncManagementControls(lost);
   for(const details of panel.querySelectorAll('details'))if(expanded.has(details.querySelector('summary')?.textContent))details.open=true;
 }
+
+panel.addEventListener('click', ev => {
+  if (!ev.target.closest('[data-guide-help]') || !current) return;
+  showGuide(buildingGuideKey(current,state.entities.get(state.landed)));
+});
 
 /** Produktions- und Verbrauchsgebäude: Ausbau (PRD-3 6.3) */
 function goodBuilding(it, e) {

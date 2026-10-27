@@ -141,7 +141,7 @@ PRD-Fortschritt. Vor jedem Umsetzungscommit werden passende Prüfungen ausgefüh
 - [x] P0: Planung mit `grilling` abstimmen und PRD erstellen.
 - [x] U1: Gemeinsamen Erklärungskatalog mit vollständiger Typenabdeckung,
   Texten, Bildern und Almanachansichten ergänzen.
-- [ ] U2: Erstkontaktfenster, gespeicherten Gelesenstatus und Wiederaufruf
+- [x] U2: Erstkontaktfenster, gespeicherten Gelesenstatus und Wiederaufruf
   integrieren; vorhandene Spielstände berücksichtigen.
 - [ ] U3: Landeplatz-/Zentrallager- und Schiffbaubegriffe konsistent korrigieren.
 - [ ] U4: Kleine/große Orbitalanlagen in Oberflächen- und Ersatzgrafik ändern.
@@ -196,3 +196,5 @@ geprüft. Für den Planungscommit wird `git diff --check` ausgeführt. Spieltest
 folgen mit der Umsetzung; in diesem Schritt wurde nur das PRD erstellt.
 
 U1: Gemeinsamer Katalog und Almanachreiter ergänzt. Registrierte Stationen, Planeten und Felder sowie Bilddateien mit node --test tests/prd11.test.js geprüft (1/1 bestanden); git diff --check bestanden.
+
+U2: Erstkontakt, Verstanden-Fortsetzung und Hilfe in Objekt-/Gebäudeansichten integriert. Gelesenstatus wird im Spieler gespeichert. Persistenz, Idempotenz, Validierung und Spielertrennung automatisiert geprüft (2/2 Tests bestanden). Visuelle Prüfung folgt in U8.

@@ -18,6 +18,8 @@ import { eventSection } from './events.js';
 import { enterPlanet } from './planetPanel.js';
 import {moduleStockPanel,handleModuleAction} from './modules.js';
 import {colonyPanel,warpPanel} from './colonies.js';
+import { entityGuideKey, OBJECT_GUIDE } from '/shared/object-guide.js';
+import { showGuide } from './objectGuide.js';
 
 const entName = (id) => esc(state.entities.get(id)?.name || 'unbekannter Ort');
 const dockedHereOwn = (id) => myShips().some((s) => s.dockedAt === id);
@@ -42,8 +44,16 @@ export function renderDetails() {
     if (e) html = entityDetails(e);
   }
   el.hidden = !html;
+  const object = sel && (sel.kind === 'entity' ? state.entities.get(sel.id) : state.ships.get(sel.id));
+  const guide = entityGuideKey(object);
+  if (html && OBJECT_GUIDE[guide]) html = `<button class="small ghost" data-guide-help="${guide}" aria-label="Erklärung anzeigen">? Hilfe</button>` + html;
   setHtml(el, html);
 }
+
+$('details').addEventListener('click', ev => {
+  const key = ev.target.closest('[data-guide-help]')?.dataset.guideHelp;
+  if (key) { ev.stopImmediatePropagation(); showGuide(key); }
+}, true);
 
 /** Statistik des gewählten Schiffes bzw. Marktes anfragen */
 export function requestStats() {
