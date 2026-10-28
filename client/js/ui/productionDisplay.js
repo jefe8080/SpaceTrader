@@ -9,7 +9,7 @@ export function stockLabel(value, need = null) {
 
 export function recipeWithStock(market, recipe, id) {
   const side = (entries, input) => Object.entries(entries).map(([good, n]) => `${n} ${esc(GOODS[good]?.name || good)} ${stockLabel(input ? recipeStock(market, good, id) : market?.goods?.[good]?.stock, input ? n : null)}`).join(' + ') || '—';
-  return `${side(recipe.in, true)} → ${side(recipe.out, false)}`;
+  return `<span data-production-recipe="${esc(id)}">${side(recipe.in, true)} → ${side(recipe.out, false)}</span>`;
 }
 
 const number = n => Number.isFinite(n) ? fmt(n) : '—';

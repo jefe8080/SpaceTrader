@@ -93,6 +93,10 @@ export function renderPlanetUi() {
   const viewed=state.landed&&state.entities.get(state.landed),summary=$('planetSummary');
   summary.hidden=!viewed;
   if(viewed){setHtml(summary,planetSummary(viewed));summary.style.top=`${Math.ceil($('topbar').getBoundingClientRect().bottom)+64}px`;}
+  // Keep recipe stocks live even while an adjacent form retains keyboard focus.
+  if(viewed)for(const label of panel.querySelectorAll('[data-production-recipe]')){
+    const id=label.dataset.productionRecipe;if(RECIPES[id])label.outerHTML=recipeWithStock(viewed.market,RECIPES[id],id);
+  }
   const lost = state.landed && state.entities.get(state.landed)?.type==='ruins' && !accessTo(state.landed).manage;
   syncManagementControls(lost);
   if (!lost && panel.contains(document.activeElement) && document.activeElement.matches('input,select,textarea')) return;

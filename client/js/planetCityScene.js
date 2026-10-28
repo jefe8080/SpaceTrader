@@ -109,6 +109,7 @@ export class PlanetCityScene {
     const header=document.getElementById('topbar');
     if(controls&&header)controls.style.top=Math.ceil(header.getBoundingClientRect().bottom)+12+'px';
     const summary=document.getElementById('planetSummary');
+    if(summary&&controls&&!summary.hidden)summary.style.top=Math.ceil(controls.getBoundingClientRect().bottom)+12+'px';
     let left=16,right=w-16,top=Math.max(100,(controls&&!controls.hidden?controls.getBoundingClientRect().bottom:80)+14,summary&&!summary.hidden?summary.getBoundingClientRect().bottom+12:0),bottom=h-24;
     for(const id of ['fleet','planetPanel']){
       const element=document.getElementById(id);if(!element||element.hidden||!element.getClientRects().length)continue;
@@ -196,10 +197,13 @@ export class PlanetCityScene {
   }
   drawProductionBubble(ctx,r){
     const text=productionBubble(this.entity.market,r.item);if(!text)return;
-    const phase=[...r.key].reduce((n,c)=>n+c.charCodeAt(0),0);
+    const phase=[...r.key].reduce((n,c)=>(n*31+c.charCodeAt(0))|0,0);
     const sway=this.reducedMotion?0:Math.sin(this.time*1.5+phase)*4;
     const s=this.toScreen(r.x,r.y-r.h);
-    ctx.save();ctx.translate(s.x+sway,s.y-34);
+    const foot=this.toScreen(r.x,r.y);
+    if(s.x<0||s.x>innerWidth||foot.y<this.area.y||s.y>this.area.y+this.area.height)return;
+    // A focused roof may extend beyond the viewport; keep its status below the HUD.
+    ctx.save();ctx.translate(s.x+sway,Math.max(this.area.y+18,s.y-34));
     ctx.fillStyle='#fff9e9';ctx.strokeStyle='#756143';ctx.lineWidth=1.5;
     ctx.beginPath();ctx.roundRect(-23,-15,46,28,9);ctx.fill();ctx.stroke();
     ctx.beginPath();ctx.moveTo(-5,13);ctx.lineTo(0,19);ctx.lineTo(5,13);ctx.fill();

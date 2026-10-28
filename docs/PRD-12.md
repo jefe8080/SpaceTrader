@@ -8,8 +8,7 @@ Versorgungsengpässe.
 
 Die Planung wurde am 28.10.2026 mit dem Skill `grilling` in Q1–Q9
 abgestimmt. Alle Empfehlungen einschließlich der Anpassungen zu Q2 und Q3
-wurden mit „alles ja“ bestätigt. Dieses PRD dokumentiert die Planung;
-die Umsetzung ist noch offen.
+wurden mit „alles ja“ bestätigt. Dieses PRD dokumentiert die abgestimmte Planung und die abgeschlossene Umsetzung.
 
 ## Verbindliche Anforderungen
 
@@ -131,7 +130,7 @@ zählen. Zusätzliche Anzeigedaten müssen dieselben Wirtschaftsregeln nutzen.
   Zustandswechsel, Priorität und Kameraverhalten prüfen.
 - [x] Schritt 4: Planetenfenster mit Lagertrennung, Sollbedarf und
   Qualifikationen ergänzen; Mangelgrenzen und Datenberechtigungen prüfen.
-- [ ] Schritt 5: Zusammenspiel in den betroffenen Ansichten visuell prüfen
+- [x] Schritt 5: Zusammenspiel in den betroffenen Ansichten visuell prüfen
   und relevante vorhandene Regressionstests ausführen.
 
 Nach jedem fachlich abgeschlossenen Schritt erfolgen passende Prüfungen,
@@ -168,5 +167,4 @@ Fehlgeschlagene oder nicht ausführbare Prüfungen werden dokumentiert.
 
 ## Prüfstand
 
-Planungsdokument erstellt; noch keine Implementierung und keine
-Implementierungsprüfungen durchgeführt.
+Alle fünf Umsetzungsschritte abgeschlossen. Gesamte Testsuite: 364 Tests erfolgreich, keine Fehler. Syntax- und Diffprüfungen erfolgreich. Browserprüfung bei 1280×720 und 390×844 einschließlich Questabschluss, Livebeständen, Stillstandswechseln, Warnfarben und unbekannten Werten durchgeführt. Details und Bildbelege: `docs/qa/prd12/README.md`.

@@ -9,6 +9,17 @@ import {supplyOverview} from '../shared/supply-overview.js';
 import {storageSummary} from '../shared/production-display.js';
 import {Game} from '../server/game.js';
 import {tickHomeworld} from '../server/homeworld.js';
+import {serializeMarket} from '../server/net.js';
+
+test('PRD12: legacy factory status follows production readiness and ownership in network data',()=>{
+  const r=RECIPES.smelter,m={owner:'p',goods:Object.fromEntries([...Object.keys(r.in),...Object.keys(r.out)].map(g=>[g,{stock:0,cap:100}])),bld:{lvl:{},factories:[{recipe:'smelter'}]}};
+  assert.equal(serializeMarket(m).factoryStates[0].reason,'Zutaten fehlen');
+  for(const [g,n] of Object.entries(r.in))m.goods[g].stock=n;
+  assert.equal(serializeMarket(m).factoryStates[0].reason,null);
+  for(const g of Object.keys(r.out))m.goods[g].stock=100;
+  assert.equal(serializeMarket(m).factoryStates[0].reason,'Lager voll');
+  delete m.owner;assert.equal(serializeMarket(m).factoryStates[0].reason,'Kein Besitz');
+});
 
 test('PRD12: supply counts desired operation and project demand once against employment limits',()=>{
   const overview=supplyOverview(100,{basic:90,skilled:10,specialist:0},[{power:120,workers:{basic:20,skilled:12}}],{basic:2,skilled:5},100);
