@@ -155,6 +155,8 @@ button.ghost:hover { border-color: var(--panel-border); }
 .small-note { font-size: 11px; margin-top: 4px; }
 .neg { color: var(--bad); }
 .pos { color: var(--good); }
+.kv .recipe-stock.pos { color: var(--good); }
+.kv .recipe-stock.neg { color: var(--bad); }
 .warn { color: #ffb74d; }
 .link { cursor: pointer; text-decoration: underline dotted; }
 #stopLossBtn.set { border-color: rgba(255, 183, 77, 0.5); }

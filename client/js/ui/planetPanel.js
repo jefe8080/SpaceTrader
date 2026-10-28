@@ -19,6 +19,7 @@ import {propertySection,handlePropertyAction,specializationPanel} from './proper
 import {handleColonyAction} from './colonies.js';
 import { firstGuide, showGuide } from './objectGuide.js';
 import { buildingGuideKey } from '/shared/object-guide.js';
+import {recipeWithStock, stockLabel} from './productionDisplay.js';
 
 const bar = $('planetBar');
 const panel = $('planetPanel');
@@ -141,7 +142,7 @@ panel.addEventListener('click', ev => {
 function goodBuilding(it, e) {
   const s = e.market.goods[it.good];
   if (!s) return '<div class="muted">Dieses Gebäude ist stillgelegt.</div>';
-  if(e.market.realEconomy)return `<p>${GOODS[it.good].name}: ${fmt(s.stock)} / ${fmt(s.cap)} · tatsächliche Rate ${fmt(s.rate*3600)}/h</p>`+(state.props.get(e.id)?.manage?specializationPanel(e):'<p>Natürlicher Standort. Konkrete Spezialisierung kann der Besitzer ausbauen.</p>');
+  if(e.market.realEconomy)return `<p>${GOODS[it.good].name} ${stockLabel(s.stock)} / ${fmt(s.cap)} · tatsächliche Rate ${fmt(s.rate*3600)}/h</p>`+(state.props.get(e.id)?.manage?specializationPanel(e):'<p>Natürlicher Standort. Konkrete Spezialisierung kann der Besitzer ausbauen.</p>');
   const prop = state.props.get(e.id);
   const manage = !!prop?.manage;
   const lvl = e.market.bld?.lvl?.[it.good] || 0;
@@ -170,7 +171,7 @@ function goodBuilding(it, e) {
 function factoryPanel(it, e) {
   const r = RECIPES[it.recipe];
   const manage = !!state.props.get(e.id)?.manage;
-  return `<div class="kv"><span>Rezept</span><span>${recipeText(r)} (${r.time} s)</span><span>Lager</span><span>Zutaten und Produkte liegen im Planetenlager</span>
+  return `<div class="kv"><span>Rezept</span><span>${recipeWithStock(e.market,r,it.recipe)} (${r.time} s)</span><span>Lager</span><span>Zutaten und Produkte liegen im Planetenlager</span>
     <span>Status</span><span>${e.owner ? 'läuft, solange Zutaten da sind' : 'steht still (kein Besitz)'}</span></div>
     ${manage ? `<div class="btnrow" style="margin-top:6px"><button class="small danger" data-pp="demolish">Abreißen (ohne Erstattung)</button></div>` : ''}`;
 }

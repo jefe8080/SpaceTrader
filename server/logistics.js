@@ -157,5 +157,5 @@ export function runLogistics(ship,c,dt,game,fly){
 export function productionGoal(market,recipe){return market.homeworld.logistics?.orders.find(o=>o.kind==='production'&&o.recipe===recipe&&o.state!=='cancelled');}
 export function productionAllowed(market,recipe){const o=productionGoal(market,recipe);return !o||o.cycles<Math.ceil(o.target/Object.values(RECIPES[recipe].out)[0]);}
 export function recordProduction(market,recipe){const o=productionGoal(market,recipe);if(o)o.cycles++;}
-export function productionStock(market,good,recipe){const o=productionGoal(market,recipe);return availableHomeStock(market,good)+(o?market.homeworld.reservations[`production:${o.id}`]?.goods[good]||0:0);}
+export {recipeStock as productionStock} from '../shared/production-display.js';
 export function consumeProductionReservation(market,recipe){const o=productionGoal(market,recipe),r=o&&market.homeworld.reservations[`production:${o.id}`];if(r)for(const [g,n] of Object.entries(RECIPES[recipe].in))r.goods[g]=Math.max(0,(r.goods[g]||0)-n);}

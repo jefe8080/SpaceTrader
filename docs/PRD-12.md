@@ -125,7 +125,7 @@ zählen. Zusätzliche Anzeigedaten müssen dieselben Wirtschaftsregeln nutzen.
 - [x] Planung abstimmen und PRD erstellen.
 - [x] Schritt 1: Hauptquestauswahl mit stabiler Auswahl und passenden Aktionen
   umsetzen; Questwechsel, Questabschluss und parallelen Fortschritt prüfen.
-- [ ] Schritt 2: Gemeinsame Bestandsdarstellung in allen Rezeptpfaden ergänzen;
+- [x] Schritt 2: Gemeinsame Bestandsdarstellung in allen Rezeptpfaden ergänzen;
   Zyklusgrenzen, Reserven, Ausgangsbestände und Aktualisierung prüfen.
 - [ ] Schritt 3: Stillstandszuordnung und bewegte Sprechblasen ergänzen;
   Zustandswechsel, Priorität und Kameraverhalten prüfen.

@@ -1,6 +1,7 @@
 import {questText} from './quests.js';
 import {HOME_STORY,storyAvailable,storyDialogReady} from '/shared/home-story.js';
 import { GOODS, RECIPES,recipeText } from '/shared/config.js';
+import {recipeWithStock} from './productionDisplay.js';
 import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock, homeGoodCapacity, homeGoodLimit, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '/shared/homeworld.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
@@ -126,7 +127,7 @@ export function homePanel(entity, item, ship) {
   }
   if (RECIPES[facility]) {
     const recipe = RECIPES[facility];
-    html += `<p>${Object.entries(recipe.in).map(([g,n]) => `${n} ${GOODS[g].name}`).join(' + ')} → ${Object.entries(recipe.out).map(([g,n]) => `${n} ${GOODS[g].name}`).join(' + ')}</p><div class="muted">${building.restored?'Normalbetrieb: 100 %':'Reparierter Grundbetrieb: 10 %'} Geschwindigkeit. ${esc(building.blocked || '')}</div>`;
+    html += `<p>${recipeWithStock(entity.market,recipe,facility)}</p><div class="muted">${building.restored?'Normalbetrieb: 100 %':'Reparierter Grundbetrieb: 10 %'} Geschwindigkeit. ${esc(building.blocked || '')}</div>`;
     if(building.status==='ready'){
       html+=operationPanel(entity,facility,building);
       if(!building.restored)html+=`<p>Normalanlage: 4 Energie, 6 einfache Kräfte · ${costLabel(HOMEWORLD.industry.restore)}</p><button class="small" data-pp="homeRestore" data-facility="${facility}" ${building.upgrading?'disabled':''}>Zur Normalanlage ausbauen</button>`;
@@ -235,7 +236,7 @@ function structurePanel(entity,id){
     if(building.upgrading) html+='<p>Ausbau läuft; bisherige Kapazität bleibt nutzbar.</p>';
     else if(cost&&building.status==='ready') html+=`<p>${costLabel(cost)}</p><button class="small" data-pp="homeStorageUpgrade" data-id="${id}">Auf Stufe ${level+1} ausbauen</button>`;
   }
-  if(building.recipe)html+=`<p>${recipeText(RECIPES[building.recipe])} · ${RECIPES[building.recipe].time} s je vollständigem Zyklus</p>`;
+  if(building.recipe)html+=`<p>${recipeWithStock(entity.market,RECIPES[building.recipe],building.recipe)} · ${RECIPES[building.recipe].time} s je vollständigem Zyklus</p>`;
   if(building.status==='ready')html+=operationPanel(entity,id,building);
   if(building.kind==='plant'&&building.progress>0)html+=`<button class="small" data-pp="homeAbortCycle" data-id="${id}">Laufenden Produktionszyklus abbrechen</button>`;
   if(building.status==='ready'&&REFINEMENT_RECIPES.includes(building.recipe)){
