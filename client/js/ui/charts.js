@@ -62,4 +62,4 @@ export function sparkline(vals, { limit = 0, w = 120, h = 26, color = 'var(--acc
 }
 
 /** Füllstandsbalken */
-export const stockBar = (stock, cap, color) => `<span class="stockbar" title="${Math.floor(stock)} / ${cap}"><div style="width:${Math.min(100, (stock / cap) * 100)}%;background:${color}"></div></span>`;
+export const stockBar = (stock, cap, color) => `<span class="stockbar" title="${Math.floor(stock)} / ${cap}"><div style="width:${cap > 0 ? Math.min(100, (stock / cap) * 100) : stock > 0 ? 100 : 0}%;background:${color}"></div></span>`;

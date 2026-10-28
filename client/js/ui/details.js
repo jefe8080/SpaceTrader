@@ -20,6 +20,7 @@ import {moduleStockPanel,handleModuleAction} from './modules.js';
 import {colonyPanel,warpPanel} from './colonies.js';
 import { entityGuideKey, OBJECT_GUIDE } from '/shared/object-guide.js';
 import { showGuide } from './objectGuide.js';
+import { homeGoodLimit } from '/shared/homeworld.js';
 
 const entName = (id) => esc(state.entities.get(id)?.name || 'unbekannter Ort');
 const dockedHereOwn = (id) => myShips().some((s) => s.dockedAt === id);
@@ -231,6 +232,7 @@ export function marketTable(e, ship) {
   const member = !mine && state.props.get(e.id)?.cons;
   const customs = !mine && !member && e.owner ? (e.market.customs || 0) : 0;
   const rows = Object.entries(e.market.goods).filter(([g])=>!state.homeworld||GOODS[g].cls!=='passenger').filter(([g, sl]) => e.type !== 'ruins' || (sl.cap > 0 && (sl.stock > 0 || ship?.cargo?.[g] || ['ore','ice','grain','gas','helium3','crude','water','food','shipfuel','fuel','ingots'].includes(g)))).map(([g, sl]) => {
+    if (e.market.homeworld) sl = { ...sl, cap: homeGoodLimit(e.market, g) };
     if (mine) return ownRow(e, g, sl, canTrade ? ship : null);
     if (member) return memberRow(e, g, sl, canTrade ? ship : null);
     const buy = canBuyFrom(sl), sell = canSellTo(sl);
