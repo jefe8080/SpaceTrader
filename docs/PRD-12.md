@@ -129,7 +129,7 @@ zählen. Zusätzliche Anzeigedaten müssen dieselben Wirtschaftsregeln nutzen.
   Zyklusgrenzen, Reserven, Ausgangsbestände und Aktualisierung prüfen.
 - [x] Schritt 3: Stillstandszuordnung und bewegte Sprechblasen ergänzen;
   Zustandswechsel, Priorität und Kameraverhalten prüfen.
-- [ ] Schritt 4: Planetenfenster mit Lagertrennung, Sollbedarf und
+- [x] Schritt 4: Planetenfenster mit Lagertrennung, Sollbedarf und
   Qualifikationen ergänzen; Mangelgrenzen und Datenberechtigungen prüfen.
 - [ ] Schritt 5: Zusammenspiel in den betroffenen Ansichten visuell prüfen
   und relevante vorhandene Regressionstests ausführen.

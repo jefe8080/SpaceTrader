@@ -157,6 +157,13 @@ button.ghost:hover { border-color: var(--panel-border); }
 .pos { color: var(--good); }
 .kv .recipe-stock.pos { color: var(--good); }
 .kv .recipe-stock.neg { color: var(--bad); }
+#planetSummary { left:316px; width:300px; font-size:12px; pointer-events:none; }
+#planetSummary .kv { margin-top:5px; font-size:12px; }
+#planetSummary .kv > span:nth-child(even), #planetSummary .kv span span { color:var(--text); }
+#planetSummary .kv span.neg { color:var(--bad); }
+@media(max-width:1100px) {
+  #planetSummary { left:12px; width:min(300px,calc(100vw - 24px)); padding:7px 10px; }
+}
 .warn { color: #ffb74d; }
 .link { cursor: pointer; text-decoration: underline dotted; }
 #stopLossBtn.set { border-color: rgba(255, 183, 77, 0.5); }

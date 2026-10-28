@@ -4,6 +4,7 @@ import {GOODS} from '../shared/goods.js';
 import {remoteManagementError} from './coverage.js';
 import {initializePopulation,updatePassengerOffers} from './population.js';
 import {stat} from './markets.js';
+import {supplyOverview} from '../shared/supply-overview.js';
 
 const INFRASTRUCTURE=['solar','gasGenerator','reactor','housing','school','academy'];
 const freeBuilders=h=>Math.min(h.workers.basic-(h.workforce?.used?.basic||0)-(h.projects||[]).reduce((n,j)=>n+(j.kind==='training'?(j.from==='basic'?j.count:0):2),0),Math.floor(h.population*.6)-Object.values(h.workforce?.used||{}).reduce((a,b)=>a+b,0)-(h.projects||[]).reduce((n,j)=>n+(j.kind==='training'?j.count:2),0));
@@ -117,6 +118,7 @@ export function tickSpecialization(game,e,dt){
   }
   h.projects=h.projects.filter(j=>j.kind!=='training'||j.remaining>0);
   h.workforce={used,reserved};h.energy={used:power,generation};h.allocations=allocations;
+  h.supplyOverview=supplyOverview(h.population,h.workers,[...h.infrastructure.map(b=>HOME_BUILDINGS[b.kind]),...(spec&&!s.paused?[spec]:[])],reserved,generation);
   h.employmentFactor=.5+.5*Math.min(1,Object.values(used).reduce((a,b)=>a+b,0)/Math.max(1,Math.floor(h.population*.6)));
   if((h.supplyFactor||0)>=1){h.growthProgress+=Math.min(h.population*.02,s?.active&&spec.growthCap||100)*dt/3600;const n=Math.min(Math.floor(h.growthProgress),Math.max(0,h.housing-h.population));h.population+=n;h.growthProgress-=n;h.workers.basic+=Math.min(n,Math.max(0,Math.floor(h.population*.6)-Object.values(h.workers).reduce((a,b)=>a+b,0)));}
   updatePassengerOffers(e);

@@ -5,6 +5,41 @@ import {recipeStock,stockAssessment} from '../shared/production-display.js';
 import {productionBubble} from '../shared/production-display.js';
 import {productionBlockReason} from '../server/homeworld-operations.js';
 import {RECIPES} from '../shared/goods.js';
+import {supplyOverview} from '../shared/supply-overview.js';
+import {storageSummary} from '../shared/production-display.js';
+import {Game} from '../server/game.js';
+import {tickHomeworld} from '../server/homeworld.js';
+
+test('PRD12: supply counts desired operation and project demand once against employment limits',()=>{
+  const overview=supplyOverview(100,{basic:90,skilled:10,specialist:0},[{power:120,workers:{basic:20,skilled:12}}],{basic:2,skilled:5},100);
+  assert.deepEqual(overview.power,{required:120,available:100});
+  assert.deepEqual(overview.workers,{required:39,available:60});
+  assert.deepEqual(overview.qualifications.skilled,{required:17,available:10});
+  assert.equal(overview.qualifications.basic.available,60);
+});
+
+test('PRD12: desired demand survives ingredient stall, excludes paused plants and construction',()=>{
+  const game=new Game(':memory:',{profile:'homeworld',seed:42});
+  try{
+    const p=game.createPlayer('PRD12 supply'),e=game.world.entities.get(p.homeworld),h=e.market.homeworld;
+    h.structures=[{id:'plant',kind:'plant',recipe:'smelter',status:'ready',enabled:true,plot:0}];
+    tickHomeworld(game,e,1);
+    assert.equal(h.supplyOverview.power.required,4);
+    assert.equal(h.allocations.find(a=>a.id==='plant').reason,'Zutaten fehlen');
+    h.structures[0].enabled=false;tickHomeworld(game,e,1);
+    assert.equal(h.supplyOverview.power.required,0);
+    h.structures[0].enabled=true;h.structures[0].status='building';tickHomeworld(game,e,1);
+    assert.equal(h.supplyOverview.power.required,0);
+  }finally{game.close();}
+});
+
+test('PRD12: separate storage includes physical modules and reserved output places',()=>{
+  const m={goods:{ore:{stock:10},chemicals:{stock:3}},moduleInventory:{a:2},homeworld:{storage:2000,hazardStorage:100,moduleOutputReserved:30}};
+  assert.deepEqual(storageSummary(m),{usage:{normal:100,hazard:3},capacity:{normal:2000,hazard:100}});
+  delete m.homeworld;m.goods.ore.cap=200;m.goods.chemicals.cap=20;
+  assert.deepEqual(storageSummary(m).capacity,{normal:200,hazard:20});
+  assert.equal(storageSummary(null),null);
+});
 
 test('PRD12: bubbles follow actual stall reason, manual pause wins, ruins and construction are excluded',()=>{
   const building={id:'p',recipe:'smelter',status:'ready'},item={homeStructure:'p'},market={homeworld:{structures:[building],allocations:[{id:'p',state:'paused',reason:'Zutaten fehlen'}]}};

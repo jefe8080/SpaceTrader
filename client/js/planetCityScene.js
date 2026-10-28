@@ -108,7 +108,8 @@ export class PlanetCityScene {
     const controls=document.getElementById('planetBar');
     const header=document.getElementById('topbar');
     if(controls&&header)controls.style.top=Math.ceil(header.getBoundingClientRect().bottom)+12+'px';
-    let left=16,right=w-16,top=Math.max(100,(controls&&!controls.hidden?controls.getBoundingClientRect().bottom:80)+14),bottom=h-24;
+    const summary=document.getElementById('planetSummary');
+    let left=16,right=w-16,top=Math.max(100,(controls&&!controls.hidden?controls.getBoundingClientRect().bottom:80)+14,summary&&!summary.hidden?summary.getBoundingClientRect().bottom+12:0),bottom=h-24;
     for(const id of ['fleet','planetPanel']){
       const element=document.getElementById(id);if(!element||element.hidden||!element.getClientRects().length)continue;
       const b=element.getBoundingClientRect();

@@ -8,6 +8,7 @@ import {tickModuleProjects} from './modules.js';
 import {tickLogistics,productionAllowed,productionStock,consumeProductionReservation,recordProduction} from './logistics.js';
 import {initializePopulation,tickVisitors} from './population.js';
 import {ORBITAL_OPERATION,tickOrbital} from './orbital.js';
+import {supplyOverview} from '../shared/supply-overview.js';
 
 const QUALIFICATIONS = ['basic', 'skilled', 'specialist'];
 const qualified = () => ({ basic: 0, skilled: 0, specialist: 0 });
@@ -367,6 +368,11 @@ function operationStep(game,entity,dt,now) {
     units.push({id:building.id,building,spec,recipe:building.kind==='plant'?RECIPES[building.recipe]:null,relicWorkshop:building.kind==='workshop',priority:building.kind==='workshop'?110:building.priority??50});
   }
   units.sort((a,b)=>b.priority-a.priority||a.id.localeCompare(b.id));
+  const demandSpecs=[...structures.filter(b=>structureSpec(b).generation&&b.enabled!==false).map(structureSpec),...units.filter(u=>u.building.enabled!==false).map(u=>u.spec)];
+  const demandReservations={...reserved,basic:reserved.basic+buildTeams(home)};
+  // The relic workshop spec already includes its two reserved specialists.
+  if(relicWork&&!units.some(u=>u.relicWorkshop&&u.building.enabled!==false))demandReservations.skilled+=2;
+  home.supplyOverview=supplyOverview(home.population,home.workers,demandSpecs,demandReservations,generation);
   for(const unit of units){
     const {id,building,spec,recipe}=unit;
     if(unit.relicWorkshop&&relicWork)remaining.skilled+=2;

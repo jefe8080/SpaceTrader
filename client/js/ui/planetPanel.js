@@ -19,7 +19,7 @@ import {propertySection,handlePropertyAction,specializationPanel} from './proper
 import {handleColonyAction} from './colonies.js';
 import { firstGuide, showGuide } from './objectGuide.js';
 import { buildingGuideKey } from '/shared/object-guide.js';
-import {recipeWithStock, stockLabel} from './productionDisplay.js';
+import {recipeWithStock, stockLabel, planetSummary} from './productionDisplay.js';
 
 const bar = $('planetBar');
 const panel = $('planetPanel');
@@ -90,6 +90,9 @@ function syncManagementControls(lost){
 }
 
 export function renderPlanetUi() {
+  const viewed=state.landed&&state.entities.get(state.landed),summary=$('planetSummary');
+  summary.hidden=!viewed;
+  if(viewed){setHtml(summary,planetSummary(viewed));summary.style.top=`${Math.ceil($('topbar').getBoundingClientRect().bottom)+64}px`;}
   const lost = state.landed && state.entities.get(state.landed)?.type==='ruins' && !accessTo(state.landed).manage;
   syncManagementControls(lost);
   if (!lost && panel.contains(document.activeElement) && document.activeElement.matches('input,select,textarea')) return;
