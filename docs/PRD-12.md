@@ -123,7 +123,7 @@ zählen. Zusätzliche Anzeigedaten müssen dieselben Wirtschaftsregeln nutzen.
 ## Umsetzungsschritte und Fortschritt
 
 - [x] Planung abstimmen und PRD erstellen.
-- [ ] Schritt 1: Hauptquestauswahl mit stabiler Auswahl und passenden Aktionen
+- [x] Schritt 1: Hauptquestauswahl mit stabiler Auswahl und passenden Aktionen
   umsetzen; Questwechsel, Questabschluss und parallelen Fortschritt prüfen.
 - [ ] Schritt 2: Gemeinsame Bestandsdarstellung in allen Rezeptpfaden ergänzen;
   Zyklusgrenzen, Reserven, Ausgangsbestände und Aktualisierung prüfen.

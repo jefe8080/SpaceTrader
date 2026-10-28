@@ -5,6 +5,8 @@ import { cmd } from '../net.js';
 import { $, setHtml } from './dom.js';
 import { bus } from './bus.js';
 import { HOME_QUESTS } from '/shared/homeworld.js';
+import { selectHomeQuest } from '/shared/quest-selection.js';
+let selectedHomeQuest = null;
 
 const g = (x) => GOODS[x]?.name || x;
 
@@ -104,8 +106,11 @@ export function renderQuestBox() {
   const q = state.quest;
   const box = $('questBox');
   box.hidden = !q && !state.homeworld;
-  const nextHome = Object.entries(HOME_QUESTS).find(([id, quest]) => !state.homeQuest?.completed[id] && state.homeQuest?.active?.[id]);
-  const homeSummary = state.homeworld && nextHome ? `<div class="qb-head">⌂ Hauptquest · ${nextHome[0]}</div><p>${esc(nextHome[1].title)}: ${esc(nextHome[1].goal)}</p><button class="small" data-q="homeTarget">Heimat zeigen</button><hr>` : '';
+  const selection = selectHomeQuest(HOME_QUESTS, state.homeQuest, selectedHomeQuest);
+  selectedHomeQuest = selection.id;
+  const home = HOME_QUESTS[selection.id];
+  const navigation = selection.count > 1 ? `<button class="small" data-q="homePrev" aria-label="Vorherige Hauptquest">‹</button><span>${selection.index+1}/${selection.count}</span><button class="small" data-q="homeNext" aria-label="Nächste Hauptquest">›</button>` : '';
+  const homeSummary = state.homeworld && home ? `<div class="qb-head">⌂ Hauptquest · ${selection.id}<span style="flex:1"></span>${navigation}</div><p>${esc(home.title)}: ${esc(home.goal)}</p><button class="small" data-q="homeTarget">Heimat zeigen</button><hr>` : '';
   if (!q) { setHtml(box, homeSummary); return; }
   const t = questTarget(q);
   const docked = myShips().filter((s) => s.dockedAt);
@@ -120,6 +125,11 @@ export function renderQuestBox() {
 $('questBox').addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-q]');
   const q = state.quest;
+  if (['homePrev','homeNext'].includes(b?.dataset.q)) {
+    selectedHomeQuest = selectHomeQuest(HOME_QUESTS, state.homeQuest, selectedHomeQuest, b.dataset.q === 'homeNext' ? 1 : -1).id;
+    renderQuestBox();
+    return;
+  }
   if (b?.dataset.q === 'homeTarget') {
     const home = state.entities.get(state.homeworld);
     if (home) { state.follow = null; state.camera.x = home.x; state.camera.y = home.y; bus.select({ kind: 'entity', id: home.id }); }
