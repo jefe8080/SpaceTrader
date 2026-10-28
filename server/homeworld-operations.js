@@ -411,6 +411,7 @@ function operationStep(game,entity,dt,now) {
 
 export function tickHomeOperations(game,entity,dt) {
   const home=entity.market.homeworld;initializeHomeOperations(home);
+  for(const [good,slot] of Object.entries(entity.market.goods))if(slot.stock>0)(home.knownGoods??={})[good]=true;
   if(home.warp)return;
   dt=Math.min(dt,Math.max(0,game.time-(home.warpResumedAt??-Infinity)));if(dt<=0)return;
   initializePopulation(entity);

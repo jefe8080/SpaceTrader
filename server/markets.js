@@ -125,6 +125,7 @@ function bucketFor(m, now) {
  */
 export function stat(m, now, kind, good, n) {
   if (!n) return;
+  if (m.homeworld && kind !== 'n') (m.homeworld.knownGoods ??= {})[good] = true;
   const cur = bucketFor(m, now);
   if (kind === 'n') cur.n += n;
   else cur[kind][good] = (cur[kind][good] || 0) + n;
