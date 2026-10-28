@@ -83,7 +83,7 @@ export function renderPlanetside(now, dt) {
       if (state.landed === id && scene.key === key) status('Stadtansicht konnte nicht geladen werden.', true);
     });
   }
-  if (viewer) { viewer.show(); viewer.render(dt); }
+  if (viewer) { if(viewer.entity?.id===e.id)viewer.entity=e; viewer.show(); viewer.render(dt); }
 }
 document.getElementById('planetRetry').onclick = () => { scene.key = ''; };
 /** Gebäudeliste eines Planeten (abhängig von Markt, Besitz und Fabriken) */

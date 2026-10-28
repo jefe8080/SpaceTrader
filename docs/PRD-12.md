@@ -127,7 +127,7 @@ zählen. Zusätzliche Anzeigedaten müssen dieselben Wirtschaftsregeln nutzen.
   umsetzen; Questwechsel, Questabschluss und parallelen Fortschritt prüfen.
 - [x] Schritt 2: Gemeinsame Bestandsdarstellung in allen Rezeptpfaden ergänzen;
   Zyklusgrenzen, Reserven, Ausgangsbestände und Aktualisierung prüfen.
-- [ ] Schritt 3: Stillstandszuordnung und bewegte Sprechblasen ergänzen;
+- [x] Schritt 3: Stillstandszuordnung und bewegte Sprechblasen ergänzen;
   Zustandswechsel, Priorität und Kameraverhalten prüfen.
 - [ ] Schritt 4: Planetenfenster mit Lagertrennung, Sollbedarf und
   Qualifikationen ergänzen; Mangelgrenzen und Datenberechtigungen prüfen.

@@ -1,4 +1,5 @@
 import {GOODS} from '/shared/config.js';
+import {productionBubble} from '/shared/production-display.js';
 import {CITY_TYPES, planCity, citySprite, cityDevelopment, pickCity} from './planetCityLayout.js';
 import {constrainCityPose,fitCityOverview,fitCityFocus} from './planetCityCamera2D.js';
 
@@ -192,6 +193,17 @@ export class PlanetCityScene {
     const scale=1/this.pose.zoom,text=r.item.label||r.key;ctx.save();ctx.translate(r.x,r.y-r.h-10);ctx.scale(scale,scale);
     ctx.font='12px system-ui';const w=ctx.measureText(text).width+16;ctx.fillStyle='#162c2bea';ctx.strokeStyle='#c9ab73';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(-w/2,-19,w,23,4);ctx.fill();ctx.stroke();ctx.fillStyle='#f6e8c9';ctx.textAlign='center';ctx.fillText(text,0,-3);ctx.restore();
   }
+  drawProductionBubble(ctx,r){
+    const text=productionBubble(this.entity.market,r.item);if(!text)return;
+    const phase=[...r.key].reduce((n,c)=>n+c.charCodeAt(0),0);
+    const sway=this.reducedMotion?0:Math.sin(this.time*1.5+phase)*4;
+    const s=this.toScreen(r.x,r.y-r.h);
+    ctx.save();ctx.translate(s.x+sway,s.y-34);
+    ctx.fillStyle='#fff9e9';ctx.strokeStyle='#756143';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(-23,-15,46,28,9);ctx.fill();ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-5,13);ctx.lineTo(0,19);ctx.lineTo(5,13);ctx.fill();
+    ctx.font='bold 15px system-ui';ctx.textAlign='center';ctx.fillStyle='#443c2b';ctx.fillText(text,0,5);ctx.restore();
+  }
   render(dt){
     if(!this.active||this.loading||!this.plan)return;this.resize();this.time+=Math.min(dt||0,.06);
     if(this.flight){const f=this.flight;f.elapsed+=Math.min(dt||0,.06);const t=Math.min(1,f.elapsed/.5),k=1-(1-t)**3;for(const key of ['x','y','zoom'])this.pose[key]=f.from[key]+(f.to[key]-f.from[key])*k;if(t===1)this.flight=null;}
@@ -206,6 +218,7 @@ export class PlanetCityScene {
     }
     ctx.restore();
     for(const r of this.records.values()){
+      this.drawProductionBubble(ctx,r);
       const s=this.toScreen(r.x,r.y-r.h/2),bw=Math.max(44,r.w*p.zoom),bh=Math.max(44,r.h*p.zoom);
       // Buttons stay transparent until keyboard focused; pointer events always go to the canvas.
       Object.assign(r.button.style,{left:s.x-bw/2+'px',top:s.y-bh/2+'px',width:bw+'px',height:bh+'px'});

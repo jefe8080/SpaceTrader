@@ -367,8 +367,13 @@ export function applyLevel(e) {
 }
 
 /** Einfacher Rezeptlauf ohne Verpflegung (für Zusatzrezepte und Fabriken auf Bauplätzen). Liefert neuen Fortschritt. */
+export function recipeBlockReason(m, r) {
+  if (!Object.entries(r.in).every(([g,n]) => m.goods[g]?.stock >= n)) return 'Zutaten fehlen';
+  if (!Object.entries(r.out).every(([g,n]) => m.goods[g] && m.goods[g].stock+n <= m.goods[g].cap)) return 'Lager voll';
+  return null;
+}
 export function runRecipe(m, r, prog, dt, now) {
-  const ready = () => Object.entries(r.in).every(([g, n]) => m.goods[g]?.stock >= n) && Object.entries(r.out).every(([g, n]) => m.goods[g] && m.goods[g].stock + n <= m.goods[g].cap);
+  const ready = () => !recipeBlockReason(m,r);
   if (!ready()) return 0;
   prog += (dt * (m.boost || 1)) / r.time;
   while (prog >= 1 && ready()) {

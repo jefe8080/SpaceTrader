@@ -1,6 +1,7 @@
 import { pilotProfile } from './pilot-profile.js';
 import { GAME_PROTOCOL } from '../shared/protocol.js';
-import { NET, NPC_OWNER, cellKey, cellOf, pilotLevel } from '../shared/config.js';
+import { NET, NPC_OWNER, cellKey, cellOf, pilotLevel, recipeOf } from '../shared/config.js';
+import {recipeBlockReason} from './markets.js';
 import { runCommand } from './handlers/index.js';
 import { sectorSummary } from './game.js';
 import { sumWindow } from './stats.js';
@@ -314,7 +315,10 @@ function extraOf(m) {
   }
   if (m.progress !== undefined) out.progress = r1(m.progress);
   if (m.smug?.offer) out.smug = m.smug.offer;
-  if (m.bld) out.bld = { lvl: m.bld.lvl, fac: m.bld.factories.map((f) => f.recipe) };
+  if (m.bld) {
+    out.bld = { lvl: m.bld.lvl, fac: m.bld.factories.map((f) => f.recipe) };
+    out.factoryStates = m.bld.factories.map(f => ({reason:m.owner ? recipeBlockReason(m,recipeOf(f.recipe)) : 'Kein Besitz'}));
+  }
   if (m.supply !== undefined) out.supply = m.supply && { state: m.supply.state, good: m.supply.good, sourceId: m.supply.sourceId, shipId: m.supply.shipId };
   return out;
 }

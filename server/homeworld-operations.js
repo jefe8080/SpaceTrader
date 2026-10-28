@@ -253,16 +253,17 @@ function completeConstruction(game,entity,now) {
   home.projects=pending;
 }
 
-function productionAvailable(market,recipe,id) {
-  if(id&&!productionAllowed(market,id))return false;
-  if(!Object.entries(recipe.in).every(([g,n])=>(id?productionStock(market,g,id):availableHomeStock(market,g))>=n))return false;
+export function productionBlockReason(market,recipe,id) {
+  if(id&&!productionAllowed(market,id))return 'Produktionsziel erreicht';
+  if(!Object.entries(recipe.in).every(([g,n])=>(id?productionStock(market,g,id):availableHomeStock(market,g))>=n))return 'Zutaten fehlen';
   const delta={normal:0,hazard:0};
   for(const [g,n] of Object.entries(recipe.out)){const cls=GOODS[g]?.cls;if(cls in delta)delta[cls]+=n;}
   for(const [g,n] of Object.entries(recipe.in)){const cls=GOODS[g]?.cls;if(cls in delta)delta[cls]-=n;}
-  for(const [g,n] of Object.entries(recipe.out))if(market.goods[g].stock+n-(recipe.in[g]||0)>homeGoodLimit(market,g)+1e-8)return false;
+  for(const [g,n] of Object.entries(recipe.out))if(market.goods[g].stock+n-(recipe.in[g]||0)>homeGoodLimit(market,g)+1e-8)return 'Lager voll';
   const used=homeStorageUsage(market),home=market.homeworld;
-  return used.normal+delta.normal<=home.storage+1e-8&&used.hazard+delta.hazard<=home.hazardStorage+1e-8;
+  return used.normal+delta.normal<=home.storage+1e-8&&used.hazard+delta.hazard<=home.hazardStorage+1e-8 ? null : 'Lager voll';
 }
+const productionAvailable=(market,recipe,id)=>!productionBlockReason(market,recipe,id);
 
 function runProduction(market,building,recipe,dt,speed,now) {
   const id=building.recipe||building.facility;
@@ -369,7 +370,7 @@ function operationStep(game,entity,dt,now) {
   for(const unit of units){
     const {id,building,spec,recipe}=unit;
     if(unit.relicWorkshop&&relicWork)remaining.skilled+=2;
-    const reason=id==='orbital:large'&&home.orbital.jobs.small&&!allocations.some(a=>a.id==='orbital:small'&&a.state==='active')?'Grundring nicht in Betrieb':building.enabled===false?'Pausiert':recipe&&!productionAvailable(market,recipe,building.recipe||id)?'Produktionsziel erreicht, Zutaten fehlen, Reserve geschützt oder Lager voll':powerUsed+(spec.power||0)>generation?'Energie fehlt':null;
+    const reason=id==='orbital:large'&&home.orbital.jobs.small&&!allocations.some(a=>a.id==='orbital:small'&&a.state==='active')?'Grundring nicht in Betrieb':building.enabled===false?'Pausiert':(recipe?productionBlockReason(market,recipe,building.recipe||id):null)||(powerUsed+(spec.power||0)>generation?'Energie fehlt':null);
     const emergency=['dock','control'].includes(id)&&reason==='Energie fehlt';
     if(emergency){allocations.push({id,state:'emergency',reason:'Unabhängige Notversorgung erhält Lagerzugang und Reichweite',power:0,workers:qualified()});continue;}
     if(!assign(id,spec,reason)){building.blocked=reason||'Personal fehlt';continue;}
