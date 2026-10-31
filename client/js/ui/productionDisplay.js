@@ -16,5 +16,11 @@ const number = n => Number.isFinite(n) ? fmt(n) : '—';
 const pair = (need, available, warn = true) => `<span class="${warn && Number.isFinite(need) && Number.isFinite(available) && need > available ? 'neg' : ''}">${number(need)} / ${number(available)}</span>`;
 export function planetSummary(entity) {
   const m = entity.market, storage = storageSummary(m), supply = (m?.homeworld || m?.economy)?.supplyOverview;
-  return `<b>${esc(entity.name)}</b><div class="kv"><span>Lager</span>${pair(storage?.usage.normal, storage?.capacity.normal, false)}<span>Gefahrgut</span>${pair(storage?.usage.hazard, storage?.capacity.hazard, false)}<span>Arbeitskräfte</span>${pair(supply?.workers.required, supply?.workers.available)}<span class="small-note">Einfach · Fach · Spezial</span><span class="small-note">${['basic','skilled','specialist'].map(q => pair(supply?.qualifications[q]?.required, supply?.qualifications[q]?.available)).join(' · ')}</span><span>Strom</span>${pair(supply?.power.required, supply?.power.available)}</div>`;
+  const stat=(label,need,available,warn=true)=>`<div class="supply-stat"><span class="supply-label">${label}</span>${pair(need,available,warn)}</div>`;
+  return `<b class="planet-summary-name">${esc(entity.name)}</b><div class="supply-grid">
+    ${stat('Lager',storage?.usage.normal,storage?.capacity.normal,false)}
+    ${stat('Gefahrgut',storage?.usage.hazard,storage?.capacity.hazard,false)}
+    ${stat('Arbeitskräfte',supply?.workers.required,supply?.workers.available)}
+    ${['basic','skilled','specialist'].map((q,i)=>stat(['Einfache Arbeit','Fachkräfte','Spezialisten'][i],supply?.qualifications[q]?.required,supply?.qualifications[q]?.available)).join('')}
+    ${stat('Strom',supply?.power.required,supply?.power.available)}</div>`;
 }

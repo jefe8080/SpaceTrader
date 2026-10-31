@@ -93,7 +93,12 @@ function syncManagementControls(lost){
 export function renderPlanetUi() {
   const viewed=state.landed&&state.entities.get(state.landed);
   const summary=$('planetSummary');
-  if(viewed&&summary)setHtml(summary,planetSummary(viewed));
+  summary.hidden=!viewed;
+  if(viewed)setHtml(summary,planetSummary(viewed));
+  document.body.classList.toggle('landed',!!viewed);
+  const fleet=$('fleet');
+  if(viewed)fleet.style.top=`${Math.ceil($('topbar').getBoundingClientRect().bottom)+12}px`;
+  else fleet.style.removeProperty('top');
   // Keep recipe stocks live even while an adjacent form retains keyboard focus.
   if(viewed)for(const label of panel.querySelectorAll('[data-production-recipe]')){
     const id=label.dataset.productionRecipe;if(RECIPES[id])label.outerHTML=recipeWithStock(viewed.market,RECIPES[id],id);
@@ -112,8 +117,7 @@ export function renderPlanetUi() {
   if (!e) return;
   setHtml(bar, `<button class="small" data-pp="leave">Planet verlassen <kbd>Esc</kbd></button>
     <button class="small" data-pp="overview" title="Zur gesamten Stadt zurückkehren">Übersicht</button>
-    <button class="small" data-pp="names" aria-pressed="${cityNames}" title="Namen aller Stadtorte anzeigen">Namen</button>
-    <div id="planetSummary" aria-label="Planetenversorgung">${planetSummary(e)}</div>`);
+    <button class="small" data-pp="names" aria-pressed="${cityNames}" title="Namen aller Stadtorte anzeigen">Namen</button>`);
   bar.setAttribute('aria-label', `${e.name} · ${PLANET_TYPES[e.type].name}`);
   bar.style.top = `${Math.ceil($('topbar').getBoundingClientRect().bottom)+12}px`;
   if(innerWidth>1100)panel.style.top=`${Math.ceil(bar.getBoundingClientRect().bottom)+12}px`;

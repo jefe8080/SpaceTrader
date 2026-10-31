@@ -76,7 +76,8 @@ Questfortschritt und die bestehenden Besitz-/Zugangsrechte berücksichtigen.
 ### 5. Planetenübersicht in den oberen Balken integrieren
 
 Das separate Übersichtsfenster aus PRD 12 entfällt. Seine vollständigen
-Inhalte werden in den oberen Balken integriert und ausschließlich in der
+Inhalte werden in die globale oberste Leiste (`topbar`, bei Pilotenprofil
+und Handel & Routen) integriert und ausschließlich in der
 Planetenansicht angezeigt:
 
 - Normales Lager und Gefahrgutlager jeweils mit Belegung und Kapazität.
@@ -182,3 +183,13 @@ Versorgungswerte aktualisieren sich auch bei fokussierten Eingabefeldern.
 
 Nachweise und Hinweise zu zwischenzeitlich korrigierten Prüfungen:
 [QA PRD 13](qa/prd13/README.md). Kein Push ausgeführt.
+
+### Layoutkorrektur nach Nutzerabnahme
+
+Die Versorgung sitzt in der globalen obersten Leiste, mit getrennt
+beschrifteten Werteblöcken für Lager, Gefahrgut, Arbeitskräfte, die drei
+Qualifikationen und Strom. Die drei bisherigen Planetenbuttons stehen
+wieder einzeln rechts unterhalb dieser Leiste. Bei Größenänderungen wird
+die Flotte unter der tatsächlichen Höhe der Leiste positioniert.
+Geprüft: 12 PRD-12-/PRD-13-Tests, JavaScript-Syntax und Browseransichten
+bei 1440 × 900 sowie 390 × 844; Versorgung im Weltall ausgeblendet.

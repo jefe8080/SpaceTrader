@@ -59,3 +59,19 @@ noch die pauschale Fabrikbausperre beziehungsweise unveränderte Schulpopulation
 Diese Erwartungen wurden an PRD 13 angepasst; die anschließenden gezielten und
 vollständigen Läufe bestehen. Es verbleiben keine fehlgeschlagenen oder
 nicht ausführbaren Prüfungen.
+
+## Korrektur der Ressourcenposition nach Nutzerabnahme
+
+Die Ressourcen sind jetzt Bestandteil der globalen obersten Leiste neben
+den bestehenden Navigationselementen. Jede Kennzahl hat eine eigene
+Beschriftung oberhalb ihres Wertepaars; die drei Planetenbuttons stehen
+wieder einzeln rechts darunter. Die Höhe der Leiste wird für die Position
+der Flotte berücksichtigt. Die bisherigen Screenshots dokumentieren den
+ersten Stand; maßgeblich für die korrigierte Position sind:
+
+- [Korrigierte obere Leiste, breit](resources-topbar-wide.jpg)
+- [Korrigierte obere Leiste, schmal](resources-topbar-narrow.jpg)
+
+Erneut geprüft: 12 Tests aus PRD 12 und 13 bestanden, JavaScript-Syntax
+fehlerfrei, Browser bei 1440 × 900 und 390 × 844 sowie Ausblenden der
+Ressourcen nach Verlassen des Planeten.
