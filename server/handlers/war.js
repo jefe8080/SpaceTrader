@@ -11,6 +11,7 @@ import { kindFactor } from '../../shared/damage.js';
 import { startRepair, quoteFor } from '../war/repair.js';
 import { setAlliance } from '../war/support.js';
 import { supplyDelivery, deliverGift, buyGalacticFriendship } from '../war/factions.js';
+import { raidError, repairPlanet } from '../war/raids.js';
 import { GOODS } from '../../shared/config.js';
 
 const battleOf = () => (v, { game }) => { const b = game.battles.get(v); if (!b) throw new CmdError('Diese Schlacht ist beendet.'); return b; };
@@ -173,6 +174,23 @@ export default {
   galacticFriendship: {
     args: {},
     run({ game, player }) { return buyGalacticFriendship(game, player) || undefined; },
+  },
+  /** Planetenraid: erst Verteidiger besiegen, dann sichtbare Plünderung; kein Besitzwechsel */
+  raid: {
+    args: { ships: V.ownShips(24), planet: V.entity() },
+    run({ game }, { ships, planet }) {
+      for (const s of ships) {
+        const err = attackerError(game, s) || raidError(game, s.owner, planet);
+        if (err) return err;
+        if (s.repairHold) return `${s.name} muss vor erneutem Kampfeinsatz repariert werden.`;
+      }
+      for (const s of ships) { const err = giveOrder(game, s, { t: 'raid', planet: planet.id }, false); if (err) return err; }
+    },
+  },
+  /** Raidschaden reparieren: Geld und kurze Zeit, keine Baumaterialien; der Schutz bleibt */
+  planetRepair: {
+    args: { target: V.entity() },
+    run({ game, player }, { target }) { return repairPlanet(game, player, target) || undefined; },
   },
   /** Freikauf eines eigenen gefangenen Schiffes: fester Preis, vorher angezeigt */
   ransom: {

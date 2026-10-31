@@ -112,6 +112,8 @@ warActions.posture = (d) => cmd('posture', { ship: d.ship, mode: d.mode });
 warActions.supply = (d) => cmd('factionSupply', { ship: d.ship, good: d.good, amount: 1e6, donate: d.donate === '1' });
 warActions.gift = (d) => cmd('friendGift', { ship: d.ship });
 warActions.galactic = () => { if (confirm('Leitstellenmodul „galaktische Freundschaft“ für 75.000.000 Cr bauen?')) cmd('galacticFriendship'); };
+warActions.raid = (d) => { if (confirm('Planetenraid starten? Erst Verteidiger besiegen, dann Plünderung.')) cmd('raid', { ships: selectedShips().map((x) => x.id), planet: d.planet }); };
+warActions.planetRepair = (d) => { if (confirm(`Raidschaden für ${fmt(Number(d.cost))} Cr reparieren?`)) cmd('planetRepair', { target: d.planet }); };
 warActions.view = (d) => import('./battle.js').then((m) => m.openBattle(d.battle));
 
 
@@ -133,7 +135,8 @@ export function adminSection(e, ship) {
     <span>Fraktionssektorlevel</span><span>${fs.level} · Fortschritt ${pct(fs.progress)} %${fs.ok ? '' : ' · ⛔ Versorgungslücke (Fortschritt pausiert)'}</span>
     <span>Geldpool</span><span>${fmt(fs.pool)} / ${fmt(fs.cap)} Cr</span>
     ${sup('water', 'Wasser')}${sup('food', 'Nahrung')}
-    <span>Kriegsschiffe</span><span>${fs.warships} / ${fs.limit}</span></div>
+    <span>Kriegsschiffe</span><span>${fs.warships} / ${fs.limit}</span>
+    ${fs.relation === 'hostile' ? `<span>Aggression</span><span>${fs.aggr}${fs.peaceLeft ? ` · Friedenszeit noch ${Math.ceil(fs.peaceLeft / 3600)} h` : ''}${fs.ok ? ' · Anstieg pausiert (versorgt)' : ''}</span>` : ''}</div>
     <div class="muted">Alle Fraktionsquests dieses Sektors laufen hier. Quests geben Ruf und Fraktions-XP, keine Credits; Abgabe nur bei ausreichender Versorgung.</div>`;
   if (ship) {
     const donate = fs.relation === 'hostile';
@@ -143,4 +146,20 @@ export function adminSection(e, ship) {
   }
   if (w.friends.length && !w.galactic) h += `<div class="muted">Zweite Freundschaft: Leitstellenmodul „galaktische Freundschaft“. <button class="small" data-war="galactic">Bauen (75 Mio. Cr)</button></div>`;
   return h + '</div>';
+}
+
+/** Planet: Raidmalus, Schutzfrist, Reparatur und Raidbefehl */
+export function raidSection(e) {
+  if (e.kind !== 'planet' || !e.market) return '';
+  const r = e.market.raid;
+  const own = e.market.homeworld?.owner === state.me?.id || e.owner === state.me?.id;
+  let h = '';
+  if (r) {
+    const left = Math.max(0, Math.round((r.protectUntil - (state.time || 0)) / 3600));
+    h += `<div class="warnbox">🏚 Geplündert${r.malus ? ': Produktion 50 % bis zur Reparatur' : ' (repariert)'} · 🛡 Raidschutz noch ca. ${left} h.
+      ${own && r.malus ? (r.repairUntil ? ' Reparatur läuft …' : ` <button class="small" data-war="planetRepair" data-planet="${e.id}" data-cost="25000">Reparieren (25.000 Cr, 2 min)</button>`) : ''}</div>`;
+  }
+  const mine = selectedShips();
+  if (!own && mine.length && (e.faction || e.market.homeworld || e.owner) && !(r && r.protectUntil > (state.time || 0))) h += `<div class="btnrow"><button class="small danger" data-war="raid" data-planet="${e.id}">⚔ Raid mit ${mine.length} Schiff${mine.length > 1 ? 'en' : ''}</button></div>`;
+  return h;
 }

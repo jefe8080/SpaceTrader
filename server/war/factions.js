@@ -72,8 +72,12 @@ export function receiveGoods(fs, good, n) {
 }
 
 /** Spieleraktivität im Sektor (wirtschaftliche oder militärische Aktionen) */
-export function recordActivity(game, sector) {
-  if (sector) game.warActivity.set(sector, game.time);
+export function recordActivity(game, sector, playerId = null) {
+  if (!sector) return;
+  game.warActivity.set(sector, game.time);
+  // Spielerbezogen für die Aggression (U10)
+  const p = playerId && game.players.get(playerId);
+  if (p) (diplo(p).act ||= {})[sector] = game.time;
 }
 function activeNear(game, sector) {
   const [q, r] = sector.split(',').map(Number);
@@ -298,7 +302,8 @@ export function fsecView(game, fs, p) {
   return { key: fs.key, faction: fs.faction, name: FACTIONS[fs.faction].name, level: fs.level, pool: Math.floor(fs.pool), cap: capOf(fs),
     progress: Math.round(fs.progress * 100) / 100, supply: { water: Math.floor(fs.supply.water), food: Math.floor(fs.supply.food) }, buffer: bufferOf(fs),
     ok: fs.ok, warships: warshipsOf(game, fs).length, limit: F.WARSHIPS_PER_LEVEL * fs.level,
-    relation: isFriend(p, fs.faction) ? 'friend' : factionHostileTo(game, fs.faction, p.id) ? 'hostile' : 'neutral' };
+    relation: isFriend(p, fs.faction) ? 'friend' : factionHostileTo(game, fs.faction, p.id) ? 'hostile' : 'neutral',
+    aggr: Math.round(diplo(p).aggr[fs.key] || 0), peaceLeft: diplo(p).peace[fs.key] === undefined ? null : Math.max(0, Math.round(86400 - (game.time - diplo(p).peace[fs.key]))) };
 }
 
 export { isFactionOwner, hexAt };

@@ -50,7 +50,7 @@ export function orderError(game, ship, cmd, append, routeOverride) {
   if (game.profile === 'homeworld') {
     if (player?.relic?.operation?.ship === ship.id) return 'Das Schiff ist für die laufende Reliktarbeit gesperrt.';
     if (ship.relicSpeed && (cmd.t === 'route' || cmd.t === 'harvest' || append || (cmd.t === 'dock' && cmd.actions?.length > 1))) return 'Der Reliktträger unterstützt keine Automatisierung oder Befehlsfolgen.';
-    const target = cmd.t === 'attack' || cmd.t === 'join' ? game.ships.get(cmd.target) || ship : cmd.target ? game.world.entities.get(cmd.target) : cmd.x !== undefined ? cmd : ship;
+    const target = cmd.t === 'attack' || cmd.t === 'join' ? game.ships.get(cmd.target) || ship : cmd.t === 'raid' ? game.world.entities.get(cmd.planet) || ship : cmd.target ? game.world.entities.get(cmd.target) : cmd.x !== undefined ? cmd : ship;
     if(target?.market?.homeworld?.warp)return 'Standort während Warpvorbereitung für Anlieferungen gesperrt.';
     const error = manualActionError(game, player, ship, target);
     if (error) return error;

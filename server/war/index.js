@@ -6,6 +6,7 @@ import { tickDebris } from './outcome.js';
 import { tickRepairs } from './repair.js';
 import { tickSupport, snapshotAllies, stockProtection } from './support.js';
 import { tickFactions, recordActivity } from './factions.js';
+import { tickRaids, onDefendersBeaten } from './raids.js';
 
 /** Persistente Kriegszustände: Präfix der Zeilen-ID in der Tabelle war -> Map am Spiel */
 const COLLECTIONS = { stack: 'stacks', battle: 'battles', fsec: 'fsecs', act: 'warActivity' };
@@ -19,7 +20,8 @@ export function initWar(game) {
   game.counters.stack ??= 0;
   game.counters.battle ??= 0;
   game.counters.debris ??= 0;
-  game.on('battleStart', (b) => { snapshotAllies(game, b); if (Object.values(b.units).some((u) => game.players.has(u.owner))) recordActivity(game, b.sector); });
+  game.on('battleStart', (b) => { snapshotAllies(game, b); for (const u of Object.values(b.units)) if (game.players.has(u.owner)) recordActivity(game, b.sector, u.owner); });
+  game.on('raidDefendersBeaten', (b) => onDefendersBeaten(game, b));
 }
 
 export function loadWar(game) {
@@ -54,6 +56,7 @@ export function tickWarAfter(game, dt) {
     tickRepairs(game);
     tickSupport(game);
     tickFactions(game);
+    tickRaids(game);
     game.warSlow = (game.warSlow || 0) + 1;
     if (game.warSlow % 60 === 1) stockProtection(game);
   }

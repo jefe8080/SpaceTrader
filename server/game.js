@@ -33,6 +33,7 @@ import {dispatchRealSupply,finishRealSupply,receiveMarketCash,spendMarketCash,do
 import { initWar, loadWar, saveWar, tickWarBefore, tickWarAfter } from './war/index.js';
 import { stackSpeed, removeFromStacks } from './war/stacks.js';
 import { recordActivity } from './war/factions.js';
+import { productionFactor } from './war/raids.js';
 
 export const WORLD_GEN_VERSION = 3; // Bestandswelt; Versionskonflikte lösen niemals einen Reset aus
 
@@ -691,14 +692,16 @@ export class Game {
       }
       const propSectors = new Set([...this.ownership.keys()].map((id) => this.world.entities.get(id)?.sector));
       for (const e of this.world.entities.values()) {
-        if (e.market?.strategy === 'homeworld') { tickHomeworld(this, e, this.econAcc); continue; }
+        // PRD 15: Raidmalus läuft als halbe Produktionsgeschwindigkeit bis zur Reparatur
+        const econDt = this.econAcc * productionFactor(e);
+        if (e.market?.strategy === 'homeworld') { tickHomeworld(this, e, econDt); continue; }
         if (e.market?.strategy === 'homeResource') { tickHomeResource(e, this.econAcc,this.time); continue; }
         if(this.profile==='homeworld'&&e.market){
-          tickMarket(e,this.econAcc,this.time,this);
+          tickMarket(e,econDt,this.time,this);
           if(propSectors.has(e.sector)||this.time-(this.activity.get(e.sector)??-Infinity)<SUPPLY.ACTIVITY)dispatchRealSupply(this,e);
           continue;
         }
-        tickMarket(e, this.econAcc, this.time, this);
+        tickMarket(e, econDt, this.time, this);
         if (!e.market) continue;
         if (SUPPLIED.has(e.market.strategy)) this.checkSupply(e);
         else if (e.market.strategy === 'planet' && (propSectors.has(e.sector) || this.time - (this.activity.get(e.sector) ?? -Infinity) < SUPPLY.ACTIVITY)) this.checkHaul(e);
@@ -826,7 +829,7 @@ export class Game {
 
   /** Nach jedem Handel mit Fremden: Einstandspreis bzw. Hauptschiff-XP, wenig XP für den Questgeber aus dem Umsatz */
   afterTrade(ship, e, good, n, total, dir, opts = {}) {
-    if (n > 0 && this.players.has(ship.owner)) recordActivity(this, e.sector); // PRD 15: Spieleraktivität für Fraktionswirtschaft und Aggression
+    if (n > 0 && this.players.has(ship.owner)) recordActivity(this, e.sector, ship.owner); // PRD 15: Spieleraktivität für Fraktionswirtschaft und Aggression
     this.tradeBasis(ship, good, n, total, dir, opts);
     this.addGiverXp(e, total / GIVER_TRADE_CR);
   }

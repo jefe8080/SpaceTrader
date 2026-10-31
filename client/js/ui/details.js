@@ -21,7 +21,7 @@ import {colonyPanel,warpPanel} from './colonies.js';
 import { entityGuideKey, OBJECT_GUIDE } from '/shared/object-guide.js';
 import { showGuide } from './objectGuide.js';
 import { homeGoodLimit } from '/shared/homeworld.js';
-import { stackSection, combatSection, foreignWarSection, ownWarSection, adminSection } from './war.js';
+import { stackSection, combatSection, foreignWarSection, ownWarSection, adminSection, raidSection } from './war.js';
 
 const entName = (id) => esc(state.entities.get(id)?.name || 'unbekannter Ort');
 const dockedHereOwn = (id) => myShips().some((s) => s.dockedAt === id);
@@ -304,7 +304,7 @@ function entityDetails(e) {
   ${e.kind==='planet' && m?`<button data-act="land" data-ent="${e.id}" ${canLand(e.id)?'':'disabled'}>Landen</button>`:''}
   <button class="star" data-act="fav" data-ent="${e.id}" aria-label="Favorit umschalten" aria-pressed="${fav}">${fav?'★':'☆'}</button></div>`;
   if(ships.length) h+=`<div class="location-orders"><label>Schiff <select id="locationShip">${ships.map(s=>`<option value="${s.id}" ${s.id===locationShip?'selected':''}>${esc(s.name)}${s.dockedAt===e.id?' · angedockt':''}</option>`).join('')}</select></label><button data-act="sendSelected" data-ent="${e.id}" title="Shift: anhängen">Anfliegen</button></div>`;
-  h += adminSection(e, myDocked);
+  h += adminSection(e, myDocked) + raidSection(e);
   let infrastructure='';
   if (e.kind === 'planet') {
     infrastructure += e.ruinsSite?colonyPanel(e):e.type === 'ruins' ? `<p>Persönliche, unverkäufliche Ruinenwelt. Rathaus, Reparaturen und Bauverwaltung sind bei Landung oder über dein Hauptschiff im eigenen Leitstellennetz erreichbar.</p><div class="kv"><span>Einwohner / Wohnraum</span><span>${m.homeworld.population} / ${m.homeworld.housing}</span><span>Leitstelle</span><span>Stufe ${m.homeworld.controlLevel}</span><span>Reguläre Bauplätze</span><span>${m.homeworld.plots}</span></div>` : `<div class="muted">${PLANET_TYPES[e.type].desc}</div>
