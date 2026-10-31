@@ -24,6 +24,7 @@ import {handlingAllowance,recordHandling} from './handling.js';
 import {tickColonies} from './colonies.js';
 import {tickWarps} from './warp.js';
 import { syncHomeQuests } from './quest-activation.js';
+import {localSalesSummary} from '../shared/local-sales.js';
 import { tickRelics } from './relic.js';
 import { homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { coveredPath, pointCovered } from './coverage.js';
@@ -1055,6 +1056,7 @@ export class Game {
     const round = (o) => Object.fromEntries(Object.entries(o || {}).map(([g, v]) => [g, Math.round(v * 10) / 10]));
     return {
       id: e.id, bucketSecs: STATS.BUCKET_SECS, buckets: STATS.BUCKETS, now: Math.floor(this.time / STATS.BUCKET_SECS),
+      localSales: localSalesSummary(e.market,this.time),
       data: (e.market.stats || []).map((b) => ({ b: b.b, n: b.n, p: round(b.p), c: round(b.c), i: round(b.i), o: round(b.o), pr: round(b.pr) })),
     };
   }

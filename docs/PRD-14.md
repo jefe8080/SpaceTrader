@@ -21,6 +21,11 @@ Push ohne Zustimmung.
 
 ## Verbindliche Anforderungen
 
+Umsetzungsauftrag am 31.10.2026 erteilt: PRD 14 vollständig umsetzen,
+schrittweise committen und anschließend ohne weitere Rückfrage auf
+`master` pushen. Die früheren Beschränkungen auf den Planungsauftrag
+sind damit für diese Umsetzung aufgehoben.
+
 ### 1. Lokalen planetaren Absatz getrennt erfassen
 
 Die Statistik unterscheidet tatsächlichen lokalen Absatz von Produktion,
@@ -265,10 +270,16 @@ und relevante neue Möglichkeiten zusammen verständlich dargestellt.
 ## Geplante Umsetzungsschritte und Fortschritt
 
 - [x] Planung mit Q1–Q8 und Nutzerkorrekturen abstimmen; PRD erstellen.
-- [ ] Schritt 1: Lokalen Absatz getrennt protokollieren, Mengen und echte
+- [x] Schritt 1: Lokalen Absatz getrennt protokollieren, Mengen und echte
   Einnahmen in der Drei-Stunden-Statistik ausweisen und Budgetanzeigen
   ergänzen. Zeitfenster, Teilzahlungen und Abgrenzung zu anderen
   Einnahmearten prüfen.
+
+  Ergebnis: Zeitgestempelte bezahlte Verkäufe im Markt gespeichert, exaktes
+  rollierendes Drei-Stunden-Fenster mit Menge und Credits je Ware sowie
+  Gesamterlös im Statistikpanel. Keine Rekonstruktion aus Altverbrauch.
+  Konsumbudget, Zufluss nach Steuern und getrennte NPC-Kasse angezeigt.
+  Prüfung: `node --test tests/local-sales.test.js` und Syntaxprüfung.
 - [ ] Schritt 2: Preisabhängige lokale Nachfrage an die aktuelle Wirtschaft
   anbinden und Verbrauch gekaufter Planeten prüfen. Reglerwirkung,
   Warenbestand, Reserven, Budgetgrenzen und rezeptgebundene Verbräuche testen.

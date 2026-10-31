@@ -1,4 +1,5 @@
 import {recordInventoryTrade} from './pilot-profile.js';
+import {recordLocalSale} from '../shared/local-sales.js';
 import {GOODS,SHIP_TYPES,SHIPYARD,WORLD,SUPPLY,buyPrice,sellPrice,canBuyFrom,canSellTo,NPC_OWNER} from '../shared/config.js';
 import {HOMEWORLD,availableHomeStock,homeStorageFree} from '../shared/homeworld.js';
 import {stat,tickHubEquilibrium} from './markets.js';
@@ -111,6 +112,7 @@ export function tickCivilMoney(game,entity,dt,consumption={}){
     civil.budget-=payment;civil.consumptionPayments+=payment;owner.credits+=payment;
     propBook(game,prop,'inc',payment);
     recordInventoryTrade(game,game.players.get(prop.player),good,'sell',amount,payment);
+    recordLocalSale(entity.market,game.time,good,price>0?payment/price:0,payment);
   }
   if(prop)propBook(game,prop,'inc',tax);
   civil.incomePerHour=income;

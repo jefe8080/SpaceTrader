@@ -394,6 +394,8 @@ function statsSection(e) {
   const cell = (v) => (v ? fmtNum(v) : '<span class="muted">–</span>');
   h += `<table class="market stats"><tr><th>Ware</th><th>Produziert</th><th>Verbraucht</th><th title="Von Schiffen geliefert">Angeliefert</th><th title="Von Schiffen abgeholt">Abgeholt</th></tr>
     ${goods.map((g) => `<tr><td>${goodTag(g)}</td><td>${cell(tot.p[g])}</td><td>${cell(tot.c[g])}</td><td>${cell(tot.i[g])}</td><td>${cell(tot.o[g])}</td></tr>`).join('')}</table>`;
+  const sales=st.localSales;
+  if(sales)h+=`<h4>Lokaler Absatz · letzte 3 Stunden</h4><p>Im Verbrauch enthalten; Menge in Einheiten, tatsächlich bezahlter Erlös in Cr.</p><div style="overflow-x:auto"><table class="market"><tr><th>Ware</th><th>Verkauft (Einheiten)</th><th>Erlös (Cr)</th></tr>${Object.keys(sales.quantities).map(g=>`<tr><td>${goodTag(g)}</td><td>${cell(sales.quantities[g])}</td><td>${cell(sales.revenue[g])}</td></tr>`).join('')}</table></div><p>Lokale Verkaufseinnahmen gesamt: ${fmtNum(sales.total)} Cr</p>`;
   if (e.market.strategy === 'factory') h += `<div class="muted small-note">${fmt(cycles)} Produktionszyklen in 3 h</div>`;
   return h + '</div>';
 }
