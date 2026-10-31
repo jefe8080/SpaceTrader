@@ -51,31 +51,20 @@ export const STORAGE = {
 // Statistik: 36 Blöcke à 5 Minuten = 3 Stunden Rückblick (Spielzeit)
 export const STATS = { BUCKET_SECS: 300, BUCKETS: 36 };
 
-// NPC-Verkehr: Versorger (Stationen holen fehlende Zutaten) und Abholer (Planeten holen Waren bei Produzenten)
+// NPC-Verkehr der echten Wirtschaft: Abholer kaufen bei realen Produzenten für zahlungsfähige Märkte
 export const SUPPLY = {
   RANGE: 90000,       // Suchradius für Bezugsquellen (gleicher Sektor)
-  MIN_SOURCE_STOCK: 10,
   COOLDOWN: 20,       // Sekunden nach einer Lieferung (je Ware)
   RETRY_NO_SOURCE: 120,
   SHIP_TYPE: 'versorger',
-  LOAD_SHARE: 0.1,    // Ladung je Fahrt: höchstens 10 % der Kapazität des Ziellagers ...
-  LOAD_MIN: 5,        // ... mindestens 5 ...
-  LOAD_MAX: 40,       // ... höchstens 40 Einheiten
   MARGIN: 0.1,        // Abstand zum Ziel-Füllstand (Anteil der Kapazität), ab dem NPC-Schiffe losfliegen
   ACTIVITY: 1800,     // Abholer nur in Sektoren mit Spielerschiffen in den letzten 30 min oder mit Spielerbesitz
 };
 
-/** Ladung eines NPC-Schiffs für ein Ziellager: min(10 % der Kapazität, freier Platz), 5 bis 40, 0 = passt nicht */
-export function supplyLoad(slot) {
-  const free = Math.floor(slot.cap - slot.stock);
-  if (free < SUPPLY.LOAD_MIN) return 0;
-  return Math.min(free, SUPPLY.LOAD_MAX, Math.max(SUPPLY.LOAD_MIN, Math.floor(slot.cap * SUPPLY.LOAD_SHARE)));
-}
-
 import { GOODS } from './goods.js';
 export { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES, RECIPES, TIER_NAMES, CARGO_CLASSES, MINE_CLASSES, ULTRA, STATION_FOOD } from './goods.js';
 export { FACTIONS, FACTION, ABILITIES, factionShips } from './factions.js';
-export { SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, YARD_MARGIN, MODULE_SIZE, MODULE_REFUND, SENSOR, FLAGSHIP,
+export { SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, YARD_MARGIN, MODULE_SIZE, SENSOR,
   upgradeCost, moduleCapacity, shipStats, holdOf, holdFor, hasAbility, holdUsage, freeFor, cargoFits, sellValue, countModules } from './ships.js';
 
 export * from './progression.js';
@@ -89,7 +78,7 @@ export { FACTS } from './facts.js';
 import { PRICE, curveMax, curveMin } from './price.js';
 export { PRICE, curveMax, curveMin };
 export { GOVERNOR_LICENSES, UNLOCK_NAMES, PROP_UPGRADES, FIXED, CUSTOMS_MAX, RECYCLE_SHARE, propertyKind, minGovernorFor, propertyBasePrice,
-  propertyPrice, propUpgradeCost, extraOptions, priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref } from './property.js';
+  propertyPrice, priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref } from './property.js';
 
 export function unitPrice(good, stock, cap, mod = 1) {
   const r = Math.max(0, Math.min(1, stock / cap));

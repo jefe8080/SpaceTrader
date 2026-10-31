@@ -5,10 +5,10 @@ import { socket, cmd } from '../net.js';
 import { typeName, entitySprite, shipSprite, goodTag, playerPrice, cargoUsed, statusText, queueText, shipSymbol, hasWarn, systemName, sectorName } from '../util.js';
 import { ZONE_TYPES, ABILITIES } from '/shared/config.js';
 import { openAlmanac } from './almanac.js';
-import { shipyardSection, hubSection, factionYardSection, outpostSection, bonusBadge, repLine } from './shipyard.js';
+import { shipyardSection, hubSection, factionYardSection, bonusBadge, repLine } from './shipyard.js';
 import { propertySection, governorSection, handlePropertyAction, handlePropertyChange, storagePrice } from './property.js';
 import { FACTIONS } from '/shared/factions.js';
-import { shipStats, holdUsage, countModules, MODULES as MODS, FLAGSHIP } from '/shared/ships.js';
+import { shipStats, holdUsage, countModules, MODULES as MODS } from '/shared/ships.js';
 import { $, setHtml, typing } from './dom.js';
 import { barChart, fmtNum, stockBar } from './charts.js';
 import { bus } from './bus.js';
@@ -91,7 +91,7 @@ function shipDetails(s) {
   const own = s.owner === state.me.id;
   const color = playerColor(s.owner);
   let h = `<div class="det-head"><img src="${shipSprite(s.type, color)}" alt=""><div>
-    <div class="title">${s.main ? '<span class="crown" title="Hauptschiff">♛</span> ' : ''}${esc(s.name)}${own ? ` <button class="small ghost" data-act="rename" data-ship="${s.id}" title="Umbenennen">✎</button>` : ''}</div>
+    <div class="title">${esc(s.name)}${own ? ` <button class="small ghost" data-act="rename" data-ship="${s.id}" title="Umbenennen">✎</button>` : ''}</div>
     <div class="type">${def.name}${own ? '' : ' · ' + esc(s.task ? 'Station' : playerName(s.owner))}</div></div></div>`;
   if (s.task) return h + npcTaskHtml(s);
   if (!own) return h + `<div class="muted">${def.desc}</div>` + foreignWarSection(s);
@@ -139,7 +139,7 @@ function shipDetails(s) {
     <button data-act="stop" data-ship="${s.id}" ${s.queue?.length ? '' : 'disabled'}>■ Stopp</button>
     <button data-act="follow" data-ship="${s.id}">◎ Folgen</button>
     <button data-act="addWait" data-ship="${s.id}" title="Warte-Befehl anhängen">⏱ Warten</button>
-    ${flagshipButton(s)}`;
+    ${manualShipButton(s)}`;
   const docked = s.dockedAt ? state.entities.get(s.dockedAt) : null;
   if (docked?.kind === 'belt' && (st.mining[GOODS[BELT_TYPES[docked.type].good].mine || 'std'] || 0) > 0 && !s.queue?.length) {
     h += `<button data-act="mine" data-ship="${s.id}" data-ent="${docked.id}">⛏ Abbauen</button>`;
@@ -174,13 +174,9 @@ function shipDetails(s) {
   return h;
 }
 
-/** Hauptschiff ernennen bzw. abberufen, mit Sperre nach jeder Änderung */
-function flagshipButton(s) {
-  if (state.homeworld) return `<button data-act="manualShip" data-ship="${s.id}" ${state.manualShip === s.id ? 'disabled' : ''}>${state.manualShip === s.id ? '● Manuell aktiv' : 'Manuell steuern'}</button>${s.relicSpeed ? `<span class="badge">Relikt ×${s.relicSpeed} · treibstofffrei</span>` : ''}`;
-  const wait = (state.flagshipAt ?? -Infinity) + FLAGSHIP.COOLDOWN - state.time;
-  const lock = wait > 0 ? ` disabled title="Wechsel erst in ${Math.ceil(wait / 60)} min möglich"` : '';
-  if (s.main) return `<button data-act="flagship" data-ship=""${lock} title="Hauptschiff abberufen">♛ Abberufen</button>`;
-  return `<button data-act="flagship" data-ship="${s.id}"${lock || ' title="Tempo ×4, Verbrauch ×4 pro Sekunde, keine Routen"'}>♛ Hauptschiff</button>`;
+/** Schiff für die manuelle Steuerung wählen */
+function manualShipButton(s) {
+  return `<button data-act="manualShip" data-ship="${s.id}" ${state.manualShip === s.id ? 'disabled' : ''}>${state.manualShip === s.id ? '● Manuell aktiv' : 'Manuell steuern'}</button>${s.relicSpeed ? `<span class="badge">Relikt ×${s.relicSpeed} · treibstofffrei</span>` : ''}`;
 }
 
 function shipStatsSection(s) {
@@ -232,7 +228,7 @@ export function marketTable(e, ship) {
   const mine = e.owner === state.me.id;
   const member = !mine && state.props.get(e.id)?.cons;
   const customs = !mine && !member && e.owner ? (e.market.customs || 0) : 0;
-  const rows = Object.entries(e.market.goods).filter(([g])=>!state.homeworld||GOODS[g].cls!=='passenger').filter(([g, sl]) => e.type !== 'ruins' || e.market.homeworld?.knownGoods?.[g] || (sl.cap > 0 && (sl.stock > 0 || ship?.cargo?.[g] || ['ore','ice','grain','gas','helium3','crude','water','food','shipfuel','fuel','ingots'].includes(g)))).map(([g, sl]) => {
+  const rows = Object.entries(e.market.goods).filter(([g])=>GOODS[g].cls!=='passenger').filter(([g, sl]) => e.type !== 'ruins' || e.market.homeworld?.knownGoods?.[g] || (sl.cap > 0 && (sl.stock > 0 || ship?.cargo?.[g] || ['ore','ice','grain','gas','helium3','crude','water','food','shipfuel','fuel','ingots'].includes(g)))).map(([g, sl]) => {
     if (e.market.homeworld) sl = { ...sl, cap: homeGoodLimit(e.market, g) };
     if (mine) return ownRow(e, g, sl, canTrade ? ship : null);
     if (member) return memberRow(e, g, sl, canTrade ? ship : null);
@@ -253,7 +249,7 @@ export function marketTable(e, ship) {
   });
   let h = `<table class="market"><tr><th>Ware</th><th>Lager</th><th>Preis</th><th></th></tr>${rows.join('')}</table>`;
   if(!e.owner&&e.market.economy)h=`<p class="muted">Marktkasse: ${fmt(e.market.economy.cash)} Cr · begrenzte Nachfrage ${fmt(e.market.economy.rate)} Cr/h. Angebote garantieren keinen Ankauf.</p>`+h;
-  if(state.homeworld)h+=moduleStockPanel(e,ship);
+  h+=moduleStockPanel(e,ship);
   if (mine && canTrade) {
     // Waren an Bord, die das Lager noch nicht führt, können nicht eingelagert werden
   }
@@ -314,7 +310,7 @@ function entityDetails(e) {
       infrastructure += `<div class="kv"><span>Verarbeitung</span><span>${recipeText(def.recipe)} (${def.recipe.time}s)</span>
         <span>Status</span><span>${m.eff >= 1 ? 'läuft' : m.eff > 0 ? 'langsam (keine Nahrung)' : 'steht still'}</span>
         <span>Versorgung</span><span>${supplyText(m)}</span></div>`;
-    } else if (e.type==='hotel'&&state.homeworld) {
+    } else if (e.type==='hotel') {
       infrastructure+='<p>Orbitalhotel mit begrenzten Gästeplätzen. Touristen bleiben 20 Minuten als Gäste und können anschließend wieder abgeholt werden.</p>';
     } else if (def.consume) {
       infrastructure += `<div class="muted">Kauft ${Object.keys(def.consume).map((g) => GOODS[g].name).join(', ')}.</div>`;
@@ -324,7 +320,7 @@ function entityDetails(e) {
       const g = Object.keys(m.goods).find((x) => GOODS[x].ultra);
       infrastructure += `<div class="kv"><span>Förderung</span><span>${g ? goodTag(g) : '?'} (ultraselten, nur am Hub verkäuflich)</span><span>Status</span><span>${m.eff >= 1 ? 'läuft' : 'langsam (keine Nahrung)'}</span></div>`;
     } else if (def.outpost) {
-      infrastructure += `<div class="muted">${esc(FACTIONS[e.faction]?.desc || '')} Bietet Module an und fragt dauerhaft ${GOODS[FACTIONS[e.faction]?.currency]?.name || '?'} nach.</div>`;
+      infrastructure += `<div class="muted">${esc(FACTIONS[e.faction]?.desc || '')} Fragt dauerhaft ${GOODS[FACTIONS[e.faction]?.currency]?.name || '?'} nach.</div>`;
     } else if (def.factionyard) {
       infrastructure += `<div class="muted">Werft der ${esc(FACTIONS[e.faction]?.name || 'Fraktion')}. Das Fraktionsschiff kostet Credits und ${GOODS[FACTIONS[e.faction]?.currency]?.name || '?'}.</div>`;
     } else if (e.type === 'hub') {
@@ -344,7 +340,6 @@ function entityDetails(e) {
   if(m?.strategy==='shipyard') infrastructure+=shipyardSection(e,myDocked);
   if(e.type==='hub') infrastructure+=hubSection(e,myDocked)+governorSection(myDocked);
   if(m?.strategy==='factionyard') infrastructure+=factionYardSection(e,myDocked);
-  if(e.type==='outpost') infrastructure+=outpostSection(e,myDocked);
   if(m?.homeworld) infrastructure+=warpPanel(e);
   if(e.faction && e.kind==='planet') infrastructure+=`<div class="muted">${repLine(e.faction)}</div>`;
   let quests=m && e.type!=='ruins' && (e.kind==='planet'||m.strategy==='shipyard')?questBoardSection(e,myDocked):'';
@@ -430,7 +425,6 @@ det.addEventListener('click', (ev) => {
     }
     case 'mine': cmd('order', { ships: [d.ship], order: { t: 'mine', target: d.ent }, append: false }); break;
     case 'sendSelected': { const ship=state.ships.get(locationShip); if(ship) orderShips([ship],state.entities.get(d.ent),ev.shiftKey); break; }
-    case 'send': orderShips([state.ships.get(d.ship)], state.entities.get(d.ent), ev.shiftKey); break;
     case 'qup': cmd('queueMove', { ship: d.ship, qid: Number(d.qid), dir: -1 }); break;
     case 'qdown': cmd('queueMove', { ship: d.ship, qid: Number(d.qid), dir: 1 }); break;
     case 'qdel': cmd('queueRemove', { ship: d.ship, qid: Number(d.qid) }); break;
@@ -439,10 +433,6 @@ det.addEventListener('click', (ev) => {
     case 'cShipDelete': cmd('cShipDelete', { ship: d.ship }); break;
     case 'refuel': cmd('refuel', { ship: d.ship }); break;
     case 'questAccept': cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); break;
-    case 'flagship':
-      if (d.ship && state.ships.get(d.ship)?.queue?.some((c) => c.t === 'route') && !confirm('Das Hauptschiff fährt keine Routen. Routenbefehle aus der Queue entfernen?')) break;
-      cmd('flagship', { ship: d.ship || null });
-      break;
     case 'alm': openAlmanac(d.good); break;
     case 'jettison': if (confirm(`${GOODS[d.good].name} wirklich abwerfen?`)) cmd('jettison', { ship: d.ship, good: d.good }); break;
     case 'trade': cmd('trade', { ship: d.ship, target: d.ent, good: d.good, dir: d.dir, amount: d.amt }); break;

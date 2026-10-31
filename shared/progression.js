@@ -27,7 +27,7 @@ export const XP = {
   RECIPE: 5,          // neuer Almanach-Eintrag: Rezept, Planeten- oder Feldtyp
   SHIP: 10,           // neuer Almanach-Eintrag: Schiff
   MODULE: 10,         // neuer Almanach-Eintrag: Modul
-  TRADE_CR: 1000,     // manueller Handel des Hauptschiffs: 1 XP je 1.000 Cr Gewinn ...
+  TRADE_CR: 1000,     // manueller Handel: 1 XP je 1.000 Cr Gewinn ...
   TRADE_MAX_H: 40,    // ... höchstens 40 XP pro Stunde
 };
 

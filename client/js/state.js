@@ -5,7 +5,6 @@ export const state = {
   me: null,             // { id, name, color }
   credits: 0,
   time: 0,              // Spielzeit des Servers (s)
-  flagshipAt: null,     // Spielzeit der letzten Änderung am Hauptschiff
   xp: 0, level: 1,
   quest: null,          // aktive Quest
   quests: [], questMinedUsed:{},

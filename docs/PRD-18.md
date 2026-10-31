@@ -209,11 +209,34 @@ Fortschritt wird im selben Commit aktualisiert.
     `npm test` 379 von 379 grün.
   - Vergleich mit dem Prod-Spielstand (30 min): **keine Abweichung**, SHA-256
     identisch mit der Referenz.
-- [ ] **S4: Client.**
+- [x] **S4: Client.**
   - Weichen über `state.homeworld` und `realEconomy` auflösen.
   - Legacy-UI entfernen.
   - `case 'send'` entfernen.
   - Irreführende Texte anpassen.
+  - Umgesetzt: Hauptschiff-Schaltfläche, Krone und Routensperre für `ship.main`,
+    `flagshipAt`, Ausbau-Tabelle mit Extras-Auswahl, alter Modulblock der Werft und
+    Modulangebot der Außenposten (Märkte der echten Wirtschaft haben keine Module)
+    entfernt. Weichen über `state.homeworld` in Detailpanel, Favoriten, Flotte,
+    HUD und Heimat-Taste aufgelöst. `case 'send'` und `case 'flagship'` entfernt.
+  - Texte angepasst: „Ausbau bis Stufe“ bei Gouverneurslizenz, Konsortiumsstufen
+    und Konsortiumsmeldung, Ausbau-Spalte im Konsortiumsbesitz, „nicht
+    Hauptschiff“ beim Schiffshandel, „Das Hauptschiff fährt keine Routen“ im
+    Routeneditor, „Bietet Module an“ bei Außenposten. „Hauptschiff“ bleibt dort,
+    wo die Heimatwelt das Schiff mit eingebautem Antrieb meint (Zugang, Flotte).
+  - Mit den Client-Verweisen entfallen `FLAGSHIP`, `MODULE_REFUND`,
+    `propUpgradeCost`, `extraOptions` und `maxLevel` in Lizenz- und
+    Konsortiumstabellen. Stadtplanungstests und `verify-agrar-revision.mjs` nutzen
+    für ihre Belastungsprobe eine eigene Liste weiterer Rohstoffe.
+  - Bleibt: Anzeigen für Märkte ohne `realEconomy` in Planetenpanel und
+    Besitzverwaltung, weil gekaufte Heimatwelt-Rohstoffquellen (`homeResource`)
+    solche Märkte sind; `state.homeworld` in der Questbox als Datenprüfung, ob die
+    Heimatwelt schon übertragen wurde.
+  - Browser-Test (Vorschau, Testspieler): Login, Hilfe, Heimatwelt mit Handel und
+    Modulen, Besitz, Konsortium, Routeneditor, Anflug, Landung und
+    Planetenansicht ohne Konsolen- oder Serverfehler. Werft-, Fraktionswerft- und
+    Hubabschnitte mit den echten Client-Modulen gerendert, weil im frischen
+    Spielstand keine Werft aufgedeckt war.
 - [ ] **S5: Shared, Sims, Skripte, Doku.**
   - Nicht mehr erreichbare Konstanten entfernen (per `knip`).
   - Sims und Skripte nach den Annahmen behandeln.

@@ -125,7 +125,6 @@ export const upgradeCost = (type, level) => Math.round(SHIP_TYPES[type].price * 
 export const MODULE_SIZE = 30;
 export const MODULE_COMBO = 5;
 export const MINING_COMBO = 0.1;
-export const MODULE_REFUND = 0.5;
 export const MODULES = {
   cabin:     { name: 'Passagierkabine', cap: 'passenger', price: 15000, desc: 'Ermöglicht den Transport von Passagieren.' },
   shielded:  { name: 'Geschirmte Kammer', cap: 'hazard', price: 25000, desc: 'Ermöglicht den Transport von Gefahrgut.' },
@@ -140,8 +139,6 @@ export const MODULES = {
 export const SENSOR = { BASE: 2500, FIRST: 0.6, MORE: 0.3 };
 export const sensorFactor = (n) => (n > 0 ? 1 + SENSOR.FIRST + SENSOR.MORE * (n - 1) : 1);
 
-/** Hauptschiff: ×4 Tempo bei ×4 Verbrauch pro Sekunde (Verbrauch pro Strecke bleibt), 5 min Sperre nach jeder Änderung */
-export const FLAGSHIP = { SPEED: 4, COOLDOWN: 300 };
 /** Kapazität für n gleiche Module: 1 → 30, 2 → 65, 3 → 100 */
 export const moduleCapacity = (n) => (n > 0 ? MODULE_SIZE * n + MODULE_COMBO * (n - 1) : 0);
 /** Abbaurate für n gleiche Abbaumodule: jedes weitere +100 % plus Kombo-Bonus */
@@ -185,7 +182,7 @@ export function shipStats(ship) {
   const protect = (n.protect || 0) > 0;
   const cargoTotal = Math.round(d.cargo * (1 + UPGRADES.cargo.per * (u.cargo || 0)) * b * (protect ? 0.5 : 1));
   return {
-    speed: d.speed * (1 + UPGRADES.speed.per * (u.speed || 0)) * b * (ship.relicSpeed || (ship.main ? FLAGSHIP.SPEED : 1)) * (protect ? 0.7 : 1),
+    speed: d.speed * (1 + UPGRADES.speed.per * (u.speed || 0)) * b * (ship.relicSpeed || 1) * (protect ? 0.7 : 1),
     tank: d.tank * (1 + UPGRADES.tank.per * (u.tank || 0)) * b,
     cargoTotal,
     cargo: Math.max(0, cargoTotal - MODULE_SIZE * mods),
@@ -194,7 +191,7 @@ export function shipStats(ship) {
     mining,
     sensor: SENSOR.BASE * sensorFactor(n.sensor || 0) * (d.ability === 'sensor' ? 2 : 1),
     // Treibstoffverbrauch je Flugsekunde relativ zum Normalwert
-    burn: ship.relicSpeed ? 0 : (ship.main ? FLAGSHIP.SPEED : 1) * (d.ability === 'fuel' ? 0.5 : 1),
+    burn: ship.relicSpeed ? 0 : d.ability === 'fuel' ? 0.5 : 1,
   };
 }
 /** Hat der Schiffstyp eine Fraktionsfähigkeit? */

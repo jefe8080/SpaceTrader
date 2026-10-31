@@ -1,6 +1,6 @@
 // Besitz: Kauf, Verwaltung eigener Planeten und Stationen, eigene Werften, Besitzübersicht (Taste B)
-import { GOODS, SHIP_TYPES, RECIPES, GOVERNOR_LICENSES, UNLOCK_NAMES, PROP_UPGRADES, FIXED, CUSTOMS_MAX,
-  propertyKind, minGovernorFor, propertyPrice, propUpgradeCost, extraOptions, priceWindow, fixedPrice, PLANET_TYPES,
+import { GOODS, SHIP_TYPES, GOVERNOR_LICENSES, UNLOCK_NAMES, FIXED, CUSTOMS_MAX,
+  propertyKind, minGovernorFor, propertyPrice, priceWindow, fixedPrice, PLANET_TYPES,
   CONSORTIUM_LEVELS } from '/shared/config.js';
 import { state, fmt, fmtK, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
@@ -24,7 +24,6 @@ export function storagePrice(e, g) {
   return fixedPrice(pmin, pmax, prop?.fixed?.[g] ?? FIXED.DEFAULT);
 }
 const shipsHere = (e) => myShips().filter((s) => s.dockedAt === e.id);
-const onBoard = (e, g) => shipsHere(e).reduce((a, s) => a + (s.cargo?.[g] || 0), 0);
 
 /** Abschnitt im Detailpanel eines Objekts */
 export function propertySection(e){return populationPanel(e)+propertySectionCore(e);}
@@ -68,11 +67,9 @@ function propertySectionCore(e) {
 function manageSection(e, prop) {
   const L = gov();
   const c = prop.cons ? cons() : null;
-  const max = c ? CONSORTIUM_LEVELS[c.level].maxLevel : L?.maxLevel || 0;
-  const funds = c ? c.pool : state.credits;
   let h = `<div class="section own-prop"><div class="section-title">${c ? `Besitz des Konsortiums ${esc(c.name)}` : 'Dein Besitz'} · seit ${Math.floor((prop.since || 0) / 3600)} h Spielzeit</div>`;
-  if (c) h += `<div class="muted small-note">Verwaltung als Handelsmeister: Ausbau aus dem Pool (${fmt(c.pool)} Cr), Waren aus deinen hier angedockten Schiffen.
-    <button class="small" data-act="cBuyOut" data-ent="${e.id}" title="Zum aktuellen Preis inkl. Ausbau aus deinem Privatgeld in den Pool">Herauskaufen: ${fmt(propertyPrice(e, prop.upg))} Cr</button></div>`;
+  if (c) h += `<div class="muted small-note">Verwaltung als Handelsmeister, Pool ${fmt(c.pool)} Cr.
+    <button class="small" data-act="cBuyOut" data-ent="${e.id}" title="Zum aktuellen Preis aus deinem Privatgeld in den Pool">Herauskaufen: ${fmt(propertyPrice(e))} Cr</button></div>`;
   else if (cons()) h += `<div class="btnrow"><button class="small" data-act="cTransfer" data-ent="${e.id}" title="Schenkung an dein Konsortium, ohne Gegenleistung">An Konsortium übertragen</button></div>`;
   h += `
     <div class="kv"><span>Saldo</span><span>1 h <b class="${prop.h1 < 0 ? 'neg' : 'pos'}">${fmtK(prop.h1)}</b> · 24 h <b class="${prop.d24 < 0 ? 'neg' : 'pos'}">${fmtK(prop.d24)}</b></span>
@@ -96,30 +93,7 @@ function manageSection(e, prop) {
   }
 
   if(e.market.realEconomy&&e.kind==='planet')return h+specializationPanel(e)+'</div>';
-  if(state.homeworld)return h+(e.market.strategy==='shipyard'?yardSection(e,prop):'')+'</div>';
-  if(e.market.realEconomy&&e.market.strategy!=='shipyard')return h+'</div>';
-  // Upgrades
-  h += `<div class="sub-title">Ausbau (max. Stufe ${max})</div><table class="market"><tr><th>Linie</th><th>Stufe</th><th>Kosten nächste Stufe</th><th></th></tr>`;
-  const opts = extraOptions(e);
-  for (const [line, u] of Object.entries(PROP_UPGRADES)) {
-    const lvl = prop.upg[line] || 0;
-    const cost = propUpgradeCost(e, line, lvl + 1);
-    const goods = Object.entries(cost.goods).map(([g, n]) => `<span class="${onBoard(e, g) >= n ? '' : 'neg'}">${n} ${GOODS[g].name}</span>`).join(', ');
-    const isYard = e.market.strategy === 'shipyard';
-    let extraSel = '';
-    if (line === 'extra' && !isYard) {
-      const free = opts.filter((o) => !prop.extras.includes(o));
-      extraSel = free.length ? `<select class="small" id="extraSel-${e.id}">${free.map((o) => `<option value="${o}">${RECIPES[o]?.name || GOODS[o]?.name || o}</option>`).join('')}</select>` : '<span class="muted">keine Optionen</span>';
-    }
-    const done = lvl >= max;
-    h += `<tr><td title="${esc(u.desc)}">${u.name}${line === 'extra' && prop.extras.length ? `<div class="muted small-note">${prop.extras.map((x) => RECIPES[x]?.name || GOODS[x]?.name).join(', ')}</div>` : ''}${line === 'extra' && isYard ? '<div class="muted small-note">schaltet die nächste Schiffsklasse frei</div>' : ''}</td><td>${lvl}</td>
-      <td>${done ? `<span class="muted">${c ? 'Konsortiumsgrenze' : 'Lizenzgrenze'}</span>` : `${fmt(cost.credits)} Cr + ${goods}`}</td>
-      <td>${extraSel}<button class="small" data-act="propUpgrade" data-ent="${e.id}" data-line="${line}" ${done || funds < cost.credits ? 'disabled' : ''}>＋</button></td></tr>`;
-  }
-  h += `</table><div class="muted small-note">Waren für den Ausbau kommen aus den Laderäumen deiner hier angedockten Schiffe.</div>`;
-
-  if (e.market.strategy === 'shipyard') h += yardSection(e, prop);
-  return h + '</div>';
+  return h+(e.market.strategy==='shipyard'?yardSection(e,prop):'')+'</div>';
 }
 
 /** Eigene Werft: Bau auf Befehl, Bestand, Verkauf an andere, Recycling */
@@ -180,10 +154,10 @@ export function governorSection(dockedShip) {
   const cur = gov();
   const next = GOVERNOR_LICENSES[(state.governor || 0) + 1];
   let h = `<div class="section"><div class="section-title">Gouverneurslizenz</div><div class="kv">
-    <span>Aktuell</span><span>${cur ? `<b>Stufe ${cur.level}</b> · max. ${cur.maxProps} Besitztümer · Ausbau bis ${cur.maxLevel} · ${cur.unlocks.map((u) => UNLOCK_NAMES[u]).join(', ')}` : 'keine'}</span>
+    <span>Aktuell</span><span>${cur ? `<b>Stufe ${cur.level}</b> · max. ${cur.maxProps} Besitztümer · ${cur.unlocks.map((u) => UNLOCK_NAMES[u]).join(', ')}` : 'keine'}</span>
     ${state.faction ? `<span>Fraktion</span><span style="color:${state.faction.color}"><b>${esc(state.faction.name)}</b></span>` : ''}`;
   if (next) {
-    h += `<span>Nächste</span><span>Stufe ${next.level}: ${next.maxProps} Besitztümer, Ausbau bis ${next.maxLevel}, ${next.unlocks.map((u) => UNLOCK_NAMES[u]).join(', ')}</span></div>`;
+    h += `<span>Nächste</span><span>Stufe ${next.level}: ${next.maxProps} Besitztümer, ${next.unlocks.map((u) => UNLOCK_NAMES[u]).join(', ')}</span></div>`;
     if (!state.faction) h += `<div class="form-row"><label>Name deiner Fraktion <input id="facName" class="fac-draft" maxlength="24" placeholder="z.B. Nordkontor" value="${esc(draft.name)}"></label><label>Farbe <input id="facColor" class="fac-draft" type="color" value="${draft.color || state.me.color}"></label></div>`;
     h += `<button class="primary small" data-act="buyGovernor" ${!dockedShip || state.credits < next.cost ? 'disabled' : ''} title="${dockedShip ? '' : 'Ein eigenes Schiff muss am Hub angedockt sein'}">Lizenz ${next.level} kaufen: ${fmt(next.cost)} Cr</button>`;
   } else h += `</div><div class="muted">Höchste Stufe erreicht.</div>`;
@@ -204,11 +178,6 @@ export function handlePropertyAction(d) {
     case 'cBuyProperty': if (confirm('Objekt für das Konsortium kaufen (aus dem Pool)?')) cmd('cBuyProperty', { target: d.ent }); return true;
     case 'cTransfer': if (confirm('Besitz ohne Gegenleistung an dein Konsortium übertragen?')) cmd('cTransfer', { target: d.ent }); return true;
     case 'cBuyOut': if (confirm('Besitz aus dem Konsortium herauskaufen? Der Preis geht aus deinem Privatgeld in den Pool.')) cmd('cBuyOut', { target: d.ent }); return true;
-    case 'propUpgrade': {
-      const sel = document.getElementById('extraSel-' + d.ent);
-      cmd('propUpgrade', { target: d.ent, line: d.line, extra: d.line === 'extra' ? sel?.value : undefined });
-      return true;
-    }
     case 'yardBuild': cmd('yardBuild', { target: d.ent, type: d.type }); return true;
     case 'yardClaim': cmd('yardClaim', { target: d.ent, index: Number(d.idx) }); return true;
     case 'recycle': if (confirm('Schiff recyceln? Es wird zerlegt.')) cmd('recycle', { ship: d.ship }); return true;
@@ -236,7 +205,7 @@ function renderProps() {
   if (L && !list.length) h += `<div class="muted">Noch kein Besitz. Wähle eine Station, dock ein Schiff an und kaufe sie im Detailpanel.</div>`;
   h += `<div class="fav-list">` + list.map(({ p, e }) => `<div class="fav-row"><img src="${entitySprite(e)}" alt=""><div class="fav-main">
     <div><b class="link" data-p="show" data-id="${e.id}">${esc(e.name)}</b> <span class="muted">${typeName(e)} · ${esc(systemName(e))} · ${esc(sectorName(e))}</span></div>
-    <div class="small-note">${p.mode === 'private' ? 'privat' : 'offen'}${p.customs ? ` · Zoll ${Math.round(p.customs * 100)} %` : ''} · Ausbau ${Object.entries(p.upg).map(([k, v]) => `${PROP_UPGRADES[k].name} ${v}`).join(', ') || '–'}</div></div>
+    <div class="small-note">${p.mode === 'private' ? 'privat' : 'offen'}${p.customs ? ` · Zoll ${Math.round(p.customs * 100)} %` : ''}</div></div>
     <div class="fav-side"><div>1 h <b class="${p.h1 < 0 ? 'neg' : 'pos'}">${fmtK(p.h1)}</b></div><div>24 h <b class="${p.d24 < 0 ? 'neg' : 'pos'}">${fmtK(p.d24)}</b></div></div></div>`).join('') + `</div>`;
   setHtml(card, h);
 }

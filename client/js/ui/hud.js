@@ -59,9 +59,9 @@ $('btnMarker').onclick = () => {
 };
 
 export function renderTop() {
-  $('btnHome').textContent = state.homeworld ? '⌂ Heimat anzeigen' : '⌂ Start anzeigen';
+  $('btnHome').textContent = '⌂ Heimat anzeigen';
   $('profileInfo').textContent = `${state.me?.name || ''} · Level ${state.level || 1} · Pilotenlizenz P${state.pilot || 1} · Gouverneur ${state.governor || 0}`;
-  $('btnHome').title = state.homeworld ? 'Zur persönlichen Heimatwelt' : 'Zum Startpunkt';
+  $('btnHome').title = 'Zur persönlichen Heimatwelt';
   $('btnMarker').textContent = state.markerMode === 'state' ? '◆ Marker: Zustand' : '◆ Marker: Farbe';
   $('credits').textContent = fmt(state.credits) + ' Cr';
   $('shipCount').textContent = `${myShips().length}`;
@@ -113,7 +113,7 @@ export function updateTooltip(mx, my) {
     const s = state.ships.get(hov.id);
     if (s) {
       const pl = state.players.find((x) => x.id === s.owner);
-      html = `<div class="tt-title" style="color:${playerColor(s.owner)}">${s.main ? '♛ ' : ''}${esc(s.name)}</div><div class="muted">${SHIP_TYPES[s.type].name} · ${esc(s.task ? 'Station' : playerName(s.owner))}${pl?.level ? ' · Level ' + pl.level : ''}</div>`;
+      html = `<div class="tt-title" style="color:${playerColor(s.owner)}">${esc(s.name)}</div><div class="muted">${SHIP_TYPES[s.type].name} · ${esc(s.task ? 'Station' : playerName(s.owner))}${pl?.level ? ' · Level ' + pl.level : ''}</div>`;
       if (pl?.title) html += `<div class="tt-title-badge">„${esc(pl.title)}“</div>`;
       if (s.task) html += `<div>Holt ${GOODS[s.task.good].name} von ${entName(s.task.sourceId)}</div>`;
     }

@@ -50,11 +50,11 @@ function member(c) {
   const L = CONSORTIUM_LEVELS[c.level];
   let h = section('overview', 'Übersicht', `<div class="kv">
     <span>Name</span><span><span class="dot" style="background:${c.color}"></span> <b>${esc(c.name)}</b></span>
-    <span>Level</span><span>${c.level} · max. ${L.maxProps} Besitztümer · Ausbau bis Stufe ${L.maxLevel}</span>
+    <span>Level</span><span>${c.level} · max. ${L.maxProps} Besitztümer</span>
     <span>Pool</span><span><b>${fmt(c.pool)} Cr</b></span>
     <span>Besitz</span><span>${c.props} / ${c.maxProps}</span>
     <span>Militärisches Bündnis</span><span><label><input type="checkbox" data-c-military ${c.military ? 'checked' : ''} ${master ? '' : 'disabled'}> automatische Unterstützung der Mitglieder</label> <span class="muted">(gilt für neue Begegnungen; Angriffe untereinander bleiben verboten)</span></span></div>
-    ${c.level < MAX_CONSORTIUM_LEVEL ? `<div class="small-note">Nächstes Level ${next.level}: ${next.maxProps} Besitztümer, Ausbau bis ${next.maxLevel}, Kosten ${fmt(next.cost)} Cr aus dem Pool.
+    ${c.level < MAX_CONSORTIUM_LEVEL ? `<div class="small-note">Nächstes Level ${next.level}: ${next.maxProps} Besitztümer, Kosten ${fmt(next.cost)} Cr aus dem Pool.
       ${master ? `<button class="small primary" data-c="levelUp" ${c.pool < next.cost ? 'disabled' : ''}>Aufsteigen</button>` : ''}</div>` : '<div class="muted small-note">Höchstes Level erreicht.</div>'}`);
 
   h += section('members', `Mitglieder (${c.members.length})`, `<table class="market"><tr><th>Name</th><th>Rang</th><th>Pilotenlevel</th><th></th></tr>

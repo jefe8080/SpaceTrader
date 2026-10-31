@@ -76,8 +76,10 @@ try{
   for(const r of factoryChange.positions){const old=before.find(p=>p[0]===r[0]&&!p[0].startsWith('factory:'));if(old)assert.deepEqual(r,old);}
   checks.push('All four category courtyards accept factories, replacing available plots without moving established sites');
   await page.evaluate(async()=>{
-    const {extraOptions}=await import('/shared/config.js'),e=qaState.entities.get(qaState.landed);
-    for(const good of extraOptions(e).slice(0,7))e.market.goods[good]={role:'produce',stock:100,cap:1000,rate:.1,baseRate:.1};
+    const {PLANET_TYPES,GOODS}=await import('/shared/config.js'),e=qaState.entities.get(qaState.landed);
+    const own=new Set(Object.keys(PLANET_TYPES[e.type].produce)),extra=new Set();
+    for(const t of Object.values(PLANET_TYPES))for(const g of Object.keys(t.produce))if(!own.has(g)&&GOODS[g].tier===0&&GOODS[g].cls==='normal')extra.add(g);
+    for(const good of [...extra].sort().slice(0,7))e.market.goods[good]={role:'produce',stock:100,cap:1000,rate:.1,baseRate:.1};
     for(const [good,role] of [['preserves','produce'],['medicine','consume'],['textiles','produce']])e.market.goods[good]={role,stock:100,cap:1000,rate:.1,baseRate:.1};
   });
   await ready();await overview();

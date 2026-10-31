@@ -18,7 +18,7 @@ const number=v=>v===Infinity?'fortlaufend':Number.isFinite(v)?v.toLocaleString('
 const options=(items,value)=>items.map(([id,label])=>`<option value="${esc(id)}" ${id===value?'selected':''}>${esc(label)}</option>`).join('');
 function quote(e,g,dir) {
   const slot=e.market?.goods?.[g];
-  if(!slot || (state.homeworld && GOODS[g]?.cls==='passenger') || !Number.isFinite(slot.stock)||!Number.isFinite(slot.cap))return null;
+  if(!slot || GOODS[g]?.cls==='passenger' || !Number.isFinite(slot.stock)||!Number.isFinite(slot.cap))return null;
   const own=e.owner===state.me?.id, member=!own && state.props.get(e.id)?.cons;
   if(own)return 0;
   if(member)return storagePrice(e,g);
@@ -53,7 +53,7 @@ function shell() {
       <label>Ortstyp <select data-filter="type">${options([['','alle'],['planet','Alle Planeten'],['station','Alle Basen / Stationen'],['belt','Alle Rohstofffelder'],...[...new Map(all.map(r=>[r.placeType,r.type]))].sort((a,b)=>a[1].localeCompare(b[1],'de'))],view.type)}</select></label>
       <label>System <select data-filter="system">${options([['','alle'],...unique('system')],view.system)}</select></label>
       <label>Sektor <select data-filter="sector">${options([['','alle'],...unique('sector')],view.sector)}</select></label>
-      <label>Ware <select data-filter="good">${options([['','keine'],...Object.entries(GOODS).filter(([,g])=>!state.homeworld||g.cls!=='passenger').sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([id,g])=>[id,g.name])],view.good)}</select></label>
+      <label>Ware <select data-filter="good">${options([['','keine'],...Object.entries(GOODS).filter(([,g])=>g.cls!=='passenger').sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([id,g])=>[id,g.name])],view.good)}</select></label>
       <label>Handelsrichtung <select data-filter="direction" ${view.good?'':'disabled'}>${options([['','alle'],['buy','Hier kaufen'],['sell','Hier verkaufen']],view.direction)}</select></label>
       <label>${view.direction==='sell'?'Mindestverkaufspreis':'Max. Einkaufspreis'} <input data-filter="price" type="number" min="0" step="0.1" value="${esc(view.price)}" ${view.good&&view.direction?'':'disabled'}></label>
       <label>Mindestmenge <input data-filter="quantity" type="number" min="0" value="${esc(view.quantity)}" ${view.good?'':'disabled'}></label>

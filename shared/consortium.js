@@ -5,12 +5,12 @@ import { GOVERNOR_LICENSES } from './property.js';
 /** Level: Aufstieg auf n kostet 5 × Gouverneurslizenz n−1 (aus dem Pool), Level 1 = Gründung aus dem Privatgeld */
 export const CONSORTIUM_LEVELS = [
   null,
-  { level: 1, maxProps: 3, maxLevel: 2, cost: 2000 },
-  { level: 2, maxProps: 15, maxLevel: 3, cost: 5 * GOVERNOR_LICENSES[1].cost },
-  { level: 3, maxProps: 35, maxLevel: 4, cost: 5 * GOVERNOR_LICENSES[2].cost },
-  { level: 4, maxProps: 80, maxLevel: 5, cost: 5 * GOVERNOR_LICENSES[3].cost },
-  { level: 5, maxProps: 150, maxLevel: 6, cost: 5 * GOVERNOR_LICENSES[4].cost },
-  { level: 6, maxProps: 300, maxLevel: 7, cost: 5 * GOVERNOR_LICENSES[5].cost },
+  { level: 1, maxProps: 3, cost: 2000 },
+  { level: 2, maxProps: 15, cost: 5 * GOVERNOR_LICENSES[1].cost },
+  { level: 3, maxProps: 35, cost: 5 * GOVERNOR_LICENSES[2].cost },
+  { level: 4, maxProps: 80, cost: 5 * GOVERNOR_LICENSES[3].cost },
+  { level: 5, maxProps: 150, cost: 5 * GOVERNOR_LICENSES[4].cost },
+  { level: 6, maxProps: 300, cost: 5 * GOVERNOR_LICENSES[5].cost },
 ];
 export const MAX_CONSORTIUM_LEVEL = CONSORTIUM_LEVELS.length - 1;
 

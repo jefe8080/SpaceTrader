@@ -1,6 +1,6 @@
-// Werft- und Hub-Abschnitte des Detailpanels: Schiffe kaufen/verkaufen, Upgrades, Module, Lizenzen
-import { GOODS, SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, MODULE_REFUND, MODULE_SIZE, ABILITIES, FACTIONS,
-  RANKS, RANK_NAMES, upgradeCost, shipStats, holdUsage, sellValue, countModules, factionRank } from '/shared/config.js';
+// Werft- und Hub-Abschnitte des Detailpanels: Schiffe kaufen/verkaufen, Upgrades, Lizenzen
+import { GOODS, SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, PILOT_LICENSES, ABILITIES, FACTIONS,
+  RANKS, RANK_NAMES, upgradeCost, sellValue, factionRank } from '/shared/config.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { shipSprite } from '../util.js';
 
@@ -90,24 +90,6 @@ function refitSection(e, s) {
       <td><button class="small" data-act="upgrade" data-ship="${s.id}" data-line="${line}" ${max || state.credits < cost ? 'disabled' : ''}>＋</button></td></tr>`;
   }
   h += `</table>`;
-  if(!state.homeworld){
-  const counts = countModules(s);
-  const st = shipStats(s);
-  const freeCargo = st.cargo - holdUsage(s).cargo;
-  if (Object.keys(counts).length) {
-    h += `<div class="sub-title">Eingebaute Module</div>` + Object.entries(counts).map(([id, n]) => `<div class="cargo-row">${MODULES[id].name} ×${n}
-      <span class="amt"></span><button class="small danger" data-act="removeModule" data-ship="${s.id}" data-module="${id}" title="Ausbauen, ${Math.round(MODULE_REFUND * 100)} % Erstattung: ${fmt(MODULES[id].price * MODULE_REFUND)} Cr">Ausbauen</button></div>`).join('');
-  }
-  const offers = own ? Object.keys(MODULES) : e.market.modules || [];
-  if (offers.length) {
-    h += `<div class="sub-title">Module im Angebot</div>` + offers.map((id) => {
-      const cost = Math.round(MODULES[id].price * disc);
-      const why = freeCargo < MODULE_SIZE ? `Braucht ${MODULE_SIZE} freie Frachteinheiten` : state.credits < cost ? 'Nicht genug Credits' : '';
-      return `<div class="cargo-row" title="${esc(MODULES[id].desc)}">${MODULES[id].name} <span class="muted">${fmt(cost)} Cr</span>
-        <span class="amt"></span><button class="small" data-act="buyModule" data-ship="${s.id}" data-module="${id}" ${why ? 'disabled' : ''} title="${esc(why)}">Einbauen</button></div>`;
-    }).join('');
-  }
-  }
   h += sellRow(s) + '</div>';
   return h;
 }
@@ -131,14 +113,12 @@ export function factionYardSection(e, dockedShip) {
   const L = lic();
   const docked = myShips().filter((s) => s.dockedAt === e.id);
   let h = `<div class="section"><div class="section-title">Fraktionsschiffe</div><div class="muted small-note">${repLine(e.faction)} · Ruf gibt es für Quests auf Planeten der Fraktion.</div>`;
-  if(state.homeworld){
-    if(!items.length)h+='<p class="muted">Kein fertiges Schiff im Bestand. Ein Auftrag ersetzt keine fehlenden Baumaterialien.</p>';
-    if(e.market.building)h+=`<p>Im realen Bau: ${SHIP_TYPES[e.market.building.type].name} · ${e.market.building.remaining} s</p>`;
-    else if(e.market.order)h+=`<p>Bestellt: ${SHIP_TYPES[e.market.order.type].name} · wartet auf Material im Werftlager</p>`;
-    else for(const type of e.market.yardCatalog||[]){
-      const d=SHIP_TYPES[type],allowed=dockedShip&&myRank(d.faction)>=d.rank&&L.classes.includes(d.cls)&&state.credits>=d.price*2;
-      h+=`<p>${d.name} · ${d.cls} · Rang ${d.rank} · Anzahlung ${fmt(d.price*2)} Cr</p><button class="small" data-act="factionOrder" data-ent="${e.id}" data-type="${type}" ${allowed?'':'disabled'}>Materialgebunden bestellen</button>`;
-    }
+  if(!items.length)h+='<p class="muted">Kein fertiges Schiff im Bestand. Ein Auftrag ersetzt keine fehlenden Baumaterialien.</p>';
+  if(e.market.building)h+=`<p>Im realen Bau: ${SHIP_TYPES[e.market.building.type].name} · ${e.market.building.remaining} s</p>`;
+  else if(e.market.order)h+=`<p>Bestellt: ${SHIP_TYPES[e.market.order.type].name} · wartet auf Material im Werftlager</p>`;
+  else for(const type of e.market.yardCatalog||[]){
+    const d=SHIP_TYPES[type],allowed=dockedShip&&myRank(d.faction)>=d.rank&&L.classes.includes(d.cls)&&state.credits>=d.price*2;
+    h+=`<p>${d.name} · ${d.cls} · Rang ${d.rank} · Anzahlung ${fmt(d.price*2)} Cr</p><button class="small" data-act="factionOrder" data-ent="${e.id}" data-type="${type}" ${allowed?'':'disabled'}>Materialgebunden bestellen</button>`;
   }
   items.forEach((it, i) => {
     const d = SHIP_TYPES[it.type];
@@ -155,21 +135,6 @@ export function factionYardSection(e, dockedShip) {
       <button class="small primary" data-act="buyFactionShip" data-ent="${e.id}" data-idx="${i}" ${why ? 'disabled' : ''} title="${esc(why)}">Kaufen</button></div></div>`;
   });
   return h + '</div>';
-}
-
-/** Außenposten einer Fraktion: Module (60 % des Katalogs) */
-export function outpostSection(e, dockedShip) {
-  const mods = e.market.modules || [];
-  if (!mods.length) return '';
-  let h = `<div class="section"><div class="section-title">Module im Angebot</div>`;
-  const st = dockedShip && shipStats(dockedShip);
-  const free = st ? st.cargo - holdUsage(dockedShip).cargo : 0;
-  for (const id of mods) {
-    const why = !dockedShip ? 'Ein eigenes Schiff muss hier angedockt sein' : free < MODULE_SIZE ? `Braucht ${MODULE_SIZE} freie Frachteinheiten` : state.credits < MODULES[id].price ? 'Nicht genug Credits' : '';
-    h += `<div class="cargo-row" title="${esc(MODULES[id].desc)}">${MODULES[id].name} <span class="muted">${fmt(MODULES[id].price)} Cr</span><span class="amt"></span>
-      <button class="small" data-act="buyModule" data-ship="${dockedShip?.id || ''}" data-module="${id}" ${why ? 'disabled' : ''} title="${esc(why)}">Einbauen</button></div>`;
-  }
-  return h + `<div class="muted small-note">Ausbau an jeder Werft (50 % Erstattung).</div></div>`;
 }
 
 /** Hub: Lizenzen und Schiffsverkauf */

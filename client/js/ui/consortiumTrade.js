@@ -1,5 +1,5 @@
 // Konsortium: Besitz, Kartendaten und Schiffshandel (PRD-3 4.4 bis 4.6) als Bereiche im Konsortiumsfenster
-import { WORLD, SHIP_TYPES, UPGRADES, MODULES, PROP_UPGRADES, CONSORTIUM } from '/shared/config.js';
+import { WORLD, SHIP_TYPES, UPGRADES, MODULES, CONSORTIUM } from '/shared/config.js';
 import { hexAt, hexKey } from '/shared/hex.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
@@ -40,10 +40,9 @@ extraSections.push({
   render(c) {
     const master = c.rank === 'master';
     if (!c.propList?.length) return `<div class="muted">Noch kein Konsortiumsbesitz. Handelsmeister kaufen vor Ort mit „Für Konsortium kaufen“, jedes Mitglied kann eigenen Besitz übertragen.</div>`;
-    return `<table class="market"><tr><th>Objekt</th><th>Handel</th><th>Ausbau</th><th>Erlöse gesamt</th><th></th></tr>
+    return `<table class="market"><tr><th>Objekt</th><th>Handel</th><th>Erlöse gesamt</th><th></th></tr>
       ${c.propList.map((p) => { const e = state.entities.get(p.entity); return `<tr><td><span class="link" data-c="showProp" data-id="${p.entity}">${esc(p.name)}</span> <span class="muted">${e ? typeName(e) : ''}</span></td>
         <td>${p.mode === 'private' ? 'privat' : 'offen'}${p.customs ? ` · Zoll ${Math.round(p.customs * 100)} %` : ''}</td>
-        <td class="small-note">${Object.entries(p.upg || {}).map(([k, v]) => `${PROP_UPGRADES[k].name} ${v}`).join(', ') || '–'}</td>
         <td>${fmt(p.inc)}</td>
         <td>${master ? `<button class="small" data-c="buyOut" data-id="${p.entity}" title="Zum aktuellen Preis aus deinem Privatgeld in den Pool">Herauskaufen</button>` : ''}</td></tr>`; }).join('')}</table>
       <div class="muted small-note">Konsortiumsbesitz zählt nur gegen das Konsortiumslimit. Erlöse fließen gebührenfrei in den Pool.</div>`;
@@ -91,7 +90,6 @@ extraSections.push({
 /** Warum kann dieses Schiff nicht angeboten werden? '' = möglich */
 function offerBlock(s) {
   if (s.offer !== null && s.offer !== undefined) return 'schon angeboten';
-  if (s.main) return 'Hauptschiff';
   if (s.state !== 'docked') return 'nicht angedockt';
   if (Object.keys(s.cargo || {}).length) return 'Laderaum nicht leer';
   if (s.queue?.length) return 'hat Befehle';
@@ -108,7 +106,7 @@ extraSections.push({
     let h = `<div class="btnrow"><select id="csShip">${ships.map((s) => { const why = offerBlock(s); return `<option value="${s.id}" ${s.id === sel ? 'selected' : ''} ${why ? 'disabled' : ''}>${esc(s.name)} (${SHIP_TYPES[s.type].name})${why ? ' · ' + why : ''}</option>`; }).join('')}</select>
       <input id="csPrice" type="number" min="0" step="1000" placeholder="Preis" value="${esc(draft.shipPrice)}" style="width:110px">
       <button class="small" data-c="shipOffer" ${sel ? '' : 'disabled'}>Anbieten</button></div>
-      <div class="muted small-note">Angedockt, leerer Laderaum, keine Befehle, nicht Hauptschiff, nicht das letzte Schiff. Das Schiff ist während des Angebots gesperrt und wechselt beim Kauf an Ort und Stelle den Besitzer. Du erhältst ${Math.round(CONSORTIUM.SALE_SHARE * 100)} %.</div>`;
+      <div class="muted small-note">Angedockt, leerer Laderaum, keine Befehle, nicht das letzte Schiff. Das Schiff ist während des Angebots gesperrt und wechselt beim Kauf an Ort und Stelle den Besitzer. Du erhältst ${Math.round(CONSORTIUM.SALE_SHARE * 100)} %.</div>`;
     if (c.ships?.length) {
       h += `<table class="market" style="margin-top:6px"><tr><th>Schiff</th><th>Anbieter</th><th>Ausstattung</th><th>Ort</th><th>Preis</th><th></th></tr>
         ${c.ships.map((o) => `<tr><td><b>${esc(o.name)}</b> <span class="badge cls-${SHIP_TYPES[o.type].cls}">${SHIP_TYPES[o.type].name}</span></td><td>${esc(o.sellerName)}</td>
