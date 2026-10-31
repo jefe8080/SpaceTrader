@@ -9,11 +9,10 @@ Produktionsrezepte werden durch eigene Gebäude freigeschaltet. Fehler bei
 Rathauseinträgen und ziviler Finanzierung werden behoben. Angriffe werden
 angekündigt und Schlachten laufen sichtbar langsamer ab.
 
-Am 31.10.2026 mit dem Skill `grilling` in Q1–Q13 abgestimmt. Der Nutzer hat
-ausdrücklich nur die Erstellung und den Commit dieses PRD freigegeben:
-**Damals keine Umsetzung; inzwischen ausdrücklich freigegeben (siehe Abschnitt 7).** Die folgenden Pakete sind geplant und benötigen
-einen späteren Umsetzungsauftrag. Dieses PRD ändert noch keinen Spielcode und
-enthält keine bereits erstellten Grafiken.
+Am 31.10.2026 mit dem Skill `grilling` in Q1–Q13 abgestimmt. Zunächst war
+nur die Planung freigegeben. Der anschließende Auftrag „bitte setze prd 16 um“
+hat die Umsetzung ausdrücklich freigegeben. Alle zehn Pakete sind umgesetzt
+und geprüft; die Nutzerkorrektur zum gezeichneten Grafikstil ist berücksichtigt.
 
 ## 1. Grafiken und Ausrichtung der Planetenansicht
 
@@ -175,13 +174,13 @@ Fortschritt im selben Commit aktualisiert. Änderungen bleiben fachlich getrennt
 | P01 | Aufzug- und acht Schiffsdesigns | Nach Nutzerkorrektur: acht gemalte PNGs und zwei Aufzug-PNGs nach aktuellen Zivilschiff-/Stadtreferenzen; SVG-Rückfall unverändert | Erledigt |
 | P02 | Ruinenbauplätze und Bild nach oben erweitern | Browser-Overlay aller Gruppen; 17 Stadt-/Kameratests; Originalbild unverändert, 128 px obere Fortsetzung | Erledigt |
 | P03 | Planetenstatistik, Rathaus und Wohnhaus | Filter anhand persistierter Questzustände; Wohnwerte aus Planeten-/Gebäudedaten; Regressionstests | Erledigt |
-| P04 | Panelhöhe und Zentrallager-Akkordeons | Verfügbare Höhe ab Menüleiste; sechs geschlossene Bereiche; DOM-Patcher bewahrt Öffnungszustand | Implementiert; visuelle Browserprüfung offen |
-| P05 | Schiffsalmanach, Kategorien, Farben und Ratings | 20 Tests: vollständige Kategorien, technische Größen, Staffel- und Sonderwaffenwerte, Orbitalregression | Implementiert; visuelle Browserprüfung offen |
-| P06 | Individuelle Erklärungen und aktuelle Grafiken | Inventar aller 117 Einträge in PRD-16-object-guide-inventory.md; Daten-/Bilddateitest erfolgreich | Implementiert; Browserprüfung folgt |
+| P04 | Panelhöhe und Zentrallager-Akkordeons | Verfügbare Höhe ab Menüleiste; fünf gewünschte geschlossene Bereiche; DOM-Patcher bewahrt Öffnungszustand | Erledigt |
+| P05 | Schiffsalmanach, Kategorien, Farben und Ratings | 20 Tests: vollständige Kategorien, technische Größen, Staffel- und Sonderwaffenwerte, Orbitalregression | Erledigt |
+| P06 | Individuelle Erklärungen und aktuelle Grafiken | Inventar aller 117 Einträge in PRD-16-object-guide-inventory.md; Daten-/Bilddateitest erfolgreich | Erledigt |
 | P07 | Rezeptfreischaltung und Bestandsmigration | 13 Tests: Fertigstellung, vorher gesperrt, Abriss, Laden und wiederholte Migration ohne XP | Erledigt |
-| P08 | Zivilbudget-Ursache und Korrektur | 16 Tests: Altkasse ohne Bevölkerungsfelder, Erschöpfung, Mangelversorgung, Obergrenzen und Nullbevölkerung | Erledigt |
-| P09 | Angriffspopup und Warnton | 8 Tests: nur Verteidiger, neue Schlachten getrennt, Beitritt stumm; bestehender Audio-Bus | Implementiert; visuelle/akustische Browserprüfung offen |
-| P10 | Kampfzeitfaktor und Abschlussprüfung | Deterministischer Zustandsvergleich, Reload-äquivalente JSON-Runde, Raid-Regression und Benchmark | Kampfzeit implementiert; Gesamtabnahme nach Grafiken |
+| P08 | Zivilbudget-Ursache und Korrektur | 17 Tests: Altkasse ohne Bevölkerungsfelder, Erschöpfung, Mangelversorgung, Obergrenzen, Nullbevölkerung und zwei echte Neustarts | Erledigt |
+| P09 | Angriffspopup und Warnton | Verteidiger/Planet, getrennte Schlachten, Beitritt stumm; WebAudio-Test für Mute/Lautstärke; zwei Karten im Browser | Erledigt |
+| P10 | Kampfzeitfaktor und Abschlussprüfung | Deterministischer Zustandsvergleich, Reload-äquivalente JSON-Runde, Raid-Regression und Benchmark | Erledigt |
 
 ## 8. Technische Ausgangspunkte und Grenzen
 
@@ -251,3 +250,26 @@ Promptset und endgültige Pfade stehen in `docs/art/prd16/painted-assets.json`.
 Nur die acht beauftragten Basisschiff-PNGs und zwei Aufzüge wurden ersetzt; die
 18 Fraktionsgrafiken bleiben unverändert. Die gemeinsame Galerie unter
 `/dev/prd16-art.html` zeigt alle Designs und die 48 Bauplatzanker.
+
+## Abschlussprüfung am 31.10.2026
+
+- `npm test`: **437 Tests bestanden, 0 fehlgeschlagen**.
+- `git diff --check`: erfolgreich.
+- Isolierter Testserver: Port 3016, Datenbank `:memory:`, keine Änderung
+  vorhandener Spielstände. Wiederholbare Browserfixture: `/dev/prd16.html`.
+- Browserfixture bestätigt fünf unabhängige, anfangs geschlossene Lagerbereiche,
+  erhaltene offene **und** geschlossene Zustände nach Aktualisierung, ausgeblendete
+  geborgene Forschungsfunde sowie alle 39 baubaren Schiffe genau einmal in drei Kategorien.
+- Sichtprüfung der Menüs bei 1600×1000, 390×844 und 844×390. Panelhöhe im
+  schmalen Fenster 675 px, im flachen Fenster 236 px, jeweils bis 12 px vor
+  dem unteren Rand; längere Inhalte bleiben scrollbar.
+- Almanach: 39/39 Einträge mit Rumpf, benannten Schildsektoren, gerichteter
+  Panzerung, Waffenarten und Ratings; keine Browserfehler in der Fixture.
+- Zwei gleichzeitige Angriffskarten bleiben getrennt schließbar. WebAudio-Test
+  prüft tatsächliche Oszillatorerzeugung, getrennte gleichzeitige Warnungen,
+  Stummschaltung und die SFX-Lautstärke. Physischer Lautsprecherton wurde nicht
+  unabhängig aufgenommen; die Audioansteuerung ist automatisiert geprüft.
+- Finale Bildgalerie zeigt die tatsächlichen PNGs. Alle zehn Illustrationen
+  visuell geprüft, Hornissenstaffel mit sechs und Wespenstaffel mit vier Fluggeräten.
+  Die alte SVG-Vorschau ist ersetzt. Prompts und Pfade: `docs/art/prd16/painted-assets.json`.
+- Kein Push und keine Veröffentlichung durchgeführt.

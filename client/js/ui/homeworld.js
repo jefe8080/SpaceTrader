@@ -144,8 +144,8 @@ export function homePanel(entity, item, ship) {
     for (const [good, slot] of goods) html += `<tr><td><b>${GOODS[good].name}</b><p>${fmt(slot.stock)} im Lager<br>${fmt(ship?.cargo?.[good] || 0)} an Bord</p>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${ship && slot.stock >= 1 ? '' : 'disabled'}>Laden</button>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Einlagern</button></td><td>${storageControls(entity,good)}</td></tr>`;
-    html += '</table>';
-    html+=moduleStockPanel(entity,ship,'pp')+populationPanel(entity);
+    html += '</table></details>';
+    html+='<details id="storage-modules"><summary>Physische Module</summary>'+moduleStockPanel(entity,ship,'pp')+'</details><details id="storage-population"><summary>Bevölkerung und Reisen</summary>'+populationPanel(entity,{prices:false})+'</details>'+homePrices(entity,home);
     html += `<p class="muted">Zwei Stunden Grundbedarf: ${Math.ceil(home.population*.4)} Wasser und ${Math.ceil(home.population*.2)} Nahrung. Reserven sind Teil des Lagerbestands, kein zusätzliches Lager.</p>`;
   }
   return html;

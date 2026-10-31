@@ -394,11 +394,13 @@ export function pickBattle(wx, wy, z) {
 
 // Separate cards keep simultaneous attacks reachable without pausing the game.
 const warnedBattles=new Set();
-socket.on('attackWarning',warning=>{
+socket.on('welcome',()=>{warnedBattles.clear();document.getElementById('attackWarnings')?.remove();});
+export function showAttackWarning(warning){
  if(warnedBattles.has(warning.id))return;warnedBattles.add(warning.id);
  let host=document.getElementById('attackWarnings');
  if(!host){host=document.createElement('div');host.id='attackWarnings';host.setAttribute('aria-live','assertive');document.body.append(host);}
  const card=document.createElement('section');card.className='attack-warning';card.setAttribute('role','alert');
  card.innerHTML='<h3>Angriff auf eigene Einheiten</h3><p><b>'+esc(warning.attacker)+'</b> · '+esc(warning.location)+'</p><p>'+warning.targets.map(esc).join(', ')+'</p><button data-battle>Zur Schlacht</button> <button data-dismiss aria-label="Angriffswarnung schließen">Schließen</button>';
  card.querySelector('[data-battle]').onclick=()=>{openBattle(warning.id);card.remove();};card.querySelector('[data-dismiss]').onclick=()=>card.remove();host.append(card);sfx('attackWarning');
-});
+}
+socket.on('attackWarning',showAttackWarning);

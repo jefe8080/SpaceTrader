@@ -23,7 +23,7 @@ export function homePrices(e,h){
     const slot=e.market.goods[g],sv=prop.fixed?.[g]??FIXED.DEFAULT,{pmin,pmax}=priceWindow(g,slot?.mod||1);
     const need=HOMEWORLD.population.needPerHour[g]??HOMEWORLD.population.comfortPerHour[g]*Math.min(1,h.population/1000);
     return `<p>${GOODS[g].name}: ${fixedPrice(pmin,pmax,sv).toFixed(1)} Cr · ${localDemandPerHour(g,slot,prop,h.population*need/3600).toFixed(1)} Einheiten/h ${[.3,.5,.7].map(s=>`<button class="small" data-act="civilPrice" data-ent="${e.id}" data-good="${g}" data-price="${s}">${s===.3?'Günstig':s===.5?'Mittel':'Hoch'}</button>`).join('')}</p>`;
-  }).join('');
+  }).join('')+'</details>';
 }
 export function handlePopulationAction(d){
   if(d.act==='civilPrice'){cmd('propFixed',{target:d.ent,good:d.good,s:Number(d.price)});return true;}

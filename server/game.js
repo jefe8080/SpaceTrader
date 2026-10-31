@@ -1,4 +1,4 @@
-import {migrateBuildingRecipes} from './building-recipes.js';
+import {migrateBuildingRecipes,unlockBuildingRecipes} from './building-recipes.js';
 import {syncRouteReservations} from './route-capacity.js';
 import {migrateNewHullInventory} from './physical-yards.js';
 import { initializeProfile, syncInventoryBasis, recordGoodsTrade } from './pilot-profile.js';
@@ -645,6 +645,7 @@ export class Game {
     this.ownership.set(e.id, prop);
     if (e.market.supply?.state === 'nosource') e.market.supply = null;
     applyProperty(this, e, prop);
+    unlockBuildingRecipes(this,e);
     this.emit('entity', e);
   }
 

@@ -15,3 +15,12 @@ test('Legacy cash-only planet recovers bounded civil income, zero inhabitants re
  e.market.economy.population=0;e.market.economy.civil.budget=0;ensureCash(e);tickCivilMoney(game,e,3600);assert.equal(e.market.economy.civil.budget,0);
  }finally{game.store.close();}
 });
+import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
+test('Saved legacy planet budget recovers after restart and stays finite on another restart',()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'prd16-budget-')),file=path.join(dir,'save.db');let game=new Game(file,{profile:'homeworld',seed:42});
+ try{
+ game.createPlayer('Altstand');const e=[...game.world.entities.values()].find(e=>e.kind==='planet'&&e.type!=='ruins'&&e.market);const id=e.id;e.market.economy={cash:0};game.save();game.store.close();game=new Game(file,{profile:'homeworld',seed:42});
+ const loaded=game.world.entities.get(id);tickRealMarket(game,loaded,60);assert.ok(loaded.market.economy.civil.budget>0);assert.ok(Number.isFinite(loaded.market.economy.cash));game.save();game.store.close();game=new Game(file,{profile:'homeworld',seed:42});
+ const again=game.world.entities.get(id);assert.ok(again.market.economy.civil.budget>0);const before=again.market.economy.civil.gross;tickRealMarket(game,again,60);assert.ok(again.market.economy.civil.gross>before);
+ }finally{game.store.close();fs.rmSync(dir,{recursive:true,force:true});}
+});

@@ -11,7 +11,10 @@ export function unlockBuildingRecipes(game,entity){
    recipes.add(b.recipe);
    if(REFINEMENT_RECIPES.includes(b.recipe))for(const id of REFINEMENT_RECIPES)if(['I','II','III','IV','V'].indexOf(industryGroup(id))<=['I','II','III','IV','V'].indexOf(b.buildGroup||industryGroup(b.recipe)))recipes.add(id);
   }
- }else for(const b of entity.market?.bld?.factories||[])recipes.add(b.recipe);
+ }else {
+  for(const b of entity.market?.bld?.factories||[])recipes.add(b.recipe);
+  if(entity.kind==='station'&&RECIPES[entity.type])recipes.add(entity.type);
+ }
  const added=[];
  for(const id of recipes){const key='st:'+id;if(RECIPES[id]&&!player.known.recipe.has(key)){player.known.recipe.add(key);game.newDiscoveries.push([player.id,'recipe',key]);added.push(key);}}
  if(added.length)game.emit('reveal',player,{recipes:added});

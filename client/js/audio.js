@@ -100,11 +100,11 @@ const SFX = {
 export const SFX_NAMES = Object.keys(SFX);
 
 const lastPlayed = {};
-/** Effekt abspielen; gleicher Effekt höchstens alle 80 ms */
+/** Effekt abspielen; 80-ms-Schutz außer für getrennte neue Angriffswarnungen. */
 export function sfx(name) {
   if (prefs.mute || !prefs.sfx || !SFX[name] || !ensure()) return;
   const now = performance.now();
-  if (now - (lastPlayed[name] || 0) < 80) return;
+  if (name !== 'attackWarning' && now - (lastPlayed[name] || 0) < 80) return;
   lastPlayed[name] = now;
   SFX[name](ctx.currentTime + 0.01);
 }

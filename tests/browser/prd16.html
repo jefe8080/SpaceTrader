@@ -1,0 +1,5 @@
+<!doctype html><html><meta charset="utf-8"><title>PRD 16 QA</title>
+<script type="module">
+const html=await(await fetch('/')).text();
+document.open();document.write(html.replace('/js/main.js','/dev/prd16.js'));document.close();
+</script></html>
