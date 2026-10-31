@@ -162,7 +162,7 @@ export class PlanetCityScene {
       const level=Number(cell.slice(-1)),image=this.art.housing[level-1];
       // Authored alpha bounds keep foundations aligned across three different canvases.
       const [x,y,sw,sh]=[[200,30,1155,954],[415,7,763,1009],[223,7,815,1296]][level-1];
-      const w=Math.max(80,r.w),h=w*sh/sw;
+      const w=r.w,h=r.h;
       ctx.drawImage(image,x,y,sw,sh,r.x-w/2,r.y-h,w,h);
       if(active||this.names)this.drawName(ctx,r);return;
     }
