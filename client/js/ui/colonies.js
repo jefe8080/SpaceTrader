@@ -19,7 +19,7 @@ export function colonyPanel(e){
   return html;
 }
 
-export function warpPanel(e){
+function warpBody(e){
   const h=e.market?.homeworld;if(h?.owner!==state.me.id||!state.homeQuest?.completed.H16)return '';
   let html='<h3>Warpservice</h3><p>Alle angedockten Schiffe müssen starten. Keine Flottenschiffe werden versetzt. Nach Bestätigung pausiert der Standort fünf Minuten und sperrt alle Lager-, Bau- und Werkstattänderungen. Sperrfrist danach: 24 Stunden Serverlaufzeit.</p>';
   if(h.warp)return html+`<p>Vorbereitung: ${Math.ceil(h.warp.remaining)} s · ${fmt(h.warp.price.total)} Cr gebunden · Ziel ${esc(state.systems.get(h.warp.target.system)?.name||h.warp.target.system)}. Bestände gesperrt.</p>`;
@@ -29,6 +29,15 @@ export function warpPanel(e){
   const q=h.warpQuote;
   if(q){const price=q.price;html+=`<div class="quest-offer"><b>Ziel: ${esc(state.systems.get(q.target.system)?.name||q.target.system)} (${Math.round(q.target.x)}, ${Math.round(q.target.y)})</b><p>Grundpreis ${fmt(price.base)} + Standortanteil ${price.siteCharge.toLocaleString('de-DE',{maximumFractionDigits:2})} (20 % von ${fmt(price.site)}) + Bestände ${fmt(price.cargo)} = <b>${fmt(price.total)} Cr</b>, auf volle Cr aufgerundet.</p><p>Mitgeführt: ${Object.entries(price.goods).map(([g,n])=>`${fmt(n)} ${GOODS[g].name}`).join(', ')||'keine Waren'} · ${Object.values(price.modules).reduce((a,b)=>a+b,0)} verpackte Module · ${price.hulls.length} gebundene/fertige Orbitalrümpfe. Eingelagerter Reliktantrieb bleibt derselben Welt zugeordnet.</p><p>Neue eigene Netzgebiete: ${q.coverage.map(a=>a.kind==='circle'?`Systemzone, Radius ${Math.round(a.radius)}`:`Hexgebiet ${a.q}, ${a.r}, ${a.rings} Ringe`).join('; ')}.</p><p>Betroffene Routen: ${q.affectedRoutes.map(r=>esc(r.name)).join(', ')||'keine'} · anfliegende Schiffe: ${q.affectedShips.length} · weitere Welten: ${q.otherWorlds.map(w=>esc(w.name)).join(', ')||'keine'}. Begonnene Abschnitte enden sicher; eigene Transportaufträge pausieren zur erneuten Freigabe.</p><button class="primary" data-act="warpStart" data-ent="${e.id}" data-quote="${q.id}">Transfer mit dieser Preisobergrenze bestätigen</button></div>`;}
   return html;
+}
+export function warpPanel(e){
+  const body=warpBody(e);if(!body)return '';
+  const h=e.market.homeworld,status=h.warp?'Transfer läuft · '+Math.ceil(h.warp.remaining)+' s':(h.warpCooldownUntil||0)>state.time?'Sperrfrist aktiv':'bereit';
+  return '<details data-disclosure="warp-'+e.id+'"><summary>Warpservice · '+status+'</summary>'+body+'</details>';
+}
+export function worldsPanel(){
+  const worlds=[...state.entities.values()].filter(e=>e.ruinsSite||e.market?.homeworld?.owner===state.me.id);
+  return '<details data-disclosure="own-worlds"><summary>Eigene Welten und Expeditionen · '+worlds.length+' Standorte · '+worlds.filter(e=>e.colony?.remaining!==undefined||e.market?.homeworld?.warp).length+' laufende Vorgänge</summary>'+worlds.map(world=>'<p>'+esc(world.name)+' · '+(world.ruinsSite?(world.colony?'Expedition im Aufbau':'unbewohnter Standort'):'Leitstelle '+world.market.homeworld.controlLevel)+'</p><button class="small" data-pp="homeSite" data-id="'+world.id+'">Standort zeigen</button>').join('')+'</details>';
 }
 export function handleColonyAction(d){
   switch(d.act){

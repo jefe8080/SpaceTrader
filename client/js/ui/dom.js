@@ -3,7 +3,11 @@ export const $ = (id) => document.getElementById(id);
 
 /** innerHTML nur setzen, wenn sich etwas geändert hat (verhindert Flackern und verlorenen Fokus) */
 export const setHtml = (el, html) => {
-  if (el._html !== html) { el.innerHTML = html; el._html = html; }
+  if (el._html !== html) {
+    const states=new Map([...el.querySelectorAll('details[data-disclosure]')].map(d=>[d.dataset.disclosure,d.open]));
+    el.innerHTML = html; el._html = html;
+    for(const d of el.querySelectorAll('details[data-disclosure]'))if(states.has(d.dataset.disclosure))d.open=states.get(d.dataset.disclosure);
+  }
 };
 
 export function toast(msg, kind = 'error') {

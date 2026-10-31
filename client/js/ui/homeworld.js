@@ -15,7 +15,7 @@ import {QUEST_DELIVERIES,STUDY_FINDS} from '/shared/advanced-homequests.js';
 import {shipSprite} from '../util.js';
 import {blueprintRank} from '/shared/combat.js';
 import {SHIP_TYPES,SHIPYARD,PILOT_LICENSES,factionRank} from '/shared/config.js';
-import {warpPanel} from './colonies.js';
+import {warpPanel,worldsPanel} from './colonies.js';
 import {housingPanel} from './housing.js';
 import {activeSideQuests} from '/shared/side-quests.js';
 
@@ -63,7 +63,7 @@ export function homePanel(entity, item, ship) {
     const mode=entity.market.mode==='open'?'open':'private';
     const trade=`<h3>Handel</h3><p>Handelsmodus: <b>${mode==='open'?'offen':'privat'}</b></p><p>${mode==='open'?'Andere Spieler und NPCs können unreservierte Waren handeln.':'Nur du kannst auf das Lager zugreifen.'} Reservierte Waren bleiben geschützt.</p><button class="small" data-pp="homeTradeMode" data-mode="${mode==='open'?'private':'open'}">Handel ${mode==='open'?'auf privat stellen':'öffnen'}</button>`;
     const overview='<details><summary>Planetenübersicht</summary>'+homeBalance(entity)+'</details>'+trade+planetNamePanel(entity);
-    if(entity.id!==state.homeworld)return overview+'<h3>Laufende Quests</h3>'+activeSideQuests(state).map(q=>'<p>'+questText(q)+'</p>').join('')+Object.entries(HOME_QUESTS).filter(([id])=>state.homeQuest?.active?.[id]&&!completed(id)).map(([id,q])=>'<p><b>'+id+' · '+esc(q.title)+'</b><br>'+esc(q.goal)+'</p>').join('')+'<button class="small" data-pp="homeSite" data-id="'+state.homeworld+'">Zur Hauptheimat zeigen</button>'+historyPanel()+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+warpPanel(entity);
+    if(entity.id!==state.homeworld)return overview+'<h3>Laufende Quests</h3>'+activeSideQuests(state).map(q=>'<p>'+questText(q)+'</p>').join('')+Object.entries(HOME_QUESTS).filter(([id])=>state.homeQuest?.active?.[id]&&!completed(id)).map(([id,q])=>'<p><b>'+id+' · '+esc(q.title)+'</b><br>'+esc(q.goal)+'</p>').join('')+'<button class="small" data-pp="homeSite" data-id="'+state.homeworld+'">Zur Hauptheimat zeigen</button>'+historyPanel()+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+worldsPanel()+warpPanel(entity);
     let html = overview+(activeSideQuests(state).length?'<h3>Laufende Nebenquests</h3>'+activeSideQuests(state).map(q=>'<p>'+questText(q)+'</p>').join(''):'')+`<div class="muted">Hauptquests laufen unabhängig von normalen Quests. Mehrere freigeschaltete Zweige können gleichzeitig fortschreiten.</div>`;
     for (const [id, quest] of Object.entries(HOME_QUESTS)) {
       if(completed(id)||!state.homeQuest?.active?.[id])continue;
@@ -84,8 +84,7 @@ export function homePanel(entity, item, ship) {
     }
     for(const [module,find] of Object.entries(STUDY_FINDS))if(completed(find.quest)&&!state.homeQuest.finds?.[module])html+=`<p>${find.name}: ${state.homeQuest.finds?.[module]?'einmalige Vorlage geborgen':'Studienvorlage verfügbar'}</p><button class="small" data-pp="homeSite" data-id="${state.homeQuest.sites?.[module]||''}">Forschungsfund zeigen</button>`;
     html+=`<p>Volle Grundversorgung: ${Math.floor(home.fullSupplySeconds||0)} / 1.800 s · Selbst ausgebildete Fachkräfte: ${home.trained?.skilled||0}</p>`+orbitalPanel(entity);
-    html+='<h3>Eigene Welten und Expeditionen</h3>';
-    for(const world of [...state.entities.values()].filter(e=>e.ruinsSite||e.market?.homeworld?.owner===state.me.id))html+=`<p>${esc(world.name)} · ${world.ruinsSite?'unbewohnter Standort':`Leitstelle ${world.market.homeworld.controlLevel}`}</p><button class="small" data-pp="homeSite" data-id="${world.id}">Standort zeigen</button>`;
+    html+=worldsPanel();
     html+=warpPanel(entity);
     html += historyPanel();
     return html;

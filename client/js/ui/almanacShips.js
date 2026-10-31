@@ -22,10 +22,10 @@ function renderShips() {
         <div><b>${d.name}</b> <span class="badge">${SHIP_CLASSES[d.cls].name}</span>${d.faction ? ` <span class="muted">${esc(d.factionName || '')} · Rang ${d.rank} (${RANK_NAMES[d.rank]}) · nur Fraktionswerft</span>` : ''}
         ${d.ability ? `<div class="ability">★ ${ABILITIES[d.ability]}</div>` : ''}
         <div class="kv small"><span>Laderaum</span><span>${fmt(d.cargo)}</span><span>Tempo</span><span>${d.speed}</span>
-        <span>Tank</span><span>${d.tank}</span><span>Bergbau</span><span>${d.mining || '–'}</span>
+        <span>Tank</span><span>${d.tank}</span>
         <span>Preis</span><span>${seen ? fmt(seen) + ' Cr (zuletzt gesehen)' : 'ca. ' + fmt(d.price) + ' Cr'}${d.currency ? ` + ${fmt(d.currency.n)} ${GOODS[d.currency.good].name}` : ''}</span>
-        ${d.faction ? '' : `<span>Material</span><span>${Object.entries(d.build || {}).map(([g, k]) => `${k} ${GOODS[g].name}`).join(', ') || '–'}</span>`}</div>
-        ${shipCombatInfo(t)}${shipRatings(t)}<div class="muted small-note">${esc(d.desc)}</div></div></div>`;
+        <span>Material</span><span>${Object.entries(d.build || {}).map(([g, k]) => `${k} ${GOODS[g].name}`).join(', ') || '–'}</span></div>
+        ${shipRatings(t)}<details data-disclosure="almanac-ship-${t}"><summary>Details</summary><p>Bergbau: ${d.mining || '–'}</p>${shipCombatInfo(t)}<div class="muted small-note">${esc(d.desc)}</div></details></div></div>`;
     }
   }
   return h + '</div>';

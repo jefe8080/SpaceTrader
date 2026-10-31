@@ -186,7 +186,7 @@ zusammengehörigen Änderungen separat committet.
 | --- | --- | --- |
 | P01 | Doppelwerft: Ausbau, freie Bauplätze, unabhängiger Betrieb, Migration; gezielte Orbital-/Versorgungstests | Implementiert; 13 Orbital-/Betriebstests bestanden, Persistenzabnahme in P08 |
 | P02 | Orbitalring-Baumenü: Kategorien, Karten, Bauplatzanzeige; Browser- und Sichtprüfung bei mehreren Fenstergrößen | Implementiert; Syntax und 4 Katalog-/Orbitaltests bestanden; Sichtprüfung in P08 |
-| P03 | Almanach und Rathaus: Aufklappbereiche und sichtbare Werte; Aktualisierungs- und Browserprüfung | Offen |
+| P03 | Almanach und Rathaus: Aufklappbereiche und sichtbare Werte; Aktualisierungs- und Browserprüfung | Implementiert; Syntaxprüfung bestanden; Browserabnahme in P08 |
 | P04 | Wohnhäuser: Darstellung, Auswahlflächen und Zoom; visuelle Prüfung aller Stufen | Offen |
 | P05 | Abfangkreis: Berechtigung, Gruppen, Haltungen und Reichweite; Logik- und Sichtprüfung | Offen |
 | P06 | Konsumkonto entfernen: sämtliche Objektarten, Warenverbrauch, Erlöse und Migration; gezielte Wirtschaftsregressionstests | Offen |
