@@ -23,6 +23,9 @@ export function canSupport(game, ship) {
 }
 
 /** Bündnisstand je Seite zu Schlachtbeginn: Änderungen gelten nur für neue Begegnungen */
+export function interceptRange(game,ship,viewer){
+  return allianceActive(game,viewer,ship.owner)&&postureOf(ship).mode==='intercept'&&canSupport(game,ship)?COMBAT.INTERCEPT:0;
+}
 export function snapshotAllies(game, b) {
   b.allies = {};
   for (const side of ['A', 'B']) {

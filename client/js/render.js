@@ -617,6 +617,7 @@ function drawSystemLabels() {
 
 // ---------------- Sektoransicht ----------------
 function drawSectorView(now) {
+  drawInterceptRange();
   drawZones(now);
   // Sektorgrenzen
   ctx.save();
@@ -829,6 +830,7 @@ export function render(now, dt) {
   }
   if (mode === 'sector') {
     drawSectorView(now);
+    drawInterceptRange();
     drawBattleSymbols(ctx, { px, now });
     ctx.restore();
     drawSectorLabels();
@@ -872,6 +874,12 @@ export function render(now, dt) {
   drawEventLabels();
 }
 
+function drawInterceptRange(){
+  if(state.hover?.kind!=='ship')return;
+  const s=state.ships.get(state.hover.id);if(!s?.interceptRange)return;
+  ctx.save();ctx.beginPath();ctx.arc(s.rx??s.x,s.ry??s.y,s.interceptRange,0,TAU);
+  ctx.fillStyle='rgba(110,190,225,0.035)';ctx.fill();ctx.strokeStyle='rgba(135,205,235,0.28)';ctx.lineWidth=1/cam.zoom;ctx.stroke();ctx.restore();
+}
 function entitySelectRadius(e) {
   if (e.kind === 'belt') return e.radius;
   return Math.max(e.radius, px(7)) * 1.25;

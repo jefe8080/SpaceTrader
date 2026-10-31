@@ -1,3 +1,4 @@
+import {interceptRange} from './war/support.js';
 import { pilotProfile } from './pilot-profile.js';
 import { GAME_PROTOCOL } from '../shared/protocol.js';
 import { NET, NPC_OWNER, cellKey, cellOf, pilotLevel, recipeOf } from '../shared/config.js';
@@ -214,7 +215,7 @@ export class Net {
       if (!v || ship.x < v.x0 - M || ship.x > v.x1 + M || ship.y < v.y0 - M || ship.y > v.y1 + M) continue;
       if (!p.revealed.has(cellKey(...cellOf(ship.x, ship.y)))) continue;
       const o = compactShip(ship);
-      Object.assign(o, foreignInfo(ship));
+      Object.assign(o, foreignInfo(ship, this.game, p));
       others.add(ship.id);
       ships.push(o);
     }
@@ -382,8 +383,8 @@ function compactShip(s) {
   return { id: s.id, x: Math.round(s.x), y: Math.round(s.y), a: Math.round(s.angle * 100) / 100, vx: r1(s.vx), vy: r1(s.vy), st: s.state, dk: s.dockedAt };
 }
 
-function foreignInfo(s) {
-  const o = { owner: s.owner, type: s.type, name: s.name, main: !!s.main, battle: s.battle || null };
+function foreignInfo(s,game,p) {
+  const o = { interceptRange:interceptRange(game,s,p.id), owner: s.owner, type: s.type, name: s.name, main: !!s.main, battle: s.battle || null };
   const c = s.queue[0];
   if (s.owner === NPC_OWNER && c?.t === 'supply') {
     const { stationId, sourceId, good, phase } = c;
@@ -395,6 +396,7 @@ function foreignInfo(s) {
 
 function shipDetail(s, game) {
   return {
+    interceptRange: game?interceptRange(game,s,s.owner):0,
     offer: game?.shipOffers.get(s.id)?.price ?? null,
     owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, passengers:s.passengers||[],moduleCargo:s.moduleCargo||{}, log: s.log, group: s.group, ord: s.ord,
     queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},relocationHold:s.relocationHold||null,dmg:s.dmg||null,battle:s.battle||null,captive:s.captive||null,ransom:s.captive&&game?ransomQuote(game,s):null,repairHold:!!s.repairHold,needsRepair:needsRepair(s),repairQuote:s.dmg&&game?quoteFor([s]):null,autoRepair:game?autoRepairOn(game,s):true,repairHere:!!(game&&s.dockedAt&&!repairSiteError(game,s.owner,game.world.entities.get(s.dockedAt))),repairRun:!!s.repairRun,posture:s.posture||null,stack:s.stack||null,rendezvous:s.rendezvous||null,
