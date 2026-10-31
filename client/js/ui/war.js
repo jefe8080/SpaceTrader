@@ -2,7 +2,7 @@
 import { state, esc, selectedShips, fmt } from '../state.js';
 import { cmd } from '../net.js';
 import { shipSymbol } from '../util.js';
-import { $ } from './dom.js';
+import { $, hint } from './dom.js';
 import { COMBAT_TYPES, NAVAL_CLASSES, COMBAT_ABILITIES, blueprint, maxHull, SYSTEMS, systemState, STATE_NAMES, WEAPONS } from '/shared/combat.js';
 
 /** Aktionen der Kriegsbedienung (data-war) */
@@ -67,19 +67,18 @@ export function combatSection(s) {
     </div>${sys ? `<div class="sys-list">${sys}</div>` : ''}</div>`;
 }
 
-/** Fremdes Schiff: ausdrücklicher Angriffsbefehl mit den ausgewählten eigenen Schiffen */
+/** Fremdes Schiff: Kampfprofil und Zugang zur laufenden Schlacht */
 export function foreignWarSection(s) {
-  const mine = selectedShips().filter((x) => !x.captive);
   const c = COMBAT_TYPES[s.type];
   let h = c ? `<div class="muted">${NAVAL_CLASSES[c.cls].name} · ${esc(c.role)}</div>` : '';
   if (s.battle) h += `<div class="btnrow"><button class="small" data-war="view" data-battle="${s.battle}">⚔ Schlacht ansehen</button></div>`;
-  else if (mine.length) h += `<div class="btnrow"><button class="small danger" data-war="attack" data-target="${s.id}" title="Ausdrücklicher Angriffsbefehl; normale Flugbefehle greifen nie an">⚔ Mit ${mine.length} Schiff${mine.length > 1 ? 'en' : ''} angreifen</button></div>`;
   return h;
 }
 
 /** Eigenes Schiff: Schlacht, Gefangenschaft mit Freikauf, Reparaturbedarf */
 export function ownWarSection(s) {
   let h = '';
+  if (!s.battle && !s.captive) h += `<div class="btnrow"><button class="small danger" data-war="attack" data-ship="${s.id}">Angriff</button></div>`;
   if (s.battle) h += `<div class="warnbox">⚔ In einer Schlacht. <button class="small" data-war="view" data-battle="${s.battle}">Schlachtansicht öffnen</button></div>`;
   if (s.captive) {
     const q = s.ransom;
@@ -105,7 +104,23 @@ export function ownWarSection(s) {
   return h;
 }
 
-warActions.attack = (d) => cmd('attack', { ships: selectedShips().map((x) => x.id), target: d.target });
+warActions.attack = (d) => {
+  const ships = [d.ship];
+  state.pickMode?.(null);
+  hint('Angriff: fremdes Schiff oder angreifbaren Planeten anklicken (Esc bricht ab)');
+  state.attackPick = (hit) => {
+    if (!hit) { state.attackPick = null; hint(null); return; }
+    const target = hit.kind === 'ship' ? state.ships.get(hit.id) : hit.kind === 'entity' ? state.entities.get(hit.id) : null;
+    if (!target || target.owner === state.me?.id || target.captive || (hit.kind !== 'ship' && (target.kind !== 'planet' || !target.market))) {
+      hint('Kein Angriffsziel. Fremdes Schiff oder angreifbaren Planeten wählen (Esc bricht ab)');
+      return;
+    }
+    if (hit.kind === 'ship') cmd('attack', { ships, target: target.id });
+    else cmd('raid', { ships, planet: target.id });
+    state.attackPick = null;
+    hint(null);
+  };
+};
 warActions.ransom = (d) => { if (confirm(`Schiff für ${fmt(Number(d.price))} Cr freikaufen?`)) cmd('ransom', { ship: d.ship, price: Number(d.price) }); };
 warActions.repair = (d) => { if (confirm(`Reparatur für ${fmt(Number(d.cost))} Cr starten?`)) cmd('repair', { ship: d.ship, cost: Number(d.cost) }); };
 warActions.posture = (d) => cmd('posture', { ship: d.ship, mode: d.mode });

@@ -50,6 +50,7 @@ export function renderAll() {
  * Auswahl setzen. Ohne keepSelection wird die Mehrfachauswahl zurückgesetzt.
  */
 export function select(sel, { keepSelection = false, explained = false } = {}) {
+  state.attackPick?.(null);
   const object = sel && (sel.kind === 'entity' ? state.entities.get(sel.id) : state.ships.get(sel.id));
   if (!explained && firstGuide(entityGuideKey(sel?.kind === 'ship' && object ? {...object,kind:'ship'} : object), () => select(sel, { keepSelection, explained: true }))) return;
   const changed = JSON.stringify(sel) !== JSON.stringify(state.selected);

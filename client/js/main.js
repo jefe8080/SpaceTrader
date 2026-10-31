@@ -62,6 +62,7 @@ socket.on('welcome', (d) => {
   state.shipTypes = new Set(d.shipTypes || []);
   state.moduleTypes = new Set(d.moduleTypes || []);
   state.ships.clear();
+  state.attackPick?.(null);
   state.selection.clear();
   state.homeStoryShipClicked = false;
   lastSub = '';
@@ -225,7 +226,7 @@ addEventListener('mousemove', (e) => {
     }
   }
   state.hover = e.target === canvas && state.me ? pickAt(e.clientX, e.clientY) : null;
-  canvas.style.cursor = drag?.moved ? 'grabbing' : state.hover ? 'pointer' : 'default';
+  canvas.style.cursor = drag?.moved ? 'grabbing' : state.attackPick ? 'crosshair' : state.hover ? 'pointer' : 'default';
   if (state.me) ui.updateTooltip(e.clientX, e.clientY);
 });
 addEventListener('mouseup', (e) => {
@@ -239,6 +240,10 @@ addEventListener('mouseup', (e) => {
 function clickAt(sx, sy, multi) {
   if (state.landed) return;
   const hit = pickAt(sx, sy);
+  if (state.attackPick) {
+    state.attackPick(hit || { kind: 'empty' });
+    return;
+  }
   if (state.pickMode) {
     if (hit?.kind === 'entity') state.pickMode(hit.id);
     return;
@@ -287,6 +292,7 @@ canvas.addEventListener('contextmenu', (e) => {
 /** Rechtsklick bzw. langes Drücken: gewählte Schiffe dorthin schicken */
 function orderAt(sx, sy, append) {
   if (state.landed) return false;
+  if (state.attackPick) { state.attackPick(null); return true; }
   const ships = selectedShips();
   if (!ships.length) return false;
   const hit = pickAt(sx, sy);
@@ -409,7 +415,8 @@ addEventListener('keydown', (e) => {
     ui.leavePlanet();
   }
   if (e.key === 'Escape') {
-    if (state.pickMode) state.pickMode(null);
+    if (state.attackPick) state.attackPick(null);
+    else if (state.pickMode) state.pickMode(null);
     else if (!ui.closeTopModal()) ui.select(null);
   } else if (e.key === ' ' && state.selected?.kind === 'ship') {
     e.preventDefault();

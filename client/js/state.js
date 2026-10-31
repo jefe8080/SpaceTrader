@@ -45,6 +45,7 @@ export const state = {
   camera: { x: 0, y: 0, zoom: 0.32 },
   follow: null,         // Schiff-ID, der die Kamera folgt
   pickMode: null,       // Callback, wenn ein Ziel auf der Karte gewählt werden soll
+  attackPick: null,     // Angriffsziel wählen; null als Argument bricht ab
   stats: new Map(),     // Entity-ID -> Statistik (3h)
   fleetFilter: 'all',
 };
