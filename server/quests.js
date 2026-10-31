@@ -327,7 +327,7 @@ function progressQuest(game,player,ship,q,explicit){
         if(game.profile==='homeworld'){
           const e=game.world.entities.get(q.giver),h=peopleOf(e),batches=(ship.passengers||[]).filter(b=>b.quest===q.id);
           if(batches.reduce((n,b)=>n+b.n,0)!==q.tourists||!h)return false;
-          for(const b of batches){h.population+=b.n;for(const qualification of Object.keys(h.workers))h.workers[qualification]+=b.workers[qualification]||0;if(h.civil)h.civil.budget+=b.wallet||0;}
+          for(const b of batches){h.population+=b.n;for(const qualification of Object.keys(h.workers))h.workers[qualification]+=b.workers[qualification]||0;}
           ship.passengers=ship.passengers.filter(b=>b.quest!==q.id);ship.cargo.tourists=(ship.cargo.tourists||0)-q.tourists;if(!ship.cargo.tourists)delete ship.cargo.tourists;updatePassengerOffers(e);
         }
         completeQuest(game, player,q); return true;

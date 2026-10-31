@@ -190,7 +190,7 @@ zusammengehörigen Änderungen separat committet.
 | P04 | Wohnhäuser: Darstellung, Auswahlflächen und Zoom; visuelle Prüfung aller Stufen | Implementiert; Stadttests bestanden; Sichtprüfung in P08 |
 | P05 | Abfangkreis: Berechtigung, Gruppen, Haltungen und Reichweite; Logik- und Sichtprüfung | Implementiert; Unterstützungsregressionen bestanden; Sichtprüfung in P08 |
 | P06 | Konsumkonto entfernen: sämtliche Objektarten, Warenverbrauch, Erlöse und Migration; gezielte Wirtschaftsregressionstests | Erledigt; 20 Wirtschaftsregressionen bestanden, einschließlich Spezialwelt und Hotel |
-| P07 | Touristisches Reisegeld ohne Konto: neue Reise, Weitertransport, Auszahlung und Heimkehr; Passagier-/Tourismustests | Offen |
+| P07 | Touristisches Reisegeld ohne Konto: neue Reise, Weitertransport, Auszahlung und Heimkehr; Passagier-/Tourismustests | Erledigt; Passagierregressionen und neue Grant-/Transfer-/Heimkehrtests bestanden |
 | P08 | Gesamtabnahme: relevante Regressionen, vollständige Testsuite, UI-Sichtprüfung und Dokumentationsabgleich | Offen |
 
 Ausgangspunkt für die Umsetzung sind insbesondere `server/orbital.js`,

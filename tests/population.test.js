@@ -38,7 +38,7 @@ test('Fehlender Wohnraum und Kabinenplatz lassen Personen vollständig erhalten'
 
 test('Touristen bleiben nach 20 Minuten dieselben Personen und ein Aufenthalt wird nur einmal bezahlt',()=>{
   const f=fixture(),n=f.state.population;f.state.civil={budget:1000};
-  assert.equal(passengerTrade(f.game,f.ship,f.source,'tourists',10,'buy').n,10);assert.equal(f.state.population,n-10);assert.equal(f.state.civil.budget,720);
+  assert.equal(passengerTrade(f.game,f.ship,f.source,'tourists',10,'buy').n,10);assert.equal(f.state.population,n-10);assert.equal(f.state.civil.budget,undefined);assert.equal(f.ship.passengers[0].wallet,280);
   const h=f.home.market.homeworld;h.visitorCapacity=20;const credits=f.player.credits;f.ship.dockedAt=f.home.id;
   assert.equal(passengerTrade(f.game,f.ship,f.home,'tourists',10,'sell').n,10);assert.equal(f.player.credits,credits+280);assert.equal(h.visitors[0].stayPaid,280);
   tickVisitors(f.home,1199);assert.equal(h.visitors[0].ready,false);tickVisitors(f.home,1200);assert.equal(h.visitors[0].ready,true);

@@ -97,15 +97,10 @@ export function passengerTrade(game,ship,e,good,amount,dir,limit=0,free=false){
     h.visitors=h.visitors.filter(v=>v.n>0);
     if(n){
       const workers=good==='workers'?takeWorkers(h,n):{basic:0,skilled:0,specialist:0};h.population-=n;
-      ship.passengers.push({id:`${e.id}:passengers:${++h.nextPassenger}`,kind:good,origin:e.id,ownerAtDeparture:prop?.player||null,n,workers,wallet:0});
+      ship.passengers.push({id:`${e.id}:passengers:${++h.nextPassenger}`,kind:good,origin:e.id,ownerAtDeparture:prop?.player||null,n,workers,wallet:good==='tourists'?n*28:0});
     }
     p.credits-=loaded*fee;
     const recipient=prop&&game.accountOf(prop.player);if(recipient)recipient.credits+=loaded*fee;else if(e.market.economy)e.market.economy.cash+=loaded*fee;
-    // Travel spending is escrowed from the source's actual civilian budget.
-    if(good==='tourists'){
-      const batch=ship.passengers.at(-1),wallet=Math.min(h.civil?.budget||0,n*GOODS.tourists.base);
-      if(wallet&&n){h.civil.budget-=wallet;batch.wallet+=wallet;}
-    }
     cargoSync(ship);updatePassengerOffers(e);stat(e.market,game.time,'o',good,loaded);
     return {n:loaded,total:loaded*fee};
   }
@@ -117,7 +112,7 @@ export function passengerTrade(game,ship,e,good,amount,dir,limit=0,free=false){
     const room=good==='workers'||returning?Math.max(0,h.housing-h.population):Math.max(0,visitorCap-occupied);
     const n=Math.min(remaining,batch.n,room);if(n<1)continue;
     const moved=splitBatch(batch,n);
-    if(good==='workers'||returning){h.population+=n;for(const q of Object.keys(h.workers))h.workers[q]+=moved.workers[q]||0;if(returning&&moved.wallet){h.civil||={budget:0};h.civil.budget+=moved.wallet;}}
+    if(good==='workers'||returning){h.population+=n;for(const q of Object.keys(h.workers))h.workers[q]+=moved.workers[q]||0;}
     else{
       moved.arrived=game.time;moved.until=game.time+1200;moved.ready=false;
       const recipient=prop&&game.accountOf(prop.player);
