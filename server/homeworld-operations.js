@@ -2,7 +2,7 @@ import { GOODS, RECIPES,REFINEMENT_RECIPES } from '../shared/goods.js';
 import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, homeStorageFree, availableHomeStock, homeGoodCapacity, homeGoodLimit, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '../shared/homeworld.js';
 import { coverageAreas } from './coverage.js';
 import { planetAccess } from '../shared/planet-access.js';
-import {tickCivilMoney} from './real-economy.js';
+import {tickCivilMoney,consumeCivilGood} from './real-economy.js';
 import {stat} from './markets.js';
 import {tickModuleProjects} from './modules.js';
 import {tickLogistics,productionAllowed,productionStock,consumeProductionReservation,recordProduction} from './logistics.js';
@@ -285,16 +285,15 @@ function runProduction(market,building,recipe,dt,speed,now) {
   market.homeworld.productionCycles[id]=(market.homeworld.productionCycles[id]||0)+completedCycles;
 }
 
-function populationStep(entity,dt,now) {
+function populationStep(game,entity,dt,now) {
   const market=entity.market,home=market.homeworld;
   home.civilConsumption={};
   const consume=(good,amount)=>{
-    const reserved=Object.values(home.reservations).reduce((sum,item)=>sum+(item.goods[good]||0),0);
-    const taken=Math.min(Math.max(0,(market.goods[good]?.stock||0)-reserved),amount);
-    if(market.goods[good])market.goods[good].stock-=taken;
-    home.civilConsumption[good]=(home.civilConsumption[good]||0)+taken;
-    stat(market,now,'c',good,taken);
-    return amount>0?taken/amount:1;
+    // Availability determines supply and operation; actual purchases are
+    // independently limited by the civilian wallet and the selected price.
+    const supplied=amount>0?Math.min(1,availableHomeStock(market,good)/amount):1;
+    consumeCivilGood(game,entity,good,dt>0?amount/dt:0,dt);
+    return supplied;
   };
   const supply={};
   for(const [good,amount] of Object.entries(HOMEWORLD.population.needPerHour))supply[good]=consume(good,home.population*amount*dt/3600);
@@ -319,7 +318,8 @@ function operationStep(game,entity,dt,now) {
     const spec=structureSpec(building);home.storage+=spec.storage||0;home.hazardStorage+=spec.hazardStorage||0;home.housing+=spec.housing||0;
   }
   for(const [good,slot] of Object.entries(market.goods))slot.cap=GOODS[good].cls==='normal'?home.storage:GOODS[good].cls==='hazard'?home.hazardStorage:0;
-  const fullySupplied=ready(home.facilities.dock)?populationStep(entity,dt,now):false;
+  tickCivilMoney(game,entity,dt);
+  const fullySupplied=ready(home.facilities.dock)?populationStep(game,entity,dt,now):false;
   if(fullySupplied)home.fullSupplySeconds=(home.fullSupplySeconds||0)+dt;
   if(fullySupplied&&completed(game.players.get(home.owner),'H03'))home.suppliedSeconds+=dt;
   const reserved=trainingReserved(home),remaining={...home.workers},used=qualified();
@@ -407,7 +407,7 @@ function operationStep(game,entity,dt,now) {
   tickOrbital(game,entity,dt);
   home.flows=flows;
   home.employmentFactor=.5+.5*Math.min(1,QUALIFICATIONS.reduce((sum,q)=>sum+used[q],0)/Math.max(1,Math.floor(home.population*.6)));
-  tickCivilMoney(game,entity,dt,ready(home.facilities.dock)?home.civilConsumption:{});
+  if(home.civil)home.civil.incomePerHour=HOMEWORLD.money.incomePerHour*home.population*home.supplyFactor*home.employmentFactor;
   home.power=generation;
 }
 

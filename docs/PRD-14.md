@@ -280,9 +280,19 @@ und relevante neue Möglichkeiten zusammen verständlich dargestellt.
   Gesamterlös im Statistikpanel. Keine Rekonstruktion aus Altverbrauch.
   Konsumbudget, Zufluss nach Steuern und getrennte NPC-Kasse angezeigt.
   Prüfung: `node --test tests/local-sales.test.js` und Syntaxprüfung.
-- [ ] Schritt 2: Preisabhängige lokale Nachfrage an die aktuelle Wirtschaft
+- [x] Schritt 2: Preisabhängige lokale Nachfrage an die aktuelle Wirtschaft
   anbinden und Verbrauch gekaufter Planeten prüfen. Reglerwirkung,
   Warenbestand, Reserven, Budgetgrenzen und rezeptgebundene Verbräuche testen.
+
+  Ergebnis: Gemeinsame Nachfrageformel für Anzeige und Warenentnahme,
+  atomare Bezahlung mit budgetbegrenzter Menge für die fünf zivilen Waren,
+  einschließlich Ruinenwelten. Rezeptzutaten bleiben unverändert. Wie auf
+  gewöhnlichen Planeten bewertet die Heimatwelt Versorgung anhand des
+  verfügbaren Grundbedarfs; Käufe sind davon getrennt budgetbegrenzt.
+  27 gezielte Tests bestanden. Die erste Prüfung deckte eine anschließend
+  behobene Ausbildungsregression auf. `npm ci` scheiterte am unnötigen
+  nativen SQLite-Neubau; `npm ci --ignore-scripts` installiert die bereits
+  enthaltene funktionsfähige Binärdatei unter Node 24.13.0.
 - [ ] Schritt 3: Filterbare Ortslisten um sämtliche Planetentypen und
   Rohstofffelder erweitern; Kombinationen, Sichtbarkeit, Warenfilter und
   passende Aktionen prüfen. Alte wirkungslose Upgradeanzeige entfernen.

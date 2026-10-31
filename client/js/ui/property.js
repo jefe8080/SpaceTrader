@@ -11,6 +11,7 @@ import {populationPanel,handlePopulationAction} from './population.js';
 import {WORLD_FOCI,FOCUS_NAMES,specializationSpec} from '/shared/specializations.js';
 import {HOME_BUILDINGS} from '/shared/homeworld.js';
 import {handleColonyAction} from './colonies.js';
+import {CIVIL_GOODS,localDemandPerHour} from '/shared/local-demand.js';
 
 const gov = () => GOVERNOR_LICENSES[state.governor || 0];
 /** Eigenes Konsortium (oder null) und Rang */
@@ -83,13 +84,13 @@ function manageSection(e, prop) {
   if (e.kind === 'planet') {
     h += `<div class="sub-title">${e.market.realEconomy?'Fixpreise und tatsächlicher Bedarf':'Fixpreis-Verbrauch der Bevölkerung'}</div><table class="market"><tr><th>Ware</th><th>Position</th><th>Preis</th><th>Verbrauch/h</th></tr>`;
     for (const [g, s] of Object.entries(e.market.goods)) {
-      if (s.role !== 'consume') continue;
+      if (s.role !== 'consume'||(e.market.realEconomy&&!CIVIL_GOODS.includes(g))) continue;
       const sv = prop.fixed[g] ?? FIXED.DEFAULT;
       const { pmin, pmax } = priceWindow(g, s.mod || 1);
       const rate = e.market.realEconomy?s.rate:(PLANET_TYPES[e.type].consume[g] || s.rate) * (e.size || 1);
       const R = fixedRref(rate, pmin, pmax);
       h += `<tr><td>${GOODS[g].name}</td><td><input type="range" class="prop-fixed" data-ent="${e.id}" data-good="${g}" min="${FIXED.MIN}" max="${FIXED.MAX}" step="0.05" value="${sv}"></td>
-        <td>${fixedPrice(pmin, pmax, sv).toFixed(1)}</td><td>${(e.market.realEconomy?rate*3600:fixedConsumptionPerHour(R, sv, pmin, pmax)).toFixed(0)}</td></tr>`;
+        <td>${fixedPrice(pmin, pmax, sv).toFixed(1)}</td><td>${localDemandPerHour(g,s,prop,rate).toFixed(0)}</td></tr>`;
     }
     h += e.market.realEconomy?'</table><p>Tatsächlicher ziviler Verbrauch zahlt aus begrenztem Konsumbudget. Betriebsmittel bezahlen keine fiktiven Erlöse.</p>':`</table><div class="muted small-note">Günstiger Preis = mehr Verbrauch: Position 0,3 bringt doppelt so viel Erlös wie 0,7 (bei voller Belieferung).</div>`;
   }
