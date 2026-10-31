@@ -1,7 +1,7 @@
 import {recordInventoryTrade} from './pilot-profile.js';
 import { RECIPES, PLANET_TYPES, PROP_UPGRADES, FIXED, SHIP_TYPES, buyPrice, sellPrice,
   priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref } from '../shared/config.js';
-import { stat, applyLevel } from './markets.js';
+import { stat, applyLevel, ensureFactoryStorage } from './markets.js';
 import { addToBuckets } from './stats.js';
 import { isConsortiumOwner } from '../shared/consortium.js';
 import { bookRevenue } from './consortium.js';
@@ -17,6 +17,7 @@ export function newProperty(entityId, playerId, time) {
 /** Besitz auf Markt und Entity anwenden: Lager, Tempo, Ertrag, Zusatzproduktion, Anzeige */
 export function applyProperty(game, e, prop) {
   const m = e.market;
+  ensureFactoryStorage(e);
   m.owner = prop.player;
   m.mode = prop.mode;
   m.customs = prop.customs || 0;

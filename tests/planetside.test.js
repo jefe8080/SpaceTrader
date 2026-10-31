@@ -33,28 +33,12 @@ test('Ausstattung ist deterministisch aus der Planeten-ID, ca. 20 % Schmuggler',
   assert.ok(n > 300 && n < 500, `Schmuggler ${n} / 2000`);
 });
 
-test('Gebäude-Ausbau: Rate +20 % und Lager +15 % je Level, ohne Besitz bis 6, Questgeber-XP', () => {
-  const { g, p, planet, ship } = setup();
-  const [good, s] = Object.entries(planet.market.goods).find(([, x]) => x.role === 'produce');
-  const rate0 = s.rate, cap0 = s.cap;
-  const cost = buildingUpgradeCost(planet, 1);
-  assert.match(cmd(g, p, 'bldUpgrade', { target: planet.id, good }), /fehlen/);
-  ship.cargo = { ...cost.goods };
-  const cr = p.credits, xp = p.xp || 0;
-  assert.equal(cmd(g, p, 'bldUpgrade', { target: planet.id, good }), undefined);
-  assert.equal(p.credits, cr - cost.credits);
-  assert.ok(Math.abs(s.rate - rate0 * (1 + BUILDING.RATE)) < 1e-9);
-  assert.equal(s.cap, Math.round(cap0 * (1 + BUILDING.STORAGE)));
-  assert.ok(planet.market.qxp > 0, 'Questgeber-XP');
-  assert.equal(p.xp || 0, xp, 'keine Piloten-XP');
-  g.buildingsOf(planet).lvl[good] = 6;
-  assert.match(cmd(g, p, 'bldUpgrade', { target: planet.id, good }), /nur für den Besitzer/);
-  // Level 10 gespeichert, ohne Besitz auf 6 gedeckelt
-  g.buildingsOf(planet).lvl[good] = 10;
-  const { applyLevel } = await_import;
-  applyLevel(planet);
-  const L = planet.market.lvl || 0;
-  assert.ok(Math.abs(s.rate - s.baseRate * (1 + LEVEL_FX.PLANET_RATE * L) * (1 + BUILDING.RATE * 6)) < 1e-9);
+test('Manuelle Warengebäude-Upgrades sind als Serverbefehl entfernt', () => {
+  const {g,p,planet}=setup();
+  const before=JSON.stringify(planet.market.goods);
+  assert.ok(cmd(g,p,'bldUpgrade',{target:planet.id,good:'grain'}));
+  assert.equal(JSON.stringify(planet.market.goods),before);
+  g.close();
 });
 
 test('Fabrik-Bauplätze: nur eigene Planeten, Kategorie-Grenze, Fabrik läuft aus dem Planetenlager', () => {

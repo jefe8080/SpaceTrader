@@ -667,8 +667,8 @@ export class Game {
     if (this.econAcc >= 1) {
       for (const prop of this.ownership.values()) {
         const e = this.world.entities.get(prop.entity);
-        if (e?.kind !== 'planet' || e.type === 'ruins' || this.profile==='homeworld') continue;
-        tickOwnedPlanet(this, e, prop, this.econAcc);
+        if (e?.kind !== 'planet' || e.type === 'ruins') continue;
+        if(this.profile!=='homeworld')tickOwnedPlanet(this, e, prop, this.econAcc);
         // Fabriken auf Bauplätzen laufen nur bei Besitz
         for (const f of e.market.bld?.factories || []) f.prog = runRecipe(e.market, recipeOf(f.recipe), f.prog || 0, this.econAcc, this.time);
       }

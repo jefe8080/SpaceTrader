@@ -150,29 +150,7 @@ function goodBuilding(it, e) {
   const s = e.market.goods[it.good];
   if (!s) return '<div class="muted">Dieses Gebäude ist stillgelegt.</div>';
   if(e.market.realEconomy)return `<p>${GOODS[it.good].name} ${stockLabel(s.stock)} / ${fmt(s.cap)} · tatsächliche Rate ${fmt(s.rate*3600)}/h</p>`+(state.props.get(e.id)?.manage?specializationPanel(e):'<p>Natürlicher Standort. Konkrete Spezialisierung kann der Besitzer ausbauen.</p>');
-  const prop = state.props.get(e.id);
-  const manage = !!prop?.manage;
-  const lvl = e.market.bld?.lvl?.[it.good] || 0;
-  const eff = effectiveLevel(lvl, !!e.owner);
-  const max = manage ? BUILDING.MAX_OWNER : BUILDING.MAX_PUBLIC;
-  const c = prop?.cons && manage ? cons() : null;
-  const funds = c ? c.pool : state.credits;
-  let h = `<div class="kv"><span>Ware</span><span>${goodTag(it.good)} · ${s.role === 'produce' ? 'Produktion' : 'Verbrauch'}</span>
-    <span>Lager</span><span>${stockBar(s.stock, s.cap, s.role === 'produce' ? '#81c784' : '#ffb74d')} ${fmt(s.stock)} / ${fmt(s.cap)}</span>
-    <span>Rate</span><span>${(s.rate * 3600).toLocaleString('de-DE', { maximumFractionDigits: 0 })} / h</span>
-    <span>Gebäudelevel</span><span><b>${eff}</b>${eff < lvl ? ` <span class="muted">(gespeichert ${lvl}, ohne Besitz auf ${BUILDING.MAX_PUBLIC} gedeckelt)</span>` : ''} · Rate +${Math.round(BUILDING.RATE * eff * 100)} %, Lager +${Math.round(BUILDING.STORAGE * eff * 100)} %</span></div>`;
-  if (lvl >= max) {
-    h += `<div class="muted small-note">${max === BUILDING.MAX_PUBLIC ? `Level ${BUILDING.MAX_PUBLIC + 1} bis ${BUILDING.MAX_OWNER} nur für den Besitzer des Planeten.` : 'Höchstes Level erreicht.'}</div>`;
-    return h;
-  }
-  const cost = buildingUpgradeCost(e, lvl + 1);
-  const goods = Object.entries(cost.goods).map(([g, n]) => `<span class="${onBoard(e.id, g) >= n ? '' : 'neg'}">${n} ${GOODS[g].name}</span>`).join(', ');
-  const ok = funds >= cost.credits && Object.entries(cost.goods).every(([g, n]) => onBoard(e.id, g) >= n);
-  h += `<div class="sub-title">Ausbau auf Level ${lvl + 1}</div>
-    <div>${fmt(cost.credits)} Cr${c ? ' aus dem Pool' : ''} + ${goods}</div>
-    <div class="btnrow" style="margin-top:6px"><button class="small primary" data-pp="bld" ${ok ? '' : 'disabled'}>Ausbauen</button></div>
-    <div class="muted small-note">Waren kommen aus den Laderäumen deiner hier angedockten Schiffe. Das Level gilt für alle Spieler. Keine Piloten-XP, der Planet erhält Questgeber-XP.</div>`;
-  return h;
+  return `<p>${goodTag(it.good)} · Lager ${fmt(s.stock)} / ${fmt(s.cap)} · Rate ${fmt(s.rate*3600)} / h</p>`;
 }
 
 function factoryPanel(it, e) {
@@ -184,7 +162,7 @@ function factoryPanel(it, e) {
 }
 
 function plotPanel(it, e) {
-  if(e.market.realEconomy)return '<p>Verarbeitungsanlagen entstehen auf Ruinenwelten. Infrastruktur und Spezialisierung verwaltest du im Questhaus oder im Besitzpanel.</p>';
+  if(!state.props.get(e.id)?.manage)return '<p>Fabriken baust du nur auf eigenen Planeten.</p>';
   const prop = state.props.get(e.id);
   const c = prop?.cons ? cons() : null;
   const funds = c ? c.pool : state.credits;
@@ -270,7 +248,6 @@ panel.addEventListener('click', (ev) => {
     case 'homeQuest': cmd('homeQuestComplete', { target: e.id, quest: d.quest }); return;
     case 'homeTransfer': if (ship) cmd('trade', { ship: ship.id, target: e.id, good: d.good, dir: d.dir, amount: 'max' }); return;
     case 'close': closeBuilding(); return;
-    case 'bld': cmd('bldUpgrade', { target: e.id, good: current.good }); return;
     case 'facBuild': if (confirm(`${RECIPES[d.recipe].name} bauen?`)) cmd('facBuild', { target: e.id, recipe: d.recipe }); return;
     case 'demolish': if (confirm('Fabrik abreißen? Es gibt keine Erstattung.')) { cmd('facDemolish', { target: e.id, index: current.index }); closeBuilding(); } return;
   }

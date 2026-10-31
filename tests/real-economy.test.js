@@ -120,12 +120,12 @@ test('Beschaffungsquest wartet bei vollem Lager und erhält gesamte Ladung bis z
   assert.equal(questProgress(f.game,f.player,f.ship),false);assert.equal(f.ship.cargo.ore,10);assert(f.player.quest);close(f);
 });
 
-test('Questgeberlevel erzeugt weder Waren noch Förderbonus und gewöhnliche Fabrikbauten werden abgewiesen',()=>{
+test('Questgeberlevel erzeugt weder Waren noch Förderbonus und unberechtigte Fabrikbauten werden abgewiesen',()=>{
   const f=fixture(),e=market(f,'plain',{ore:slot('produce',10,1)}),before=structuredClone(e.market.goods);
   e.market.lvl=100;applyLevel(e);assert.deepEqual(e.market.goods,before);
   f.player.known.visit.add(e.id);f.ship.dockedAt=e.id;
   const credits=f.player.credits,error=runCommand(f.game,f.player,{cmd:'facBuild',target:e.id,recipe:'waterworks'});
-  assert.match(error,/persönlichen Ruinenwelten/);assert.equal(f.player.credits,credits);close(f);
+  assert.match(error,/eigenen Planeten/);assert.equal(f.player.credits,credits);close(f);
 });
 
 test('NPC-Versorger fliegt tatsächlich Quelle und Ziel an und hält Waren- und Geldbilanz ein',()=>{

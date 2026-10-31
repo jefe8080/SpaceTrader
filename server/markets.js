@@ -336,6 +336,7 @@ const yardBonusOf = (b) => (b.bonus ? { bonus: b.bonus, yardLvl: b.yardLvl } : {
  * Zusatzwaren bei Level 2, 4 und 6. Auch das Lager-Upgrade des Besitzers (m.storageMul) fließt ein.
  */
 export function applyLevel(e) {
+  ensureFactoryStorage(e);
   const m = e.market;
   if (e.kind !== 'planet' || !m || e.type === 'ruins' || m.realEconomy) return;
   const L = m.lvl || 0;
@@ -350,13 +351,6 @@ export function applyLevel(e) {
     if (s) Object.assign(s, { role, rate, baseRate: rate, baseCap, target, lvlExtra: true });
     else m.goods[g] = { role, rate, baseRate: rate, cap: baseCap, baseCap, stock: target * baseCap, mod: 1, target, lvlExtra: true };
   });
-  // Fabriken auf Bauplätzen (PRD-3 6.4): Zutaten und Produkte bekommen Lagerplätze im Planetenlager.
-  // Eigene Plätze haben Rate 0, damit nur die Fabrik sie verbraucht bzw. füllt.
-  for (const f of m.bld?.factories || []) {
-    const r = recipeOf(f.recipe);
-    for (const [g, n] of Object.entries(r.in)) if (!m.goods[g]) m.goods[g] = { role: 'consume', rate: 0, baseRate: 0, cap: n * STORAGE.STATION_INPUT_PER_UNIT, baseCap: n * STORAGE.STATION_INPUT_PER_UNIT, stock: 0, mod: 1, fac: true };
-    for (const [g, n] of Object.entries(r.out)) if (!m.goods[g]) m.goods[g] = { role: 'produce', rate: 0, baseRate: 0, cap: n * STORAGE.STATION_OUTPUT_PER_UNIT, baseCap: n * STORAGE.STATION_OUTPUT_PER_UNIT, stock: 0, mod: 1, fac: true };
-  }
   // Gebäude-Ausbau (PRD-3 6.3): Rate +20 % und Lager +15 % je Level der Ware, ohne Besitz höchstens Level 6 wirksam
   for (const [g, s] of Object.entries(m.goods)) {
     const b = effectiveLevel(m.bld?.lvl?.[g], !!m.owner);
@@ -526,3 +520,16 @@ export function missingInputs(m) {
   return g ? [g] : [];
 }
 export const missingInput = (m) => missingInputs(m)[0] ?? null;
+
+/** Shared factory slots also serve real-economy planets without creating stock. */
+export function ensureFactoryStorage(e) {
+  const m=e.market;
+  if(e.kind!=='planet'||!m||e.type==='ruins')return;
+  // Fabriken auf Bauplätzen (PRD-3 6.4): Zutaten und Produkte bekommen Lagerplätze im Planetenlager.
+  // Eigene Plätze haben Rate 0, damit nur die Fabrik sie verbraucht bzw. füllt.
+  for (const f of m.bld?.factories || []) {
+    const r = recipeOf(f.recipe);
+    for (const [g, n] of Object.entries(r.in)) if (!m.goods[g]) m.goods[g] = { role: 'consume', rate: 0, baseRate: 0, cap: n * STORAGE.STATION_INPUT_PER_UNIT, baseCap: n * STORAGE.STATION_INPUT_PER_UNIT, stock: 0, mod: 1, fac: true };
+    for (const [g, n] of Object.entries(r.out)) if (!m.goods[g]) m.goods[g] = { role: 'produce', rate: 0, baseRate: 0, cap: n * STORAGE.STATION_OUTPUT_PER_UNIT, baseCap: n * STORAGE.STATION_OUTPUT_PER_UNIT, stock: 0, mod: 1, fac: true };
+  }
+}

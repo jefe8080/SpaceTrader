@@ -1,7 +1,6 @@
-import { GOODS, RECIPES, BUILDING, buildingUpgradeCost, upgradeValue, factorySlots, factoryCost, recipeCat, RECIPE_CATS, isConsortiumOwner } from '../../shared/config.js';
+import { RECIPES, factorySlots, factoryCost, recipeCat, RECIPE_CATS, isConsortiumOwner } from '../../shared/config.js';
 import { V, CmdError } from './validate.js';
 import { takeGoods, dockedOwn } from './property.js';
-import { applyLevel } from '../markets.js';
 import { clog } from '../consortium.js';
 import { remoteManagementError } from '../coverage.js';
 import {startSpecialization,startWorldInfrastructure,startWorldTraining,specializationAccess} from '../specializations.js';
@@ -27,44 +26,10 @@ export default {
   worldInfrastructure:{args:{target:V.entity(),kind:V.oneOf('solar','gasGenerator','reactor','housing','school','academy')},run({game,player},{target,kind}){return startWorldInfrastructure(game,player,target,kind);}},
   worldTrain:{args:{target:V.entity(),qualification:V.oneOf('skilled','specialist')},run({game,player},{target,qualification}){return startWorldTraining(game,player,target,qualification);}},
   worldTax:{args:{target:V.entity(),percent:V.num(0,40)},run({game,player},{target,percent}){const error=specializationAccess(game,player,target);if(error)return error;target.market.economy.civil||={budget:0,gross:0,taxes:0,consumptionPayments:0};target.market.economy.civil.taxRate=percent/100;}},
-  /**
-   * Gebäude-Ausbau (PRD-3 6.3): jeder Spieler mit angedocktem Schiff bis Level 6, Level 7 bis 10 nur der Besitzer
-   * (bzw. Handelsmeister). Credits plus Waren aus den Laderäumen, Questgeber-XP aus dem Ausbauwert, keine Piloten-XP.
-   */
-  bldUpgrade: {
-    args: { target: landedPlanet(), good: V.key(GOODS) },
-    run({ game, player }, { target: e, good }) {
-      if(game.profile==='homeworld')return 'Leistung entsteht durch konkrete Infrastruktur und Spezialisierung.';
-      if (e.type === 'ruins') return 'Ruinenanlagen werden über die Heimat-Bauverwaltung ausgebaut.';
-      const ships = dockedOwn(game, player, e);
-      if (!ships.length) return 'Ein eigenes Schiff muss hier angedockt sein.';
-      const s = e.market.goods[good];
-      if (!s || (s.role !== 'produce' && s.role !== 'consume') || s.fac) return 'Für diese Ware gibt es hier kein Gebäude.';
-      const b = game.buildingsOf(e);
-      const lvl = (b.lvl[good] || 0) + 1;
-      const prop = game.ownership.get(e.id);
-      const max = game.canManage(prop, player.id) ? BUILDING.MAX_OWNER : BUILDING.MAX_PUBLIC;
-      if (lvl > max) return max === BUILDING.MAX_PUBLIC ? `Level ${lvl} bis ${BUILDING.MAX_OWNER} nur für den Besitzer des Planeten.` : 'Höchstes Level erreicht.';
-      const cost = buildingUpgradeCost(e, lvl);
-      const { payer, cons } = payerFor(game, player, e);
-      if (payer.credits < cost.credits) return cons ? 'Nicht genug Credits im Pool.' : 'Nicht genug Credits.';
-      const err = takeGoods(ships, cost.goods);
-      if (err) return err;
-      payer.credits -= cost.credits;
-      b.lvl[good] = lvl;
-      applyLevel(e);
-      game.addGiverXp(e, upgradeValue(cost) / BUILDING.XP_CR);
-      if (cons) { clog(game, cons, player.id, 'upgrade', cost.credits, `${e.name}: Gebäude ${GOODS[good].name} ${lvl}`); game.emit('consortium', cons); }
-      game.emit('entity', e);
-      game.emit('notice', player, `${e.name}: Gebäude ${GOODS[good].name} auf Level ${lvl}`);
-    },
-  },
-
   /** Fabrik auf einem Bauplatz eines eigenen Planeten (PRD-3 6.4) */
   facBuild: {
     args: { target: landedPlanet(), recipe: V.key(RECIPES) },
     run({ game, player }, { target: e, recipe }) {
-      if(game.profile==='homeworld')return 'Rezeptverarbeitung ist nur auf persönlichen Ruinenwelten möglich.';
       if (e.type === 'ruins') return 'Nutze die Heimat-Bauverwaltung für eigene Industrieanlagen.';
       const prop = game.ownership.get(e.id);
       if (!game.canManage(prop, player.id)) return 'Fabriken baust du nur auf eigenen Planeten (Konsortium: Handelsmeister).';
