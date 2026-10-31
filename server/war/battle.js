@@ -1,3 +1,4 @@
+import {warnDefenders} from './warnings.js';
 // PRD 15 U04: serverseitige Schlachtinstanzen. Eigenständige taktische 2D-Karte, genau zwei Seiten, Beitritt nur durch Anflug.
 // Der Server entscheidet über Bewegung, Treffer, Schaden und Rückzug; Zuschauer und Spielerwechsel ändern nichts.
 import { SHIP_TYPES } from '../../shared/config.js';
@@ -113,6 +114,7 @@ export function startBattle(game, attackers, defenders, opts = {}) {
   // Zivilschiffe ohne kampffähigen Geleitschutz kapitulieren beim Schlachtbeginn
   for (const u of Object.values(b.units)) civilRule(game, b, u, true);
   logBattle(game, b, `Schlacht begonnen: ${b.sides.A.owners.map((o) => ownerName(game, o)).join(', ')} gegen ${b.sides.B.owners.map((o) => ownerName(game, o)).join(', ') || 'Verteidigung'}`);
+  warnDefenders(game,b);
   game.emit('battleStart', b);
   return b;
 }

@@ -180,7 +180,7 @@ Fortschritt im selben Commit aktualisiert. Änderungen bleiben fachlich getrennt
 | P06 | Individuelle Erklärungen und aktuelle Grafiken | Vollständige Eintragsliste sowie Text-/Bildprüfung | Offen |
 | P07 | Rezeptfreischaltung und Bestandsmigration | 13 Tests: Fertigstellung, vorher gesperrt, Abriss, Laden und wiederholte Migration ohne XP | Erledigt |
 | P08 | Zivilbudget-Ursache und Korrektur | 16 Tests: Altkasse ohne Bevölkerungsfelder, Erschöpfung, Mangelversorgung, Obergrenzen und Nullbevölkerung | Erledigt |
-| P09 | Angriffspopup und Warnton | Eigene/fremde Schlachten, Mehrfachereignisse und Audioeinstellungen | Offen |
+| P09 | Angriffspopup und Warnton | 8 Tests: nur Verteidiger, neue Schlachten getrennt, Beitritt stumm; bestehender Audio-Bus | Implementiert; visuelle/akustische Browserprüfung offen |
 | P10 | Kampfzeitfaktor und Abschlussprüfung | Deterministischer Kampfvergleich, Persistenz und Performancevergleich | Offen |
 
 ## 8. Technische Ausgangspunkte und Grenzen

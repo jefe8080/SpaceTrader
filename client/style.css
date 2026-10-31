@@ -568,3 +568,7 @@ body.fleet-collapsed #fleet .fleet-item img { width:30px; }
   .battle-panel { width: auto; border-left: none; border-top: 1px solid #29425e; flex: 1; }
 }
 .section button.on { outline: 2px solid #4fc3f7; }
+
+#attackWarnings{position:fixed;right:16px;top:72px;z-index:90;max-height:calc(100dvh - 90px);overflow:auto;width:min(360px,calc(100vw - 32px));pointer-events:none}
+.attack-warning{pointer-events:auto;background:#17232f;color:#fff;border:2px solid #ef5350;border-radius:8px;padding:12px;margin-bottom:10px;box-shadow:0 4px 18px #0008}
+.orbital-ship{padding:8px;margin:8px 0;border-radius:6px}

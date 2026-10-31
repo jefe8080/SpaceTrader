@@ -39,6 +39,7 @@ export class Net {
     });
     game.on('log', (ship, msg) => this.sessions.get(ship.owner)?.socket.emit('log', { ship: ship.name, id: ship.id, msg }));
     game.on('sfx', (p, name) => this.sessions.get(p.id)?.socket.emit('sfx', name));
+    game.on('attackWarning',(p,data)=>this.sessions.get(p.id)?.socket.emit('attackWarning',data));
     game.on('pilotLevelUp',(p,data)=>this.sessions.get(p.id)?.socket.emit('pilotLevelUp',data));
     game.on('player', () => this.broadcastPlayers()); // Level und Titel für die Tooltips der anderen
     game.on('notice', (p, msg) => p && this.sessions.get(p.id)?.socket.emit('notice', msg));

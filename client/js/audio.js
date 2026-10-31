@@ -94,6 +94,7 @@ const SFX = {
     for (const f of [262, 330, 392, 523]) tone(t, { f, dur: 1.4, vol: 0.12, type: 'sawtooth', attack: 0.08, filter: 1800 });
     seq(t + 0.3, [1047, 1319, 1568], 0.12, { dur: 0.8, vol: 0.1, out: reverb });
   },
+  attackWarning: (t) => seq(t,[440,880,440,880],.16,{dur:.2,vol:.28,type:'sawtooth',filter:2200}),
   error: (t) => { tone(t, { f: 150, f2: 110, dur: 0.22, vol: 0.25, type: 'sawtooth', filter: 900 }); tone(t + 0.1, { f: 140, f2: 100, dur: 0.2, vol: 0.2, type: 'sawtooth', filter: 900 }); },
 };
 export const SFX_NAMES = Object.keys(SFX);
