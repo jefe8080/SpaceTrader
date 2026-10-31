@@ -39,7 +39,7 @@ function loadArt() {
         return {image,x:left,y:top,w:right-left+1,h:bottom-top+1};
       });
       return {sprites};
-    }).then(async art=>({...art,housing:await Promise.all([1,2,3].map(level=>loadImage('/assets/art/cities/housing-'+level+'.png'))),elevators:await Promise.all(['small','large'].map(size=>loadImage('/assets/orbital_elevator_'+size+'.svg')))})).catch(error=>{artPromise=null;throw error;});
+    }).then(async art=>({...art,housing:await Promise.all([1,2,3].map(level=>loadImage('/assets/art/cities/housing-'+level+'.png'))),extension:await loadImage('/assets/art/cities/ruins-city-extension.png'),elevators:await Promise.all(['small','large'].map(size=>loadImage('/assets/orbital_elevator_'+size+'.svg')))})).catch(error=>{artPromise=null;throw error;});
 }
 function line(ctx,points,color,width) {ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();}
 function ellipse(ctx,x,y,rx,ry,fill) {ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill();}
@@ -223,6 +223,9 @@ export class PlanetCityScene {
     this.clampPose();
     const ctx=this.ctx,a=this.area,p=this.pose;ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.fillStyle=this.theme.ground;ctx.fillRect(0,0,innerWidth,innerHeight);
     ctx.save();ctx.translate(a.x+a.width/2,a.y+a.height/2);ctx.scale(p.zoom,p.zoom);ctx.translate(-p.x,-p.y);
+    // Original painting remains at its original coordinates, unscaled. Only the
+    // generated continuation above it extends the playable camera surface.
+    if(this.entity.type==='ruins')ctx.drawImage(this.art.extension,0,0,1536,128,0,-128,1536,128);
     ctx.drawImage(this.art.terrain,0,0,1536,1024);
     for(const r of [...this.records.values()].sort((a,b)=>a.y-b.y))this.drawRecord(ctx,r);
     if(!this.reducedMotion)for(const r of this.records.values()){

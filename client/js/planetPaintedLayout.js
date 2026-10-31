@@ -29,10 +29,10 @@ export function planPaintedCity(entity,items,descriptor,previous=new Map(),recip
   const records=items.map(item=>{
     const s=sites.get(assignments.get(item.key)),character=item.kind==='beggar'||item.kind==='dog';
     const box={x:s.x-s.w/2,y:s.y-s.h,width:s.w,height:s.h};
-    const polygon=character?null:[{x:box.x+s.w*.18,y:box.y},{x:box.x+s.w*.83,y:box.y},{x:box.x+s.w,y:box.y+s.h*.23},
+    const polygon=item.kind==='plot'?[{x:s.x,y:s.y-s.h},{x:s.x+s.w/2,y:s.y-s.h/2},{x:s.x,y:s.y},{x:s.x-s.w/2,y:s.y-s.h/2}]:character?null:[{x:box.x+s.w*.18,y:box.y},{x:box.x+s.w*.83,y:box.y},{x:box.x+s.w,y:box.y+s.h*.23},
       {x:box.x+s.w,y:s.y-s.h*.12},{x:box.x+s.w*.78,y:s.y},{x:box.x+s.w*.12,y:s.y},{x:box.x,y:s.y-s.h*.2},{x:box.x,y:box.y+s.h*.25}];
     return {...s,key:item.key,item,character,box,polygon,authored:true};
   });
-  return {type:entity.type,authored:true,records,assignments,roads:[],landscape:PAINTED_LANDSCAPE,
+  return {type:entity.type,authored:true,records,assignments,roads:[],landscape:descriptor.landscape||PAINTED_LANDSCAPE,
     bounds:descriptor.bounds||{x:25,y:25,width:1486,height:974},plaza:descriptor.plaza};
 }

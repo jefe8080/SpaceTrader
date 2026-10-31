@@ -173,7 +173,7 @@ Fortschritt im selben Commit aktualisiert. Änderungen bleiben fachlich getrennt
 | Paket | Inhalt | Nachweis vor Abschluss | Status |
 | --- | --- | --- | --- |
 | P01 | Aufzug- und acht Schiffsdesigns | Browsergalerie: acht Silhouetten und zwei Aufzüge geprüft; bestehende Spritepfade und Spielerfarben erhalten | Erledigt |
-| P02 | Ruinenbauplätze und Bild nach oben erweitern | Alle 48 Plätze, Wasserwerk, Zoom und Auswahl prüfen | Offen |
+| P02 | Ruinenbauplätze und Bild nach oben erweitern | Browser-Overlay aller Gruppen; 17 Stadt-/Kameratests; Originalbild unverändert, 128 px obere Fortsetzung | Erledigt |
 | P03 | Planetenstatistik, Rathaus und Wohnhaus | Filter anhand persistierter Questzustände; Wohnwerte aus Planeten-/Gebäudedaten; Regressionstests | Erledigt |
 | P04 | Panelhöhe und Zentrallager-Akkordeons | Verfügbare Höhe ab Menüleiste; sechs geschlossene Bereiche; DOM-Patcher bewahrt Öffnungszustand | Implementiert; visuelle Browserprüfung offen |
 | P05 | Schiffsalmanach, Kategorien, Farben und Ratings | 20 Tests: vollständige Kategorien, technische Größen, Staffel- und Sonderwaffenwerte, Orbitalregression | Implementiert; visuelle Browserprüfung offen |
