@@ -303,10 +303,18 @@ und relevante neue Möglichkeiten zusammen verständlich dargestellt.
   geeigneten Schiffen den Abbau. Alte Besitz-Upgradelinien sind im aktuellen
   Weltprofil auch an Werften ausgeblendet. Prüfung: fünf Trade-UI-Tests,
   Syntax und Whitespace bestanden.
-- [ ] Schritt 4: Touristenaufnahme an Paradieswelten und Orbitalhotels
+- [x] Schritt 4: Touristenaufnahme an Paradieswelten und Orbitalhotels
   korrigieren; konkrete Ablehnungsgründe ergänzen. Gästeplatzgrenzen,
   Aufenthalt, Wiederabholung, Rückkehr und unveränderte Personenbestände
   prüfen.
+
+  Ergebnis: Paradieswelten erhalten ihre 50 Grundgästeplätze bereits bei
+  Initialisierung. Hotels verwalten echte Gäste mit 480 Plätzen, abgeleitet
+  aus dem bisherigen Touristenwert 0,4/s × 1200 Sekunden Aufenthaltsdauer.
+  Keine Erzeugung von Wohnbevölkerung im Hotel. Herkunft, Wallet, Aufenthalt
+  und Wiederabholung bleiben erhalten. Fehlende Eignung, Vollbelegung,
+  Andockung und private Zugänge werden getrennt erklärt. Acht vorhandene
+  Bevölkerungstests und ein zusätzlicher integrierter Tourismusfall bestanden.
 - [ ] Schritt 5: Wohnhausstufen in beiden Baupfaden ergänzen, Ausbaukosten
   und Betriebswerte dokumentieren, drei Hochhausgrafiken erstellen und
   integrieren. Kapazitäten, Rechte, Kosten, Fertigstellung, Speichern/Laden
