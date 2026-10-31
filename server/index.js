@@ -16,8 +16,6 @@ const { dbFile: DB_FILE, profile } = runtimeOptions(root);
 const app = express();
 app.get('/api/status', (req, res) => res.json({ protocol: GAME_PROTOCOL, profile }));
 app.use(express.static(path.join(root, 'client')));
-app.use('/vendor/three/addons', express.static(path.join(root, 'node_modules/three/examples/jsm')));
-app.use('/vendor/three', express.static(path.join(root, 'node_modules/three/build')));
 app.use('/shared', express.static(path.join(root, 'shared')));
 if (profile === 'homeworld'&&process.env.DEV_TOOLS==='1') app.use('/dev', express.static(path.join(root, 'tests', 'browser')));
 

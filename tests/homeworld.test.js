@@ -7,8 +7,6 @@ import { Game } from '../server/game.js';
 import {runCommand,acknowledgeStories} from './home-story-helper.js';
 import { createHomeworld, tickHomeworld, ringCoordinates } from '../server/homeworld.js';
 import { HOMEWORLD } from '../shared/homeworld.js';
-import { ruinsLayout, createRuinsTerrain } from '../client/js/ruinsTerrain.js';
-import { createPlanetEnvironment } from '../client/js/planetEnvironment.js';
 
 function fixture(seed = 42, db = ':memory:') {
   const game = new Game(db, { profile: 'homeworld', seed });
@@ -130,13 +128,4 @@ test('Neustart erhält Reparaturtimer, Starthilfen und Heimatidentität ohne neu
     assert.equal(f.home.facilities.waterworks.status,'ready');
     assert.match(command(f,'homeQuestComplete',{quest:'H01'}),/bereits abgeholt/);
   } finally {if(f?.game.store.db.open)f.game.store.close();fs.rmSync(dir,{recursive:true,force:true});}
-});
-
-test('Ruinenlandschaft: 48 getrennte reguläre Plätze und eigene Grundanlagenanker', () => {
-  const layout=ruinsLayout();assert.equal(layout.slots.filter(s=>s.role==='plot').length,48);
-  for(let i=0;i<layout.slots.length;i++)for(const b of layout.slots.slice(i+1)){
-    const a=layout.slots[i];assert.ok(Math.abs(a.position[0]-b.position[0])>=(a.footprint[0]+b.footprint[0])/2||Math.abs(a.position[2]-b.position[2])>=(a.footprint[1]+b.footprint[1])/2,a.id+' / '+b.id);
-  }
-  const terrain=createRuinsTerrain(),environment=createPlanetEnvironment(terrain,'ruins');
-  assert.ok(environment.userData.boundaryEdges>=4);environment.userData.dispose();
 });

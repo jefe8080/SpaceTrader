@@ -107,24 +107,6 @@ try {
   await shot('fleet-focus.png');
   assert.equal(await page.evaluate(()=>window.commands.filter(c=>c.cmd!=='guideRead').length),0);
   assert.deepEqual(errors,[]);
-  // Exercise actual fallback geometry with a live WebGL render, separately from the city canvas.
-  await page.evaluate(async()=>{
-    const THREE=await import('three');
-    const {developBuilding}=await import('/js/planetArt.js');
-    const canvas=document.createElement('canvas');canvas.id='fallback-preview';
-    canvas.style='position:fixed;inset:0;z-index:10000;width:100vw;height:100vh';document.body.append(canvas);
-    const renderer=new THREE.WebGLRenderer({canvas,antialias:true});renderer.setSize(1440,1000);
-    const scene=new THREE.Scene();scene.background=new THREE.Color('#152c30');
-    scene.add(new THREE.HemisphereLight(0xffedcb,0x374e47,3));
-    const light=new THREE.DirectionalLight(0xffe4bc,4);light.position.set(-20,60,40);scene.add(light);
-    for(const large of [false,true]){
-      const group=new THREE.Group();group.position.x=large?24:-24;
-      developBuilding(group,{homeOrbital:true},{market:{homeworld:{orbital:{small:true,large}}}});scene.add(group);
-    }
-    const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0x737e63}));ground.rotation.x=-Math.PI/2;ground.position.y=-.1;scene.add(ground);
-    const camera=new THREE.PerspectiveCamera(42,1.44,.1,1000);camera.position.set(75,65,110);camera.lookAt(0,25,0);renderer.render(scene,camera);
-  });
-  await shot('orbital-fallback.png');
   await fs.writeFile(new URL('browser-results.json',out),JSON.stringify({ok:true,errors,checks:['first-contact continuation','repeat without introduction','help reopen','390px dialog overflow','building almanac','small/large surface elevators','planet exit and same/other ship focus at four zooms','cancel running camera flight','no movement or paid commands']},null,2));
   console.log('PRD11 browser checks passed');
 } finally { await browser.close(); }

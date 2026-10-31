@@ -20,7 +20,7 @@ Dann http://localhost:3000 öffnen. Entwicklung mit automatischem Neustart: `npm
 | `npm run sim:homeworld -- --seed 42` | Reproduzierbarer PRD-5-Einstieg H00–H06 mit echten Flügen, Käufen und Reliktbergung |
 | `npm run sim:homeworld -- --decision-seconds 30` | Einstieg mit ausdrücklich modellierter Lese-/Entscheidungszeit; keine Verzögerung im eigentlichen Spiel |
 | `npm run sim:progression` | Vollständiger Einzelspielerpfad H00–H13 mit realer Finanzierung, Produktion und Zweitgründung |
-| `npm run dev:prd5` | Getrennte Entwicklungswelt, Port 3005, inklusive grafischer Prüfoberfläche unter `/dev/planet.html` |
+| `npm run dev:prd5` | Getrennte Entwicklungswelt, Port 3005 |
 | `npm run reset` | Löscht die ausgewählte Weltdatei samt SQLite-Seitendateien; Server vorher beenden |
 | `npm run sprites` | Schiffsgrafiken neu erzeugen |
 

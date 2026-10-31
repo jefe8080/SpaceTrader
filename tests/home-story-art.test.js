@@ -1,9 +1,7 @@
 import {acknowledgeStories} from './home-story-helper.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import * as THREE from 'three';
 import {HOME_STORY,storyAvailable,storyDialogReady} from '../shared/home-story.js';
-import {buildingDevelopment,developBuilding,paintPlanet} from '../client/js/planetArt.js';
 import {Game} from '../server/game.js';
 import {runCommand} from '../server/handlers/index.js';
 
@@ -49,24 +47,4 @@ test('Siedlungswahl verändert nur widerrufbare Betriebsprioritäten und keine P
     }
     assert.equal(p.credits,before);
   }finally{game.close();}
-});
-
-test('Ruinen, Baustellen und Orbitalstufen erhalten unterscheidbare Silhouetten am selben Anker',()=>{
-  const item={homeFacility:'dock'},home={facilities:{dock:{status:'ruined'}}},entity={market:{homeworld:home}};
-  const build=()=>{const object=new THREE.Group();object.add(new THREE.Mesh(new THREE.BoxGeometry(3,3,3),new THREE.MeshStandardMaterial()));return object;};
-  const ruined=build();assert.equal(buildingDevelopment(home,item),'ruined');const disposeR=developBuilding(ruined,item,entity);
-  assert.equal(ruined.children[0].visible,false);assert.equal(ruined.children.length,6);
-  home.facilities.dock.status='building';const construction=build(),disposeC=developBuilding(construction,item,entity);assert.equal(construction.children.length,10);
-  home.orbital={small:true};const ring=build(),disposeS=developBuilding(ring,{homeOrbital:true},entity);
-  assert.equal(buildingDevelopment(home,{homeOrbital:true}),'orbital-small');
-  home.orbital.large=true;assert.equal(buildingDevelopment(home,{homeOrbital:true}),'orbital-large');
-  assert.deepEqual(ruined.position.toArray(),[0,0,0]);disposeR();disposeC();disposeS();
-});
-
-test('Tuschematerialien verändern weder gemeinsam genutzte Vorlagen noch Auswahlgeometrie',()=>{
-  const source=new THREE.MeshStandardMaterial({color:0x667755}),geometry=new THREE.BoxGeometry(4,5,6),object=new THREE.Mesh(geometry,source);
-  const originalColor=source.color.getHex(),dispose=paintPlanet(object,{outlines:true});
-  assert.ok(object.material.isMeshToonMaterial);assert.notEqual(object.material,source);
-  assert.equal(source.color.getHex(),originalColor);assert.equal(object.geometry,geometry);assert.equal(object.children.length,1);
-  dispose();source.dispose();geometry.dispose();
 });
