@@ -78,7 +78,7 @@ export function planCity(entity, items, previous = new Map(), recipeCategory) {
     const sprite=citySprite(entity,r.item);
     if(typeof sprite!=='string'||!sprite.startsWith('housing-'))continue;
     const level=Number(sprite.slice(-1)),ratio=[954/1155,1009/763,1296/815][level-1];
-    r.w=Math.min(r.w,[64,70,76][level-1]);r.h=r.w*ratio;
+    r.w=Math.min(r.w,(r.item.homeStructure?[32,34,36]:[64,70,76])[level-1]);r.h=r.w*ratio;
     r.box={x:r.x-r.w/2,y:r.y-r.h,width:r.w,height:r.h};
     r.polygon=null;
   }

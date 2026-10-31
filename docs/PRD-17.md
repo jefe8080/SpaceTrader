@@ -9,9 +9,8 @@ Die zivile Konsumkasse entfällt vollständig: Bevölkerungsverbrauch und
 touristisches Reisegeld werden durch neu erzeugtes Geld finanziert.
 
 Am 31.10.2026 mit dem Skill `grilling` in Q1–Q15 und abschließender Ergänzung
-abgestimmt und vom Nutzer bestätigt. Freigegeben sind die Erstellung und der
-Commit dieses PRD. Die Umsetzung bleibt offen; dieses Dokument ist kein
-Nachweis bereits implementierter Funktionen.
+abgestimmt und vom Nutzer bestätigt. Mit dem anschließenden Umsetzungsauftrag
+implementiert und anhand der unten beschriebenen Prüfungen abgenommen.
 
 ## 1. Orbitalring Stufe 2: Upgrade Doppelwerft
 
@@ -184,14 +183,14 @@ zusammengehörigen Änderungen separat committet.
 
 | Paket | Umfang und Prüfung | Stand |
 | --- | --- | --- |
-| P01 | Doppelwerft: Ausbau, freie Bauplätze, unabhängiger Betrieb, Migration; gezielte Orbital-/Versorgungstests | Implementiert; 13 Orbital-/Betriebstests bestanden, Persistenzabnahme in P08 |
-| P02 | Orbitalring-Baumenü: Kategorien, Karten, Bauplatzanzeige; Browser- und Sichtprüfung bei mehreren Fenstergrößen | Implementiert; Syntax und 4 Katalog-/Orbitaltests bestanden; Sichtprüfung in P08 |
-| P03 | Almanach und Rathaus: Aufklappbereiche und sichtbare Werte; Aktualisierungs- und Browserprüfung | Implementiert; Syntaxprüfung bestanden; Browserabnahme in P08 |
-| P04 | Wohnhäuser: Darstellung, Auswahlflächen und Zoom; visuelle Prüfung aller Stufen | Implementiert; Stadttests bestanden; Sichtprüfung in P08 |
-| P05 | Abfangkreis: Berechtigung, Gruppen, Haltungen und Reichweite; Logik- und Sichtprüfung | Implementiert; Unterstützungsregressionen bestanden; Sichtprüfung in P08 |
+| P01 | Doppelwerft: Ausbau, freie Bauplätze, unabhängiger Betrieb, Migration | Erledigt; Orbital-, Versorgungs-, Limit- und Neustarttests bestanden |
+| P02 | Orbitalring-Baumenü: Kategorien, Karten, Bauplatzanzeige | Erledigt; 39 eindeutige Typen, Bauaktion und Aktualisierung im Browser geprüft |
+| P03 | Almanach und Rathaus: Aufklappbereiche und sichtbare Werte | Erledigt; geschlossener Ausgangszustand und Zustandserhalt geprüft |
+| P04 | Wohnhäuser: Darstellung, Auswahlflächen und Zoom | Erledigt; alle drei Stufen visuell und Auswahlgeometrie automatisiert geprüft |
+| P05 | Abfangkreis: Berechtigung, Gruppen, Haltungen und Reichweite | Erledigt; eigene/verbündete Gruppen und Ausschlüsse getestet, System-/Sektorsicht geprüft |
 | P06 | Konsumkonto entfernen: sämtliche Objektarten, Warenverbrauch, Erlöse und Migration; gezielte Wirtschaftsregressionstests | Erledigt; 20 Wirtschaftsregressionen bestanden, einschließlich Spezialwelt und Hotel |
 | P07 | Touristisches Reisegeld ohne Konto: neue Reise, Weitertransport, Auszahlung und Heimkehr; Passagier-/Tourismustests | Erledigt; Passagierregressionen und neue Grant-/Transfer-/Heimkehrtests bestanden |
-| P08 | Gesamtabnahme: relevante Regressionen, vollständige Testsuite, UI-Sichtprüfung und Dokumentationsabgleich | Offen |
+| P08 | Gesamtabnahme: relevante Regressionen, vollständige Testsuite, UI-Sichtprüfung und Dokumentationsabgleich | Erledigt; 447 Tests bestanden, Browserprüfung bei 1440×900, 390×844 und 844×390 |
 
 Ausgangspunkt für die Umsetzung sind insbesondere `server/orbital.js`,
 `server/homeworld-operations.js`, `client/js/ui/homeworld.js`,
@@ -204,5 +203,7 @@ Zusätzliche betroffene Pfade werden je Paket ermittelt.
 
 - Inhalt gegen die bestätigten Antworten Q1–Q15 und die Ergänzung zum
   Geltungsbereich aller Weltraumobjekte geprüft.
-- Umsetzung und technische Tests sind noch nicht durchgeführt.
+- Umsetzung abgeschlossen; vollständige Testsuite: **447 bestanden, 0 fehlgeschlagen**.
+- Browserabnahme, Screenshots und Prüfumfang: `docs/qa/prd17/README.md`.
+- Protokollversion auf 8 erhöht; laufenden Spielserver nach Übernahme neu starten.
 - Kein Push ohne ausdrückliche Zustimmung.

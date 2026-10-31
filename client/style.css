@@ -286,7 +286,7 @@ select.small { padding: 1px 4px; font-size: 12px; }
 .badge.cls-XL { background: rgba(240, 98, 146, 0.3); }
 .badge.cls-F { background: rgba(186, 104, 200, 0.35); }
 .sub-title { font-size: 11px; color: var(--muted); margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 1px; }
-.alm-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 8px; max-height: 64vh; overflow: auto; }
+.alm-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 8px; max-height: 64vh; overflow: auto; }
 .alm-cards .alm-tier { grid-column: 1 / -1; }
 .alm-card { display: flex; gap: 10px; border: 1px solid var(--panel-border); border-radius: 8px; padding: 8px; background: rgba(0, 0, 0, 0.18); }
 .alm-card img { width: 64px; height: 64px; flex: none; }
@@ -574,3 +574,9 @@ body.fleet-collapsed #fleet .fleet-item img { width:30px; }
 .orbital-ship{padding:8px;margin:8px 0;border-radius:6px}
 
 .guide-art{display:block;width:100%;max-width:340px;height:180px;margin:12px auto}
+
+/* PRD 17: ship cards remain readable in narrow and shallow panels. */
+.alm-card > div { min-width:0; overflow-wrap:anywhere; }
+.orbital-ship { border:1px solid var(--panel-border); background:rgba(0,0,0,.18); overflow-wrap:anywhere; }
+.orbital-ship h4 { margin:6px 0; }
+[data-disclosure^="orbital-"] > summary { font-weight:600; min-height:40px; display:list-item; }

@@ -81,7 +81,7 @@ test('Ziviler Grundbedarf folgt realer Einwohnerzahl; Unterversorgung zerstört 
     assert(taken<=localDemandPerHour(g,f.e.market.goods[g],prop)+1e-8);
     assert(Math.abs(taken-(sales.quantities[g]||0))<1e-8);
   }
-  assert(sales.total<=f.h.civil.gross-f.h.civil.taxes+1e-8);assert(f.h.civil.purchaseLimited);
+  assert(sales.total>0);assert.equal(f.h.civil.budget,undefined);assert.equal(f.h.civil.purchaseLimited,undefined);
   stock(f,{water:0,food:0});const before=f.h.population;tickRealMarket(f.game,f.e,7*86400);assert.equal(f.h.population,before);close(f);
 });
 

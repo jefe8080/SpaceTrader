@@ -80,7 +80,7 @@ socket.on('ships', (d) => {
     if (!s) { s = { id: c.id, cargo: {}, log: [], queue: [], warn: {} }; state.ships.set(c.id, s); }
     Object.assign(s, { x: c.x, y: c.y, angle: c.a, vx: c.vx, vy: c.vy, state: c.st, dockedAt: c.dk, recv: now });
     if (c.d) Object.assign(s, c.d);
-    if (c.owner) Object.assign(s, { owner: c.owner, type: c.type, name: c.name, task: c.task, cargo: c.cargo || s.cargo });
+    if (c.owner) Object.assign(s, { owner: c.owner, type: c.type, name: c.name, task: c.task, interceptRange:c.interceptRange||0, cargo: c.cargo || s.cargo });
     seen.add(c.id);
   }
   for (const id of state.ships.keys()) if (!seen.has(id)) state.ships.delete(id);

@@ -25,7 +25,7 @@ function fixture() {
 
 test('PRD7: mismatched or pre-PRD7 servers produce an explicit version error', () => {
   assert.equal(serverVersionError(GAME_PROTOCOL),null);
-  for(const version of [undefined,null,6,8])assert.match(serverVersionError(version),/Spielserver neu starten/);
+  for(const version of [undefined,null,GAME_PROTOCOL-1,GAME_PROTOCOL+1])assert.match(serverVersionError(version),/Spielserver neu starten/);
 });
 
 test('PRD7: old saved pilot receives active H00 and a populated profile on actual welcome', () => {

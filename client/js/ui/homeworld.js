@@ -164,8 +164,10 @@ const costLabel=cost=>`${fmt(cost.credits)} Cr · ${Object.entries(cost.goods).m
 function orbitalPanel(entity){
   const o=entity.market.homeworld.orbital;
   let html=`<h3>Orbitalring</h3><p>Kleiner Ring: ${o?.small?'betriebsbereit':'gebrochen'} · Großer Ring: ${o?.large?'betriebsbereit':`${o?.largeStage||0} / 2 Abschnitte`}. Eigener Orbitalanker, kein Bodenbauplatz.</p>`;
+  const upgradeMissing=Object.entries({alloys:100,shipparts:30,engines:10,reactorcores:4}).filter(([g,n])=>availableHomeStock(entity.market,g)<n);
+  const upgradeReason=o?.project?'Ringbau läuft bereits':upgradeMissing.length?'Materialien fehlen: '+upgradeMissing.map(([g])=>GOODS[g].name).join(', '):null;
   if(o?.large)html+=o.doubleYard?'<p><b>Doppelwerft aktiv · zwei freie Größenplätze</b></p>':o.project?.kind==='doubleYard'?'<p>Doppelwerft im Ausbau · '+Math.ceil(o.project.remaining)+' s</p>':
-    '<p>Doppelwerft: 100 Legierungen, 30 Schiffsbauteile, 10 Triebwerke, 4 Reaktorkerne · 600 s · keine Credits</p><button class="small" data-pp="homeOrbitalUpgrade" '+(o.project?'disabled title="Ringbau läuft bereits"':'')+'>Doppelwerft ausbauen</button>';
+    '<p>Doppelwerft: 100 Legierungen, 30 Schiffsbauteile, 10 Triebwerke, 4 Reaktorkerne · 600 s · keine Credits</p><button class="small" data-pp="homeOrbitalUpgrade" '+(upgradeReason?'disabled':'')+'>Doppelwerft ausbauen</button>'+(upgradeReason?'<p class="muted">'+upgradeReason+'</p>':'');
   if(o?.project&&o.project.kind!=='doubleYard')html+=`<p>Ringbau ${o.project.kind==='small'?'klein':'groß'}, Abschnitt ${o.project.stage}: ${Math.ceil(o.project.remaining)} s · zwei Bauarbeiter gebunden.</p>`;
   else if(completed('H07')&&!o?.small){
     const ships=myShips().filter(s=>s.type==='spatz'&&s.dockedAt===entity.id);

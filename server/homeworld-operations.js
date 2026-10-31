@@ -305,8 +305,7 @@ function populationStep(game,entity,dt,now) {
   const market=entity.market,home=market.homeworld;
   home.civilConsumption={};
   const consume=(good,amount)=>{
-    // Availability determines supply and operation; actual purchases are
-    // independently limited by the civilian wallet and the selected price.
+    // Availability determines supply; the selected price controls actual demand.
     const supplied=amount>0?Math.min(1,availableHomeStock(market,good)/amount):1;
     consumeCivilGood(game,entity,good,dt>0?amount/dt:0,dt);
     return supplied;

@@ -31,8 +31,8 @@ try{
   await page.locator('#details h4').filter({hasText:'Lokaler Absatz'}).evaluate(e=>e.scrollIntoView({block:'center'}));
   await page.screenshot({path:path.join(out,`sales-${width}.png`)});
   await page.locator('#details [data-section="management"]').evaluate(e=>e.open=true);
-  assert((await page.locator('#details').textContent()).includes('Ziviles Konsumbudget: 321'));
-  await page.locator('#details p').filter({hasText:'Ziviles Konsumbudget:'}).evaluate(e=>e.scrollIntoView({block:'center'}));
+  assert((await page.locator('#details').textContent()).includes('Tatsächlich verbrauchte Zivilwaren'));
+  await page.locator('#details p').filter({hasText:'Tatsächlich verbrauchte Zivilwaren'}).evaluate(e=>e.scrollIntoView({block:'center'}));
   await page.screenshot({path:path.join(out,`economy-${width}.png`)});
   await page.evaluate(()=>window.prd14.places());await page.locator('[data-filter="type"]').selectOption('belt:ore');await page.locator('[data-filter="good"]').selectOption('ore');
   assert.equal(await page.locator('#tradeRows tr').count(),1);assert.equal(await page.locator('#tradeRows [data-f="buy"]').count(),0);

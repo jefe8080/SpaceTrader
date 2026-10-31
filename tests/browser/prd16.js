@@ -32,7 +32,7 @@ try{
  const town=homePanel(home,{kind:'questhouse'},ship);assert(!town.includes('Forschungsfund zeigen'),'Collected research hidden');state.homeQuest.finds=oldFinds;
  openBuilding(scene.items.find(it=>it.homeOrbital),true);
  const hulls=[...panel.querySelectorAll('[data-pp="homeOrbitalBuild"]')].map(b=>b.dataset.type),expected=Object.values(SHIP_TYPES).filter(d=>!d.npc).length;
- assert(hulls.length===expected&&new Set(hulls).size===expected,'Every hull exactly once');assert(panel.querySelectorAll('h4').length===3,'Three ship categories');
+ assert(hulls.length===expected&&new Set(hulls).size===expected,'Every hull exactly once');assert(panel.querySelectorAll('[data-disclosure^="orbital-"]').length===3,'Three ship categories');
  openBuilding(scene.items.find(it=>it.homeFacility==='dock'),true);
  report.textContent='QA: Lager, Rathaus und 39 Schiffe bestanden';
 }catch(error){report.textContent='FEHLER: '+error.message;console.error(error);}

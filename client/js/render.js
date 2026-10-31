@@ -617,7 +617,6 @@ function drawSystemLabels() {
 
 // ---------------- Sektoransicht ----------------
 function drawSectorView(now) {
-  drawInterceptRange();
   drawZones(now);
   // Sektorgrenzen
   ctx.save();
@@ -838,6 +837,7 @@ export function render(now, dt) {
     return;
   }
 
+  drawInterceptRange();
   drawZones(now);
   drawBlackHoles(now);
   drawStars();
