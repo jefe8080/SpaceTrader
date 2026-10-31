@@ -543,3 +543,9 @@ body.fleet-collapsed #fleet .fleet-item img { width:30px; }
 
 /* PRD 15: Stacks, Schlacht und Fraktionen */
 .stack-row { display: flex; align-items: center; gap: 4px; padding: 2px 0; }
+.sys-list { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.sys-chip { font-size: 11px; padding: 1px 5px; border-radius: 3px; border: 1px solid #546e7a; }
+.sys-damaged { border-style: dashed; border-color: #ffb300; }
+.sys-critical { border-style: dotted; border-color: #ff7043; }
+.sys-destroyed { border-color: #e53935; text-decoration: line-through; }
+.sys-jammed { border-color: #4fc3f7; font-style: italic; }

@@ -3,6 +3,7 @@ import {activeSideQuests} from '../shared/side-quests.js';
 import {homeAccess,homeConstructionError,chargeHome} from './homeworld-operations.js';
 import {QUEST_DELIVERIES} from '../shared/advanced-homequests.js';
 import {applyPhysicalHull,initializeNewHull} from './physical-yards.js';
+import {blueprintRank} from '../shared/combat.js';
 
 export const ORBITAL_OPERATION={small:{power:20,workers:{basic:8,skilled:6}},large:{power:60,workers:{skilled:10,specialist:4}}};
 const readyMaterials=(h,id)=>Object.entries(QUEST_DELIVERIES[id]).every(([g,n])=>(h.questDeliveries?.[id]?.[g]||0)>=n);
@@ -34,7 +35,8 @@ export function orbitalBuild(game,p,e,type){
   const large=['L','XL'].includes(d.cls),slot=large?'large':'small';
   if(!['S','M','L','XL'].includes(d.cls)||large&&!o.large)return 'Dafür muss der große Ring fertig sein.';
   const license=PILOT_LICENSES[p.pilot||1];if(!license.classes.includes(d.cls))return 'Die passende Pilotenlizenz fehlt.';
-  if(d.faction&&factionRank(p.rep?.[d.faction]||0)<d.rank)return 'Der erforderliche Fraktionsrang fehlt.';
+  // PRD 15: Der Bauplan folgt jeweils einen Ruflevel nach der Kauffreigabe
+  if(d.faction&&factionRank(p.rep?.[d.faction]||0)<blueprintRank(d))return `Der Bauplan erfordert Fraktionsrang ${blueprintRank(d)}.`;
   if(o.jobs[slot])return 'Dieser Orbitalbauplatz ist bereits belegt.';
   if(o.inventory.length+Object.keys(o.jobs).length>=12)return 'Alle zwölf Ausgabeplätze sind belegt.';
   const goods={...d.build};if(d.currency)goods[d.currency.good]=(goods[d.currency.good]||0)+d.currency.n;

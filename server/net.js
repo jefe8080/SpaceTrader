@@ -363,7 +363,7 @@ function shipDetail(s, game) {
   return {
     offer: game?.shipOffers.get(s.id)?.price ?? null,
     owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, passengers:s.passengers||[],moduleCargo:s.moduleCargo||{}, log: s.log, group: s.group, ord: s.ord,
-    queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},relocationHold:s.relocationHold||null,stack:s.stack||null,rendezvous:s.rendezvous||null,
+    queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},relocationHold:s.relocationHold||null,dmg:s.dmg||null,stack:s.stack||null,rendezvous:s.rendezvous||null,
     nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,
     transit: s.transit ? s.transit.exit : null, zone: s.zone || null, marker: s.marker || null,
     fuel: Math.round((s.fuel || 0) * 10) / 10, autoRefuel: s.autoRefuel ?? 0, upg: s.upg || {}, modules: s.modules || [], upgValue: s.upgValue || 0, main: !!s.main, relicSpeed: s.relicSpeed || 0, mined: s.mined || {}, bonus: s.bonus || 0, yardLvl: s.yardLvl || 0,

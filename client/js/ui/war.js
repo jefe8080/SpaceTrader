@@ -3,6 +3,7 @@ import { state, esc } from '../state.js';
 import { cmd } from '../net.js';
 import { shipSymbol } from '../util.js';
 import { $ } from './dom.js';
+import { COMBAT_TYPES, NAVAL_CLASSES, COMBAT_ABILITIES, blueprint, maxHull, SYSTEMS, systemState, STATE_NAMES, WEAPONS } from '/shared/combat.js';
 
 const stackById = (id) => (state.me?.stacks || []).find((st) => st.id === id);
 
@@ -42,6 +43,26 @@ $('details').addEventListener('click', (ev) => {
     default: warActions[d.war]?.(d);
   }
 });
+
+/** Kampfprofil eines Schiffs: Klasse, Rolle, Rumpf, Systeme und bleibende Schäden */
+export function combatSection(s) {
+  const c = COMBAT_TYPES[s.type];
+  if (!c) return '';
+  const bp = blueprint(s.type), d = s.dmg || {};
+  const hull = d.hull ?? maxHull(s.type), max = maxHull(s.type);
+  const ab = c.ability ? COMBAT_ABILITIES[c.ability] : null;
+  const weapons = Object.entries(bp.weapons.reduce((m, w) => ((m[w.w] = (m[w.w] || 0) + 1), m), {})).map(([w, n]) => `${WEAPONS[w].name}${n > 1 ? ' ×' + n : ''}`).join(', ');
+  const sys = bp.systems.map((x) => {
+    const hp = d.sys?.[x.id] ?? x.hp, st = systemState(hp, x.hp);
+    return `<span class="sys-chip sys-${st}" title="${esc(SYSTEMS[x.kind].effect)}">${SYSTEMS[x.kind].icon} ${esc(SYSTEMS[x.kind].name)}: ${STATE_NAMES[st]}</span>`;
+  }).join(' ');
+  return `<div class="section"><div class="section-title">Kampfprofil</div><div class="kv">
+    <span>Klasse</span><span>${NAVAL_CLASSES[c.cls].name} · ${esc(c.role)}</span>
+    <span>Rumpf</span><span>${Math.round(hull)} / ${max}${bp.squad ? ` · ${d.craft ?? bp.squad.n}/${bp.squad.n} Fluggeräte` : ''}</span>
+    ${weapons ? `<span>Bewaffnung</span><span>${weapons}</span>` : ''}
+    ${ab ? `<span>Fähigkeit</span><span class="ability">★ ${esc(ab.name)}: ${esc(ab.desc)} <span class="muted">(Nachteil: ${esc(ab.drawback)})</span></span>` : ''}
+    </div>${sys ? `<div class="sys-list">${sys}</div>` : ''}</div>`;
+}
 
 /** Weitere Aktionen späterer Pakete registrieren sich hier */
 export const warActions = {};

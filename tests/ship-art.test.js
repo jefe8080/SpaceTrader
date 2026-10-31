@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {SHIP_TYPES} from '../shared/ships.js';
 import {PAINTED_SHIPS,shipArtUrl,shipScreenSize,shipVerticalScale} from '../client/js/shipArt.js';
+const PRD15_SPRITES=['falke','keiler','abfangstaffel','bomberstaffel','korvette','fregatte','zerstoerer','kreuzer'].map(t=>'ship_'+t);
 
 test('Schiffe behalten ihre Flugrichtung und zeigen ihre Oberseite möglichst nach oben',()=>{
   assert.equal(shipVerticalScale(0),1);
@@ -17,8 +18,11 @@ test('Schiffe behalten ihre Flugrichtung und zeigen ihre Oberseite möglichst na
 });
 
 test('Jeder Schiffstyp hat eine austauschbare quadratische PNG-Illustration mit Alpha',async()=>{
-  assert.equal(PAINTED_SHIPS.size,Object.keys(SHIP_TYPES).length);
-  for(const ship of Object.values(SHIP_TYPES)){
+  // PRD 15: neue Typen nutzen bis zur gemalten Illustration stilkonforme SVG-Sprites (Rückfall des Assetloaders)
+  const painted=Object.values(SHIP_TYPES).filter(ship=>!PRD15_SPRITES.includes(ship.sprite));
+  assert.equal(PAINTED_SHIPS.size,painted.length);
+  for(const name of PRD15_SPRITES)assert.ok((await readFile(new URL(`../client/assets/${name}.svg`,import.meta.url),'utf8')).includes('<svg'),name);
+  for(const ship of painted){
     const url=shipArtUrl(ship.sprite);
     assert.ok(url,ship.sprite);
     const png=await readFile(new URL('../client'+url,import.meta.url));

@@ -42,6 +42,15 @@ const SHIPS = {
   fx_league:    { len: 120, w: 33, nose: 0.35, wing: { span: 24, sweep: 10, root: 60, tip: 40 }, pods: 5, engines: 6, ring: true, hull: ['#c8e6c9', '#1b5e20'] },
   fl_syndicate: { len: 110, w: 30, nose: 0.3, wing: { span: 12, sweep: 4, root: 44, tip: 36 }, pods: 4, engines: 4, fins: true, hull: ['#ffcdd2', '#4e342e'] },
   fx_syndicate: { len: 120, w: 33, nose: 0.3, wing: { span: 26, sweep: 12, root: 60, tip: 40 }, pods: 5, engines: 6, ring: true, fins: true, hull: ['#ef9a9a', '#3e2723'] },
+  // PRD 15: Mehrzweck- und Militärmodelle im selben Comic-Stil (kräftige Konturen, Zweitonrumpf, Akzent über #ff00ff)
+  falke:        { len: 84, w: 9, nose: 0.95, wing: { span: 30, sweep: 24, root: 26, tip: 6 }, engines: 2, fins: true, guns: 2, hull: ['#fff8e1', '#8d6e63'] },
+  keiler:       { len: 96, w: 20, nose: 0.3, wing: { span: 14, sweep: 4, root: 34, tip: 26 }, pods: 2, engines: 3, guns: 3, armor: true, hull: ['#d7ccc8', '#4e342e'] },
+  abfangstaffel:{ squad: 6, len: 34, w: 5, nose: 1, wing: { span: 12, sweep: 10, root: 12, tip: 3 }, engines: 1, hull: ['#eceff1', '#455a64'] },
+  bomberstaffel:{ squad: 4, len: 40, w: 7, nose: 0.6, wing: { span: 14, sweep: 6, root: 16, tip: 6 }, engines: 2, hull: ['#cfd8dc', '#37474f'] },
+  korvette:     { len: 92, w: 12, nose: 0.85, wing: { span: 26, sweep: 18, root: 30, tip: 10 }, engines: 2, fins: true, guns: 3, hull: ['#e3f2fd', '#37474f'] },
+  fregatte:     { len: 106, w: 17, nose: 0.75, wing: { span: 30, sweep: 18, root: 40, tip: 14 }, engines: 3, fins: true, guns: 5, armor: true, hull: ['#e0e0e0', '#263238'] },
+  zerstoerer:   { len: 114, w: 21, nose: 0.65, wing: { span: 28, sweep: 14, root: 46, tip: 18 }, engines: 4, fins: true, guns: 6, armor: true, hull: ['#cfd8dc', '#212121'] },
+  kreuzer:      { len: 122, w: 27, nose: 0.5, wing: { span: 30, sweep: 12, root: 56, tip: 26 }, engines: 5, ring: true, fins: true, guns: 8, armor: true, hull: ['#b0bec5', '#1a2327'] },
 };
 
 const r1 = (v) => Math.round(v * 10) / 10;
@@ -99,6 +108,12 @@ function svg(p) {
     parts.push(`<path d="M${r1(x1 - 4)} ${r1(cy - w * 0.6)} L${r1(x1 + 12)} ${cy} L${r1(x1 - 4)} ${r1(cy + w * 0.6)} Z" fill="#ffca28" stroke="#5d4037" stroke-width="2"/>`);
     parts.push(`<path d="M${r1(x1)} ${r1(cy - w * 0.35)} L${r1(x1 + 6)} ${r1(cy - 2)} M${r1(x1)} ${r1(cy + w * 0.35)} L${r1(x1 + 6)} ${r1(cy + 2)}" stroke="#5d4037" stroke-width="2"/>`);
   }
+  // PRD 15: Panzerplatten und Geschütztürme
+  if (p.armor) for (const s of [-1, 1]) parts.push(`<path d="M${r1(x0 + 14)} ${r1(cy + s * (w - 1))} L${r1(x1 - noseLen - 6)} ${r1(cy + s * (w * 0.85))}" stroke="#1c2529" stroke-width="4" stroke-linecap="round" opacity="0.55"/>`);
+  for (let i = 0; i < (p.guns || 0); i++) {
+    const gx = x0 + 18 + (i * (p.len - noseLen - 30)) / Math.max(1, (p.guns || 1) - 1), gy = cy + (i % 2 ? 1 : -1) * w * 0.45;
+    parts.push(`<path d="M${r1(gx)} ${r1(gy)} L${r1(gx + 9)} ${r1(gy)}" stroke="#1c2529" stroke-width="2.5" stroke-linecap="round"/><circle cx="${r1(gx)}" cy="${r1(gy)}" r="3.2" fill="#ffca28" stroke="#1c2529" stroke-width="1.5"/>`);
+  }
   // Cockpit
   const ckx = x1 - noseLen - (p.drill ? 10 : 2);
   parts.push(`<ellipse cx="${r1(ckx)}" cy="${cy}" rx="${r1(Math.min(12, noseLen * 0.55))}" ry="${r1(Math.max(3, w * 0.45))}" fill="${p.glass || '#4fc3f7'}" stroke="#01579b" stroke-width="1.5"/>`);
@@ -106,7 +121,20 @@ function svg(p) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">\n  <!-- Generiert von scripts/gen-ship-sprites.js. Nase zeigt nach rechts. #ff00ff = Spielerfarbe -->\n  ${parts.join('\n  ')}\n</svg>\n`;
 }
 
+/** Staffel: mehrere kleine Fluggeräte in Keilformation in einer Grafik */
+function squadSvg(p) {
+  const one = svg({ ...p, squad: 0 });
+  const inner = one.slice(one.indexOf('<defs>'), one.lastIndexOf('</svg>'));
+  const defs = inner.slice(0, inner.indexOf('</defs>') + 7), body = inner.slice(inner.indexOf('</defs>') + 7);
+  const slots = [[0, 0], [-1, -1], [-1, 1], [-2, -2], [-2, 2], [-3, 0]].slice(0, p.squad);
+  const g = slots.map(([c, r]) => `<g transform="translate(${c * 22} ${r * 18}) translate(64 64) scale(0.62) translate(-64 -64)">${body}</g>`).join('\n  ');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">\n  <!-- Generiert von scripts/gen-ship-sprites.js. Staffel, Nase zeigt nach rechts. #ff00ff = Spielerfarbe -->\n  ${defs}\n  <g transform="translate(18 0)">${g}</g>\n</svg>\n`;
+}
+
+// Aufruf mit Namen erzeugt nur diese Grafiken (bestehende bleiben unverändert)
+const only = process.argv.slice(2);
 for (const [name, p] of Object.entries(SHIPS)) {
-  fs.writeFileSync(path.join(out, `ship_${name}.svg`), svg(p));
+  if (only.length && !only.includes(name)) continue;
+  fs.writeFileSync(path.join(out, `ship_${name}.svg`), p.squad ? squadSvg(p) : svg(p));
   console.log('geschrieben:', `ship_${name}.svg`);
 }

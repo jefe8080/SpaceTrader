@@ -1,9 +1,11 @@
+import { navalClass } from '../shared/combat.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SHIP_TYPES, MODULES, PILOT_LICENSES, GOODS, YARD_MARGIN, STEP, FACTIONS, ABILITIES,
   moduleCapacity, moduleMiningRate, upgradeCost, shipStats, freeFor, sellValue } from '../shared/config.js';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
+const PRD15_TYPES = ['falke', 'keiler', 'abfangstaffel', 'bomberstaffel', 'korvette', 'fregatte', 'zerstoerer', 'kreuzer'];
 
 test('Kombo-Kapazität: 1 Modul 30, 2 Module 65, 3 Module 100', () => {
   assert.equal(moduleCapacity(0), 0);
@@ -20,7 +22,8 @@ test('Abbaumodule: jedes weitere +100 % plus Kombo-Bonus', () => {
 
 test('Schiffskatalog: Klassen, Preisbereiche, Material + Marge ≈ Referenzpreis', () => {
   const byCls = {};
-  for (const [t, d] of Object.entries(SHIP_TYPES)) if (!d.npc && !d.faction) (byCls[d.cls] ||= []).push(t);
+  // PRD 15 ergänzt Mehrzweck- und Militärmodelle; sie haben eigene Preis- und Kampftabellen (tests/prd15-combat-data.test.js)
+  for (const [t, d] of Object.entries(SHIP_TYPES)) if (!d.npc && !d.faction && !PRD15_TYPES.includes(t)) (byCls[d.cls] ||= []).push(t);
   assert.equal(byCls.S.length, 3);
   assert.equal(byCls.M.length, 4);
   assert.equal(byCls.L.length, 4);
@@ -145,13 +148,14 @@ test('Sensorphalanx: +60 % für das erste, +30 % für jedes weitere Modul', () =
 });
 
 test('Fraktionsschiffe: je Fraktion L, XL und Spezial, Profilwert ca. +50 %, Preis 2,5 × Gegenstück', () => {
-  const fac = Object.entries(SHIP_TYPES).filter(([, d]) => d.faction);
+  const fac = Object.entries(SHIP_TYPES).filter(([, d]) => d.faction).map(([id, d]) => [id, { ...d, id }]);
   assert.equal(fac.length, 18);
   for (const f of Object.keys(FACTIONS)) {
     const list = fac.filter(([, d]) => d.faction === f).map(([, d]) => d);
     assert.deepEqual(list.map((d) => d.cls).sort(), ['F', 'L', 'XL']);
     assert.deepEqual(list.map((d) => d.rank).sort(), [1, 2, 3]);
-    for (const d of list.filter((x) => x.base)) {
+    // PRD 15: Fraktionskriegsschiffe tauschen Fracht gegen Kampfkraft; das Wirtschaftsprofil gilt für Mehrzweckmodelle
+    for (const d of list.filter((x) => x.base && navalClass(x.id) !== 'war')) {
       const b = SHIP_TYPES[d.base];
       assert.ok(Math.abs(d.price / (b.price * 2.5) - 1) < 0.15, `${d.name}: Preis`);
       const best = Math.max(d.cargo / b.cargo, d.speed / b.speed, b.mining ? d.mining / b.mining : 0, d.tank / b.tank);

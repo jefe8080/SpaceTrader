@@ -60,7 +60,7 @@ export const FACTION_SHIPS = {
                  currency: { good: 'diamond', n: 250 }, base: 'titan', desc: 'Riesiger Abbaufrachter mit Doppelbohrkopf.' },
   f_miners:    { faction: 'miners', cls: 'F', rank: 3, name: 'Erzbrecher', size: 74, cargo: 1500, speed: 125, mining: 80, price: 20000000, tank: 400,
                  currency: { good: 'diamond', n: 500 }, ability: 'drill', desc: 'Gildenfrachter mit gewaltigem Bohrkopf.' },
-  fl_tech:     { faction: 'tech', cls: 'L', rank: 1, name: 'Datenpfeil', size: 58, cargo: 600, speed: 210, mining: 0, price: 3750000, tank: 250,
+  fl_tech:     { faction: 'tech', cls: 'L', rank: 1, name: 'Datenpfeil', size: 58, cargo: 600, speed: 250, mining: 0, price: 3750000, tank: 250,
                  currency: { good: 'exocrystals', n: 60 }, base: 'kondor', desc: 'Schneller Kurierfrachter des Konsortiums.' },
   fx_tech:     { faction: 'tech', cls: 'XL', rank: 2, name: 'Netzkreuzer', size: 88, cargo: 1900, speed: 140, mining: 0, price: 14000000, tank: 620,
                  currency: { good: 'exocrystals', n: 150 }, base: 'titan', desc: 'Großfrachter mit Hochleistungsantrieb.' },
@@ -98,6 +98,10 @@ for(const faction of Object.values(FACTIONS)){
 for(const ship of Object.values(FACTION_SHIPS)){
   ship.rawCurrency={...ship.currency};ship.currency={good:REFINED_FOR_RAW[ship.currency.good],n:refinedAmountFor(ship.currency.good,ship.currency.n)};
 }
+// PRD 15 U03: Fraktionskriegsschiffe besitzen nur kleine Versorgungs-/Beuteladeräume
+export const WAR_CARGO = { fx_tech: 120, f_tech: 80, f_nomads: 150, fl_order: 60, fx_order: 150, f_order: 80, fx_syndicate: 200, f_syndicate: 200 };
+for (const [id, cargo] of Object.entries(WAR_CARGO)) FACTION_SHIPS[id].cargo = cargo;
+
 /** Fähigkeiten der Spezialschiffe */
 export const ABILITIES = {
   drill: 'Baut ultraseltene Vorkommen ohne Tiefbohrer-Modul ab',

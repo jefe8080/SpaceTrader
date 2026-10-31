@@ -106,9 +106,9 @@ export function questReward(effortMin, level, goodsValue = 0, type = null) {
 /** Questgeber-XP aus einer erfüllten Quest */
 export const giverXpOf = (questXp) => questXp / QUEST.GIVER_XP_DIV;
 
-/** Fraktionsruf: Ränge 0 bis 3, Ruf proportional zu den Quest-XP, Verlust nur beim Abbruch (nie unter die Rangschwelle) */
-export const RANKS = [0, 100, 400, 1200];
-export const RANK_NAMES = ['Fremder', 'Partner', 'Vertrauter', 'Ehrenmitglied'];
+/** Fraktionsruf: Ränge 0 bis 4 (Rang 4 seit PRD 15 für den Bauplan des Spezialschiffs), Ruf proportional zu den Quest-XP, Verlust nur beim Abbruch (nie unter die Rangschwelle) */
+export const RANKS = [0, 100, 400, 1200, 3000];
+export const RANK_NAMES = ['Fremder', 'Partner', 'Vertrauter', 'Ehrenmitglied', 'Bannerträger'];
 export const REP = { PER_XP: 0.67, ABORT: 0.25 }; // Ruf = 0,67 × Quest-XP (PRD-3), Abbruch kostet 25 % der Quest-XP als Ruf
 export function factionRank(rep = 0) {
   let r = 0;
