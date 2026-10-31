@@ -11,7 +11,7 @@ angekündigt und Schlachten laufen sichtbar langsamer ab.
 
 Am 31.10.2026 mit dem Skill `grilling` in Q1–Q13 abgestimmt. Der Nutzer hat
 ausdrücklich nur die Erstellung und den Commit dieses PRD freigegeben:
-**Keine Umsetzung starten.** Die folgenden Pakete sind geplant und benötigen
+**Damals keine Umsetzung; inzwischen ausdrücklich freigegeben (siehe Abschnitt 7).** Die folgenden Pakete sind geplant und benötigen
 einen späteren Umsetzungsauftrag. Dieses PRD ändert noch keinen Spielcode und
 enthält keine bereits erstellten Grafiken.
 
@@ -165,7 +165,8 @@ werden dokumentiert; eine Verbesserung wird nicht ungeprüft behauptet.
 
 ## 7. Geplante Umsetzungspakete und Fortschritt
 
-Alle Pakete sind **offen, Umsetzung nicht freigegeben**. Nach späterem Auftrag
+Umsetzung am 31.10.2026 durch „bitte setze prd 16 um“ freigegeben. Die bestehende
+Planung mit `grilling` bleibt Grundlage. Für alle Pakete
 werden passende Prüfungen vor jedem Umsetzungskommit ausgeführt und dieser
 Fortschritt im selben Commit aktualisiert. Änderungen bleiben fachlich getrennt.
 
