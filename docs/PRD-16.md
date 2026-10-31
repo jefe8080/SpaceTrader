@@ -172,7 +172,7 @@ Fortschritt im selben Commit aktualisiert. Änderungen bleiben fachlich getrennt
 
 | Paket | Inhalt | Nachweis vor Abschluss | Status |
 | --- | --- | --- | --- |
-| P01 | Aufzug- und acht Schiffsdesigns | Visuelle Stilprüfung und Einbindung aller Varianten | Offen |
+| P01 | Aufzug- und acht Schiffsdesigns | Browsergalerie: acht Silhouetten und zwei Aufzüge geprüft; bestehende Spritepfade und Spielerfarben erhalten | Erledigt |
 | P02 | Ruinenbauplätze und Bild nach oben erweitern | Alle 48 Plätze, Wasserwerk, Zoom und Auswahl prüfen | Offen |
 | P03 | Planetenstatistik, Rathaus und Wohnhaus | Filter anhand persistierter Questzustände; Wohnwerte aus Planeten-/Gebäudedaten; Regressionstests | Erledigt |
 | P04 | Panelhöhe und Zentrallager-Akkordeons | Verfügbare Höhe ab Menüleiste; sechs geschlossene Bereiche; DOM-Patcher bewahrt Öffnungszustand | Implementiert; visuelle Browserprüfung offen |
@@ -240,3 +240,10 @@ Rechner: Faktor 1: 102,19 ms; Faktor 0,5: 83,67 ms. Die simulierten Zeiträume
 sind verschieden (40/20 s); dies belegt keine allgemeine Performanceverbesserung.
 Für gleiche simulierte Zeit sind beim langsameren Tempo doppelt so viele
 Ticks erforderlich. Keine zusätzlichen Optimierungen ohne belegten Bedarf.
+
+## Grafiken (P01/P02)
+
+Schiffe und Aufzüge sind native SVGs; Generatoren reproduzieren die Designs.
+Nur die acht beauftragten Basisschiffe und zwei Aufzüge wurden ersetzt; die
+18 Fraktionsgrafiken bleiben unverändert. Die gemeinsame Galerie unter
+`/dev/prd16-art.html` zeigt alle Designs und die 48 Bauplatzanker.

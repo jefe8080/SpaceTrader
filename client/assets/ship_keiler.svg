@@ -1,32 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
   <!-- Generiert von scripts/gen-ship-sprites.js. Nase zeigt nach rechts. #ff00ff = Spielerfarbe -->
   <defs>
-    <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d7ccc8"/><stop offset="1" stop-color="#4e342e"/></linearGradient>
-    <linearGradient id="wing" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4e342e"/><stop offset="1" stop-color="#d7ccc8"/></linearGradient>
+    <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e7d7b6"/><stop offset="1" stop-color="#665850"/></linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#665850"/><stop offset="1" stop-color="#e7d7b6"/></linearGradient>
     <radialGradient id="flame" cx="100%" cy="50%" r="100%"><stop offset="0" stop-color="#fff3c4"/><stop offset="0.5" stop-color="#ffab40"/><stop offset="1" stop-color="#ff6d00" stop-opacity="0"/></radialGradient>
   </defs>
-  <path d="M51 48 L85 48 L107 30 L75.8 30 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
-  <path d="M75.8 30 L107 30 L103 36 L77.8 36 Z" fill="#ff00ff"/>
-  <path d="M51 80 L85 80 L107 98 L75.8 98 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
-  <path d="M75.8 98 L107 98 L103 92 L77.8 92 Z" fill="#ff00ff"/>
-  <rect x="35.2" y="35" width="16" height="10" rx="2" fill="#b0bec5" stroke="#263238" stroke-width="1.5"/>
-  <rect x="35.2" y="83" width="16" height="10" rx="2" fill="#b0bec5" stroke="#263238" stroke-width="1.5"/>
-  <rect x="54.2" y="35" width="16" height="10" rx="2" fill="#90a4ae" stroke="#263238" stroke-width="1.5"/>
-  <rect x="54.2" y="83" width="16" height="10" rx="2" fill="#90a4ae" stroke="#263238" stroke-width="1.5"/>
-  <ellipse cx="12" cy="52" rx="8" ry="5" fill="url(#flame)"/>
-  <rect x="14" y="47" width="9" height="10" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
-  <ellipse cx="12" cy="64" rx="8" ry="5" fill="url(#flame)"/>
-  <rect x="14" y="59" width="9" height="10" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
-  <ellipse cx="12" cy="76" rx="8" ry="5" fill="url(#flame)"/>
-  <rect x="14" y="71" width="9" height="10" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
-  <path d="M20 44 L97.4 46 Q112 56.4 112 64 Q112 71.6 97.4 82 L20 84 Q16 64 20 44 Z" fill="url(#hull)" stroke="#1c2529" stroke-width="2.5"/>
-  <path d="M26 64 L93.4 64" stroke="#263238" stroke-width="1" opacity="0.45"/>
-  <rect x="46.7" y="46" width="7.7" height="36" fill="#ff00ff" opacity="0.9"/>
-  <path d="M30 45 L91.4 47" stroke="#1c2529" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
-  <path d="M30 83 L91.4 81" stroke="#1c2529" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
-  <path d="M34 55 L43 55" stroke="#1c2529" stroke-width="2.5" stroke-linecap="round"/><circle cx="34" cy="55" r="3.2" fill="#ffca28" stroke="#1c2529" stroke-width="1.5"/>
-  <path d="M59.7 73 L68.7 73" stroke="#1c2529" stroke-width="2.5" stroke-linecap="round"/><circle cx="59.7" cy="73" r="3.2" fill="#ffca28" stroke="#1c2529" stroke-width="1.5"/>
-  <path d="M85.4 55 L94.4 55" stroke="#1c2529" stroke-width="2.5" stroke-linecap="round"/><circle cx="85.4" cy="55" r="3.2" fill="#ffca28" stroke="#1c2529" stroke-width="1.5"/>
-  <ellipse cx="95.4" cy="64" rx="8" ry="9" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
-  <ellipse cx="97.4" cy="61" rx="3.7" ry="2.4" fill="#e1f5fe" opacity="0.7"/>
+  <path d="M49 44.8 L87 44.8 L106 31 L88 31 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M88 31 L106 31 L102 37 L90 37 Z" fill="#ff00ff"/>
+  <path d="M49 83.2 L87 83.2 L106 97 L88 97 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M88 97 L106 97 L102 91 L90 91 Z" fill="#ff00ff"/>
+  <rect x="37.6" y="31" width="13.1" height="10" rx="2" fill="#b0bec5" stroke="#263238" stroke-width="1.5"/>
+  <rect x="37.6" y="87" width="13.1" height="10" rx="2" fill="#b0bec5" stroke="#263238" stroke-width="1.5"/>
+  <rect x="53.7" y="31" width="13.1" height="10" rx="2" fill="#90a4ae" stroke="#263238" stroke-width="1.5"/>
+  <rect x="53.7" y="87" width="13.1" height="10" rx="2" fill="#90a4ae" stroke="#263238" stroke-width="1.5"/>
+  <rect x="69.9" y="31" width="13.1" height="10" rx="2" fill="#b0bec5" stroke="#263238" stroke-width="1.5"/>
+  <rect x="69.9" y="87" width="13.1" height="10" rx="2" fill="#b0bec5" stroke="#263238" stroke-width="1.5"/>
+  <ellipse cx="16" cy="52" rx="8" ry="5" fill="url(#flame)"/>
+  <rect x="18" y="47" width="9" height="10" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <ellipse cx="16" cy="64" rx="8" ry="5" fill="url(#flame)"/>
+  <rect x="18" y="59" width="9" height="10" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <ellipse cx="16" cy="76" rx="8" ry="5" fill="url(#flame)"/>
+  <rect x="18" y="71" width="9" height="10" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <path d="M24 40 L97.4 42.4 Q108 53.2 108 64 Q108 74.8 97.4 85.6 L24 88 Q20 64 24 40 Z" fill="url(#hull)" stroke="#1c2529" stroke-width="2.5"/>
+  <path d="M30 64 L93.4 64" stroke="#263238" stroke-width="1" opacity="0.45"/>
+  <rect x="48.2" y="42" width="7" height="44" fill="#ff00ff" opacity="0.9"/>
+  <path d="M34 41 L91.4 43.6" stroke="#1c2529" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+  <path d="M34 87 L91.4 84.4" stroke="#1c2529" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+  <path d="M38 53.2 L47 53.2" stroke="#1c2529" stroke-width="2.5" stroke-linecap="round"/><circle cx="38" cy="53.2" r="3.2" fill="#ffca28" stroke="#1c2529" stroke-width="1.5"/>
+  <path d="M85.4 74.8 L94.4 74.8" stroke="#1c2529" stroke-width="2.5" stroke-linecap="round"/><circle cx="85.4" cy="74.8" r="3.2" fill="#ffca28" stroke="#1c2529" stroke-width="1.5"/>
+  <path d="M91 48 111 52 111 76 91 80Z" fill="#746b5d" stroke="#27373a" stroke-width="3"/><path d="M105 57 120 57M105 71 120 71" stroke="#e8dfc5" stroke-width="4"/>
+  <ellipse cx="95.4" cy="64" rx="5.9" ry="10.8" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
+  <ellipse cx="97.4" cy="60.4" rx="2.7" ry="2.9" fill="#e1f5fe" opacity="0.7"/>
 </svg>
