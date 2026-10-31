@@ -5,18 +5,21 @@ import { tickEngagements } from './engage.js';
 import { tickDebris } from './outcome.js';
 import { tickRepairs } from './repair.js';
 import { tickSupport, snapshotAllies, stockProtection } from './support.js';
+import { tickFactions, recordActivity } from './factions.js';
 
 /** Persistente Kriegszustände: Präfix der Zeilen-ID in der Tabelle war -> Map am Spiel */
-const COLLECTIONS = { stack: 'stacks', battle: 'battles' };
+const COLLECTIONS = { stack: 'stacks', battle: 'battles', fsec: 'fsecs', act: 'warActivity' };
 
 export function initWar(game) {
   game.stacks = new Map();
   game.battles = new Map();
   game.battleFx = new Map(); // flüchtige Effekte für die Darstellung, nicht gespeichert
+  game.fsecs = new Map();    // Fraktion@Sektor -> Verwaltung, Pool, Level, Versorgung
+  game.warActivity = new Map(); // Sektor -> letzte wirtschaftliche/militärische Spieleraktion
   game.counters.stack ??= 0;
   game.counters.battle ??= 0;
   game.counters.debris ??= 0;
-  game.on('battleStart', (b) => snapshotAllies(game, b));
+  game.on('battleStart', (b) => { snapshotAllies(game, b); if (Object.values(b.units).some((u) => game.players.has(u.owner))) recordActivity(game, b.sector); });
 }
 
 export function loadWar(game) {
@@ -50,6 +53,7 @@ export function tickWarAfter(game, dt) {
     tickDebris(game);
     tickRepairs(game);
     tickSupport(game);
+    tickFactions(game);
     game.warSlow = (game.warSlow || 0) + 1;
     if (game.warSlow % 60 === 1) stockProtection(game);
   }

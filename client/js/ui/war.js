@@ -109,6 +109,9 @@ warActions.attack = (d) => cmd('attack', { ships: selectedShips().map((x) => x.i
 warActions.ransom = (d) => { if (confirm(`Schiff für ${fmt(Number(d.price))} Cr freikaufen?`)) cmd('ransom', { ship: d.ship, price: Number(d.price) }); };
 warActions.repair = (d) => { if (confirm(`Reparatur für ${fmt(Number(d.cost))} Cr starten?`)) cmd('repair', { ship: d.ship, cost: Number(d.cost) }); };
 warActions.posture = (d) => cmd('posture', { ship: d.ship, mode: d.mode });
+warActions.supply = (d) => cmd('factionSupply', { ship: d.ship, good: d.good, amount: 1e6, donate: d.donate === '1' });
+warActions.gift = (d) => cmd('friendGift', { ship: d.ship });
+warActions.galactic = () => { if (confirm('Leitstellenmodul „galaktische Freundschaft“ für 75.000.000 Cr bauen?')) cmd('galacticFriendship'); };
 warActions.view = (d) => import('./battle.js').then((m) => m.openBattle(d.battle));
 
 
@@ -116,3 +119,28 @@ $('details').addEventListener('change', (ev) => {
   const id = ev.target.dataset?.warAuto;
   if (id) cmd('autoRepair', { ship: id, on: ev.target.checked });
 });
+
+const REL = { friend: '🤝 befreundet', hostile: '⚔ verfeindet', neutral: '◯ neutral' };
+/** Verwaltungsplanet: Fraktionssektor mit Pool, Level, Grundversorgung und Freundschaftsquest */
+export function adminSection(e, ship) {
+  const fs = (state.me?.war?.factions || []).find((f) => f.admin === e.id);
+  if (!fs) return '';
+  const w = state.me.war;
+  const pct = (v) => Math.round(v * 100);
+  const sup = (g, label) => `<span>${label}</span><span><span class="bv-bar" role="img" aria-label="${fs.supply[g]} von ${fs.buffer}"><i style="width:${Math.min(100, fs.supply[g] / fs.buffer * 100)}%"></i></span> ${fs.supply[g]} / ${fs.buffer}</span>`;
+  let h = `<div class="section"><div class="section-title">Verwaltungszentrum ${esc(fs.name)}</div><div class="kv">
+    <span>Beziehung</span><span>${REL[fs.relation]}</span>
+    <span>Fraktionssektorlevel</span><span>${fs.level} · Fortschritt ${pct(fs.progress)} %${fs.ok ? '' : ' · ⛔ Versorgungslücke (Fortschritt pausiert)'}</span>
+    <span>Geldpool</span><span>${fmt(fs.pool)} / ${fmt(fs.cap)} Cr</span>
+    ${sup('water', 'Wasser')}${sup('food', 'Nahrung')}
+    <span>Kriegsschiffe</span><span>${fs.warships} / ${fs.limit}</span></div>
+    <div class="muted">Alle Fraktionsquests dieses Sektors laufen hier. Quests geben Ruf und Fraktions-XP, keine Credits; Abgabe nur bei ausreichender Versorgung.</div>`;
+  if (ship) {
+    const donate = fs.relation === 'hostile';
+    h += `<div class="btnrow">${['water', 'food'].map((g) => (ship.cargo?.[g] ? `<button class="small" data-war="supply" data-ship="${ship.id}" data-good="${g}" data-donate="${donate ? 1 : 0}">${donate ? '🎁 Abgabe' : '💰 Verkauf'}: ${g === 'water' ? 'Wasser' : 'Nahrung'}</button>` : '')).join('')}</div>`;
+    if (donate) h += `<div class="muted">Feindliche Fraktion: gekennzeichnete Abgabe ohne Bezahlung, Ruf oder Diplomatiewirkung; schützt keine eindringenden Kriegsschiffe.</div>`;
+    if (w.friendQuest && fs.relation !== 'friend') h += `<button class="small primary" data-war="gift" data-ship="${ship.id}">🎁 Freundschaftsgeschenk übergeben (${Object.entries(w.friendQuest.gift).map(([g, n]) => n + ' ' + (g === 'water' ? 'Wasser' : 'Nahrung')).join(', ')})</button>`;
+  }
+  if (w.friends.length && !w.galactic) h += `<div class="muted">Zweite Freundschaft: Leitstellenmodul „galaktische Freundschaft“. <button class="small" data-war="galactic">Bauen (75 Mio. Cr)</button></div>`;
+  return h + '</div>';
+}

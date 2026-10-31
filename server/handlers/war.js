@@ -10,6 +10,8 @@ import { COMBAT, blueprint } from '../../shared/combat.js';
 import { kindFactor } from '../../shared/damage.js';
 import { startRepair, quoteFor } from '../war/repair.js';
 import { setAlliance } from '../war/support.js';
+import { supplyDelivery, deliverGift, buyGalacticFriendship } from '../war/factions.js';
+import { GOODS } from '../../shared/config.js';
 
 const battleOf = () => (v, { game }) => { const b = game.battles.get(v); if (!b) throw new CmdError('Diese Schlacht ist beendet.'); return b; };
 const ORDER_TYPES = ['move', 'attack', 'escort', 'defend', 'distance', 'hold', 'ceasefire', 'retreat', 'ai', 'priority'];
@@ -156,6 +158,21 @@ export default {
   consortiumMilitary: {
     args: { on: V.bool() },
     run({ game, player }, { on }) { return setAlliance(game, player, on) || undefined; },
+  },
+  /** Wasser/Nahrung an den Verwaltungsplaneten: Verkauf zum Bestpreis bzw. gekennzeichnete Abgabe bei Feindschaft */
+  factionSupply: {
+    args: { ship: V.ownShip(), good: V.key(GOODS), amount: V.int(1, 1e6), donate: V.opt(V.bool(), false) },
+    run({ game, player }, { ship, good, amount, donate }) { return supplyDelivery(game, player, ship, good, amount, donate) || undefined; },
+  },
+  /** Geschenk der Freundschaftsquest übergeben */
+  friendGift: {
+    args: { ship: V.ownShip() },
+    run({ game, player }, { ship }) { return deliverGift(game, player, ship) || undefined; },
+  },
+  /** Leitstellenmodul „galaktische Freundschaft“ */
+  galacticFriendship: {
+    args: {},
+    run({ game, player }) { return buyGalacticFriendship(game, player) || undefined; },
   },
   /** Freikauf eines eigenen gefangenen Schiffes: fester Preis, vorher angezeigt */
   ransom: {

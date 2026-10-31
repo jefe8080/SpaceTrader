@@ -1,3 +1,5 @@
+import { questTurnInBlock, questFactionXp } from './war/factions.js';
+import { factionHostileTo } from './war/diplomacy.js';
 import { revealQuestTarget } from './quest-activation.js';
 import { WORLD, GOODS, BELT_TYPES, QUEST, QUEST_TYPES, REP, RANKS, factionRank, questReward, flightMinutes, canBuyFrom, shipStats,
   giverLevel, giverXpOf, planetFeatures, EXTRAS, freeFor } from '../shared/config.js';
@@ -18,7 +20,8 @@ const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const shuffle = (arr) => arr.map((v) => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(([, v]) => v);
 
 /** Questgeber: jeder Planet und jede Werft (auch im Spielerbesitz) */
-export const isGiver = (e) => !!e?.market && (e.kind === 'planet' || e.market.strategy === 'shipyard');
+// PRD 15: Fraktionsquests laufen ausschließlich über Verwaltungsplaneten
+export const isGiver = (e) => !!e?.market && (!e.faction || !!e.admin) && (e.kind === 'planet' || e.market.strategy === 'shipyard');
 export const giverLvl = (e) => giverLevel(e.market?.qxp || 0);
 export const boardOf = (e) => (e.market.board ||= { offers: [], next: 0 });
 
@@ -73,8 +76,10 @@ export function makeOffer(game, e, onlyType = null) {
     if (!p) continue;
     const { effort, value = 0, ...params } = p;
     const reward = questReward(effort, level, value, type);
+    // Fraktionsquests geben persönlichen Ruf und Fraktions-XP, keine Credits
+    if (e.admin) reward.cr = 0;
     return { id: 'q' + ++game.counters.quest, type, giver: e.id, giverName: e.name, level, created: Math.round(game.time),
-      effort: Math.round(effort * 10) / 10, reward, faction: e.faction || null, ...params };
+      effort: Math.round(effort * 10) / 10, reward, faction: e.faction || null, ...(e.admin ? { adminSector: `${e.admin}@${e.sector}` } : {}), ...params };
   }
   return null;
 }
@@ -212,6 +217,7 @@ export function acceptQuest(game, player, ship, e, questId, offers = null) {
   if (i < 0) return 'Diese Quest ist nicht mehr verfügbar.';
   const q = list[i];
   const invalid=questOfferError(game,player,ship,q);if(invalid)return invalid;
+  if(q.faction&&factionHostileTo(game,q.faction,player.id))return 'Feindliche Fraktionen vergeben keine Aufträge.';
   const st = shipStats(ship);
   if (q.type === 'tour' && st.passenger < q.tourists) return `Für ${q.tourists} Touristen braucht das Schiff Passagierkabinen mit ${q.tourists} Plätzen.`;
   if(game.profile==='homeworld'&&q.type==='tour'){
@@ -278,6 +284,7 @@ function progressQuest(game,player,ship,q,explicit){
     case 'mine': {
       if(!explicit)return false;
       if (at !== q.giver || (ship.cargo[q.good] || 0) < q.amount) return false;
+      { const block=questTurnInBlock(game,q); if(block){ if(explicit) game.emit('notice',player,block); return false; } }
       if (q.type === 'mine' && minedQuestProgress(player,q,minedBy(game, player, q.good)) < q.amount) return false;
       const destination=game.world.entities.get(q.giver),prop=game.ownership.get(q.giver);
       if(!destination?.market||prop?.mode==='private'&&!game.canUseStorage(prop,player.id)||destination.market.homeworld?.warp)return false;
@@ -344,6 +351,7 @@ export function exploreZone(game, player, zones) {
 
 function completeQuest(game, player,q) {
   if(!activeSideQuests(player).includes(q))return;
+  if(q.adminSector)questFactionXp(game,q,q.reward.xp);
   removeSideQuest(player,q);
   player.credits += q.reward.cr;
   player.questsDone = (player.questsDone || 0) + 1;

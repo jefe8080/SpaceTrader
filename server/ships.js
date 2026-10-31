@@ -12,6 +12,7 @@ import { runAttack, runFlee } from './war/engage.js';
 import { mineDebris } from './war/outcome.js';
 import { runRepairRun, runRepairWait, runSalvage } from './war/repair.js';
 import { runIntercept } from './war/support.js';
+import { runGoldRun } from './war/factions.js';
 
 const inZoneAt = (z, p) => inZone(z, p.x, p.y);
 
@@ -283,6 +284,7 @@ const EXEC = {
   join(ship, c, dt, game) { return runJoin(ship, c, dt, game, flyTo); },
   attack(ship, c, dt, game) { return runAttack(ship, c, dt, game, flyTo); },
   intercept(ship, c, dt, game) { return runIntercept(ship, c, dt, game, flyTo); },
+  goldRun(ship, c, dt, game) { return runGoldRun(ship, c, dt, game, flyToEntity); },
   repairRun(ship, c, dt, game) { return runRepairRun(ship, c, dt, game, flyToEntity); },
   repairWait(ship, c, dt, game) { return runRepairWait(ship, c, dt, game); },
   salvage(ship, c, dt, game) { return runSalvage(ship, c, dt, game); },

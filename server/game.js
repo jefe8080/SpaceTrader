@@ -32,6 +32,7 @@ import { coveredPath, pointCovered } from './coverage.js';
 import {dispatchRealSupply,finishRealSupply,receiveMarketCash,spendMarketCash,downstreamDemand} from './real-economy.js';
 import { initWar, loadWar, saveWar, tickWarBefore, tickWarAfter } from './war/index.js';
 import { stackSpeed, removeFromStacks } from './war/stacks.js';
+import { recordActivity } from './war/factions.js';
 
 export const WORLD_GEN_VERSION = 3; // Bestandswelt; Versionskonflikte lösen niemals einen Reset aus
 
@@ -825,6 +826,7 @@ export class Game {
 
   /** Nach jedem Handel mit Fremden: Einstandspreis bzw. Hauptschiff-XP, wenig XP für den Questgeber aus dem Umsatz */
   afterTrade(ship, e, good, n, total, dir, opts = {}) {
+    if (n > 0 && this.players.has(ship.owner)) recordActivity(this, e.sector); // PRD 15: Spieleraktivität für Fraktionswirtschaft und Aggression
     this.tradeBasis(ship, good, n, total, dir, opts);
     this.addGiverXp(e, total / GIVER_TRADE_CR);
   }

@@ -14,6 +14,8 @@ import { visibleBattles, battleView } from './war/view.js';
 import { ransomQuote } from './war/outcome.js';
 import { quoteFor, autoRepairOn, repairSiteError } from './war/repair.js';
 import { needsRepair } from '../shared/combat.js';
+import { fsecView } from './war/factions.js';
+import { diplo } from './war/diplomacy.js';
 
 const r1 = (v) => Math.round(v * 10) / 10;
 const MAX_MARKET_SUBS = 400;
@@ -220,7 +222,7 @@ export class Net {
       }
     }
     // Spielerdaten und Routen nur bei Änderung
-    const me = JSON.stringify({...playerDetail(p),profile:pilotProfile(this.game,p),coverage:this.game.profile==='homeworld'?coverageAreas(this.game,p):[],controlCapacity:controlCapacity(this.game,p),stacks:stacksView(this.game,p)});
+    const me = JSON.stringify({...playerDetail(p),profile:pilotProfile(this.game,p),coverage:this.game.profile==='homeworld'?coverageAreas(this.game,p):[],controlCapacity:controlCapacity(this.game,p),stacks:stacksView(this.game,p),war:warView(this.game,p)});
     if (me !== s.sentMe) { s.sentMe = me; s.socket.emit('me', JSON.parse(me)); }
     const routes = JSON.stringify([...this.game.routes.values()].filter((r) => r.owner === p.id));
     if (routes !== s.sentRoutes) { s.sentRoutes = routes; s.socket.emit('routes', JSON.parse(routes)); }
@@ -397,4 +399,12 @@ function playerDetail(p) {
     homeworld: p.homeworld || null, homeQuest: p.homeQuest || null, manualShip: p.manualShip || null, relic: p.relic || null,moduleBlueprints:p.moduleBlueprints||[],
     flagshipAt: p.flagshipAt ?? null, xp: Math.floor(p.xp || 0), level: pilotLevel(p.xp), quest: p.quest || null, quests:p.quests||[],questMinedUsed:p.questMinedUsed||{}, questLock: p.questLock || 0,
     rep: p.rep || {},zoneVisits:p.zoneVisits||[], questsDone: p.questsDone || 0, dogUntil: p.dogUntil || 0, mg: p.mg || null };
+}
+
+/** PRD 15: Diplomatie, Freundschaftsquest, Berichte und bekannte Fraktionssektoren */
+function warView(game, p) {
+  const w = diplo(p);
+  const factions = [...game.fsecs.values()].filter((fs) => { const e = game.world.entities.get(fs.admin); return e && game.isKnown(p, e); }).map((fs) => ({ admin: fs.admin, ...fsecView(game, fs, p) }));
+  return { friends: w.friends, friendQuest: w.friendQuest || null, galactic: !!w.galactic, reports: (w.reports || []).slice(0, 5), factions,
+    aggr: Object.fromEntries(Object.entries(w.aggr).map(([k, v]) => [k, Math.round(v)])), peace: w.peace };
 }

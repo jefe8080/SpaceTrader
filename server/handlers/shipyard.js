@@ -1,3 +1,4 @@
+import { shipPurchaseBlock } from '../war/factions.js';
 import { GOODS, SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, MODULE_SIZE, MODULE_REFUND,
   upgradeCost, shipStats, holdUsage, cargoFits, sellValue, pilotLevel, factionRank, RANK_NAMES, FACTIONS } from '../../shared/config.js';
 import { V } from './validate.js';
@@ -21,6 +22,7 @@ export default {
   buyShip: {
     args: { target: V.entity(), index: V.int(0, 20) },
     run({ game, player }, { target, index }) {
+      { const lock = shipPurchaseBlock(game, player); if (lock) return lock; }
       if (!isYard(target)) return 'Keine Werft.';
       const docked = game.shipsOf(player.id).some((s) => s.dockedAt === target.id);
       if (!docked) return 'Eines deiner Schiffe muss an der Werft angedockt sein.';
@@ -55,6 +57,7 @@ export default {
   buyFactionShip: {
     args: { target: V.entity(), index: V.opt(V.int(0, 10), 0) },
     run({ game, player }, { target, index }) {
+      { const lock = shipPurchaseBlock(game, player); if (lock) return lock; }
       const m = target.market;
       if (m?.strategy !== 'factionyard') return 'Keine Fraktionswerft.';
       const docked = game.shipsOf(player.id).filter((s) => s.dockedAt === target.id);
@@ -93,6 +96,7 @@ export default {
   yardOrder: {
     args: { target: V.entity(), type: V.key(SHIP_TYPES) },
     run({ game, player }, { target: e, type }) {
+      { const lock = shipPurchaseBlock(game, player); if (lock) return lock; }
       const m = e.market;
       const faction=game.profile==='homeworld'&&m?.strategy==='factionyard';
       if (m?.strategy === 'factionyard'&&!faction) return 'Fraktionsschiffe sind an der Fraktionswerft dauerhaft im Angebot.';

@@ -4,6 +4,7 @@ import {homeAccess,homeConstructionError,chargeHome} from './homeworld-operation
 import {QUEST_DELIVERIES} from '../shared/advanced-homequests.js';
 import {applyPhysicalHull,initializeNewHull} from './physical-yards.js';
 import {blueprintRank} from '../shared/combat.js';
+import {shipPurchaseBlock} from './war/factions.js';
 
 export const ORBITAL_OPERATION={small:{power:20,workers:{basic:8,skilled:6}},large:{power:60,workers:{skilled:10,specialist:4}}};
 const readyMaterials=(h,id)=>Object.entries(QUEST_DELIVERIES[id]).every(([g,n])=>(h.questDeliveries?.[id]?.[g]||0)>=n);
@@ -30,6 +31,7 @@ export function startOrbital(game,p,e,large,ship,confirmed){
 
 export function orbitalBuild(game,p,e,type){
   const error=homeAccess(game,p,e);if(error)return error;
+  {const lock=shipPurchaseBlock(game,p);if(lock)return lock;}
   const h=e.market.homeworld,o=h.orbital,d=SHIP_TYPES[type];
   if(!o?.small||!d||d.npc)return 'Dieser Schiffstyp gehört nicht zum Orbitalbaukatalog.';
   const large=['L','XL'].includes(d.cls),slot=large?'large':'small';
