@@ -1,3 +1,4 @@
+import {migrateCivilAccounts} from './civil-accounting.js';
 import {GOODS,STATION_TYPES,freeFor} from '../shared/config.js';
 import {stat} from './markets.js';
 
@@ -12,6 +13,7 @@ export function grantSchoolStaff(h,schools){
   }
 }
 export function initializePopulation(e){
+  migrateCivilAccounts(e.market);
   if(e.type==='hotel'&&e.kind==='station'){
     const h=e.market.economy||=( {cash:0,rate:0,population:0} );
     h.population??=0;h.housing??=0;h.workers||={basic:0,skilled:0,specialist:0};h.visitors||=[];h.nextPassenger||=0;

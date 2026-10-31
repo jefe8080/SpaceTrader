@@ -1,3 +1,4 @@
+import {migrateCivilAccounts} from './civil-accounting.js';
 import {migrateBuildingRecipes,unlockBuildingRecipes} from './building-recipes.js';
 import {syncRouteReservations} from './route-capacity.js';
 import {migrateNewHullInventory} from './physical-yards.js';
@@ -97,6 +98,7 @@ export class Game {
       if (markets.has(e.id)) {
         e.market = markets.get(e.id);
         e.market.stats = stats.get(e.id) || [];
+        migrateCivilAccounts(e.market);
       }
       this.world.addEntity(e);
     }

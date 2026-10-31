@@ -103,11 +103,11 @@ test('Voller Liefermarkt erhält bezahlte Restladung über Neustart, spätere En
   game.store.close();fs.rmSync(directory,{recursive:true,force:true});
 });
 
-test('Bürger teilen ein Einkommen in Steuern, bezahlten Konsum und begrenzten Rest, Betrieb zahlt nichts doppelt',()=>{
+test('Bürger zahlen unveränderte Steuern ohne Konsumkonto; Betrieb zahlt nichts doppelt',()=>{
   const f=fixture(),home=f.home.market.homeworld;home.supplyFactor=1;home.employmentFactor=1;
-  const credits=f.player.credits;tickCivilMoney(f.game,f.home,3600,{water:5});
+  const credits=f.player.credits;tickCivilMoney(f.game,f.home,3600);
   const civil=home.civil;assert.equal(civil.gross,400);assert.equal(civil.taxes,80);
-  approximately(civil.gross,civil.taxes+civil.consumptionPayments+civil.budget+civil.unspentExpired);
+  assert.equal(civil.budget,undefined);assert.equal(civil.consumptionPayments,0);
   approximately(f.player.credits-credits,civil.taxes+civil.consumptionPayments);
   const old=f.player.credits;f.ship.dockedAt=f.home.id;home.facilities.dock.status='ready';f.ship.cargo={ore:10};f.game.trade(f.ship,f.home,'ore',10,'sell');assert.equal(f.player.credits,old);
   assert.equal(runCommand(f.game,f.player,{cmd:'homeTax',target:f.home.id,percent:40}),undefined);assert.equal(civil.taxRate,.4);

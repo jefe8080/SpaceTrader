@@ -93,7 +93,7 @@ function manageSection(e, prop) {
       h += `<tr><td>${GOODS[g].name}</td><td><input type="range" class="prop-fixed" data-ent="${e.id}" data-good="${g}" min="${FIXED.MIN}" max="${FIXED.MAX}" step="0.05" value="${sv}"></td>
         <td>${fixedPrice(pmin, pmax, sv).toFixed(1)}</td><td>${localDemandPerHour(g,s,prop,rate).toFixed(0)}</td></tr>`;
     }
-    h += e.market.realEconomy?'</table><p>Tatsächlicher ziviler Verbrauch zahlt aus begrenztem Konsumbudget. Betriebsmittel bezahlen keine fiktiven Erlöse.</p>':`</table><div class="muted small-note">Günstiger Preis = mehr Verbrauch: Position 0,3 bringt doppelt so viel Erlös wie 0,7 (bei voller Belieferung).</div>`;
+    h += e.market.realEconomy?'</table><p>Tatsächlicher ziviler Verbrauch wird aus neu erzeugtem Geld bezahlt. Betriebsmittel bezahlen keine fiktiven Erlöse.</p>':`</table><div class="muted small-note">Günstiger Preis = mehr Verbrauch: Position 0,3 bringt doppelt so viel Erlös wie 0,7 (bei voller Belieferung).</div>`;
   }
 
   if(e.market.realEconomy&&e.kind==='planet')return h+specializationPanel(e)+'</div>';
@@ -136,7 +136,7 @@ export function specializationPanel(e){
   html+=(h.infrastructure||[]).filter(b=>b.kind==='housing').map(b=>housingPanel(e,b)).join('');
   html+=(h.projects||[]).map(j=>`<p>${esc(j.kind==='training'?`Ausbildung: ${j.to}`:j.focus||HOME_BUILDINGS[j.building]?.name)} · ${Math.ceil(j.remaining??Math.max(0,j.until-state.time))} s · ${esc(j.reason||'Material gebunden')}</p>`).join('');
   html+=`<button class="small" data-act="worldTrain" data-ent="${e.id}" data-qualification="skilled">10 Fachkräfte ausbilden · 120 s</button><button class="small" data-act="worldTrain" data-ent="${e.id}" data-qualification="specialist">10 Spezialisten ausbilden · 180 s</button>
-    <p>Steuern: ${Math.round((h.civil?.taxRate??.2)*100)} % · Konsumbudget ${fmt(h.civil?.budget||0)} Cr · Steuerertrag ${fmt(h.civil?.taxes||0)} Cr · bezahlter ziviler Absatz ${fmt(h.civil?.consumptionPayments||0)} Cr</p><input id="worldTax-${e.id}" aria-label="Steuersatz" type="number" min="0" max="40" value="${Math.round((h.civil?.taxRate??.2)*100)}"><button class="small" data-act="worldTax" data-ent="${e.id}">Steuersatz setzen</button>`;
+    <p>Steuern: ${Math.round((h.civil?.taxRate??.2)*100)} % · Steuerertrag ${fmt(h.civil?.taxes||0)} Cr · bezahlter ziviler Absatz ${fmt(h.civil?.consumptionPayments||0)} Cr</p><input id="worldTax-${e.id}" aria-label="Steuersatz" type="number" min="0" max="40" value="${Math.round((h.civil?.taxRate??.2)*100)}"><button class="small" data-act="worldTax" data-ent="${e.id}">Steuersatz setzen</button>`;
   return html;
 }
 

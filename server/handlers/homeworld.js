@@ -36,7 +36,7 @@ export default {
     args:{target:V.entity(),percent:V.num(0,40)},
     run({game,player},{target,percent}){
       const error=homeAccess(game,player,target);if(error)return error;
-      const home=target.market.homeworld;home.civil||={budget:0,gross:0,taxes:0,consumptionPayments:0};home.civil.taxRate=percent/100;
+      const home=target.market.homeworld;home.civil||={gross:0,taxes:0,consumptionPayments:0};home.civil.taxRate=percent/100;
     },
   },
   homeControlUpgrade:{

@@ -29,7 +29,7 @@ export default {
   worldSpecialize:{args:{target:V.entity(),focus:V.oneOf(...new Set(Object.values(WORLD_FOCI).flat()))},run({game,player},{target,focus}){return startSpecialization(game,player,target,focus);}},
   worldInfrastructure:{args:{target:V.entity(),kind:V.oneOf('solar','gasGenerator','reactor','housing','school','academy')},run({game,player},{target,kind}){return startWorldInfrastructure(game,player,target,kind);}},
   worldTrain:{args:{target:V.entity(),qualification:V.oneOf('skilled','specialist')},run({game,player},{target,qualification}){return startWorldTraining(game,player,target,qualification);}},
-  worldTax:{args:{target:V.entity(),percent:V.num(0,40)},run({game,player},{target,percent}){const error=specializationAccess(game,player,target);if(error)return error;target.market.economy.civil||={budget:0,gross:0,taxes:0,consumptionPayments:0};target.market.economy.civil.taxRate=percent/100;}},
+  worldTax:{args:{target:V.entity(),percent:V.num(0,40)},run({game,player},{target,percent}){const error=specializationAccess(game,player,target);if(error)return error;target.market.economy.civil||={gross:0,taxes:0,consumptionPayments:0};target.market.economy.civil.taxRate=percent/100;}},
   /** Fabrik auf einem Bauplatz eines eigenen Planeten (PRD-3 6.4) */
   facBuild: {
     args: { target: landedPlanet(), recipe: V.key(RECIPES) },

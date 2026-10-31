@@ -1,3 +1,4 @@
+import {migrateCivilAccounts} from './civil-accounting.js';
 import {recordInventoryTrade} from './pilot-profile.js';
 import {recordLocalSale} from '../shared/local-sales.js';
 import {CIVIL_GOODS,localDemandPerHour} from '../shared/local-demand.js';
@@ -32,6 +33,7 @@ export function preparePublicEntity(entity){
 
 export function ensureCash(entity){
   const market=entity.market;
+  migrateCivilAccounts(market);
   if(market.economy){
     const cash=market.economy;
     // Old saves can contain only a procurement cash account. Fill missing
@@ -111,15 +113,14 @@ export function tickRealMarket(game,entity,dt){
 export function consumeCivilGood(game,entity,good,rate,dt){
   const m=entity.market,h=m.homeworld||ensureCash(entity),prop=game.ownership.get(entity.id),owner=prop&&game.accountOf(prop.player);
   const slot=m.goods[good],demand=localDemandPerHour(good,slot,prop,rate)*dt/3600;
-  let amount=Math.min(availableHomeStock(m,good),demand);
+  migrateCivilAccounts(m);
+  const amount=Math.max(0,Math.min(availableHomeStock(m,good),demand));
   if(owner){
-    h.civil||={budget:0,consumptionPayments:0};
-    const price=game.fixedPriceOf(entity,prop,good),budget=h.civil.budget||0;
-    h.civil.purchaseLimited=!!h.civil.purchaseLimited||amount*price>budget+1e-8;
-    amount=Math.min(amount,budget/price);
+    h.civil||={consumptionPayments:0};
+    const price=game.fixedPriceOf(entity,prop,good);
     const payment=amount*price;
     if(payment>0){
-      h.civil.budget=Math.max(0,budget-payment);h.civil.consumptionPayments=(h.civil.consumptionPayments||0)+payment;owner.credits+=payment;
+      h.civil.consumptionPayments=(h.civil.consumptionPayments||0)+payment;owner.credits+=payment;
       propBook(game,prop,'inc',payment);recordInventoryTrade(game,game.players.get(prop.player),good,'sell',amount,payment);
       recordLocalSale(m,game.time,good,amount,payment);
     }
@@ -129,26 +130,15 @@ export function consumeCivilGood(game,entity,good,rate,dt){
   return demand>0?amount/demand:1;
 }
 
-export function tickCivilMoney(game,entity,dt,consumption={}){
+export function tickCivilMoney(game,entity,dt){
   const home=entity.market.homeworld||ensureCash(entity),prop=game.ownership.get(entity.id),owner=prop&&game.accountOf(prop.player);
+  migrateCivilAccounts(entity.market);
   if(!home||!home.population)return;
-  home.civil||={budget:0,taxRate:.2,gross:0,taxes:0,consumptionPayments:0};
-  for(const [key,value] of Object.entries({budget:0,taxRate:.2,gross:0,taxes:0,consumptionPayments:0}))home.civil[key]??=value;
+  home.civil||={taxRate:.2,gross:0,taxes:0,consumptionPayments:0};
+  for(const [key,value] of Object.entries({taxRate:.2,gross:0,taxes:0,consumptionPayments:0}))home.civil[key]??=value;
   const civil=home.civil,income=HOMEWORLD.money.incomePerHour*home.population*(home.supplyFactor??.25)*(home.employmentFactor??.5);
-  civil.purchaseLimited=false;
   const gross=income*dt/3600,tax=gross*civil.taxRate;
   if(owner)owner.credits+=tax;civil.gross+=gross;civil.taxes+=tax;
-  const budgetBeforeCap=civil.budget+gross-tax;
-  civil.budget=Math.min(income*(1-civil.taxRate)*HOMEWORLD.money.civilianBudgetHours,budgetBeforeCap);
-  civil.unspentExpired=(civil.unspentExpired||0)+budgetBeforeCap-civil.budget;
-  for(const [good,amount] of Object.entries(consumption)){
-    if(!owner)continue;
-    const price=game.fixedPriceOf(entity,prop,good),payment=Math.min(civil.budget,amount*price);
-    civil.budget-=payment;civil.consumptionPayments+=payment;owner.credits+=payment;
-    propBook(game,prop,'inc',payment);
-    recordInventoryTrade(game,game.players.get(prop.player),good,'sell',amount,payment);
-    recordLocalSale(entity.market,game.time,good,price>0?payment/price:0,payment);
-  }
   if(prop)propBook(game,prop,'inc',tax);
   civil.incomePerHour=income;
 }
