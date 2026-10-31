@@ -7,7 +7,7 @@ import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import {moduleStockPanel,moduleCraftPanel} from './modules.js';
 import {REFINEMENT_RECIPES} from '/shared/goods.js';
-import {populationPanel} from './population.js';
+import {populationPanel,homePrices} from './population.js';
 import {QUEST_DELIVERIES,STUDY_FINDS} from '/shared/advanced-homequests.js';
 import {SHIP_TYPES,SHIPYARD} from '/shared/config.js';
 import {warpPanel} from './colonies.js';
@@ -137,7 +137,7 @@ export function homePanel(entity, item, ship) {
   }
   if (facility === 'dock' && building.status === 'ready') {
     const goods = Object.entries(entity.market.goods).filter(([g]) => ['normal','hazard'].includes(GOODS[g].cls));
-    html += homeBalance(entity)+storageBatchPanel(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market home-storage"><tr><th>Ware / Bestand</th><th>Lagerregeln</th></tr>';
+    html += homeBalance(entity)+'<details id="storage-limits"><summary>Einstellbare Lagerlimits und Transfers</summary>'+storageBatchPanel(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market home-storage"><tr><th>Ware / Bestand</th><th>Lagerregeln</th></tr>';
     for (const [good, slot] of goods) html += `<tr><td><b>${GOODS[good].name}</b><p>${fmt(slot.stock)} im Lager<br>${fmt(ship?.cargo?.[good] || 0)} an Bord</p>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${ship && slot.stock >= 1 ? '' : 'disabled'}>Laden</button>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Einlagern</button></td><td>${storageControls(entity,good)}</td></tr>`;
@@ -207,7 +207,7 @@ function homeBalance(entity){
   if(home.civil)html+=`<details><summary>Bürger und Geld</summary><p>Brutto ${fmt(home.civil.incomePerHour||0)} Cr/h · Steuer ${Math.round(home.civil.taxRate*100)} % · Konsumkasse ${fmt(home.civil.budget)} Cr</p>
     <p>Bisher: ${fmt(home.civil.gross)} Cr Einkommen, davon ${fmt(home.civil.taxes)} Cr Steuern und ${fmt(home.civil.consumptionPayments)} Cr tatsächlich bezahlter Konsum.</p>
     <label>Steuer 0–40 % <input id="homeTaxPercent" type="number" min="0" max="40" value="${Math.round(home.civil.taxRate*100)}"></label><button class="small" data-pp="homeTax">Steuersatz setzen</button></details>`;
-  html+='<table class="market"><tr><th>Ware</th><th>Verfügbar / geschützt</th><th>Zu- / Abfluss je h</th></tr>';
+  html+='<details id="storage-overview"><summary>Warenübersicht: verfügbar / geschützt / Zu- und Abfluss</summary><table class="market"><tr><th>Ware</th><th>Verfügbar / geschützt</th><th>Zu- / Abfluss je h</th></tr>';
   for(const [g,slot] of Object.entries(entity.market.goods)){
     if(GOODS[g].cls==='passenger')continue;
     const protectedAmount=slot.stock-availableHomeStock(entity.market,g),flow=home.flows?.[g];
@@ -215,7 +215,7 @@ function homeBalance(entity){
     const drain=(flow?.consume||0)-(flow?.produce||0),duration=drain>0?`${(availableHomeStock(entity.market,g)/drain).toFixed(1)} h Vorrat`:'kein Nettoverbrauch';
     html+=`<tr><td>${GOODS[g].name}<div class="muted">${duration}</div></td><td>${fmt(availableHomeStock(entity.market,g))} / ${fmt(protectedAmount)}</td><td>+${fmt(flow?.produce||0)} / −${fmt(flow?.consume||0)}</td></tr>`;
   }
-  html+='</table><details><summary>Belegung und Engpässe</summary>'+(home.allocations||[]).map(a=>`<p>${esc(names[a.id]||RECIPES[a.id]?.name||home.structures?.find(s=>s.id===a.id)?.kind||a.id)}: ${a.state==='active'?'Betrieb':esc(a.reason||'Pausiert')} · ${a.power} Energie</p>`).join('')+'</details>';
+  html+='</table></details><details><summary>Belegung und Engpässe</summary>'+(home.allocations||[]).map(a=>`<p>${esc(names[a.id]||RECIPES[a.id]?.name||home.structures?.find(s=>s.id===a.id)?.kind||a.id)}: ${a.state==='active'?'Betrieb':esc(a.reason||'Pausiert')} · ${a.power} Energie</p>`).join('')+'</details>';
   html+='<details><summary>Bau- und Ausbildungsaufträge</summary>'+(home.projects||[]).map(p=>`<p>${esc(({module:'Modulfertigung',study:'Modulstudium',control:'Leitstellenausbau',training:'Ausbildung',construction:'Neubau',upgrade:'Ausbau',restore:'Wiederherstellung',land:'Flächenerschließung'})[p.kind]||p.kind)} · ${['training','module','study'].includes(p.kind)?`${p.kind==='training'?p.count+' Einwohner:':'Restzeit:'} ${Math.ceil(p.remaining)} s ${p.paused?'(pausiert)':''}`:`${Math.max(0,Math.ceil(p.until-state.time))} s · 2 einfache Kräfte im Bauteam · Material gebunden`}</p>`).join('')+'</details>';
   return html;
 }

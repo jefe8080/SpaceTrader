@@ -122,8 +122,8 @@ export function renderPlanetUi() {
   bar.setAttribute('aria-label', `${e.name} · ${PLANET_TYPES[e.type].name}`);
   bar.style.top = `${Math.ceil($('topbar').getBoundingClientRect().bottom)+12}px`;
   if(innerWidth>1100)panel.style.top=`${Math.ceil(bar.getBoundingClientRect().bottom)+12}px`;
-  else panel.style.removeProperty('top');
-  panel.style.maxHeight=`${Math.max(80,Math.min(innerHeight*.46,innerHeight-bar.getBoundingClientRect().bottom-24))}px`;
+  else panel.style.top=`${Math.ceil(bar.getBoundingClientRect().bottom)+12}px`;
+  panel.style.maxHeight=`${Math.max(80,innerHeight-bar.getBoundingClientRect().bottom-24)}px`;
   getPlanetView()?.setNames(cityNames);
   if (!current) return;
   // Gebäude kann nach Änderungen (Abriss, Bau) neu nummeriert sein

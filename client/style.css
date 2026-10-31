@@ -363,7 +363,7 @@ body.landed #planetPanel { top:120px; bottom:auto; left:auto; right:16px; transf
   body.landed #fleet { display:none; }
   body.landed #planetBar { left:12px; right:12px; top:56px; }
   body.landed #planetBar .muted { display:none; }
-  body.landed #planetPanel { left:12px; right:12px; width:auto; top:auto; bottom:12px; max-height:38vh; }
+  body.landed #planetPanel { left:12px; right:12px; width:auto; top:120px; bottom:12px; max-height:calc(100dvh - 144px); }
 }
 
 .help-card { max-height:calc(100vh - 80px); overflow:auto; }

@@ -19,8 +19,8 @@ function patchChildren(target, source) {
       if (current.nodeValue !== next.nodeValue) current.nodeValue = next.nodeValue;
       continue;
     }
-    for (const attr of [...current.attributes]) if (!next.hasAttribute(attr.name)) current.removeAttribute(attr.name);
-    for (const attr of next.attributes) if (current.getAttribute(attr.name) !== attr.value) current.setAttribute(attr.name, attr.value);
+    for (const attr of [...current.attributes]) if (!(current.tagName === 'DETAILS' && attr.name === 'open') && !next.hasAttribute(attr.name)) current.removeAttribute(attr.name);
+    for (const attr of next.attributes) if (!(current.tagName === 'DETAILS' && attr.name === 'open') && current.getAttribute(attr.name) !== attr.value) current.setAttribute(attr.name, attr.value);
     // Preserve the selected value and native popup, but still update option availability.
     const selected = current.tagName === 'SELECT' ? [...current.selectedOptions].map(option => option.value) : null;
     patchChildren(current, next);
