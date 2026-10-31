@@ -8,6 +8,7 @@ import { ransom, ransomQuote } from '../war/outcome.js';
 import { beginRetreat, isActive, defaultTactic } from '../war/battle.js';
 import { COMBAT, blueprint } from '../../shared/combat.js';
 import { kindFactor } from '../../shared/damage.js';
+import { startRepair, quoteFor } from '../war/repair.js';
 
 const battleOf = () => (v, { game }) => { const b = game.battles.get(v); if (!b) throw new CmdError('Diese Schlacht ist beendet.'); return b; };
 const ORDER_TYPES = ['move', 'attack', 'escort', 'defend', 'distance', 'hold', 'ceasefire', 'retreat', 'ai', 'priority'];
@@ -127,6 +128,19 @@ export default {
         u.stance = t.stance; u.retreat = { ...t.retreat };
         if (dcPrio !== undefined) u.dcPrio = blueprint(ship.type).systems.some((s) => s.id === dcPrio) ? dcPrio : null;
       }
+    },
+  },
+  /** Manuelle Vollreparatur angedockt; der bestätigte Preis muss der aktuellen Vorschau entsprechen */
+  repair: {
+    args: { ship: V.ownShip(), cost: V.opt(V.int(0, 1e12)) },
+    run({ game, player }, { ship, cost }) { return startRepair(game, player, ship, cost) || undefined; },
+  },
+  /** Reparaturautomatik je Stack bzw. Einzelschiff an/aus (Standard: an) */
+  autoRepair: {
+    args: { ship: V.ownShip(false, true), on: V.bool() },
+    run({ game }, { ship, on }) {
+      const st = stackOf(game, ship);
+      if (st) st.autoRepair = on; else ship.autoRepair = on;
     },
   },
   /** Freikauf eines eigenen gefangenen Schiffes: fester Preis, vorher angezeigt */

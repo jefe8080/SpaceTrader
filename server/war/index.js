@@ -3,6 +3,7 @@ import { formRouteStacks, syncStacks } from './stacks.js';
 import { tickBattles } from './battle.js';
 import { tickEngagements } from './engage.js';
 import { tickDebris } from './outcome.js';
+import { tickRepairs } from './repair.js';
 
 /** Persistente Kriegszustände: Präfix der Zeilen-ID in der Tabelle war -> Map am Spiel */
 const COLLECTIONS = { stack: 'stacks', battle: 'battles' };
@@ -42,5 +43,5 @@ export function tickWarBefore(game, dt) {
 export function tickWarAfter(game, dt) {
   syncStacks(game, dt);
   game.warAcc = (game.warAcc || 0) + dt;
-  if (game.warAcc >= 1) { game.warAcc = 0; tickDebris(game); }
+  if (game.warAcc >= 1) { game.warAcc = 0; tickDebris(game); tickRepairs(game); }
 }

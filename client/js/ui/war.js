@@ -87,10 +87,24 @@ export function ownWarSection(s) {
       <button class="small" data-war="ransom" data-ship="${s.id}" data-price="${q.price}">Freikaufen</button>` : ''}</div>`;
   }
   if (s.repairHold) h += `<div class="warnbox">🔧 Unter 30 % kapituliert: vor erneutem Kampfeinsatz reparieren.</div>`;
+  if (s.repairRun) h += `<div class="infobox">🔧 Reparaturfahrt aktiv; danach wird der gespeicherte Auftrag fortgesetzt. Keine Abfangeinsätze währenddessen.</div>`;
+  const q = s.repairQuote;
+  if (s.needsRepair || (q && q.ammo > 0)) {
+    h += `<div class="section"><div class="section-title">Reparatur</div>
+      <div class="muted">Vorschau: ${fmt(q?.cost || 0)} Cr (davon Munition ${fmt(q?.ammo || 0)} Cr), ${q?.secs || 0} s. Vollreparatur nur angedockt an zugänglicher Werft oder eigener Ruinenwelt mit Antriebswerkstatt.</div>
+      ${s.repairHere ? `<button class="small" data-war="repair" data-ship="${s.id}" data-cost="${q?.cost || 0}">🔧 Jetzt reparieren</button>` : ''}</div>`;
+  }
+  if (COMBAT_TYPES[s.type]?.weapons?.length || s.stack) h += `<label class="muted"><input type="checkbox" data-war-auto="${s.id}" ${s.autoRepair !== false ? 'checked' : ''}> Reparaturautomatik${s.stack ? ' (ganzer Stack)' : ''}</label>`;
   return h;
 }
 
 warActions.attack = (d) => cmd('attack', { ships: selectedShips().map((x) => x.id), target: d.target });
 warActions.ransom = (d) => { if (confirm(`Schiff für ${fmt(Number(d.price))} Cr freikaufen?`)) cmd('ransom', { ship: d.ship, price: Number(d.price) }); };
+warActions.repair = (d) => { if (confirm(`Reparatur für ${fmt(Number(d.cost))} Cr starten?`)) cmd('repair', { ship: d.ship, cost: Number(d.cost) }); };
 warActions.view = (d) => import('./battle.js').then((m) => m.openBattle(d.battle));
 
+
+$('details').addEventListener('change', (ev) => {
+  const id = ev.target.dataset?.warAuto;
+  if (id) cmd('autoRepair', { ship: id, on: ev.target.checked });
+});

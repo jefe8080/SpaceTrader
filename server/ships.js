@@ -10,6 +10,7 @@ import {runLogistics} from './logistics.js';
 import { isFollower, stackOf, stackMembers, stackMayDepart, runJoin, runRendezvous, routeStackPending } from './war/stacks.js';
 import { runAttack, runFlee } from './war/engage.js';
 import { mineDebris } from './war/outcome.js';
+import { runRepairRun, runRepairWait, runSalvage } from './war/repair.js';
 
 const inZoneAt = (z, p) => inZone(z, p.x, p.y);
 
@@ -280,6 +281,9 @@ function runActions(ship, e, actions, st, dt, game, opts) {
 const EXEC = {
   join(ship, c, dt, game) { return runJoin(ship, c, dt, game, flyTo); },
   attack(ship, c, dt, game) { return runAttack(ship, c, dt, game, flyTo); },
+  repairRun(ship, c, dt, game) { return runRepairRun(ship, c, dt, game, flyToEntity); },
+  repairWait(ship, c, dt, game) { return runRepairWait(ship, c, dt, game); },
+  salvage(ship, c, dt, game) { return runSalvage(ship, c, dt, game); },
   logistics(ship,c,dt,game){return runLogistics(ship,c,dt,game,flyToEntity);},
   move(ship, c, dt, game) {
     if (!followNav(ship, `p:${c.x},${c.y}`, c.x, c.y, dt, game)) return false;
