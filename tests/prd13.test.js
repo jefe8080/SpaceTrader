@@ -5,6 +5,7 @@ import planetHandlers from '../server/handlers/planet.js';
 import {newProperty,releaseMarket} from '../server/property.js';
 import {repairHome,tickHomeworld} from '../server/homeworld.js';
 import {RECIPES,factoryCost} from '../shared/config.js';
+import {tickSpecialization} from '../server/specializations.js';
 
 function fixture() {
   const game=new Game(':memory:',{profile:'homeworld',seed:42}),player=game.createPlayer('PRD13');
@@ -12,6 +13,35 @@ function fixture() {
   ship.dockedAt=home.id;player.credits=1e8;
   return {game,player,home,ship};
 }
+
+test('PRD13: economic schools grant two residents once on completion, migration and rebuilding',()=>{
+  const {game,home}=fixture();
+  try {
+    const h=home.market.homeworld;
+    h.structures=[{id:'old',kind:'school',status:'ready'},{id:'new',kind:'school',status:'building'}];
+    const population=h.population,skilled=h.workers.skilled;
+    tickHomeworld(game,home,1);
+    assert.equal(h.population,population+2);assert.equal(h.workers.skilled,skilled+2);
+    h.projects.push({id:'build',kind:'construction',target:'new',until:game.time});
+    tickHomeworld(game,home,1);
+    assert.equal(h.population,population+4);assert.equal(h.workers.skilled,skilled+4);
+    h.structures[0].upgrades=['academy'];tickHomeworld(game,home,1);
+    assert.equal(h.population,population+4);
+    h.structures.shift();h.structures.push({id:'rebuilt',kind:'school',status:'ready'});
+    tickHomeworld(game,home,1);assert.equal(h.population,population+6);
+    const saved=structuredClone(h);
+    home.market.homeworld=saved;tickHomeworld(game,home,1);
+    assert.equal(saved.population,population+6);
+    const e=[...game.world.entities.values()].find(e=>e.kind==='planet'&&e.type==='mining'&&e.market.realEconomy),world=e.market.economy;
+    world.infrastructure=[{id:'old',kind:'school'},{id:'decorative',kind:'academy'}];
+    world.projects=[{id:'new',kind:'infrastructure',building:'school',until:game.time+10}];
+    const pop=world.population,staff=world.workers.skilled;
+    tickSpecialization(game,e,0);assert.equal(world.population,pop+2);
+    game.time+=10;tickSpecialization(game,e,0);
+    assert.equal(world.population,pop+4);assert.equal(world.workers.skilled,staff+4);
+    tickSpecialization(game,e,0);assert.equal(world.population,pop+4);
+  } finally {game.close();}
+});
 
 test('PRD13: workshop repair requires H04, ownership and access, then charges once',()=>{
   const f=fixture(),{game,player,home}=f,h=home.market.homeworld;

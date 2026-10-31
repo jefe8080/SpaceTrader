@@ -128,11 +128,11 @@ test('Ausbildung reserviert Bewohner, pausiert ohne Versorgung und wandelt Quali
   f.entity.market.goods.water.stock=0;f.entity.market.goods.food.stock=0;advance(f,500);
   assert.equal(f.home.projects[0].remaining,60);assert.equal(f.home.projects[0].paused,true);
   f.entity.market.goods.water.stock=100;f.entity.market.goods.food.stock=100;advance(f,60);
-  assert.equal(f.home.workers.basic,38);assert.equal(f.home.workers.skilled,22);assert.equal(f.home.population,100);
+  assert.equal(f.home.workers.basic,38);assert.equal(f.home.workers.skilled,24);assert.equal(f.home.population,102);
   school.upgrades=['academy'];advance(f,1);
   assert.equal(command(f,'homeTrain',{qualification:'specialist'}),undefined);advance(f,180);
-  assert.equal(f.home.workers.specialist,10);assert.equal(f.home.workers.skilled,12);
-  assert.equal(Object.values(f.home.workers).reduce((a,b)=>a+b,0),60);
+  assert.equal(f.home.workers.specialist,10);assert.equal(f.home.workers.skilled,14);
+  assert.equal(Object.values(f.home.workers).reduce((a,b)=>a+b,0),62);
   assert.deepEqual(f.home.trained,{skilled:10,specialist:10});
   f.game.store.close();
 });
@@ -172,6 +172,6 @@ test('Neustart erhält Baukosten und Ausbildungsrestzeit ohne Offlinefortschritt
     f={game,player,entity,home:entity.market.homeworld};
     assert.equal(f.home.projects.find(p=>p.kind==='training').remaining,90);assert.equal(player.credits,credits);
     advance(f,30);assert.equal(f.home.structures.find(s=>s.kind==='housing').status,'ready');assert.ok(Math.abs(player.credits-credits-(f.home.civil.taxes+f.home.civil.consumptionPayments-civilIncome))<1e-7);
-    advance(f,60);assert.equal(f.home.workers.skilled,22);assert.equal(f.home.projects.length,0);
+    advance(f,60);assert.equal(f.home.workers.skilled,24);assert.equal(f.home.projects.length,0);
   }finally{if(f?.game.store.db.open)f.game.store.close();fs.rmSync(directory,{recursive:true,force:true});}
 });

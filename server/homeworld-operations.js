@@ -6,7 +6,7 @@ import {tickCivilMoney} from './real-economy.js';
 import {stat} from './markets.js';
 import {tickModuleProjects} from './modules.js';
 import {tickLogistics,productionAllowed,productionStock,consumeProductionReservation,recordProduction} from './logistics.js';
-import {initializePopulation,tickVisitors} from './population.js';
+import {initializePopulation,tickVisitors,grantSchoolStaff} from './population.js';
 import {ORBITAL_OPERATION,tickOrbital} from './orbital.js';
 import {supplyOverview} from '../shared/supply-overview.js';
 
@@ -19,6 +19,7 @@ const shipsHere = (game, player, entity) => game.shipsOf(player.id).filter(ship 
 
 export function initializeHomeOperations(home) {
   home.structures ||= [];
+  grantSchoolStaff(home,home.structures.filter(s=>s.status==='ready'));
   for (const s of home.structures) if (['silo', 'safeStorage'].includes(s.kind)) s.level = storageLevel(s);
   home.projects ||= []; home.reserves ||= {}; home.reservations ||= {};
   home.trained ||= { skilled: 0, specialist: 0 }; home.nextProject ||= 0; home.expansions ||= 0;
@@ -252,6 +253,7 @@ function completeConstruction(game,entity,now) {
     notify(game,entity);
   }
   home.projects=pending;
+  grantSchoolStaff(home,home.structures.filter(s=>s.status==='ready'));
 }
 
 export function productionBlockReason(market,recipe,id) {

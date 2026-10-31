@@ -57,11 +57,11 @@ test('Ausbildung reserviert vorhandene Personen, nutzt echte Schulkapazität und
   f.h.supplyFactor=1;advance(f,120);assert.equal(f.h.workers.skilled,skilled+20);assert.equal(f.h.workers.basic,basic-20);assert(f.h.population>=population&&f.h.population<=population+1);close(f);
 });
 
-test('Infrastruktur bindet Waren, läuft parallel und liefert reale Energie ohne Rezeptfabriken',()=>{
+test('Infrastruktur bindet Waren, läuft parallel und liefert reale Energie neben separat bezahlten Rezeptfabriken',()=>{
   const f=fixture();f.h.infrastructure=[];stock(f,{ingots:20,glass:8});
   const construct=()=>runCommand(f.game,f.player,{cmd:'worldInfrastructure',target:f.e.id,kind:'solar'});
   assert.equal(construct(),undefined);assert.equal(construct(),undefined);assert.equal(f.e.market.goods.ingots.stock,0);assert.equal(f.h.projects.length,2);advance(f,60);assert.equal(f.h.energy.generation,52);assert.equal(f.h.infrastructure.length,2);
-  assert.match(runCommand(f.game,f.player,{cmd:'facBuild',target:f.e.id,recipe:'smelter'}),/Ruinenwelten/);close(f);
+  assert.match(runCommand(f.game,f.player,{cmd:'facBuild',target:f.e.id,recipe:'smelter'}),/Platten/);close(f);
 });
 
 test('Questgeberlevel erzeugt weder zusätzliches Angebot noch höheren Besitzwert oder Rohstoffausstoß',()=>{

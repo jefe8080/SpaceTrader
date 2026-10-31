@@ -3,10 +3,19 @@ import {stat} from './markets.js';
 
 export const peopleOf=e=>e.market?.homeworld||e.market?.economy;
 const total=w=>Object.values(w).reduce((a,b)=>a+b,0);
+/** Persist the grant on each economic school, so upgrades and reloads cannot repeat it. */
+export function grantSchoolStaff(h,schools){
+  if(!h?.workers)return;
+  for(const school of schools||[]){
+    if(school.kind!=='school'||school.staffGranted)continue;
+    h.population+=2;h.workers.skilled+=2;school.staffGranted=true;
+  }
+}
 export function initializePopulation(e){
   const h=peopleOf(e);if(!h||e.kind!=='planet')return;
   h.workers||={basic:Math.floor(h.population*.48),skilled:Math.floor(h.population*.12),specialist:0};
   if(!h.peopleRegistered){e.market.provenance||=[];e.market.provenance.push({id:`${e.id}:population`,source:'existing_population',amount:h.population});h.peopleRegistered=true;}
+  grantSchoolStaff(h,e.type==='ruins'?(h.structures||[]).filter(s=>s.status==='ready'):h.infrastructure);
   h.housing??=Math.max(100,Math.ceil(h.population*1.2));h.visitors||=[];h.nextPassenger||=0;h.growthProgress||=0;
   for(const [g,n] of Object.entries({water:.2,food:.1})){
     e.market.goods[g]||={role:'consume',rate:0,stock:0,cap:Math.max(200,h.population*n*4),mod:1};

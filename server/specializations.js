@@ -2,7 +2,7 @@ import {HOME_BUILDINGS,HOMEWORLD,availableHomeStock} from '../shared/homeworld.j
 import {WORLD_FOCI,specializationSpec} from '../shared/specializations.js';
 import {GOODS} from '../shared/goods.js';
 import {remoteManagementError} from './coverage.js';
-import {initializePopulation,updatePassengerOffers} from './population.js';
+import {initializePopulation,updatePassengerOffers,grantSchoolStaff} from './population.js';
 import {stat} from './markets.js';
 import {supplyOverview} from '../shared/supply-overview.js';
 
@@ -75,6 +75,7 @@ export function tickSpecialization(game,e,dt){
     else if(j.kind==='infrastructure')h.infrastructure.push({id:j.id,kind:j.building});
   }
   h.projects=pending;
+  grantSchoolStaff(h,h.infrastructure);
   h.housing=h.baseHousing;h.visitorCapacity=e.type==='resort'?50:0;h.schoolCapacity=0;h.docks=2;h.throughput=500;
   const reserved={basic:0,skilled:0,specialist:0},used={basic:0,skilled:0,specialist:0};
   for(const j of h.projects)if(j.kind==='training')reserved[j.from]+=j.count;else reserved.basic+=2;

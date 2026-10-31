@@ -123,7 +123,7 @@ Ausgeklappt steht die bisherige vollständige Flottenbedienung zur Verfügung.
 - [x] Schritt 2: Alte Fabrikbauplätze vollständig wieder anbinden und
   manuelle Warengebäude-Upgrades entfernen; Baukosten, Rechte, Lager,
   Produktionsbetrieb und erhaltene Questlevel-Beschleunigung prüfen.
-- [ ] Schritt 3: Schulpersonal für beide Baupfade und einmalige Migration
+- [x] Schritt 3: Schulpersonal für beide Baupfade und einmalige Migration
   bestehender Schulen umsetzen; Mehrfachgutschriften ausschließen.
 - [ ] Schritt 4: Planetenübersicht in den oberen Balken integrieren und
   einklappbare Flottenliste mit gespeichertem Zustand umsetzen.
