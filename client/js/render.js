@@ -1,3 +1,4 @@
+import { drawBattleSymbols, pickBattle } from './ui/battle.js';
 import {drawPlanetExterior} from './planetExterior.js';
 import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, ZONE_TYPES, GOODS, cellKey } from '/shared/config.js';
 import { hexAt, hexCorners, hexCenter, hexKey } from '/shared/hex.js';
@@ -828,6 +829,7 @@ export function render(now, dt) {
   }
   if (mode === 'sector') {
     drawSectorView(now);
+    drawBattleSymbols(ctx, { px, now });
     ctx.restore();
     drawSectorLabels();
     drawEventLabels(true);
@@ -856,6 +858,7 @@ export function render(now, dt) {
   for (const s of selectedShips()) ring(s.rx, s.ry, shipR(s), '#4fc3f7', now);
   if (sel?.kind === 'ship' && !state.selection.size) { const s = state.ships.get(sel.id); if (s && s.owner !== state.me.id) ring(s.rx, s.ry, shipR(s), '#4fc3f7', now); }
   if (hov?.kind === 'ship') { const s = state.ships.get(hov.id); if (s) ring(s.rx, s.ry, shipR(s), 'rgba(255,255,255,0.35)', now, false); }
+  drawBattleSymbols(ctx, { px, now });
 
   const fx = state.clickFx;
   if (fx && now - fx.t < 500) {
@@ -879,6 +882,8 @@ export function pickAt(sx, sy) {
   const [wx, wy] = screenToWorld(sx, sy);
   const z = cam.zoom;
   const mode = viewMode();
+  // PRD 15: Schlachtsymbole haben Vorrang (Doppelklick öffnet die Schlachtansicht)
+  if (mode !== 'galaxy') { const bh = pickBattle(wx, wy, z); if (bh) return bh; }
   let best = null, bestScore = Infinity;
   const shipList = mode === 'galaxy' ? selectedShips() : state.ships.values();
   for (const s of shipList) {

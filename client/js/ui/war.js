@@ -1,9 +1,12 @@
 // PRD 15: Bedienung von Stacks, Kampfstatus, Reparatur, Gefangenen und Fraktionen im Schiffs- und Objektdetail.
-import { state, esc } from '../state.js';
+import { state, esc, selectedShips, fmt } from '../state.js';
 import { cmd } from '../net.js';
 import { shipSymbol } from '../util.js';
 import { $ } from './dom.js';
 import { COMBAT_TYPES, NAVAL_CLASSES, COMBAT_ABILITIES, blueprint, maxHull, SYSTEMS, systemState, STATE_NAMES, WEAPONS } from '/shared/combat.js';
+
+/** Aktionen der Kriegsbedienung (data-war) */
+export const warActions = {};
 
 const stackById = (id) => (state.me?.stacks || []).find((st) => st.id === id);
 
@@ -64,5 +67,30 @@ export function combatSection(s) {
     </div>${sys ? `<div class="sys-list">${sys}</div>` : ''}</div>`;
 }
 
-/** Weitere Aktionen späterer Pakete registrieren sich hier */
-export const warActions = {};
+/** Fremdes Schiff: ausdrücklicher Angriffsbefehl mit den ausgewählten eigenen Schiffen */
+export function foreignWarSection(s) {
+  const mine = selectedShips().filter((x) => !x.captive);
+  const c = COMBAT_TYPES[s.type];
+  let h = c ? `<div class="muted">${NAVAL_CLASSES[c.cls].name} · ${esc(c.role)}</div>` : '';
+  if (s.battle) h += `<div class="btnrow"><button class="small" data-war="view" data-battle="${s.battle}">⚔ Schlacht ansehen</button></div>`;
+  else if (mine.length) h += `<div class="btnrow"><button class="small danger" data-war="attack" data-target="${s.id}" title="Ausdrücklicher Angriffsbefehl; normale Flugbefehle greifen nie an">⚔ Mit ${mine.length} Schiff${mine.length > 1 ? 'en' : ''} angreifen</button></div>`;
+  return h;
+}
+
+/** Eigenes Schiff: Schlacht, Gefangenschaft mit Freikauf, Reparaturbedarf */
+export function ownWarSection(s) {
+  let h = '';
+  if (s.battle) h += `<div class="warnbox">⚔ In einer Schlacht. <button class="small" data-war="view" data-battle="${s.battle}">Schlachtansicht öffnen</button></div>`;
+  if (s.captive) {
+    const q = s.ransom;
+    h += `<div class="warnbox">⛓ Gefangen von ${esc(q?.captorName || '?')}. ${q ? `Freikauf: ${fmt(q.price)} Cr (25 % des Kaufpreises), Rückgabe ohne Ladung mit verbliebenen Schäden bei ${esc(q.destName)}.
+      <button class="small" data-war="ransom" data-ship="${s.id}" data-price="${q.price}">Freikaufen</button>` : ''}</div>`;
+  }
+  if (s.repairHold) h += `<div class="warnbox">🔧 Unter 30 % kapituliert: vor erneutem Kampfeinsatz reparieren.</div>`;
+  return h;
+}
+
+warActions.attack = (d) => cmd('attack', { ships: selectedShips().map((x) => x.id), target: d.target });
+warActions.ransom = (d) => { if (confirm(`Schiff für ${fmt(Number(d.price))} Cr freikaufen?`)) cmd('ransom', { ship: d.ship, price: Number(d.price) }); };
+warActions.view = (d) => import('./battle.js').then((m) => m.openBattle(d.battle));
+

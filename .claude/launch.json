@@ -4,14 +4,27 @@
     {
       "name": "space-trader",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["server/index.js"],
+      "runtimeArgs": [
+        "server/index.js"
+      ],
       "port": 3000
     },
     {
       "name": "space-trader-preview",
       "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "set DB_FILE=data/preview.db&& set PORT=3001&& node server/index.js"],
+      "runtimeArgs": [
+        "/c",
+        "set DB_FILE=data/preview.db&& set PORT=3001&& node server/index.js"
+      ],
       "port": 3001
+    },
+    {
+      "name": "space-trader-prd15",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/dev-prd15.js"
+      ],
+      "port": 3015
     }
   ]
 }

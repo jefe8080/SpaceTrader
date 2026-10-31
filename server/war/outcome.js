@@ -1,18 +1,14 @@
 // PRD 15 U06: Schlachtende. Kapitulation, Sieg/Unentschieden, Besitzwechsel, Gefangene, Freikauf, Trümmer und Berichte.
 import { SHIP_TYPES, GOODS, freeFor, WORLD } from '../../shared/config.js';
 import { COMBAT, navalClass, blueprint, maxHull, needsRepair } from '../../shared/combat.js';
-import { kindFactor } from '../../shared/damage.js';
-import { battleHooks, isActive } from './battle.js';
+import { battleHooks, isActive, drivesDestroyed } from './battle.js';
 import { removeFromStacks, detachShip } from './stacks.js';
 import { ownerName, isFactionOwner, diplo } from './diplomacy.js';
 
 const unitsOf = (b) => Object.values(b.units);
 /** Kampfunfähig: weder beweglich noch bewaffnet (zählt nicht als weiterkämpfend) */
 export function immobile(game, b, u) {
-  const ship = game.ships.get(u.ship), bp = blueprint(ship.type);
-  if (bp.squad) return false;
-  const hasThrust = bp.systems.some((s) => s.kind === 'thrust');
-  return kindFactor(u, ship, 'engine', b.t) === 0 && (!hasThrust || kindFactor(u, ship, 'thrust', b.t) === 0);
+  return drivesDestroyed(game.ships.get(u.ship));
 }
 
 /** Hooks späterer Pakete: Beute für Fraktionen (U09), Reparaturautomatik (U07), Raids (U10) */

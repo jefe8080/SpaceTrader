@@ -1,3 +1,4 @@
+import { openBattle } from './ui/battle.js';
 import { state, selectedShips } from './state.js';
 import { serverVersionError } from '/shared/protocol.js';
 import { socket } from './net.js';
@@ -242,6 +243,7 @@ function clickAt(sx, sy, multi) {
     if (hit?.kind === 'entity') state.pickMode(hit.id);
     return;
   }
+  if (hit?.kind === 'battle') return; // Doppelklick öffnet die Schlachtansicht
   // System bzw. Sektor anklicken: hineinzoomen
   if (hit?.kind === 'system') {
     const sy = state.systems.get(hit.id);
@@ -272,6 +274,7 @@ function clickAt(sx, sy, multi) {
 canvas.addEventListener('dblclick', (e) => {
   if (state.landed) return;
   const hit = pickAt(e.clientX, e.clientY);
+  if (hit?.kind === 'battle') { openBattle(hit.id); return; }
   if (hit?.kind === 'ship') state.follow = hit.id;
   if (hit?.kind === 'entity' && state.entities.get(hit.id)?.kind === 'planet') ui.enterPlanet(hit.id);
 });

@@ -10,6 +10,8 @@ import { offersView } from './offers.js';
 import { eventsView } from './events.js';
 import { coverageAreas, controlCapacity } from './coverage.js';
 import { stacksView } from './war/stacks.js';
+import { visibleBattles, battleView } from './war/view.js';
+import { ransomQuote } from './war/outcome.js';
 
 const r1 = (v) => Math.round(v * 10) / 10;
 const MAX_MARKET_SUBS = 400;
@@ -123,6 +125,15 @@ export class Net {
       if (data) socket.emit('stats', data);
     });
 
+    // PRD 15: Schlachtansicht abonnieren (jeder darf sichtbare Schlachten ansehen, Steuerung nur eigener Einheiten)
+    socket.on('battleView', (msg) => {
+      if (!session) return;
+      const b = this.game.battles.get(msg?.id);
+      session.battleView = b && (visibleBattles(this.game, session.player, null, 0).some((x) => x.id === b.id) || this.game.isKnown(session.player, b)) ? b.id : null;
+      session.battleSince = -1;
+      if (msg?.id && !session.battleView) socket.emit('battle', { id: msg.id, ended: true });
+    });
+
     socket.on('shipStats', (msg) => {
       if (!session) return;
       const ship = this.game.ships.get(msg?.ship);
@@ -196,7 +207,16 @@ export class Net {
       ships.push(o);
     }
     for (const id of s.sentDetail.keys()) if (!this.game.ships.has(id) || this.game.ships.get(id).owner !== p.id) s.sentDetail.delete(id);
-    s.socket.emit('ships', { t: r1(this.game.time), credits: Math.floor(p.credits), ships });
+    s.socket.emit('ships', { t: r1(this.game.time), credits: Math.floor(p.credits), ships, battles: visibleBattles(this.game, p, v, M) });
+    if (s.battleView) {
+      const b = this.game.battles.get(s.battleView);
+      if (!b) { s.socket.emit('battle', { id: s.battleView, ended: true }); s.battleView = null; }
+      else {
+        const view = battleView(this.game, b, p, s.battleSince ?? -1);
+        if (view.fx.length) s.battleSince = view.fx[view.fx.length - 1].t;
+        s.socket.emit('battle', view);
+      }
+    }
     // Spielerdaten und Routen nur bei Änderung
     const me = JSON.stringify({...playerDetail(p),profile:pilotProfile(this.game,p),coverage:this.game.profile==='homeworld'?coverageAreas(this.game,p):[],controlCapacity:controlCapacity(this.game,p),stacks:stacksView(this.game,p)});
     if (me !== s.sentMe) { s.sentMe = me; s.socket.emit('me', JSON.parse(me)); }
@@ -349,7 +369,7 @@ function compactShip(s) {
 }
 
 function foreignInfo(s) {
-  const o = { owner: s.owner, type: s.type, name: s.name, main: !!s.main };
+  const o = { owner: s.owner, type: s.type, name: s.name, main: !!s.main, battle: s.battle || null };
   const c = s.queue[0];
   if (s.owner === NPC_OWNER && c?.t === 'supply') {
     const { stationId, sourceId, good, phase } = c;
@@ -363,7 +383,7 @@ function shipDetail(s, game) {
   return {
     offer: game?.shipOffers.get(s.id)?.price ?? null,
     owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, passengers:s.passengers||[],moduleCargo:s.moduleCargo||{}, log: s.log, group: s.group, ord: s.ord,
-    queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},relocationHold:s.relocationHold||null,dmg:s.dmg||null,stack:s.stack||null,rendezvous:s.rendezvous||null,
+    queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},relocationHold:s.relocationHold||null,dmg:s.dmg||null,battle:s.battle||null,captive:s.captive||null,ransom:s.captive&&game?ransomQuote(game,s):null,repairHold:!!s.repairHold,stack:s.stack||null,rendezvous:s.rendezvous||null,
     nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,
     transit: s.transit ? s.transit.exit : null, zone: s.zone || null, marker: s.marker || null,
     fuel: Math.round((s.fuel || 0) * 10) / 10, autoRefuel: s.autoRefuel ?? 0, upg: s.upg || {}, modules: s.modules || [], upgValue: s.upgValue || 0, main: !!s.main, relicSpeed: s.relicSpeed || 0, mined: s.mined || {}, bonus: s.bonus || 0, yardLvl: s.yardLvl || 0,

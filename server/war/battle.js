@@ -1,7 +1,7 @@
 // PRD 15 U04: serverseitige Schlachtinstanzen. Eigenständige taktische 2D-Karte, genau zwei Seiten, Beitritt nur durch Anflug.
 // Der Server entscheidet über Bewegung, Treffer, Schaden und Rückzug; Zuschauer und Spielerwechsel ändern nichts.
 import { SHIP_TYPES } from '../../shared/config.js';
-import { COMBAT, WEAPONS, blueprint, ensureDamage, navalClass, maxHull } from '../../shared/combat.js';
+import { COMBAT, WEAPONS, SYSTEMS, blueprint, ensureDamage, navalClass, maxHull } from '../../shared/combat.js';
 import { applyHit, applyArea, hitChance, systemEffect, kindFactor, systemExposed, wrap, shieldActive } from '../../shared/damage.js';
 import { stackOf, stackMembers, detachShip } from './stacks.js';
 import { ownerName } from './diplomacy.js';
@@ -133,6 +133,7 @@ export function joinBattle(game, b, ships, side) {
   return list.length;
 }
 
+const tag = (game, ship) => `${ship.name} (${ownerName(game, ship.owner)})`;
 export function logBattle(game, b, msg) {
   b.log.push({ t: Math.round(b.t), msg });
   if (b.log.length > 60) b.log.shift();
@@ -153,9 +154,14 @@ export function stillFighting(game, b, u) {
   if (!isFighting(u)) return false;
   const ship = shipOf(game, u), bp = blueprint(ship.type);
   if (bp.squad) return (ship.dmg.craft || 0) > 0;
-  const hasThrust = bp.systems.some((s) => s.kind === 'thrust');
-  const moving = kindFactor(u, ship, 'engine', b.t) > 0 || (hasThrust && kindFactor(u, ship, 'thrust', b.t) > 0);
-  return moving || weaponsOperational(game, b, u);
+  return !drivesDestroyed(ship) || weaponsOperational(game, b, u);
+}
+/** Dauerhaft bewegungsunfähig: alle Haupt- und Manövrieranlagen zerstört (Ionenstörung zählt nicht) */
+export function drivesDestroyed(ship) {
+  const bp = blueprint(ship.type);
+  if (bp.squad) return false;
+  const drives = bp.systems.filter((s) => s.kind === 'engine' || s.kind === 'thrust');
+  return drives.length > 0 && drives.every((s) => (ship.dmg.sys[s.id] ?? s.hp) <= 0);
 }
 /** Kampffähiger Geleitschutz derselben Seite */
 function hasEscort(game, b, u) {
@@ -169,7 +175,7 @@ function surrender(game, b, u, why) {
   u.order = null;
   // Bereits fliegende Geschosse richten keinen Schaden mehr an (Prüfung beim Einschlag)
   fx(game, b, { k: 'surrender', ship: u.ship });
-  logBattle(game, b, `${shipOf(game, u).name} kapituliert (${why})`);
+  logBattle(game, b, `${tag(game, shipOf(game, u))} kapituliert (${why})`);
 }
 
 /** Zivile Regeln: ohne Geleitschutz Kapitulation, mit Geleitschutz regulärer Rückzugsversuch */
@@ -183,7 +189,7 @@ export function beginRetreat(game, b, u, why) {
   if (u.state !== 'fight') return;
   u.state = 'retreating';
   u.retreatWhy = why;
-  logBattle(game, b, `${shipOf(game, u).name} versucht den Rückzug (${why})`);
+  logBattle(game, b, `${tag(game, shipOf(game, u))} versucht den Rückzug (${why})`);
 }
 
 /** Rückzugs- und Kapitulationspolitik je Klasse (PRD 6.2) */
@@ -248,7 +254,7 @@ function destroy(game, b, u, why) {
   const ship = shipOf(game, u);
   ship.dmg.hull = 0;
   fx(game, b, { k: 'destroyed', ship: u.ship, x: Math.round(u.x), y: Math.round(u.y) });
-  logBattle(game, b, `${ship.name} zerstört${why ? ' (' + why + ')' : ''}`);
+  logBattle(game, b, `${tag(game, ship)} zerstört${why ? ' (' + why + ')' : ''}`);
 }
 
 // ---------- Sensorik: gleiche Informationen für Spieler und KI ----------
@@ -428,7 +434,7 @@ function retreatDone(game, b, u) {
   b.retreated.push(u.ship);
   const ship = shipOf(game, u);
   fx(game, b, { k: 'retreated', ship: u.ship });
-  logBattle(game, b, `${ship.name} hat sich zurückgezogen`);
+  logBattle(game, b, `${tag(game, ship)} hat sich zurückgezogen`);
   // Sofort sicher außerhalb der Schlacht im Herkunftssystem; zurückgezogene Schiffe bleiben vom Stack getrennt
   detachShip(game, ship);
   const a = Math.atan2(u.y - H / 2, u.x - W / 2);
@@ -613,7 +619,7 @@ function afterHit(game, b, t, r, p) {
   if (!t) return;
   if (r.shield + r.hull + r.system > 0) b.lastHarm = b.t;
   fx(game, b, { k: 'hit', ship: t.ship, w: p.w, shield: r.shield > 0 && !r.hull, sys: r.system > 0 ? p.sys : null, destroyed: r.sysDestroyed, jam: r.jammed, craft: r.craftLost });
-  for (const sid of r.sysDestroyed) logBattle(game, b, `${shipOf(game, t).name}: System ${sid} zerstört`);
+  for (const sid of r.sysDestroyed) logBattle(game, b, `${tag(game, shipOf(game, t))}: ${SYSTEMS[blueprint(t.type).systems.find((s) => s.id === sid)?.kind]?.name || sid} zerstört`);
   if (r.killed) destroy(game, b, t);
   // Letzter kampffähiger Beschützer ausgefallen -> verbliebene Zivilschiffe kapitulieren
   if (r.killed || r.sysDestroyed.length) for (const o of unitsOf(b)) if (o.side === t.side) civilRule(game, b, o);

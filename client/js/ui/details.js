@@ -21,7 +21,7 @@ import {colonyPanel,warpPanel} from './colonies.js';
 import { entityGuideKey, OBJECT_GUIDE } from '/shared/object-guide.js';
 import { showGuide } from './objectGuide.js';
 import { homeGoodLimit } from '/shared/homeworld.js';
-import { stackSection, combatSection } from './war.js';
+import { stackSection, combatSection, foreignWarSection, ownWarSection } from './war.js';
 
 const entName = (id) => esc(state.entities.get(id)?.name || 'unbekannter Ort');
 const dockedHereOwn = (id) => myShips().some((s) => s.dockedAt === id);
@@ -95,7 +95,7 @@ function shipDetails(s) {
     <div class="title">${s.main ? '<span class="crown" title="Hauptschiff">♛</span> ' : ''}${esc(s.name)}${own ? ` <button class="small ghost" data-act="rename" data-ship="${s.id}" title="Umbenennen">✎</button>` : ''}</div>
     <div class="type">${def.name}${own ? '' : ' · ' + esc(s.task ? 'Station' : playerName(s.owner))}</div></div></div>`;
   if (s.task) return h + npcTaskHtml(s);
-  if (!own) return h + `<div class="muted">${def.desc}</div>`;
+  if (!own) return h + `<div class="muted">${def.desc}</div>` + foreignWarSection(s);
   const used = cargoUsed(s);
   h += `<div class="status-line">${shipSymbol(s)} ${s.transit ? 'Im Wurmloch …' : statusText(s)}</div>`;
   if (s.offer !== null && s.offer !== undefined) {
@@ -108,7 +108,7 @@ function shipDetails(s) {
     h += `<div class="warnbox">${Object.values(s.warn).map((w) => `<div>⚠ ${esc(w)}</div>`).join('')}
       <button class="small" data-act="clearWarn" data-ship="${s.id}">Quittieren</button></div>`;
   }
-  h += stackSection(s) + combatSection(s);
+  h += ownWarSection(s) + stackSection(s) + combatSection(s);
   const here = state.entities.get(s.dockedAt);
   const st = shipStats(s), hu = holdUsage(s);
   const mods = Object.entries(countModules(s));
