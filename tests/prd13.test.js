@@ -6,6 +6,9 @@ import {newProperty,releaseMarket} from '../server/property.js';
 import {repairHome,tickHomeworld} from '../server/homeworld.js';
 import {RECIPES,factoryCost} from '../shared/config.js';
 import {tickSpecialization} from '../server/specializations.js';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 function fixture() {
   const game=new Game(':memory:',{profile:'homeworld',seed:42}),player=game.createPlayer('PRD13');
@@ -60,7 +63,37 @@ test('PRD13: workshop repair requires H04, ownership and access, then charges on
     assert.equal(player.credits,paid);
     const other=game.createPlayer('Other');
     assert.match(repairHome(game,other,home,'workshop'),/eigenen/);
+    const second=structuredClone(home);second.id='prd13-second-ruins';
+    second.market.homeworld.facilities.workshop={status:'ruined'};
+    game.world.addEntity(second);
+    assert.match(repairHome(game,player,second,'workshop'),/Verbindung/);
+    f.ship.dockedAt=second.id;
+    assert.equal(repairHome(game,player,second,'workshop'),undefined);
+    assert.equal(second.market.homeworld.facilities.workshop.status,'building');
   } finally {game.close();}
+});
+
+test('PRD13: saved school migration markers prevent grants after an actual database reload',()=>{
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'prd13-')),file=path.join(directory,'world.db');
+  let game;
+  try {
+    game=new Game(file,{profile:'homeworld',seed:42});
+    const player=game.createPlayer('Migration'),home=game.world.entities.get(player.homeworld),h=home.market.homeworld;
+    const e=[...game.world.entities.values()].find(e=>e.kind==='planet'&&e.type==='mining'&&e.market.realEconomy),world=e.market.economy;
+    h.structures=[{id:'old',kind:'school',status:'ready'}];
+    world.infrastructure=[{id:'old',kind:'school'}];
+    tickHomeworld(game,home,1);tickSpecialization(game,e,0);
+    const expected=[h.population,h.workers.skilled,world.population,world.workers.skilled],ids=[home.id,e.id];
+    game.close();game=new Game(file,{profile:'homeworld'});
+    const restored=game.world.entities.get(ids[0]),ordinary=game.world.entities.get(ids[1]);
+    tickHomeworld(game,restored,1);tickSpecialization(game,ordinary,0);
+    assert.deepEqual([restored.market.homeworld.population,restored.market.homeworld.workers.skilled,ordinary.market.economy.population,ordinary.market.economy.workers.skilled],expected);
+    assert.equal(restored.market.homeworld.structures[0].staffGranted,true);
+    assert.equal(ordinary.market.economy.infrastructure[0].staffGranted,true);
+  } finally {
+    if(game?.store.db.open)game.close();
+    fs.rmSync(directory,{recursive:true,force:true});
+  }
 });
 
 test('PRD13: real-economy factories need ownership and docked cargo, create storage and produce only while owned',()=>{
@@ -86,5 +119,15 @@ test('PRD13: real-economy factories need ownership and docked cargo, create stor
     const stopped=e.market.goods.ingots.stock;
     for(let n=0;n<r.time+1;n++)game.tick(1);
     assert.equal(e.market.goods.ingots.stock,stopped);
+    assert.match(build(),/eigenen/);
+    game.setOwner(e,player,newProperty(e.id,player.id,game.time));
+    ship.cargo={plates:100,machinery:20};
+    assert.equal(build(),undefined);assert.equal(build(),undefined);
+    const paid=player.credits,cargo=structuredClone(ship.cargo);
+    assert.match(build(),/Keine freien Bauplätze/);
+    assert.equal(player.credits,paid);assert.deepEqual(ship.cargo,cargo);
+    assert.equal(planetHandlers.facDemolish.run({game,player},{target:e,index:0}),undefined);
+    assert.equal(game.buildingsOf(e).factories.length,2);
+    assert.equal(player.credits,paid);
   } finally {game.close();}
 });

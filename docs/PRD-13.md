@@ -9,8 +9,8 @@ Planetenwerte und Flotte werden platzsparender dargestellt.
 
 Die Planung wurde am 31.10.2026 mit dem Skill `grilling` abgestimmt
 (Q1–Q8 einschließlich der Nutzerkorrekturen). Der Nutzer hat die Erstellung
-und den Commit dieses PRD beauftragt. Die Umsetzung ist noch nicht gestartet
-und wird vom Nutzer separat angestoßen.
+und den Commit dieses PRD beauftragt. Die anschließend beauftragte Umsetzung
+ist einschließlich Regressionstests und visueller Abnahme abgeschlossen.
 
 ## Verbindliche Anforderungen
 
@@ -127,7 +127,7 @@ Ausgeklappt steht die bisherige vollständige Flottenbedienung zur Verfügung.
   bestehender Schulen umsetzen; Mehrfachgutschriften ausschließen.
 - [x] Schritt 4: Planetenübersicht in den oberen Balken integrieren und
   einklappbare Flottenliste mit gespeichertem Zustand umsetzen.
-- [ ] Schritt 5: Zusammenspiel, vorhandene Regressionstests und visuelle
+- [x] Schritt 5: Zusammenspiel, vorhandene Regressionstests und visuelle
   Darstellung bei breiten und schmalen Ansichten prüfen.
 
 Nach jedem fachlich abgeschlossenen Umsetzungsschritt erfolgen passende
@@ -168,6 +168,17 @@ Ein Push erfolgt erst nach Zustimmung des Nutzers.
 
 ## Prüfstand
 
-Nur die Planung ist abgeschlossen. Es wurden keine Spielcodeänderungen
-vorgenommen und noch keine Umsetzungsprüfungen ausgeführt. Die Umsetzung
-wartet auf den separaten Start durch den Nutzer.
+Abgeschlossen am 31.10.2026. Alle 370 Tests der vollständigen Suite bestehen.
+Die ergänzten PRD-13-Tests prüfen wirtschaftliche Schulen einschließlich
+Fertigstellung, Migration, Neubau, Upgrade und tatsächlichem Datenbankneustart,
+Werkstattreparaturen nach H04 auf einer weiteren Ruinenwelt sowie Fabrikbau,
+Kosten, Bauplatzgrenzen, Lager, Produktion, Besitzverlust und Abriss.
+
+Die Browserabnahme bei 1440 × 900 und 390 × 844 prüft die integrierte
+Versorgung, Warnfarben, unbekannte Werte, Planetenwechsel, Rezeptauswahl,
+Flottenauswahl, Filtererhalt und den Klappzustand nach Ansichtswechsel und
+Neuladen. Ein Resize-Handler hält die Positionen nach Größenwechsel aktuell;
+Versorgungswerte aktualisieren sich auch bei fokussierten Eingabefeldern.
+
+Nachweise und Hinweise zu zwischenzeitlich korrigierten Prüfungen:
+[QA PRD 13](qa/prd13/README.md). Kein Push ausgeführt.

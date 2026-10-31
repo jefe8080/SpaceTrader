@@ -28,6 +28,7 @@ export const panelKinds = {};
 let current = null; // gewähltes Gebäude
 let cityNames = false;
 let panelContext = null;
+addEventListener('resize', renderPlanetUi);
 
 const shipsHere = (id) => myShips().filter((s) => s.dockedAt === id);
 const onBoard = (id, g) => shipsHere(id).reduce((a, s) => a + (s.cargo?.[g] || 0), 0);
