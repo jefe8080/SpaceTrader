@@ -1,4 +1,5 @@
 import {GOODS,propertyBasePrice} from '../shared/config.js';
+import {activeSideQuests} from '../shared/side-quests.js';
 import {HOMEWORLD} from '../shared/homeworld.js';
 import {newProperty} from './property.js';
 import {colonyCost} from '../shared/colonies.js';
@@ -43,7 +44,7 @@ export function foundColony(game,p,e,ship,confirmed){
   if(current.first!==c.cost.first||current.k!==c.cost.k){c.cost=structuredClone(current);game.emit('entity',e);return 'Die Kostenstufe hat sich durch eine andere Gründung geändert. Neue Vorschau prüfen und fehlende Materialien ergänzen.';}
   if(!Object.entries(c.cost.goods).every(([g,n])=>(c.deliveries[g]||0)>=n))return 'Die Gründungsmaterialien sind noch nicht vollständig geliefert.';
   if(p.credits<c.cost.credits)return 'Nicht genug Credits für die gebundenen Gründungskosten.';
-  if(!ship||ship.owner!==p.id||ship.type!=='spatz'||ship.dockedAt!==e.id||ship.queue.length||ship.relicSpeed||game.shipOffers.has(ship.id)||p.quest?.ship===ship.id||p.relic?.operation?.ship===ship.id||p.homeQuest.salvage?.phase==='sealed'&&p.homeQuest.salvage.ship===ship.id)return 'Einen untätigen eigenen Expeditionsspatz ohne Relikt, Angebot oder Questbindung bereitstellen.';
+  if(!ship||ship.owner!==p.id||ship.type!=='spatz'||ship.dockedAt!==e.id||ship.queue.length||ship.relicSpeed||game.shipOffers.has(ship.id)||activeSideQuests(p).some(q=>q.ship===ship.id)||p.relic?.operation?.ship===ship.id||p.homeQuest.salvage?.phase==='sealed'&&p.homeQuest.salvage.ship===ship.id)return 'Einen untätigen eigenen Expeditionsspatz ohne Relikt, Angebot oder Questbindung bereitstellen.';
   const ships=present(game,p,e);
   if(!ships.some(s=>s.id!==ship.id&&!s.queue.length&&!game.shipOffers.has(s.id)))return 'Ein weiteres verfügbares eigenes Schiff muss zur Weiterreise hier angedockt sein.';
   if(Object.entries(ship.cargo).some(([g,n])=>n>0&&g!=='workers')||Object.values(ship.moduleCargo||{}).some(n=>n>0)||ship.modules?.some(m=>m!=='cabin'))return 'Andere Fracht und Module vor der dauerhaften Abgabe entladen; Kabinen dürfen als Expeditionsinfrastruktur bleiben.';

@@ -347,9 +347,21 @@ und relevante neue Möglichkeiten zusammen verständlich dargestellt.
   Andocken entnimmt keine Lieferquestware. 39 gezielte Tests bestanden;
   ein alter Test wurde an die ausdrücklich geänderte Lagerregel angepasst,
   ein neuer Abbau-Negativtest auf einen tatsächlich ungeeigneten Kolibri korrigiert.
-- [ ] Schritt 7: Parallele Nebenquests entsprechend Pilotenlevel inklusive
+- [x] Schritt 7: Parallele Nebenquests entsprechend Pilotenlevel inklusive
   UI, Speicherung und eindeutiger Einzelaktionen umsetzen. Levelaufstiegs-
   Popup ergänzen; Parallelfortschritt und Schutz vor Doppelverwendung prüfen.
+
+  Ergebnis: Die bisherige `player.quest` bleibt ohne Ladenmigration erhalten;
+  zusätzliche Aufgaben liegen in `player.quests`. Eindeutige Quest-IDs für
+  Auswahl, Abgabe und Abbruch; beide Datenfelder werden gespeichert und
+  übertragen. Erkundungs- und Reiseereignisse prüfen alle aktiven Aufgaben.
+  Eine Abbaubuchhaltung verhindert erneute Verwendung bereits angerechneter
+  Mengen; Passagierbatches bleiben an genau eine Rundreise gebunden.
+  Schiffabgabe, Kolonisierung und Orbitalbau beachten auch zusätzliche Slots.
+  Ein ereignisgesteuerter, schließbarer Leveldialog zeigt zusätzliche Slots
+  und tatsächlich verfügbare Lizenzen samt separatem Kauf und Klassen.
+  Auf Level 7 existiert keine Lizenz 7; das Popup benennt dies korrekt.
+  28 gezielte Tests einschließlich echter Datenbankneustarts bestanden.
 - [ ] Schritt 8: Zusammenspiel und relevante Regressionstests abschließen;
   breite und schmale Ansichten visuell prüfen und Nachweise dokumentieren.
 

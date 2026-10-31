@@ -25,6 +25,7 @@ import {tickColonies} from './colonies.js';
 import {tickWarps} from './warp.js';
 import { syncHomeQuests } from './quest-activation.js';
 import {localSalesSummary} from '../shared/local-sales.js';
+import {activeSideQuests} from '../shared/side-quests.js';
 import { tickRelics } from './relic.js';
 import { homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { coveredPath, pointCovered } from './coverage.js';
@@ -214,6 +215,7 @@ export class Game {
     p.xp = (p.xp || 0) + n;
     const after = pilotLevel(p.xp);
     if (after > before) {
+      this.emit('pilotLevelUp',p,{before,level:after});
       this.emit('notice', p, `Pilotenlevel ${after} erreicht${pilotTitle(p.xp) ? ': ' + pilotTitle(p.xp) : ` (Pilotenlizenz ${after} jetzt kaufbar)`}`);
       this.emit('sfx', p, 'levelUp');
       this.emit('player', p);
@@ -312,6 +314,7 @@ export class Game {
    */
   canGiveAway(player, ship) {
     if (ship.owner !== player.id) return 'Das ist nicht dein Schiff.';
+    if(activeSideQuests(player).some(q=>q.ship===ship.id&&(q.type==='tour'||q.type==='courier'&&q.state==='deliver')))return 'Zuerst den an dieses Schiff gebundenen Nebenauftrag abschließen oder abbrechen.';
     if (player.relic?.location.kind === 'ship' && player.relic.location.id === ship.id) return 'Vor der Abgabe den einzigartigen Reliktantrieb an einer eigenen Werkstatt ausbauen.';
     if (player.relic?.operation?.ship === ship.id) return 'Während der Reliktarbeit kann dieses Schiff nicht abgegeben werden.';
     if (player.homeQuest?.salvage?.phase === 'sealed' && player.homeQuest.salvage.ship === ship.id) return 'Zuerst den versiegelten Fund zur Heimatwerkstatt bringen.';
@@ -388,7 +391,7 @@ export class Game {
       }
     }
     if (!newCells.length) return;
-    if (p.quest?.type === 'explore') exploreCells(this, p, newCells);
+    if (activeSideQuests(p).some(q=>q.type==='explore')) exploreCells(this, p, newCells);
     const entities = [];
     for (const k of newCells) {
       for (const id of this.world.entitiesInCell(k)) {
@@ -538,7 +541,7 @@ export class Game {
         if (!sec.firstVisit) { sec.firstVisit = p.id; this.emit('notice', p, `Erstentdeckung: Sektor ${sec.name}`); }
       }
     }
-    if (p.quest?.type === 'explore' && fx.zones) exploreZone(this, p, fx.zones);
+    if (fx.zones&&activeSideQuests(p).some(q=>q.type==='explore')) exploreZone(this, p, fx.zones);
     for (const sy of this.world.systemsNear(ship.x, ship.y)) {
       if (p.known.system.has(sy.id)) continue;
       if (Math.hypot(sy.x - ship.x, sy.y - ship.y) <= WORLD.SYSTEM_DETECT) {

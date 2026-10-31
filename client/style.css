@@ -526,3 +526,11 @@ body.fleet-collapsed #fleet .fleet-item img { width:30px; }
   .supply-stat > span:last-child { font-size:11px; }
   body.fleet-collapsed #fleet { width:76px; }
 }
+/* Pilotenaufstieg: nur auf ein tatsächliches Serverereignis geöffnet. */
+.level-up-dialog { color: #eee5cd; background: #203532; border: 1px solid #8eac98; border-radius: 12px; padding: 22px; width: min(480px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; box-sizing: border-box; }
+.level-up-dialog::backdrop { background: #071411b8; }
+.level-up-dialog h2 { margin-top: 0; }
+.level-up-dialog li { margin-bottom: 10px; }
+.housing-card { padding: 10px 0; border-bottom: 1px solid #627e6c; }
+#questBox .btnrow { flex-wrap: wrap; }
+#questBox [aria-pressed="true"] { border-color: #e6be73; background: #456258; }

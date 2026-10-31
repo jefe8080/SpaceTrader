@@ -6,7 +6,9 @@ import { $, setHtml } from './dom.js';
 import { bus } from './bus.js';
 import { HOME_QUESTS } from '/shared/homeworld.js';
 import { selectHomeQuest } from '/shared/quest-selection.js';
+import {activeSideQuests,sideQuestLimit,selectedSideQuest,minedQuestProgress} from '/shared/side-quests.js';
 let selectedHomeQuest = null;
+let selectedQuest=null;
 
 const g = (x) => GOODS[x]?.name || x;
 
@@ -38,12 +40,12 @@ const qTitle = (q) => `${QUEST_TYPES[q.type].icon} ${QUEST_TYPES[q.type].name} <
 /** Warum kann dieses Schiff die Quest nicht annehmen? '' = möglich */
 function acceptBlock(q, ship) {
   if (!ship) return 'Ein eigenes Schiff muss hier angedockt sein';
-  if (state.quest) return 'Du hast schon eine aktive Quest';
+  if (activeSideQuests(state).length>=sideQuestLimit(state)) return `Alle ${sideQuestLimit(state)} Nebenquestslots belegt`;
   const lock = (state.questLock || 0) - state.time;
   if (lock > 0) return `Nach einem Abbruch erst in ${Math.ceil(lock / 60)} min`;
   const st = shipStats(ship);
   if (q.type === 'tour' && st.passenger < q.tourists) return `Braucht Passagierkabinen für ${q.tourists} Touristen`;
-  if (q.type === 'mine' && !(st.mining.std > 0)) return 'Braucht ein Schiff mit Abbaugeräten';
+  if (q.type === 'mine' && !(st.mining[GOODS[q.good]?.mine||'std'] > 0)) return 'Braucht die passenden Abbaugeräte für diesen Rohstoff';
   return '';
 }
 
@@ -81,7 +83,7 @@ function progressText(q) {
   switch (q.type) {
     case 'procure':
     case 'rush': return `An Bord (bestes Schiff): ${Math.min(best(q.good), q.amount)} / ${q.amount} ${g(q.good)}`;
-    case 'mine': return `Selbst abgebaut: ${Math.min(q.amount, Math.max(0, minedTotal(q.good) - q.minedBase))} / ${q.amount} · an Bord: ${Math.min(best(q.good), q.amount)}`;
+    case 'mine': return `Selbst abgebaut und noch nicht abgegeben: ${Math.min(q.amount,minedQuestProgress(state,q,minedTotal(q.good)))} / ${q.amount} · an Bord: ${Math.min(best(q.good), q.amount)}`;
     case 'courier': return q.state === 'pickup' ? `Abholen bei ${esc(q.pickupName)}` : `Unterwegs mit ${esc(state.ships.get(q.ship)?.name || '?')} nach ${esc(q.destName)}`;
     case 'tour': return q.state === 'return' ? `Alle Halte besucht: zurück nach ${esc(q.giverName)}` : `Halte: ${q.visited.length} / ${q.stops.length} (mit ${esc(state.ships.get(q.ship)?.name || '?')})`;
     case 'explore': return q.zone ? `Ein Schiff in das Gebiet fliegen` : `Aufgedeckt: ${Math.round((q.progress / q.cells) * q.pct * 10) / 10} / ${q.pct} %`;
@@ -94,7 +96,7 @@ function questTarget(q) {
   switch (q.type) {
     case 'procure':
     case 'rush': return best(q.good) >= q.amount || !q.source ? q.giver : q.source;
-    case 'mine': return minedTotal(q.good) - q.minedBase >= q.amount ? q.giver : q.belt;
+    case 'mine': return minedQuestProgress(state,q,minedTotal(q.good)) >= q.amount ? q.giver : q.belt;
     case 'courier': return q.state === 'pickup' ? q.pickup : q.dest;
     case 'tour': return q.state === 'return' ? q.giver : q.stops.find((s) => !q.visited.includes(s));
     case 'explore': return q.zone ? { x: q.zx, y: q.zy } : (state.sectors.get(q.sector)?.bh || null);
@@ -103,7 +105,7 @@ function questTarget(q) {
 }
 
 export function renderQuestBox() {
-  const q = state.quest;
+  const quests=activeSideQuests(state),q=selectedSideQuest(state,selectedQuest)||quests[0];selectedQuest=q?.id||null;
   const box = $('questBox');
   box.hidden = !q && !state.homeworld;
   const selection = selectHomeQuest(HOME_QUESTS, state.homeQuest, selectedHomeQuest);
@@ -114,7 +116,8 @@ export function renderQuestBox() {
   if (!q) { setHtml(box, homeSummary); return; }
   const t = questTarget(q);
   const docked = myShips().filter((s) => s.dockedAt);
-  setHtml(box, `${homeSummary}<div class="qb-head">${qTitle(q)}<span style="flex:1"></span><button class="small ghost" data-q="abort" title="Abbrechen: 10 min Sperre${q.faction ? ', kleiner Rufverlust' : ''}">✕</button></div>
+  const tabs=`<p>Nebenquests: ${quests.length} / ${sideQuestLimit(state)} Slots</p><div class="btnrow">${quests.map((quest,i)=>`<button class="small" data-q="select" data-quest="${quest.id}" aria-pressed="${quest===q}" title="${esc(quest.giverName||quest.id)}">${i+1} · ${QUEST_TYPES[quest.type].name}</button>`).join('')}</div>`;
+  setHtml(box, `${homeSummary}${tabs}<div class="qb-head">${qTitle(q)}<span style="flex:1"></span><button class="small ghost" data-q="abort" title="Abbrechen: 10 min Sperre${q.faction ? ', kleiner Rufverlust' : ''}">✕</button></div>
     <div class="qb-text">${questText(q)}</div>
     <div class="qb-prog">${progressText(q)}</div>
     <div class="qb-foot">${rewardText(q)}<span style="flex:1"></span>
@@ -124,7 +127,8 @@ export function renderQuestBox() {
 
 $('questBox').addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-q]');
-  const q = state.quest;
+  if(b?.dataset.q==='select'){selectedQuest=b.dataset.quest;renderQuestBox();return;}
+  const q = selectedSideQuest(state,selectedQuest)||activeSideQuests(state)[0];
   if (['homePrev','homeNext'].includes(b?.dataset.q)) {
     selectedHomeQuest = selectHomeQuest(HOME_QUESTS, state.homeQuest, selectedHomeQuest, b.dataset.q === 'homeNext' ? 1 : -1).id;
     renderQuestBox();
@@ -137,8 +141,8 @@ $('questBox').addEventListener('click', (ev) => {
   }
   if (!b || !q) return;
   if (b.dataset.q === 'abort') {
-    if (confirm(`Quest abbrechen? Danach ${QUEST.ABORT_LOCK / 60} min keine neue Quest${q.faction ? ' und kleiner Rufverlust bei der Fraktion' : ''}.`)) cmd('questAbort');
-  } else if (b.dataset.q === 'deliver') cmd('questDeliver', { ship: b.dataset.ship });
+    if (confirm(`Quest abbrechen? Danach ${QUEST.ABORT_LOCK / 60} min keine neue Quest${q.faction ? ' und kleiner Rufverlust bei der Fraktion' : ''}.`)) cmd('questAbort',{quest:q.id});
+  } else if (b.dataset.q === 'deliver') cmd('questDeliver', { ship: b.dataset.ship,quest:q.id });
   else if (b.dataset.q === 'target') {
     const t = questTarget(q);
     const e = typeof t === 'string' ? state.entities.get(t) : null;

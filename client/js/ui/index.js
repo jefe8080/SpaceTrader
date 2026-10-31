@@ -13,6 +13,7 @@ import { entityGuideKey } from '/shared/object-guide.js';
 import { renderDogBuff } from './minigames.js';
 import { renderHomeDialog } from './homeworld.js';
 import './pilotProfile.js';
+import './levelUp.js';
 import './routes.js';
 import './favorites.js';
 import './almanac.js';
