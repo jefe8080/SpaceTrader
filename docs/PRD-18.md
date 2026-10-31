@@ -260,11 +260,30 @@ Fortschritt wird im selben Commit aktualisiert.
     auf das Weltprofil ersetzt. Historische QA-Anleitungen unter `docs/qa/`
     nennen noch `WORLD_PROFILE=homeworld`; die Variable wird ignoriert und die
     Anleitungen bleiben als Prüfprotokoll unverändert.
-- [ ] **S6: Abnahme.**
+- [x] **S6: Abnahme.**
   - Vergleich mit dem Prod-Spielstand ohne Abweichung.
   - Sims und Browser-Test erfolgreich.
   - `knip` und ESLint sauber.
   - Arbeitskopien des Spielstands gelöscht.
+  - Vergleich (Endstand, 30 min, 3.600 Schritte): **keine Abweichung**, SHA-256
+    identisch mit der Referenz `3e992d7`.
+  - `npm test`: 379 von 379 grün, alle in `homeworld`.
+  - Nachtrag aus der Abnahme: In `server/net.js` war eine Abfrage auf
+    `game.profile` übersehen worden; die Willkommensnachricht enthielt dadurch
+    keine Leitstellenabdeckung. Behoben in `eb6098b`, Regressionstest im
+    PRD-7-Willkommenstest. Der Prod-Vergleich deckt nur den gespeicherten Zustand
+    ab, nicht die Netzwerknachrichten.
+  - Sims: `sim:homeworld` (Seed 42) schließt H00 bis H06 ab, Ausgabe
+    byte-identisch zur Referenz. `logistics-qa` und `specializations-qa` laufen
+    durch. **Offen, vorbestehend:** `sim:progression` endet mit „Zeitlimit
+    Produktion water“, `colonies-qa` und `orbital-qa` brechen an
+    Quest-Vorbedingungen ab. Alle drei verhalten sich im Referenzstand `3e992d7`
+    identisch (bei `sim:progression` byte-identische Ausgabe); sie sind nicht
+    Folge dieses PRD und nicht Teil seines Umfangs.
+  - Browser-Test siehe S4: ohne Konsolen- oder Serverfehler.
+  - ESLint `no-unused-vars` und knip: gegenüber `3e992d7` keine neuen Befunde.
+  - Arbeitskopien des Prod-Spielstands, Vergleichsdumps und Referenz-Worktree
+    im Scratchpad gelöscht; nichts davon war im Repo.
 
 ## Abnahmekriterien
 
