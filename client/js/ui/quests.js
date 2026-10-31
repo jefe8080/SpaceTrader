@@ -119,7 +119,7 @@ export function renderQuestBox() {
     <div class="qb-prog">${progressText(q)}</div>
     <div class="qb-foot">${rewardText(q)}<span style="flex:1"></span>
       ${t ? `<button class="small" data-q="target">◎ ${typeof t === 'string' ? esc(nm(t)) : 'Ziel'}</button>` : ''}
-      ${docked.length && ['procure', 'rush', 'mine'].includes(q.type) && docked.some((s) => s.dockedAt === q.giver) ? `<button class="small primary" data-q="deliver" data-ship="${docked.find((s) => s.dockedAt === q.giver).id}">Abliefern</button>` : ''}</div>`);
+      ${docked.length && ['procure', 'rush', 'mine'].includes(q.type) && docked.some((s) => s.dockedAt === q.giver) ? `<button class="small primary" data-q="deliver" data-ship="${docked.find((s) => s.dockedAt === q.giver).id}">Questabgabe (kein Handelsverkauf)</button>` : ''}</div>`);
 }
 
 $('questBox').addEventListener('click', (ev) => {

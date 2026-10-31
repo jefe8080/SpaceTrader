@@ -114,10 +114,13 @@ test('Bürger teilen ein Einkommen in Steuern, bezahlten Konsum und begrenzten R
   assert.match(runCommand(f.game,f.player,{cmd:'homeTax',target:f.home.id,percent:41}),/Zahl/);close(f);
 });
 
-test('Beschaffungsquest wartet bei vollem Lager und erhält gesamte Ladung bis zur wirklichen Übergabe',()=>{
+test('PRD14: ausdrückliche Questabgabe funktioniert bei vollem Lager ohne zusätzlichen Marktumsatz',()=>{
   const f=fixture(),e=market(f,'quest-buyer',{ore:slot('consume',100,0,100)});
-  f.player.quest={id:'q-test',type:'procure',giver:e.id,good:'ore',amount:10,reward:0,xp:0};f.ship.dockedAt=e.id;f.ship.cargo={ore:10};
-  assert.equal(questProgress(f.game,f.player,f.ship),false);assert.equal(f.ship.cargo.ore,10);assert(f.player.quest);close(f);
+  f.player.quest={id:'q-test',type:'procure',giver:e.id,good:'ore',amount:10,reward:{cr:123,xp:0}};f.ship.dockedAt=e.id;f.ship.cargo={ore:10};
+  const credits=f.player.credits;
+  assert.equal(questProgress(f.game,f.player,f.ship,false),false);assert.equal(f.ship.cargo.ore,10);
+  assert.equal(questProgress(f.game,f.player,f.ship),true);assert.equal(f.ship.cargo.ore,undefined);assert.equal(f.player.quest,null);assert.equal(f.player.credits,credits+123);assert.equal(e.market.goods.ore.stock,100);
+  assert.equal(e.market.localSales,undefined);assert.equal(questProgress(f.game,f.player,f.ship),false);assert.equal(f.player.credits,credits+123);close(f);
 });
 
 test('Questgeberlevel erzeugt weder Waren noch Förderbonus und unberechtigte Fabrikbauten werden abgewiesen',()=>{

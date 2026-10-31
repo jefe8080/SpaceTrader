@@ -333,9 +333,20 @@ und relevante neue Möglichkeiten zusammen verständlich dargestellt.
   Doppelauftrag- und Datenbankneustarttest sowie 14 Bauregressionen bestanden.
   Die ersten beiden neuen Testläufe korrigierten reine Fixturefehler
   (Groß-/Kleinschreibung des Fehlertexts und fehlende Zielentdeckung).
-- [ ] Schritt 6: Alle Nebenquestarten überarbeiten, lagerunabhängige
+- [x] Schritt 6: Alle Nebenquestarten überarbeiten, lagerunabhängige
   Questabgabe und konsistente Besitzregeln umsetzen. Aktive Aufgaben ohne
   Migration erhalten; Abschluss, Belohnung und Fehlermeldungen prüfen.
+
+  Ergebnis: Eigene Standorte sind zulässig; private fremde, gesperrte,
+  verschwundene und ungeeignete Ziele werden bei Annahme begründet abgewiesen.
+  Beschaffung verlangt eine reale verfügbare Quelle; Abbau berücksichtigt
+  alle Feldtypen und das passende tatsächliche Gerät. Erkundung prüft
+  besuchte Sondergebiete und verbleibende Fläche. Questabgabe ist ausdrücklich
+  vom Handelsverkauf getrennt, funktioniert ohne Warenplatz und bei vollem
+  Lager, protokolliert ihre Lieferung ohne zusätzlichen Umsatz. Automatisches
+  Andocken entnimmt keine Lieferquestware. 39 gezielte Tests bestanden;
+  ein alter Test wurde an die ausdrücklich geänderte Lagerregel angepasst,
+  ein neuer Abbau-Negativtest auf einen tatsächlich ungeeigneten Kolibri korrigiert.
 - [ ] Schritt 7: Parallele Nebenquests entsprechend Pilotenlevel inklusive
   UI, Speicherung und eindeutiger Einzelaktionen umsetzen. Levelaufstiegs-
   Popup ergänzen; Parallelfortschritt und Schutz vor Doppelverwendung prüfen.

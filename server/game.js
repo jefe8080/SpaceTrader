@@ -479,7 +479,7 @@ export class Game {
       if (e.market.building) this.discover(p, 'ship', e.market.building.type);
       for (const m of e.market.modules || []) this.discover(p, 'module', m);
     }
-    if (p) questProgress(this, p, ship);
+    if (p) questProgress(this, p, ship, false);
     const tank = this.shipTank(ship);
     if ((this.profile!=='homeworld'||ship.queue[0]?.manualDirect||pointCovered(this,p,e)) && !ship.relicSpeed && tank > 0 && ship.autoRefuel > 0 && ship.fuel < tank * ship.autoRefuel && e.market?.goods.shipfuel && canBuyFrom(e.market.goods.shipfuel)) {
       this.refuel(ship, e);
@@ -524,6 +524,7 @@ export class Game {
     if (!p) return;
     for (const { sector, entities } of this.world.ensureAround(ship.x, ship.y)) this.onSectorCreated(sector, entities);
     const fx = zoneEffects(this.world.zonesNear(ship.x, ship.y), ship.x, ship.y, { void: hasAbility(ship, 'void') });
+    if(fx.zones?.length)p.zoneVisits=[...new Set([...(p.zoneVisits||[]),...fx.zones.map(z=>z.id)])];
     this.revealAround(p, ship.x, ship.y, shipStats(ship).sensor * fx.sensor);
     const h = hexAt(ship.x, ship.y);
     const key = hexKey(h.q, h.r);

@@ -3,7 +3,7 @@ import { WORLD, GOODS, BELT_TYPES, QUEST, QUEST_TYPES, REP, RANKS, factionRank, 
   giverLevel, giverXpOf, planetFeatures, EXTRAS, freeFor } from '../shared/config.js';
 import { hexAt, hexKey, hexNeighbors } from '../shared/hex.js';
 import { missingInputs, stat } from './markets.js';
-import {homeStorageFree} from '../shared/homeworld.js';
+import {availableHomeStock} from '../shared/homeworld.js';
 import {passengerTrade,updatePassengerOffers,peopleOf,residentDepartureCapacity} from './population.js';
 
 /**
@@ -78,9 +78,9 @@ export function makeOffer(game, e, onlyType = null) {
   return null;
 }
 
-/** Märkte im Sektor des Questgebers innerhalb von QUEST.RANGE (ohne Spielerbesitz) */
+/** Real destinations, including owned sites; private/blocked sites need access. */
 function nearMarkets(game, e, range = QUEST.RANGE) {
-  return game.world.sectorEntities(e.sector).filter((x) => x !== e && x.market && x.kind !== 'wormhole' && dist(x, e) <= range && !game.ownership.has(x.id));
+  return game.world.sectorEntities(e.sector).filter((x) => x !== e && x.market && ['planet','station'].includes(x.kind) && dist(x,e)<=range && !x.market.homeworld?.warp && x.market.mode!=='private' && !(x.type==='ruins'&&x.market.homeworld?.facilities?.dock?.status!=='ready'));
 }
 const stop = QUEST.STOP_MIN;
 
@@ -93,7 +93,6 @@ const GEN = {
   },
   /** Material für den aktuellen Bau einer NPC-Werft */
   rush(game, e, level) {
-    if (e.market.owner) return null;
     const g = missingInputs(e.market).find((x) => GOODS[x].cls === 'normal');
     return g ? deliveryQuest(game, e, level, g) : null;
   },
@@ -141,7 +140,7 @@ const GEN = {
   },
   /** x Einheiten Erz oder Eis selbst abbauen und an die Werft liefern */
   mine(game, e, level) {
-    const belts = game.world.sectorEntities(e.sector).filter((b) => b.kind === 'belt' && ['ore', 'ice'].includes(BELT_TYPES[b.type].good) && dist(b, e) <= QUEST.RANGE);
+    const belts = game.world.sectorEntities(e.sector).filter((b) => b.kind === 'belt' && BELT_TYPES[b.type] && dist(b, e) <= QUEST.RANGE);
     if (!belts.length) return null;
     const b = belts.sort((x, y) => dist(x, e) - dist(y, e))[0];
     const g = BELT_TYPES[b.type].good;
@@ -162,9 +161,10 @@ function deliveryQuest(game, e, level, g) {
     const need = Object.entries(e.market.goods).find(([x]) => x === g)?.[1];
     if (need) amount = Math.max(5, Math.min(amount, Math.floor(need.cap - need.stock)));
   }
-  const srcs = nearMarkets(game, e, QUEST.RANGE * 1.5).filter((x) => x.market.goods[g] && canBuyFrom(x.market.goods[g]))
+  const srcs = nearMarkets(game, e, QUEST.RANGE * 1.5).filter((x) => viableSource(x,g))
     .sort((a, b) => dist(a, e) - dist(b, e)).slice(0, 3);
   const src = srcs.length ? pick(srcs) : null;
+  if(!src)return null;
   const effort = (src ? flightMinutes(2 * dist(e, src)) : flightMinutes(2 * 30000)) + 2 * stop;
   return { good: g, amount, source: src?.id || null, sourceName: src?.name || null, value: amount * base * (src?.market.goods[g].mod || 1), effort };
 }
@@ -172,6 +172,33 @@ function deliveryQuest(game, e, level, g) {
 // ---------- Annehmen, abbrechen, abschließen ----------
 /** Objekte, die einer Quest gehören (für die Besitzprüfung) */
 const questEntities = (q) => [q.source, q.pickup, q.dest, ...(q.stops || []), ['procure', 'rush', 'mine'].includes(q.type) ? q.giver : null].filter(Boolean);
+
+const viableSource=(e,g)=>!!e?.market?.goods[g]&&canBuyFrom(e.market.goods[g])&&(availableHomeStock(e.market,g)>0||e.market.goods[g].role==='produce'&&e.market.goods[g].rate>0);
+export function questOfferError(game,player,ship,q){
+  for(const id of questEntities(q)){
+    const e=game.world.entities.get(id),prop=game.ownership.get(id);
+    if(!e?.market)return 'Ein Auftragsziel existiert nicht mehr.';
+    if(e.market.homeworld?.warp)return 'Ein Auftragsziel ist im Warptransfer.';
+    if(prop?.mode==='private'&&!game.canUseStorage(prop,player.id))return 'Ein Auftragsziel ist privat und nicht zugänglich.';
+    if(e.type==='ruins'&&e.market.homeworld?.facilities?.dock?.status!=='ready')return 'Der Landeplatz eines Auftragsziels ist noch nicht betriebsbereit.';
+  }
+  if(['procure','rush'].includes(q.type)&&!viableSource(game.world.entities.get(q.source),q.good)&&(ship.cargo[q.good]||0)<q.amount)return 'Die angegebene Warenquelle ist derzeit nicht verfügbar. Angebot später erneut prüfen.';
+  if(q.type==='rush'&&!missingInputs(game.world.entities.get(q.giver).market).includes(q.good))return 'Die Werft benötigt dieses Material für ihren aktuellen Bau nicht mehr.';
+  if(q.type==='mine'){
+    const b=game.world.entities.get(q.belt);
+    if(b?.kind!=='belt'||BELT_TYPES[b.type]?.good!==q.good)return 'Das Abbauziel ist für diese Ware nicht geeignet.';
+    if(!(shipStats(ship).mining[GOODS[q.good]?.mine||'std']>0))return 'Für diesen Rohstoff braucht das Schiff passende Abbaugeräte.';
+  }
+  if(q.type==='explore'){
+    if(q.zone&&(!game.findZone(q.zone)||player.zoneVisits?.includes(q.zone)))return 'Dieses Sondergebiet wurde bereits besucht oder existiert nicht mehr.';
+    if(q.sector){
+      if(!game.world.sectors.has(q.sector))return 'Der Zielsektor existiert nicht mehr.';
+      let known=0;for(const key of player.revealed){const [x,y]=key.split(',').map(Number),h=hexAt((x+.5)*WORLD.FOG_CELL,(y+.5)*WORLD.FOG_CELL);if(hexKey(h.q,h.r)===q.sector)known++;}
+      if(SECTOR_CELLS-known<q.cells)return 'In diesem Sektor ist nicht mehr genügend unerforschte Fläche für diesen Auftrag übrig.';
+    }
+  }
+  return null;
+}
 
 /** offers: Angebotsliste (Questtafel oder Schmugglerslot) */
 export function acceptQuest(game, player, ship, e, questId, offers = null) {
@@ -184,7 +211,7 @@ export function acceptQuest(game, player, ship, e, questId, offers = null) {
   const i = list.findIndex((o) => o.id === questId);
   if (i < 0) return 'Diese Quest ist nicht mehr verfügbar.';
   const q = list[i];
-  if (questEntities(q).some((id) => game.canUseStorage(game.ownership.get(id), player.id))) return 'Diese Quest betrifft deinen eigenen Besitz oder den deines Konsortiums.';
+  const invalid=questOfferError(game,player,ship,q);if(invalid)return invalid;
   const st = shipStats(ship);
   if (q.type === 'tour' && st.passenger < q.tourists) return `Für ${q.tourists} Touristen braucht das Schiff Passagierkabinen mit ${q.tourists} Plätzen.`;
   if(game.profile==='homeworld'&&q.type==='tour'){
@@ -194,7 +221,6 @@ export function acceptQuest(game, player, ship, e, questId, offers = null) {
     let left=q.tourists;
     for(const batch of [...ship.passengers].reverse())if(batch.kind==='tourists'&&left){batch.quest=q.id;left-=batch.n;}
   }
-  if (q.type === 'mine' && !(st.mining.std > 0)) return 'Für diese Quest braucht das Schiff Abbaugeräte.';
   list.splice(i, 1);
   const quest = { ...q, accepted: Math.round(game.time), ship: ship.id, progress: 0 };
   if (q.type === 'courier') quest.state = 'pickup';
@@ -211,7 +237,7 @@ export function acceptQuest(game, player, ship, e, questId, offers = null) {
   game.emit('notice', player, `${q.smuggler ? 'Schmuggelauftrag' : 'Quest'} angenommen: ${QUEST_TYPES[q.type].name} für ${e.name}`);
   game.emit('sfx', player, 'questAccept');
   game.emit('entity', e);
-  questProgress(game, player, ship); // z.B. Ware schon an Bord
+  questProgress(game, player, ship, false);
   return undefined;
 }
 
@@ -237,7 +263,7 @@ export const minedBy = (game, player, g) => game.shipsOf(player.id).reduce((a, s
  * Fortschritt prüfen, wenn ein eigenes Schiff irgendwo angedockt ist (beim Andocken und auf Knopfdruck).
  * Liefert true, wenn sich etwas getan hat.
  */
-export function questProgress(game, player, ship) {
+export function questProgress(game, player, ship, explicit=true) {
   const q = player.quest;
   if (!q || !ship.dockedAt) return false;
   const at = ship.dockedAt;
@@ -245,15 +271,18 @@ export function questProgress(game, player, ship) {
     case 'procure':
     case 'rush':
     case 'mine': {
+      if(!explicit)return false;
       if (at !== q.giver || (ship.cargo[q.good] || 0) < q.amount) return false;
       if (q.type === 'mine' && minedBy(game, player, q.good) - q.minedBase < q.amount) return false;
-      const destination=game.world.entities.get(q.giver);
-      if(game.profile==='homeworld'&&(!destination?.market?.goods[q.good]||homeStorageFree(destination.market,q.good)<q.amount))return false;
+      const destination=game.world.entities.get(q.giver),prop=game.ownership.get(q.giver);
+      if(!destination?.market||prop?.mode==='private'&&!game.canUseStorage(prop,player.id)||destination.market.homeworld?.warp)return false;
       ship.cargo[q.good] -= q.amount;
       if (!ship.cargo[q.good]) delete ship.cargo[q.good];
-      const e = game.world.entities.get(q.giver);
-      const slot = e?.market?.goods[q.good];
-      if (slot) { slot.stock = Math.min(slot.cap, slot.stock + q.amount); stat(e.market, game.time, 'i', q.good, q.amount); }
+      // Dedicated quest handover: goods leave circulation, never enter the
+      // trade store and never produce an additional trade or local-sale payout.
+      destination.market.questDeliveries||=[];
+      destination.market.questDeliveries.push({quest:q.id,good:q.good,amount:q.amount,time:game.time});
+      destination.market.questDeliveries=destination.market.questDeliveries.slice(-100);
       completeQuest(game, player);
       return true;
     }
