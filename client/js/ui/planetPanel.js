@@ -94,7 +94,7 @@ export function renderPlanetUi() {
   const viewed=state.landed&&state.entities.get(state.landed);
   const summary=$('planetSummary');
   summary.hidden=!viewed;
-  if(viewed)setHtml(summary,planetSummary(viewed));
+  if(viewed){setHtml(summary,planetSummary(viewed));summary.title=viewed.name;}
   document.body.classList.toggle('landed',!!viewed);
   const fleet=$('fleet');
   if(viewed)fleet.style.top=`${Math.ceil($('topbar').getBoundingClientRect().bottom)+12}px`;

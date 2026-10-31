@@ -17,7 +17,7 @@ const pair = (need, available, warn = true) => `<span class="${warn && Number.is
 export function planetSummary(entity) {
   const m = entity.market, storage = storageSummary(m), supply = (m?.homeworld || m?.economy)?.supplyOverview;
   const stat=(label,need,available,warn=true)=>`<div class="supply-stat"><span class="supply-label">${label}</span>${pair(need,available,warn)}</div>`;
-  return `<b class="planet-summary-name">${esc(entity.name)}</b><div class="supply-grid">
+  return `<div class="supply-grid">
     ${stat('Lager',storage?.usage.normal,storage?.capacity.normal,false)}
     ${stat('Gefahrgut',storage?.usage.hazard,storage?.capacity.hazard,false)}
     ${stat('Arbeitskräfte',supply?.workers.required,supply?.workers.available)}

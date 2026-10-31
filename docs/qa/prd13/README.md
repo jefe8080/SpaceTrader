@@ -75,3 +75,18 @@ ersten Stand; maßgeblich für die korrigierte Position sind:
 Erneut geprüft: 12 Tests aus PRD 12 und 13 bestanden, JavaScript-Syntax
 fehlerfrei, Browser bei 1440 × 900 und 390 × 844 sowie Ausblenden der
 Ressourcen nach Verlassen des Planeten.
+
+## Abschließende Korrektur: bestehende Zeile ohne Höhenzuwachs
+
+Die vorherige Korrektur verwendete noch eine zusätzliche Zeile innerhalb
+der Topbar. Diese ist entfernt. Maßgeblich sind nun:
+
+- [Ressourcen in derselben Topbar-Zeile, breit](resources-inline-wide.jpg)
+- [Bestehende mobile Leiste mit seitlich scrollbaren Werten](resources-inline-narrow.jpg)
+
+Gemessen bei 1440 × 900: 46 Pixel Leistenhöhe. Bei 390 × 844: 92 Pixel
+sowohl im Weltall als auch auf dem Planeten. Die mobile Topbar wird durch
+die Ressourcen nicht höher. Pfeil-rechts auf dem fokussierten Wertebereich
+scrollt diesen seitlich (20 Pixel im geprüften Tastenschritt).
+Die drei Planetenbuttons bleiben separat rechts darunter.
+Erneut bestanden: alle 12 gezielten PRD-12-/PRD-13-Tests und Syntaxprüfungen.

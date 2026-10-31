@@ -30,13 +30,15 @@
 
   <div id="hud" hidden>
     <div id="topbar">
+      <div class="topbar-status" tabindex="0" role="region" aria-label="Spiel- und Planetenwerte" title="Bei wenig Platz seitlich scrollen">
       <div class="logo">SPACE<span>TRADER</span></div>
       <div class="stat"><span class="label">Credits</span><span id="credits" class="value">0</span></div>
       <div class="stat"><span class="label">Schiffe</span><span id="shipCount" class="value">0</span></div>
       <div class="stat" id="levelStat" title="Pilotenlevel und Erfahrung"><span class="label">Level</span><span id="levelValue" class="value">1</span><span class="xpbar"><span id="xpFill"></span></span></div>
       <span id="dogBuff" class="dog-buff" title="Hunde-Buff: bessere Chancen bei Minispielen" hidden></span>
       <div class="stat" title="Pilotenlizenz (Kauf am Handels-Hub, erfordert das gleiche Pilotenlevel)"><span class="label">Lizenz</span><span id="pilotLevel" class="value">P1</span></div>
-      <div class="spacer"></div>
+      <section id="planetSummary" aria-label="Planetenversorgung" hidden></section>
+      </div>
       <nav class="main-nav" aria-label="Hauptnavigation">
         <details id="pilotProfile"><summary>Pilotenprofil</summary><div class="nav-content">
           <div id="profileInfo"></div><button id="btnPilotInfo">Profil und Erfolge</button>
@@ -57,7 +59,6 @@
         </div></details>
       </nav>
       <div class="map-tools"><button id="btnMarker" class="small">◆ Marker</button></div>
-      <section id="planetSummary" aria-label="Planetenversorgung" hidden></section>
     </div>
     <div id="fleet" class="panel">
       <div class="panel-head"><h2>Flotte</h2><span style="flex:1"></span><button id="btnFleetToggle" class="small" aria-label="Flotte einklappen" aria-expanded="true">◀</button><button id="btnNewGroup" class="small" title="Neue Gruppe (mit Auswahl)">＋ Gruppe</button></div>

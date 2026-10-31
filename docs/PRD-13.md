@@ -193,3 +193,15 @@ wieder einzeln rechts unterhalb dieser Leiste. Bei Größenänderungen wird
 die Flotte unter der tatsächlichen Höhe der Leiste positioniert.
 Geprüft: 12 PRD-12-/PRD-13-Tests, JavaScript-Syntax und Browseransichten
 bei 1440 × 900 sowie 390 × 844; Versorgung im Weltall ausgeblendet.
+
+### Verbindliche Präzisierung: keine zusätzliche Topbar-Zeile
+
+Die Ressourcen stehen direkt in derselben Zeile wie die bestehenden
+Spielerwerte und die Navigation. Die Topbar erhält keine zusätzliche Zeile
+und wächst durch die Ressourcen nicht. Der Planetenname bleibt als Tooltip
+verfügbar. Bei Platzmangel sind die Spieler- und Ressourcenwerte horizontal
+scrollbar; auf schmalen Geräten stehen die Ressourcen zuerst.
+
+Gemessen: 46 Pixel auf dem Desktop (1440 × 900) sowie unverändert 92 Pixel
+in Weltall- und Planetenansicht bei 390 × 844. Seitliches Scrollen per
+Pfeiltaste geprüft. 12 gezielte Regressionstests bestehen weiterhin.
