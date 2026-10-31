@@ -148,10 +148,20 @@ Jeder Schritt endet mit grüner Testsuite und einem eigenen Commit; dieser
 Fortschritt wird im selben Commit aktualisiert.
 
 - [x] **S0: PRD.** Planung abgestimmt und dieses Dokument angelegt.
-- [ ] **S1: Prüfskript.**
+- [x] **S1: Prüfskript.**
   - Deterministischen Vergleich mit dem Prod-Spielstand bauen (E4).
   - Referenzlauf mit Commit `3e992d7` erzeugen.
   - Selbsttest: Zwei Läufe mit demselben Code ergeben keine Abweichung.
+  - Umgesetzt in `scripts/compare-prd18.mjs` (`run` und `diff`). Der Lauf kopiert
+    den Spielstand, ersetzt `Math.random` durch einen Generator mit festem Seed,
+    lässt `Date`/`performance.now` mit 500 ms je Schritt laufen, ruft
+    `game.tick(0.5)` auf, speichert und vergleicht alle SQLite-Tabellen zeilenweise.
+    Die Ausgabe enthält nur IDs und Feldnamen.
+  - Referenz `3e992d7`, 30 Minuten: 3.600 Schritte, 20 Tabellen, 338.099 Zeilen,
+    Laufzeit rund 5,5 min.
+  - Selbsttest (2 Minuten, zwei Läufe mit `3e992d7`): keine Abweichung. Gegenprobe
+    0 gegen 2 Minuten: 6.325 abweichende Zeilen, der Vergleich erkennt also
+    Zustandsänderungen.
 - [ ] **S2: Tests.** Legacy-Tests auf `homeworld` umstellen oder löschen (E3),
   solange der Legacy-Code noch vorhanden ist.
 - [ ] **S3: Server.**
