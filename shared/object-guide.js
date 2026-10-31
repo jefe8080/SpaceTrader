@@ -1,5 +1,5 @@
-import { STATION_TYPES, PLANET_TYPES, BELT_TYPES, GOODS } from './goods.js';
-import { HOME_BUILDINGS } from './homeworld.js';
+import { STATION_TYPES, PLANET_TYPES, BELT_TYPES, GOODS, RECIPES } from './goods.js';
+import { HOME_BUILDINGS, industrySpec } from './homeworld.js';
 import { ENTERTAINMENT } from './planetside.js';
 import { STUDY_FINDS } from './advanced-homequests.js';
 
@@ -12,7 +12,7 @@ const names = goods => Object.keys(goods || {}).map(g => GOODS[g]?.name || g).jo
 for (const [id, d] of Object.entries(STATION_TYPES)) {
   let points = ['Zum Handeln und Verwalten muss ein eigenes Schiff hier angedockt sein.'];
   let intro = 'Eine Station für Versorgung und Handel im Weltraum.';
-  if (d.recipe) { intro = 'Diese Produktionsstation verarbeitet angelieferte Zutaten zu Waren.'; points.push('Die Produktion benötigt passende Zutaten im Stationslager.', 'Konkrete Rezepte werden durch Entdeckung freigeschaltet.'); }
+  if (d.recipe) { intro = 'Diese Produktionsstation verarbeitet angelieferte Zutaten zu Waren.'; points.push('Die Produktion benötigt passende Zutaten im Stationslager.', 'Die Rezepte werden dauerhaft mit der Fertigstellung eines eigenen Gebäudes freigeschaltet.'); }
   if (d.extract) { intro = 'Diese Spezialförderstation gewinnt seltene Rohstoffe.'; points.push('Fördert: ' + d.extract.map(g => GOODS[g].name).join(', ') + '.', 'Die Förderung ist langsam; Bestand und Nachfrage bestimmen den Handel.'); }
   if (id === 'hub') { intro = 'Der Handels-Hub bündelt zentralen Handel und Verwaltung.'; points = ['Hier kannst du handeln, ein Konsortium gründen und Pilotenlizenzen kaufen.', 'Das Pilotenlevel steigt durch Erfahrung; eine Pilotenlizenz wird separat gekauft und setzt das passende Level voraus.', 'Die Lizenz schaltet Schiffsklassen und Upgrades frei. Die Steuerkapazität bestimmt die nutzbare Flotte.']; }
   if (['shipyard','bigyard','factionyard'].includes(id)) { intro = id === 'bigyard' ? 'Die große Werft baut auch große Schiffsklassen.' : id === 'factionyard' ? 'Eine Fraktionswerft baut Schiffe ihrer Fraktion.' : 'Die Werft baut neue Schiffe aus angelieferten Materialien.'; points.push('Für den Kauf brauchst du Credits und eine passende Pilotenlizenz.', id === 'factionyard' ? 'Fraktionsschiffe benötigen außerdem Rang und die geforderte Fraktionswährung.' : 'Bestellungen sind auf den Baukatalog der Werft beschränkt.'); }
@@ -21,7 +21,7 @@ for (const [id, d] of Object.entries(STATION_TYPES)) {
   if (id === 'wreck') { intro = 'Eine persönliche Fundstelle kann geborgen oder untersucht werden.'; points = ['Aufgaben geben die Voraussetzungen für die Bergung vor.', 'Für persönliche Funde ist das aktive manuelle Schiff erforderlich.', 'Fundorte und Belohnungen werden erst bei ihrer Entdeckung bekannt.']; }
   add('st:' + id, d.name, '/assets/' + d.sprite + '.svg', intro, points, 'Stationen');
 }
-for (const [id, d] of Object.entries(PLANET_TYPES)) add('pl:' + id, d.name, '/assets/' + d.sprite + '.svg', 'Ein Planet mit eigenen Rohstoffen, Bewohnern und Einrichtungen.', ['Mit einem angedockten Schiff kannst du die Oberfläche betreten.', 'Gebäude bieten Produktion, Lagerung und lokale Dienste.', 'Konkrete Waren und Rezepte lernst du durch Entdeckung kennen.'], 'Planeten');
+for (const [id, d] of Object.entries(PLANET_TYPES)) add('pl:' + id, d.name, '/assets/' + d.sprite + '.svg', 'Ein Planet mit eigenen Rohstoffen, Bewohnern und Einrichtungen.', ['Mit einem angedockten Schiff kannst du die Oberfläche betreten.', 'Gebäude bieten Produktion, Lagerung und lokale Dienste.', 'Rohstoffquellen werden beim Erkunden bekannt; Produktionsrezepte schaltet die Fertigstellung eigener Gebäude frei.'], 'Planeten');
 for (const [id, d] of Object.entries(BELT_TYPES)) add('bt:' + id, d.name, '/assets/' + d.sprite + '.svg', 'Ein Ressourcenfeld für den Abbau von ' + GOODS[d.good].name + '.', ['Zum Abbau benötigst du ein geeignetes Bergbaumodul (' + (GOODS[d.good].mine || 'std') + ').', 'Freier Laderaum und bei Gefahrgut ein geschirmter Frachtraum sind erforderlich.'], 'Ressourcenfelder');
 const buildings = {
   questhouse: ['Rathaus und Questhaus', 'Hier erhältst du Aufgaben und holst abgeschlossene Belohnungen ab.'],
@@ -72,13 +72,7 @@ for (const [id,name,intro,points] of [
   ['relic','Reliktwrack','Ein persönliches Wrack mit einem versiegelten Fund.',['Mit dem aktiven manuellen Schiff persönlich bergen.','Den versiegelten Fund mit dem Bergungsschiff zur Heimatwerkstatt bringen.','Die Fundstelle verschwindet nach Abschluss der zugehörigen Aufgabe.']],
 ]) add('quest:'+id,name,'/assets/art/homeworld/'+(id==='relic'?'relic':'archive')+'.png',intro,points,'Fundstellen');
 
-const modelImages={questhouse:'hall',produce:'farm',consume:'store',factory:'factory',plot:'store',smuggler:'smuggler',beggar:'beggar',dog:'dog',school:'school','home:dock':'store','home:control':'hall','home:workshop':'factory',housing:'hall',solar:'tower',silo:'silo',safeStorage:'store',spaceport:'tower',moduleBench:'factory',researchWorkshop:'school',researchCenter:'school',workshop:'factory',academy:'school'};
-for (const d of Object.values(OBJECT_GUIDE).filter(d=>d.category==='Gebäude')) {
-  const id=d.key.replace('building:','').replace('home-building:','').replace('fun:','');
-  const model=modelImages[id]||(['tavern','casino','fair','racetrack','mine'].includes(id)?id:null);
-  if(model)d.image='/assets/models/'+model+'/preview.png';
-  if(id.startsWith('orbital-'))d.image='/assets/orbital_elevator_'+id.replace('orbital-','')+'.svg';
-}
+for(const size of ['small','large'])OBJECT_GUIDE['building:orbital-'+size].image='/assets/orbital_elevator_'+size+'.svg';
 for(const [id,d] of Object.entries(HOME_BUILDINGS)){
   const entry=OBJECT_GUIDE['building:home-building:'+id];
   entry.points=[];
@@ -108,3 +102,28 @@ const functions={
 for(const [id,points]of Object.entries(functions))OBJECT_GUIDE['building:'+id].points=points;
 OBJECT_GUIDE['building:orbital-small'].points=['Der Wiederaufbau benötigt freigeschaltete Hauptquests und vollständig gelieferte Questmaterialien.','Ein eigener leerer, ungebundener Spatz wird nach ausdrücklicher Bestätigung dauerhaft als Infrastruktur abgegeben. Mindestens ein steuerbares Schiff muss übrig bleiben.','Fertigt Schiffe der Klassen S und M aus realen Materialien; Ausgabe erfolgt mit vollem Tank. Betrieb benötigt Energie und Belegschaft.'];
 OBJECT_GUIDE['building:orbital-large'].points=['Benötigt den kleinen Ring, Forschungsfortschritt und die vollständigen Questmaterialien.','Der Ausbau erfolgt in zwei getrennten Bauabschnitten.','Ein zusätzlicher Bauplatz fertigt Schiffe der Klassen L und XL. Pilotenlizenz, bei Fraktionsschiffen auch Rang und veredelte Währung, bleiben erforderlich.'];
+
+// PRD 16: same current artwork as the city renderer, explicit atlas cells.
+const guideCells={questhouse:13,produce:10,consume:6,factory:16,smuggler:18,beggar:22,dog:23,school:14,'home:dock':17,'home:control':13,'home:workshop':16,solar:21,gasGenerator:16,reactor:16,silo:1,safeStorage:5,spaceport:17,moduleBench:16,researchWorkshop:8,researchCenter:8,workshop:16,academy:14};
+for(const d of Object.values(OBJECT_GUIDE).filter(d=>d.category==='Gebäude')){
+ const id=d.key.replace('building:','').replace('home-building:','').replace('fun:','');
+ if(id.startsWith('orbital-'))continue;
+ if(id==='housing'){d.image='/assets/art/cities/housing-1.png';continue;}
+ if(id==='plot'){d.image='/assets/art/cities/ruins-city-v2.png';d.frame=[610,570,130,90];continue;}
+ const cell=guideCells[id]??15;d.image='/assets/art/cities/sprites.png';d.frame=[cell%5*1536/5,Math.floor(cell/5)*1024/5,1536/5,1024/5];
+}
+const quantities=values=>Object.entries(values||{}).map(([g,n])=>n+' '+(GOODS[g]?.name||g)).join(', ')||'keine';
+for(const [id,r] of Object.entries(RECIPES)){
+ const key='st:'+id,spec=industrySpec(id);
+ if(!OBJECT_GUIDE[key])add(key,r.name,'/assets/art/cities/sprites.png','Diese Anlage fertigt '+quantities(r.out)+' aus '+quantities(r.in)+'.',[],'Stationen');
+ const entry=OBJECT_GUIDE[key];entry.intro=r.name+' verarbeitet '+quantities(r.in)+' zu '+quantities(r.out)+'.';
+ entry.points=['Zutaten je Zyklus: '+quantities(r.in)+'.','Ergebnis je Zyklus: '+quantities(r.out)+'.','Ein vollständiger Zyklus dauert '+r.time+' Sekunden. Zutaten werden erst bei einem vollständigen Zyklus verbraucht.','Fertigstellung eines eigenen Gebäudes schaltet seine Rezepte dauerhaft frei. Abriss entfernt die Freischaltung nicht. Die Erklärung ist schon vor dem Bau vollständig lesbar.','Produktion benötigt eine fertige, eingeschaltete Anlage, Zutaten und freien Lagerraum.'];
+ if(spec)entry.points.push('Bau: '+spec.credits+' Cr, '+quantities(spec.goods)+'; '+spec.seconds+' s. Voraussetzung: '+spec.quest+'.','Betrieb: '+spec.power+' Energie; '+Object.entries(spec.workers).map(([q,n])=>n+' '+({basic:'einfache Kräfte',skilled:'Fachkräfte',specialist:'Spezialisten'}[q])).join(', ')+'.');
+ const cell=({waterworks:0,foodplant:12,fueldepot:0,refinery:5,smelter:3})[id]??16;
+ entry.image='/assets/art/cities/sprites.png';entry.frame=[cell%5*1536/5,Math.floor(cell/5)*1024/5,1536/5,1024/5];
+}
+for(const [id,d] of Object.entries(HOME_BUILDINGS)){
+ const entry=OBJECT_GUIDE['building:home-building:'+id];
+ entry.intro=({housing:'Stellt zusätzlichen gemeinsamen Wohnraum für die Bevölkerung bereit.',solar:'Wandelt Sonnenlicht ohne Brennstoffverbrauch in Energie für Betriebe um.',gasGenerator:'Verbrennt Gas und hält die Energieversorgung auch jenseits der Solarkapazität aufrecht.',reactor:'Versorgt anspruchsvolle Industrie mit hoher Energieerzeugung.',silo:'Vergrößert die gemeinsame Lagerkapazität für normale Waren.',safeStorage:'Schafft getrennte sichere Lagerplätze für Gefahrgut.',spaceport:'Erweitert den planetaren Umschlag und die Landekapazität.',moduleBench:'Fertigt transportierbare Module aus Materialien und bekannten Vorlagen.',researchWorkshop:'Untersucht geborgene Vorlagen und bereitet Forschungsarbeiten vor.',researchCenter:'Bündelt fortgeschrittene Forschung für den weiteren Ausbau.',school:'Bildet einfache Bewohner über Zeit zu Fachkräften aus.',academy:'Qualifiziert Fachkräfte zu Spezialisten für anspruchsvolle Betriebe.',workshop:'Bearbeitet den einzigartigen Reliktantrieb an angedockten Schiffen.'})[id]||entry.intro;
+ entry.points.push('Bau: '+d.credits+' Cr; '+quantities(d.goods)+'; '+d.seconds+' s.'+(d.quest?' Voraussetzung: '+d.quest+'.':''),'Betrieb: '+(d.power||0)+' Energie; Personal: '+Object.entries(d.workers||{}).map(([q,n])=>n+' '+({basic:'einfache Kräfte',skilled:'Fachkräfte',specialist:'Spezialisten'}[q])).join(', ')+'.');
+}

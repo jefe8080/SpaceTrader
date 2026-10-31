@@ -177,7 +177,7 @@ Fortschritt im selben Commit aktualisiert. Änderungen bleiben fachlich getrennt
 | P03 | Planetenstatistik, Rathaus und Wohnhaus | Filter anhand persistierter Questzustände; Wohnwerte aus Planeten-/Gebäudedaten; Regressionstests | Erledigt |
 | P04 | Panelhöhe und Zentrallager-Akkordeons | Verfügbare Höhe ab Menüleiste; sechs geschlossene Bereiche; DOM-Patcher bewahrt Öffnungszustand | Implementiert; visuelle Browserprüfung offen |
 | P05 | Schiffsalmanach, Kategorien, Farben und Ratings | 20 Tests: vollständige Kategorien, technische Größen, Staffel- und Sonderwaffenwerte, Orbitalregression | Implementiert; visuelle Browserprüfung offen |
-| P06 | Individuelle Erklärungen und aktuelle Grafiken | Vollständige Eintragsliste sowie Text-/Bildprüfung | Offen |
+| P06 | Individuelle Erklärungen und aktuelle Grafiken | Inventar aller 117 Einträge in PRD-16-object-guide-inventory.md; Daten-/Bilddateitest erfolgreich | Implementiert; Browserprüfung folgt |
 | P07 | Rezeptfreischaltung und Bestandsmigration | 13 Tests: Fertigstellung, vorher gesperrt, Abriss, Laden und wiederholte Migration ohne XP | Erledigt |
 | P08 | Zivilbudget-Ursache und Korrektur | 16 Tests: Altkasse ohne Bevölkerungsfelder, Erschöpfung, Mangelversorgung, Obergrenzen und Nullbevölkerung | Erledigt |
 | P09 | Angriffspopup und Warnton | 8 Tests: nur Verteidiger, neue Schlachten getrennt, Beitritt stumm; bestehender Audio-Bus | Implementiert; visuelle/akustische Browserprüfung offen |

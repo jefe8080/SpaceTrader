@@ -9,8 +9,9 @@ export function guideHtml(key) {
   const d = OBJECT_GUIDE[key];
   if (!d) return '';
   const station=key.startsWith('st:')&&STATION_TYPES[key.slice(3)];
-  const image=station ? spriteUrl(station.sprite,station.accent)||d.image : d.image;
-  return `<article class="object-guide"><img src="${image}" alt="${esc(d.name)}"><h3>${esc(d.name)}</h3><p>${esc(d.intro)}</p><ul>${d.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul></article>`;
+  const image=station&&!d.frame ? spriteUrl(station.sprite,station.accent)||d.image : d.image;
+  const picture=d.frame?`<svg class="guide-art" viewBox="${d.frame.join(' ')}" role="img" aria-label="${esc(d.name)}"><image href="${image}" width="1536" height="1024"/></svg>`:`<img src="${image}" alt="${esc(d.name)}">`;
+  return `<article class="object-guide">${picture}<h3>${esc(d.name)}</h3><p>${esc(d.intro)}</p><ul>${d.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul></article>`;
 }
 for (const [id,label,categories] of [['buildings','Gebäude',['Gebäude','Stationen']],['objects','Weltobjekte',['Planeten','Ressourcenfelder','Schiffe','Fundstellen','Weltobjekte']]]) {
   registerAlmanacTab(id,label,() => Object.values(OBJECT_GUIDE).filter(d => categories.includes(d.category)).map(d => `<details><summary>${esc(d.name)}</summary>${guideHtml(d.key)}</details>`).join(''));
