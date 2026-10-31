@@ -31,7 +31,17 @@ export function preparePublicEntity(entity){
 }
 
 export function ensureCash(entity){
-  const market=entity.market;if(market.economy)return market.economy;
+  const market=entity.market;
+  if(market.economy){
+    const cash=market.economy;
+    // Old saves can contain only a procurement cash account. Fill missing
+    // demographic/accounting fields, preserving real zero population and money.
+    cash.population??=entity.kind==='planet'?Math.round(1000*(entity.size||1)):0;
+    for(const key of ['cash','granted','spent','received'])if(!Number.isFinite(cash[key]))cash[key]=0;
+    if(!Number.isFinite(cash.rate))cash.rate=Object.entries(market.goods).reduce((n,[g,s])=>n+(s.role==='consume'?s.rate*3600*GOODS[g].base:0),0);
+    if(entity.kind==='planet')initializePopulation(entity);
+    return cash;
+  }
   let rate=Object.entries(market.goods).reduce((sum,[good,slot])=>sum+(slot.role==='consume'?slot.rate*3600*GOODS[good].base:0),0);
   if(market.yardCatalog)rate=Math.max(rate,...market.yardCatalog.map(type=>Object.entries(SHIP_TYPES[type].build).reduce((sum,[g,n])=>sum+GOODS[g].base*n,0)));
   // A hub's fuel service has a bounded procurement allocation; selling fuel

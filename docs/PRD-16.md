@@ -179,7 +179,7 @@ Fortschritt im selben Commit aktualisiert. Änderungen bleiben fachlich getrennt
 | P05 | Schiffsalmanach, Kategorien, Farben und Ratings | 20 Tests: vollständige Kategorien, technische Größen, Staffel- und Sonderwaffenwerte, Orbitalregression | Implementiert; visuelle Browserprüfung offen |
 | P06 | Individuelle Erklärungen und aktuelle Grafiken | Vollständige Eintragsliste sowie Text-/Bildprüfung | Offen |
 | P07 | Rezeptfreischaltung und Bestandsmigration | 13 Tests: Fertigstellung, vorher gesperrt, Abriss, Laden und wiederholte Migration ohne XP | Erledigt |
-| P08 | Zivilbudget-Ursache und Korrektur | Reproduktion, Wirtschaftsregression und Neustart | Offen |
+| P08 | Zivilbudget-Ursache und Korrektur | 16 Tests: Altkasse ohne Bevölkerungsfelder, Erschöpfung, Mangelversorgung, Obergrenzen und Nullbevölkerung | Erledigt |
 | P09 | Angriffspopup und Warnton | Eigene/fremde Schlachten, Mehrfachereignisse und Audioeinstellungen | Offen |
 | P10 | Kampfzeitfaktor und Abschlussprüfung | Deterministischer Kampfvergleich, Persistenz und Performancevergleich | Offen |
 
@@ -210,3 +210,16 @@ dem Kampfcode. Ionenwaffen und PD zählen mit ihrem echten Schaden; Störung,
 Abfangwirkung, Feuerwinkel, Trefferchance und Munition werden nicht als
 erfundener Zusatzschaden bewertet. Die Bewertung beschreibt Potenzial,
 keine Siegwahrscheinlichkeit, und ändert keine Kampfwerte.
+
+## Budgetbefund (P08)
+
+Reproduzierbarer Kompatibilitätsfall: Ein alter Planet mit
+`economy: {cash: 0}` wird von `ensureCash` bisher unverändert zurückgegeben.
+Damit fehlt die Bevölkerung, `tickCivilMoney` kehrt früh zurück und zahlt
+kein Einkommen; fehlende Buchungsfelder können zudem NaN erzeugen. Die
+Migration ergänzt ausschließlich fehlende Bevölkerungs- und Kassenfelder.
+Explizite Nullbevölkerung bleibt erhalten. Beschaffungs- und Konsumkasse
+bleiben getrennt und unterliegen weiterhin ihren bisherigen Obergrenzen.
+Der Regressionstest bildet diesen Altzustand nach; ein konkreter privater
+Nutzerspielstand wurde dafür nicht verändert. Mangelversorgung erzeugt nach
+bestehender Regel weiterhin vermindertes Einkommen, keine unbegrenzte Zuwendung.
