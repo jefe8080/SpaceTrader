@@ -1,3 +1,6 @@
+import {SHIP_CATEGORIES,shipComparison,compareShipTypes} from '/shared/ship-comparison.js';
+import {FACTIONS} from '/shared/factions.js';
+import {shipRatings} from './shipComparison.js';
 import {questText} from './quests.js';
 import {HOME_STORY,storyAvailable,storyDialogReady} from '/shared/home-story.js';
 import { GOODS, RECIPES,recipeText } from '/shared/config.js';
@@ -168,7 +171,10 @@ function orbitalPanel(entity){
   for(const s of o?.infrastructureShips||[])html+=`<p>Infrastruktur: ${esc(s.name)} (${s.id}) · dauerhaft im Ring.</p>`;
   if(o?.small){
     html+='<details><summary>Schiffbau mit echten Materialien</summary><p>Kleiner Betrieb: 20 Energie, acht einfache und sechs Fachkräfte. Große Fertigung zusätzlich: 60 Energie, zehn Fachkräfte, vier Spezialisten. Personal und Energie nur bei laufendem Bau.</p>';
-    for(const [id,d] of Object.entries(SHIP_TYPES).filter(([,d])=>!d.npc&&(o.large?['S','M','L','XL']:['S','M']).includes(d.cls)))html+=`<p>${d.name}: ${Object.entries(d.build).map(([g,n])=>`${n} ${GOODS[g].name}`).join(', ')}${d.currency?` + ${d.currency.n} ${GOODS[d.currency.good].name} · Fraktionsrang ${d.rank}`:''} · ${SHIPYARD.BUILD_TIME[d.cls]} s</p><button class="small" data-pp="homeOrbitalBuild" data-type="${id}">Schiff bauen</button>`;
+    for(const [category,label] of Object.entries(SHIP_CATEGORIES)){
+    html+=`<h4>${label}</h4>`;
+    for(const [id,d] of Object.entries(SHIP_TYPES).filter(([id,d])=>!d.npc&&shipComparison(id).category===category&&(o.large||['craft','S','M'].includes(shipComparison(id).tier))).sort(compareShipTypes))html+=`<div class="orbital-ship" style="${d.faction?'background:'+FACTIONS[d.faction].color+'24;border-left:4px solid '+FACTIONS[d.faction].color:''}"><p>${d.name}: ${Object.entries(d.build).map(([g,n])=>`${n} ${GOODS[g].name}`).join(', ')}${d.currency?` + ${d.currency.n} ${GOODS[d.currency.good].name} · Fraktionsrang ${d.rank}`:''} · ${SHIPYARD.BUILD_TIME[d.cls]||SHIPYARD.BUILD_TIME[shipComparison(id).tier]} s</p><button class="small" data-pp="homeOrbitalBuild" data-type="${id}">Schiff bauen</button>${shipRatings(id)}</div>`;
+    }
     html+='</details>';
     for(const j of Object.values(o.jobs))html+=`<p>${SHIP_TYPES[j.type].name}: ${Math.ceil(j.remaining)} s · ${j.paused?'pausiert: Energie oder Personal fehlt':'in Fertigung'} · Ausgabeplatz reserviert.</p>`;
     for(const i of o.inventory)html+=`<p>${SHIP_TYPES[i.type].name} · ${esc(i.id)} · Tank voll bei Erstübernahme</p><button class="small" data-pp="homeOrbitalClaim" data-id="${i.id}">Vorhandenes Schiff in Flotte übernehmen</button>`;

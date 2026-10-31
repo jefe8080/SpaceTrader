@@ -176,7 +176,7 @@ Fortschritt im selben Commit aktualisiert. Änderungen bleiben fachlich getrennt
 | P02 | Ruinenbauplätze und Bild nach oben erweitern | Alle 48 Plätze, Wasserwerk, Zoom und Auswahl prüfen | Offen |
 | P03 | Planetenstatistik, Rathaus und Wohnhaus | Filter anhand persistierter Questzustände; Wohnwerte aus Planeten-/Gebäudedaten; Regressionstests | Erledigt |
 | P04 | Panelhöhe und Zentrallager-Akkordeons | Verfügbare Höhe ab Menüleiste; sechs geschlossene Bereiche; DOM-Patcher bewahrt Öffnungszustand | Implementiert; visuelle Browserprüfung offen |
-| P05 | Schiffsalmanach, Kategorien, Farben und Ratings | Vollständigkeit und Abgleich mit zentralen Spieldaten | Offen |
+| P05 | Schiffsalmanach, Kategorien, Farben und Ratings | 20 Tests: vollständige Kategorien, technische Größen, Staffel- und Sonderwaffenwerte, Orbitalregression | Implementiert; visuelle Browserprüfung offen |
 | P06 | Individuelle Erklärungen und aktuelle Grafiken | Vollständige Eintragsliste sowie Text-/Bildprüfung | Offen |
 | P07 | Rezeptfreischaltung und Bestandsmigration | Neubau, Fertigstellung, Abriss, Altstand und Wiederholung | Offen |
 | P08 | Zivilbudget-Ursache und Korrektur | Reproduktion, Wirtschaftsregression und Neustart | Offen |
@@ -195,3 +195,18 @@ Die Planung basiert auf einer lesenden Prüfung. Relevante Ausgangspunkte sind
 Nicht enthalten sind neue Schiffstypen, eine individuelle Bewohnerzuordnung,
 eine neue Wirtschaftsordnung oder eine Erhöhung von Lebenspunkten zur
 Kampfverlängerung. Push und Veröffentlichung benötigen eine separate Zustimmung.
+
+## Umsetzung: zentrale Schiffsbewertungen (P05)
+
+`shared/ship-comparison.js` definiert vier aufsteigende Untergrenzen pro
+Bewertung: Tempo 90/150/230/300; Frachtraum 30/160/520/1800;
+Verteidigung 500/1500/3500/7000; Angriff 1/60/150/350. Darunter gilt 1,
+pro erreichter Grenze ein weiterer Punkt bis 5. Verteidigung ist Rumpf-LP
+multipliziert mit dem Mittel der vier inversen Panzerungsfaktoren gegen
+Durchschlag 0, plus Gesamtschild. Angriff ist die Summe aus Schaden ×
+Schussfolge aller Waffen, bei Staffeln × voller Fluggerätezahl. Strahlen
+verwenden ihre maximale Aufladung; Frontstrahl-/Belagerungsboni entsprechen
+dem Kampfcode. Ionenwaffen und PD zählen mit ihrem echten Schaden; Störung,
+Abfangwirkung, Feuerwinkel, Trefferchance und Munition werden nicht als
+erfundener Zusatzschaden bewertet. Die Bewertung beschreibt Potenzial,
+keine Siegwahrscheinlichkeit, und ändert keine Kampfwerte.

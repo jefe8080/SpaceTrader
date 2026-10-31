@@ -1,3 +1,4 @@
+import {shipCombatInfo,shipRatings} from './shipComparison.js';
 // Almanach-Reiter Schiffe und Module: sichtbar sind gesehene oder gekaufte Typen
 import { GOODS, SHIP_TYPES, SHIP_CLASSES, MODULES, MODULE_SIZE, ABILITIES, RANK_NAMES, moduleCapacity } from '/shared/config.js';
 import { state, fmt, esc } from '../state.js';
@@ -24,7 +25,7 @@ function renderShips() {
         <span>Tank</span><span>${d.tank}</span><span>Bergbau</span><span>${d.mining || '–'}</span>
         <span>Preis</span><span>${seen ? fmt(seen) + ' Cr (zuletzt gesehen)' : 'ca. ' + fmt(d.price) + ' Cr'}${d.currency ? ` + ${fmt(d.currency.n)} ${GOODS[d.currency.good].name}` : ''}</span>
         ${d.faction ? '' : `<span>Material</span><span>${Object.entries(d.build || {}).map(([g, k]) => `${k} ${GOODS[g].name}`).join(', ') || '–'}</span>`}</div>
-        <div class="muted small-note">${esc(d.desc)}</div></div></div>`;
+        ${shipCombatInfo(t)}${shipRatings(t)}<div class="muted small-note">${esc(d.desc)}</div></div></div>`;
     }
   }
   return h + '</div>';

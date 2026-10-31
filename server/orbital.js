@@ -3,7 +3,7 @@ import {activeSideQuests} from '../shared/side-quests.js';
 import {homeAccess,homeConstructionError,chargeHome} from './homeworld-operations.js';
 import {QUEST_DELIVERIES} from '../shared/advanced-homequests.js';
 import {applyPhysicalHull,initializeNewHull} from './physical-yards.js';
-import {blueprintRank} from '../shared/combat.js';
+import {blueprint,blueprintRank} from '../shared/combat.js';
 import {shipPurchaseBlock} from './war/factions.js';
 
 export const ORBITAL_OPERATION={small:{power:20,workers:{basic:8,skilled:6}},large:{power:60,workers:{skilled:10,specialist:4}}};
@@ -34,8 +34,8 @@ export function orbitalBuild(game,p,e,type){
   {const lock=shipPurchaseBlock(game,p);if(lock)return lock;}
   const h=e.market.homeworld,o=h.orbital,d=SHIP_TYPES[type];
   if(!o?.small||!d||d.npc)return 'Dieser Schiffstyp gehört nicht zum Orbitalbaukatalog.';
-  const large=['L','XL'].includes(d.cls),slot=large?'large':'small';
-  if(!['S','M','L','XL'].includes(d.cls)||large&&!o.large)return 'Dafür muss der große Ring fertig sein.';
+  const tier=blueprint(type).tier,large=['L','XL'].includes(tier),slot=large?'large':'small';
+  if(large&&!o.large)return 'Dafür muss der große Ring fertig sein.';
   const license=PILOT_LICENSES[p.pilot||1];if(!license.classes.includes(d.cls))return 'Die passende Pilotenlizenz fehlt.';
   // PRD 15: Der Bauplan folgt jeweils einen Ruflevel nach der Kauffreigabe
   if(d.faction&&factionRank(p.rep?.[d.faction]||0)<blueprintRank(d))return `Der Bauplan erfordert Fraktionsrang ${blueprintRank(d)}.`;
@@ -43,7 +43,7 @@ export function orbitalBuild(game,p,e,type){
   if(o.inventory.length+Object.keys(o.jobs).length>=12)return 'Alle zwölf Ausgabeplätze sind belegt.';
   const goods={...d.build};if(d.currency)goods[d.currency.good]=(goods[d.currency.good]||0)+d.currency.n;
   const blocked=chargeHome(game,p,e,{credits:0,goods});if(blocked)return blocked;
-  o.jobs[slot]={id:`${e.id}:orbital:${++o.next}`,type,remaining:SHIPYARD.BUILD_TIME[d.cls],materials:structuredClone(d.build),currency:d.currency?structuredClone(d.currency):null,slot,output:'orbitalInventory'};
+  o.jobs[slot]={id:`${e.id}:orbital:${++o.next}`,type,remaining:SHIPYARD.BUILD_TIME[d.cls]||SHIPYARD.BUILD_TIME[tier],materials:structuredClone(d.build),currency:d.currency?structuredClone(d.currency):null,slot,output:'orbitalInventory'};
   game.emit('entity',e);
 }
 export function claimOrbital(game,p,e,id){
