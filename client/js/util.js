@@ -32,6 +32,7 @@ export const goodTag = (g) => `<span class="good"><span class="dot" style="backg
 export function playerPrice(e, g, dir = null) {
   const s = e.market?.goods[g];
   if (!s) return null;
+  if (e.admin) return GOODS[g].base;
   const d = dir || (canBuyFrom(s) ? 'buy' : 'sell');
   return d === 'buy' ? buyPrice(g, s) : sellPrice(g, s);
 }

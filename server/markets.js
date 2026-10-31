@@ -336,6 +336,7 @@ const yardBonusOf = (b) => (b.bonus ? { bonus: b.bonus, yardLvl: b.yardLvl } : {
  * Zusatzwaren bei Level 2, 4 und 6. Auch das Lager-Upgrade des Besitzers (m.storageMul) fließt ein.
  */
 export function applyLevel(e) {
+  if (e.admin || e.market?.strategy === 'factionadmin') return;
   ensureFactoryStorage(e);
   const m = e.market;
   if (e.kind !== 'planet' || !m || e.type === 'ruins' || m.realEconomy) return;
@@ -495,6 +496,7 @@ export function tickHubEquilibrium(entity, dt, now) {
 export function tickMarket(e, dt, now, game) {
   const m = e.market;
   if (!m) return;
+  if (e.admin || m.strategy === 'factionadmin') return;
   if(m.realEconomy&&game)tickRealMarket(game,e,dt);
   else if (drifts(m)) npcTick(e, m, dt, now);
   else STRATEGIES[m.strategy].tick(e, m, dt, now, game);
@@ -508,6 +510,7 @@ export function tickMarket(e, dt, now, game) {
  * NPC-Märkte mit Drift: Zutaten deutlich unter dem Ziel-Füllstand. Sonst die Regel der Strategie (fehlt für einen Zyklus).
  */
 export function missingInputs(m) {
+  if (m.strategy === 'factionadmin') return [];
   if (drifts(m)) {
     if (m.strategy !== 'factory' && m.strategy !== 'extractor') return [];
     const ins = m.strategy === 'factory' ? { ...STATION_TYPES[m.recipe].recipe.in, food: 1 } : { food: 1 };

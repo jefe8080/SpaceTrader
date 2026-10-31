@@ -244,7 +244,7 @@ function doTrade(ship, e, a, game, opts = {}) {
 function waitCondMet(e, a) {
   const s = e.market?.goods[a.good];
   if (!s) return true;
-  const v = a.cond.startsWith('stock') ? s.stock : slotPrice(a.good, s);
+  const v = a.cond.startsWith('stock') ? s.stock : e.admin ? GOODS[a.good].base : slotPrice(a.good, s);
   return a.cond.endsWith('>=') ? v >= a.value : v <= a.value;
 }
 

@@ -1,4 +1,5 @@
-import { questTurnInBlock, questFactionXp } from './war/factions.js';
+import { questTurnInBlock, questFactionXp, fsecOfEntity, receiveGoods, bufferOf } from './war/factions.js';
+import { FACTION_WAR } from '../shared/warfare.js';
 import { factionHostileTo } from './war/diplomacy.js';
 import { revealQuestTarget } from './quest-activation.js';
 import { WORLD, GOODS, BELT_TYPES, QUEST, QUEST_TYPES, REP, RANKS, factionRank, questReward, flightMinutes, canBuyFrom, shipStats,
@@ -288,10 +289,16 @@ function progressQuest(game,player,ship,q,explicit){
       if (q.type === 'mine' && minedQuestProgress(player,q,minedBy(game, player, q.good)) < q.amount) return false;
       const destination=game.world.entities.get(q.giver),prop=game.ownership.get(q.giver);
       if(!destination?.market||prop?.mode==='private'&&!game.canUseStorage(prop,player.id)||destination.market.homeworld?.warp)return false;
+      const factionSector = fsecOfEntity(game, destination);
+      if (factionSector && FACTION_WAR.SUPPLY_GOODS.includes(q.good) && bufferOf(factionSector) - (factionSector.supply[q.good] || 0) < q.amount) {
+        if (explicit) game.emit('notice', player, 'Das Versorgungslager ist voll; die Questware bleibt an Bord.');
+        return false;
+      }
       ship.cargo[q.good] -= q.amount;
       if (!ship.cargo[q.good]) delete ship.cargo[q.good];
-      // Dedicated quest handover: goods leave circulation, never enter the
-      // trade store and never produce an additional trade or local-sale payout.
+      if (factionSector) receiveGoods(factionSector, q.good, q.amount);
+      // Dedicated quest handover: faction deliveries feed supply/pool;
+      // other goods leave circulation. Neither creates a second player payout.
       destination.market.questDeliveries||=[];
       destination.market.questDeliveries.push({quest:q.id,good:q.good,amount:q.amount,time:game.time});
       destination.market.questDeliveries=destination.market.questDeliveries.slice(-100);

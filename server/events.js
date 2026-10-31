@@ -58,7 +58,7 @@ export function tickEvents(game, dt) {
 /** Event auswürfeln: NPC-Planet, Ware aus der Produktion des Sektors (ohne Passagiere und ultraseltene Waren) */
 export function startEvent(game, sector, players) {
   const ents = game.world.sectorEntities(sector).filter((e) => e.sector === sector && e.market);
-  const planets = ents.filter((e) => e.kind === 'planet' && !game.ownership.has(e.id));
+  const planets = ents.filter((e) => e.kind === 'planet' && !e.admin && !game.ownership.has(e.id));
   const goods = new Set();
   for (const e of ents) for (const [g, s] of Object.entries(e.market.goods)) if (s.role === 'produce' && canBuyFrom(s) && !GOODS[g].ultra && GOODS[g].cls !== 'passenger') goods.add(g);
   if (!planets.length || !goods.size) return null;

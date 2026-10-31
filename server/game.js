@@ -33,7 +33,7 @@ import {dispatchRealSupply,finishRealSupply,receiveMarketCash,spendMarketCash,do
 import { initWar, loadWar, saveWar, tickWarBefore, tickWarAfter } from './war/index.js';
 import { migrateWar } from './war/migrate.js';
 import { stackSpeed, removeFromStacks } from './war/stacks.js';
-import { recordActivity } from './war/factions.js';
+import { recordActivity, tradeAdminSupply } from './war/factions.js';
 import { productionFactor } from './war/raids.js';
 
 export const WORLD_GEN_VERSION = 3; // Bestandswelt; Versionskonflikte lösen niemals einen Reset aus
@@ -757,6 +757,7 @@ export class Game {
   }
 
   tradeImpl(ship, e, good, amount, dir, limit = 0, opts = {}) {
+    if (e.admin) return tradeAdminSupply(this, ship, e, good, amount, dir, limit, opts);
     if(this.profile==='homeworld'&&GOODS[good]?.cls==='passenger')return passengerTrade(this,ship,e,good,amount,dir,limit);
     // Sondernachfrage: nur manuelle Verkäufe über den Handelsbefehl, Überschuss zum normalen Marktpreis
     if (opts.manual && dir === 'sell' && ship.dockedAt === e.id) {

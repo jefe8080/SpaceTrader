@@ -314,6 +314,7 @@ export function serializeEntity(e) {
   if (e.size) o.size = e.size;
   if (e.wh) o.wh = e.wh;
   if (e.faction) o.faction = e.faction;
+  if (e.admin) o.admin = e.admin;
   if (e.salvageOwner) o.salvageOwner = e.salvageOwner;
   if(e.archiveOwner)Object.assign(o,{archiveOwner:e.archiveOwner,archiveKey:e.archiveKey});
   if(e.ruinsSite)Object.assign(o,{ruinsSite:true,colony:e.colony||null});

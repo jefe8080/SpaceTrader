@@ -30,7 +30,10 @@ export function ensureFactionSectors(game) {
   for (const sec of game.world.sectors.values()) {
     if (!sec.faction?.id) continue;
     const key = fsecKey(sec.faction.id, sec.key);
-    if (game.fsecs.has(key)) continue;
+    if (game.fsecs.has(key)) {
+      prepareAdminMarket(game, game.fsecs.get(key));
+      continue;
+    }
     const ents = game.world.sectorEntities(sec.key).filter((e) => e.sector === sec.key && e.faction === sec.faction.id);
     const yard = ents.find((e) => e.type === 'factionyard');
     if (!yard) continue;
@@ -41,7 +44,52 @@ export function ensureFactionSectors(game) {
     game.fsecs.set(key, { key, faction: sec.faction.id, sector: sec.key, admin: admin.id, yard: yard.id, pool: F.START_POOL, level: 1, progress: 0, xp: 0,
       supply: { water: F.BUFFER * 0.5, food: F.BUFFER * 0.5 }, ok: true, nextTransport: game.time + 600 + Math.random() * 900, nextBuild: game.time + 60,
       fleet: [], raidAt: 0, upkeepAt: game.time });
+    prepareAdminMarket(game, game.fsecs.get(key));
   }
+}
+
+/** One-time conversion; supply slots always reference the canonical faction buffer. */
+export function prepareAdminMarket(game, fs) {
+  const e = game.world.entities.get(fs.admin);
+  if (!e?.market) return;
+  e.admin = fs.faction;
+  if (!fs.adminMarketVersion) {
+    e.adminOriginalName ??= e.name;
+    e.name = `${e.adminOriginalName} – Verwaltungszentrum (${FACTIONS[fs.faction].name})`;
+    for (const [good, slot] of Object.entries(e.market.goods)) {
+      const amount = Math.max(0, slot.stock || 0);
+      if (F.SUPPLY_GOODS.includes(good)) fs.supply[good] = (fs.supply[good] || 0) + amount;
+      else poolAdd(fs, amount * (good === 'finegold' ? F.GOLD_RATE : bestPrice(good)));
+    }
+    fs.adminMarketVersion = 1;
+  }
+  if (e.market.strategy === 'factionadmin' && e.market.adminBound === fs) return;
+  e.market.strategy = 'factionadmin';
+  e.market.goods = Object.fromEntries(F.SUPPLY_GOODS.map((good) => [good, {
+    role: 'consume', get rate() { return F.DEMAND_PER_MIN * fs.level / 60; }, mod: 1,
+    get cap() { return bufferOf(fs); },
+    get stock() { return fs.supply[good] || 0; },
+    set stock(value) { fs.supply[good] = value; },
+  }]));
+  Object.defineProperty(e.market, 'adminBound', { value: fs, configurable: true });
+  e.market.rev = (e.market.rev || 0) + 1;
+}
+
+/** Shared by manual and route trades; special quest/gift/loot paths stay separate. */
+export function tradeAdminSupply(game, ship, e, good, amount, dir, limit = 0, opts = {}) {
+  const fs = fsecOfEntity(game, e), p = game.players.get(ship.owner);
+  if (!fs || !p) return { n: 0, reason: 'Kein Spielerhandel am Verwaltungszentrum.' };
+  if (ship.dockedAt !== e.id) return { n: 0, reason: 'Schiff ist nicht angedockt' };
+  if (dir !== 'sell' || !F.SUPPLY_GOODS.includes(good)) return { n: 0, reason: 'Fraktionen kaufen außerhalb von Quests nur Wasser und Nahrung.' };
+  const price = bestPrice(good);
+  if (limit && price < limit) return { n: 0, reason: 'Preisgrenze' };
+  const before = ship.cargo[good] || 0;
+  const reason = supplyDelivery(game, p, ship, good, amount, false);
+  if (reason) return { n: 0, reason };
+  const n = before - (ship.cargo[good] || 0), total = n * price;
+  game.recordShip(ship, 'inc', total, opts.route);
+  game.afterTrade(ship, e, good, n, total, dir, opts);
+  return { n, total };
 }
 
 export const fsecOfEntity = (game, e) => (e?.admin ? game.fsecs.get(fsecKey(e.admin, e.sector)) : null);
@@ -270,6 +318,7 @@ export function deliverGift(game, p, ship) {
   if (!fs) return 'Das Geschenk wird an einem Verwaltungsplaneten übergeben.';
   if (w.friends.includes(fs.faction)) return 'Mit dieser Fraktion bist du bereits befreundet.';
   for (const [g, n] of Object.entries(q.gift)) if ((ship.cargo[g] || 0) < n) return `Geschenk unvollständig: ${n} ${GOODS[g].name} nötig.`;
+  for (const [g, n] of Object.entries(q.gift)) if (F.SUPPLY_GOODS.includes(g) && bufferOf(fs) - (fs.supply[g] || 0) < n) return 'Das Versorgungslager ist voll; das Geschenk bleibt an Bord.';
   for (const [g, n] of Object.entries(q.gift)) {
     ship.cargo[g] -= n;
     if (!ship.cargo[g]) delete ship.cargo[g];

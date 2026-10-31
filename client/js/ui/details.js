@@ -228,6 +228,7 @@ function supplyText(m) {
 const ROLE_LABEL = { produce: 'verkauft', consume: 'kauft', trade: 'Händler' };
 
 export function marketTable(e, ship) {
+  if (e.admin) return '<div class="muted">Das Verwaltungszentrum kauft ausschließlich Wasser und Nahrung zum regulären Bestpreis. Verkäufe nutzen den Fraktionspool und den Versorgungspuffer; Versorgung und Abgabe sind im Verwaltungsbereich aufgeführt.</div>';
   const onRoute = ship?.queue?.[0]?.t === 'route';
   const canTrade = ship && ship.dockedAt === e.id && !onRoute;
   const mine = e.owner === state.me.id;

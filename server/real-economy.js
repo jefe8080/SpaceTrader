@@ -147,6 +147,7 @@ const queuedFor=(game,entity,good)=>[...game.ships.values()].some(s=>s.owner===N
 
 /** Public demand buys real goods with escrowed cash, never anticipated sales. */
 export function dispatchRealSupply(game,entity){
+  if(entity.admin)return;
   if(entity.type==='hub')return; // Hub stocks use their historical equilibrium.
   const market=entity.market;if(game.ownership.has(entity.id))return;
   if(market.yardCatalog&&(market.building||(!market.order&&market.forSale.length>=SHIPYARD.MAX_FOR_SALE)))return;
