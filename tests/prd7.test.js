@@ -40,6 +40,7 @@ test('PRD7: old saved pilot receives active H00 and a populated profile on actua
     const loaded=game.players.get(id),messages={};
     const net=new Net({on(){},emit(){}},game);
     net.sendConsortium=()=>{};net.sendEvents=()=>{};
+    game.world.entities.get(loaded.homeworld).market.homeworld.controlLevel=1;
     net.welcome({player:loaded,socket:{emit:(event,data)=>{messages[event]=data;}},sentDetail:new Map(),view:null});
     assert.equal(messages.welcome.protocol,GAME_PROTOCOL);
     assert.equal(messages.welcome.onboardingRequired,true);
@@ -49,6 +50,7 @@ test('PRD7: old saved pilot receives active H00 and a populated profile on actua
     assert.equal(messages.me.homeQuest.journal.filter(entry=>entry.id==='H00').length,1);
     assert.ok(messages.me.profile);assert.equal(messages.me.profile.ships,1);
     assert.equal(messages.me.profile.revenue,0);
+    assert.equal(messages.me.coverage.length,1,'Leitstellenabdeckung wird übertragen');
   } finally {game?.store.close();fs.rmSync(directory,{recursive:true,force:true});}
 });
 
