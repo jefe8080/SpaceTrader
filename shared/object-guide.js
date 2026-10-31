@@ -72,7 +72,7 @@ for (const [id,name,intro,points] of [
   ['relic','Reliktwrack','Ein persönliches Wrack mit einem versiegelten Fund.',['Mit dem aktiven manuellen Schiff persönlich bergen.','Den versiegelten Fund mit dem Bergungsschiff zur Heimatwerkstatt bringen.','Die Fundstelle verschwindet nach Abschluss der zugehörigen Aufgabe.']],
 ]) add('quest:'+id,name,'/assets/art/homeworld/'+(id==='relic'?'relic':'archive')+'.png',intro,points,'Fundstellen');
 
-for(const size of ['small','large'])OBJECT_GUIDE['building:orbital-'+size].image='/assets/orbital_elevator_'+size+'.svg';
+for(const size of ['small','large'])OBJECT_GUIDE['building:orbital-'+size].image='/assets/art/cities/orbital-elevator-'+size+'.png';
 for(const [id,d] of Object.entries(HOME_BUILDINGS)){
   const entry=OBJECT_GUIDE['building:home-building:'+id];
   entry.points=[];
@@ -110,7 +110,7 @@ for(const d of Object.values(OBJECT_GUIDE).filter(d=>d.category==='Gebäude')){
  if(id.startsWith('orbital-'))continue;
  if(id==='housing'){d.image='/assets/art/cities/housing-1.png';continue;}
  if(id==='plot'){d.image='/assets/art/cities/ruins-city-v2.png';d.frame=[610,570,130,90];continue;}
- const cell=guideCells[id]??15;d.image='/assets/art/cities/sprites.png';d.frame=[cell%5*1536/5,Math.floor(cell/5)*1024/5,1536/5,1024/5];
+ const cell=guideCells[id]??15;d.image='/assets/art/cities/sprites.png';d.frame=[cell%5*1536/5+15,Math.floor(cell/5)*1024/5+5,1536/5-30,1024/5-10];
 }
 const quantities=values=>Object.entries(values||{}).map(([g,n])=>n+' '+(GOODS[g]?.name||g)).join(', ')||'keine';
 for(const [id,r] of Object.entries(RECIPES)){
@@ -120,7 +120,7 @@ for(const [id,r] of Object.entries(RECIPES)){
  entry.points=['Zutaten je Zyklus: '+quantities(r.in)+'.','Ergebnis je Zyklus: '+quantities(r.out)+'.','Ein vollständiger Zyklus dauert '+r.time+' Sekunden. Zutaten werden erst bei einem vollständigen Zyklus verbraucht.','Fertigstellung eines eigenen Gebäudes schaltet seine Rezepte dauerhaft frei. Abriss entfernt die Freischaltung nicht. Die Erklärung ist schon vor dem Bau vollständig lesbar.','Produktion benötigt eine fertige, eingeschaltete Anlage, Zutaten und freien Lagerraum.'];
  if(spec)entry.points.push('Bau: '+spec.credits+' Cr, '+quantities(spec.goods)+'; '+spec.seconds+' s. Voraussetzung: '+spec.quest+'.','Betrieb: '+spec.power+' Energie; '+Object.entries(spec.workers).map(([q,n])=>n+' '+({basic:'einfache Kräfte',skilled:'Fachkräfte',specialist:'Spezialisten'}[q])).join(', ')+'.');
  const cell=({waterworks:0,foodplant:12,fueldepot:0,refinery:5,smelter:3})[id]??16;
- entry.image='/assets/art/cities/sprites.png';entry.frame=[cell%5*1536/5,Math.floor(cell/5)*1024/5,1536/5,1024/5];
+ entry.image='/assets/art/cities/sprites.png';entry.frame=[cell%5*1536/5+15,Math.floor(cell/5)*1024/5+5,1536/5-30,1024/5-10];
 }
 for(const [id,d] of Object.entries(HOME_BUILDINGS)){
  const entry=OBJECT_GUIDE['building:home-building:'+id];

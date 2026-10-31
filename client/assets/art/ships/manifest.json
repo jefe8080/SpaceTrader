@@ -162,41 +162,41 @@
   {
     "id": "falke",
     "file": "ship_falke.png",
-    "source": "scripts/art/prd15-ship-designs.js"
+    "source": "docs/art/prd16/painted-assets.json"
   },
   {
     "id": "keiler",
     "file": "ship_keiler.png",
-    "source": "scripts/art/prd15-ship-designs.js"
+    "source": "docs/art/prd16/painted-assets.json"
   },
   {
     "id": "abfangstaffel",
     "file": "ship_abfangstaffel.png",
-    "source": "scripts/art/prd15-ship-designs.js"
+    "source": "docs/art/prd16/painted-assets.json"
   },
   {
     "id": "bomberstaffel",
     "file": "ship_bomberstaffel.png",
-    "source": "scripts/art/prd15-ship-designs.js"
+    "source": "docs/art/prd16/painted-assets.json"
   },
   {
     "id": "korvette",
     "file": "ship_korvette.png",
-    "source": "scripts/art/prd15-ship-designs.js"
+    "source": "docs/art/prd16/painted-assets.json"
   },
   {
     "id": "fregatte",
     "file": "ship_fregatte.png",
-    "source": "scripts/art/prd15-ship-designs.js"
+    "source": "docs/art/prd16/painted-assets.json"
   },
   {
     "id": "zerstoerer",
     "file": "ship_zerstoerer.png",
-    "source": "scripts/art/prd15-ship-designs.js"
+    "source": "docs/art/prd16/painted-assets.json"
   },
   {
     "id": "kreuzer",
     "file": "ship_kreuzer.png",
-    "source": "scripts/art/prd15-ship-designs.js"
+    "source": "docs/art/prd16/painted-assets.json"
   }
 ]

@@ -1,72 +1,68 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
   <!-- Generiert von scripts/gen-ship-sprites.js. Staffel, Nase zeigt nach rechts. #ff00ff = Spielerfarbe -->
   <defs>
-    <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0d9b9"/><stop offset="1" stop-color="#4d615b"/></linearGradient>
-    <linearGradient id="wing" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4d615b"/><stop offset="1" stop-color="#e0d9b9"/></linearGradient>
+    <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfd8dc"/><stop offset="1" stop-color="#37474f"/></linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#37474f"/><stop offset="1" stop-color="#cfd8dc"/></linearGradient>
     <radialGradient id="flame" cx="100%" cy="50%" r="100%"><stop offset="0" stop-color="#fff3c4"/><stop offset="0.5" stop-color="#ffab40"/><stop offset="1" stop-color="#ff6d00" stop-opacity="0"/></radialGradient>
   </defs>
-  <g transform="translate(18 0)"><g transform="translate(0 -18) translate(64 64) scale(0.62) translate(-64 -64)">
-  <path d="M59 56.8 L77 56.8 L84 43 L75.6 43 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
-  <path d="M75.6 43 L84 43 L80 49 L77.6 49 Z" fill="#ff00ff"/>
-  <path d="M59 71.2 L77 71.2 L84 85 L75.6 85 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
-  <path d="M75.6 85 L84 85 L80 79 L77.6 79 Z" fill="#ff00ff"/>
-  <ellipse cx="41" cy="58.5" rx="8" ry="4.5" fill="url(#flame)"/>
-  <rect x="43" y="54" width="9" height="9" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
-  <ellipse cx="41" cy="69.5" rx="8" ry="4.5" fill="url(#flame)"/>
-  <rect x="43" y="65" width="9" height="9" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
-  <path d="M49 55 L70.6 55.9 Q83 60.2 83 64 Q83 67.8 70.6 72.1 L49 73 Q45 64 49 55 Z" fill="url(#hull)" stroke="#1c2529" stroke-width="2.5"/>
-  <path d="M55 64 L66.6 64" stroke="#263238" stroke-width="1" opacity="0.45"/>
-  <rect x="57.2" y="57" width="6" height="14" fill="#ff00ff" opacity="0.9"/>
-  <rect x="54" y="52" width="17" height="5" rx="2" fill="#d99d48" stroke="#253d42"/><rect x="54" y="71" width="17" height="5" rx="2" fill="#d99d48" stroke="#253d42"/>
-  <ellipse cx="68.6" cy="64" rx="6.8" ry="4.1" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
-  <ellipse cx="70.6" cy="62.7" rx="3.1" ry="1.2" fill="#e1f5fe" opacity="0.7"/>
+  <g transform="translate(18 0)"><g transform="translate(0 0) translate(64 64) scale(0.62) translate(-64 -64)">
+  <path d="M60 58.4 L76 58.4 L76 43 L68.8 43 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M68.8 43 L76 43 L72 49 L70.8 49 Z" fill="#ff00ff"/>
+  <path d="M60 69.6 L76 69.6 L76 85 L68.8 85 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M68.8 85 L76 85 L72 79 L70.8 79 Z" fill="#ff00ff"/>
+  <ellipse cx="40" cy="59.5" rx="8" ry="3.5" fill="url(#flame)"/>
+  <rect x="42" y="56" width="9" height="7" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <ellipse cx="40" cy="68.5" rx="8" ry="3.5" fill="url(#flame)"/>
+  <rect x="42" y="65" width="9" height="7" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <path d="M48 57 L62.8 57.7 Q84 62.2 84 64 Q84 65.8 62.8 70.3 L48 71 Q44 64 48 57 Z" fill="url(#hull)" stroke="#1c2529" stroke-width="2.5"/>
+  <path d="M54 64 L58.8 64" stroke="#263238" stroke-width="1" opacity="0.45"/>
+  <rect x="56.8" y="59" width="6" height="10" fill="#ff00ff" opacity="0.9"/>
+  <ellipse cx="60.8" cy="64" rx="11.7" ry="3.2" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
+  <ellipse cx="62.8" cy="63" rx="5" ry="1.2" fill="#e1f5fe" opacity="0.7"/>
 </g>
-  <g transform="translate(0 18) translate(64 64) scale(0.62) translate(-64 -64)">
-  <path d="M59 56.8 L77 56.8 L84 43 L75.6 43 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
-  <path d="M75.6 43 L84 43 L80 49 L77.6 49 Z" fill="#ff00ff"/>
-  <path d="M59 71.2 L77 71.2 L84 85 L75.6 85 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
-  <path d="M75.6 85 L84 85 L80 79 L77.6 79 Z" fill="#ff00ff"/>
-  <ellipse cx="41" cy="58.5" rx="8" ry="4.5" fill="url(#flame)"/>
-  <rect x="43" y="54" width="9" height="9" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
-  <ellipse cx="41" cy="69.5" rx="8" ry="4.5" fill="url(#flame)"/>
-  <rect x="43" y="65" width="9" height="9" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
-  <path d="M49 55 L70.6 55.9 Q83 60.2 83 64 Q83 67.8 70.6 72.1 L49 73 Q45 64 49 55 Z" fill="url(#hull)" stroke="#1c2529" stroke-width="2.5"/>
-  <path d="M55 64 L66.6 64" stroke="#263238" stroke-width="1" opacity="0.45"/>
-  <rect x="57.2" y="57" width="6" height="14" fill="#ff00ff" opacity="0.9"/>
-  <rect x="54" y="52" width="17" height="5" rx="2" fill="#d99d48" stroke="#253d42"/><rect x="54" y="71" width="17" height="5" rx="2" fill="#d99d48" stroke="#253d42"/>
-  <ellipse cx="68.6" cy="64" rx="6.8" ry="4.1" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
-  <ellipse cx="70.6" cy="62.7" rx="3.1" ry="1.2" fill="#e1f5fe" opacity="0.7"/>
+  <g transform="translate(-22 -18) translate(64 64) scale(0.62) translate(-64 -64)">
+  <path d="M60 58.4 L76 58.4 L76 43 L68.8 43 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M68.8 43 L76 43 L72 49 L70.8 49 Z" fill="#ff00ff"/>
+  <path d="M60 69.6 L76 69.6 L76 85 L68.8 85 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M68.8 85 L76 85 L72 79 L70.8 79 Z" fill="#ff00ff"/>
+  <ellipse cx="40" cy="59.5" rx="8" ry="3.5" fill="url(#flame)"/>
+  <rect x="42" y="56" width="9" height="7" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <ellipse cx="40" cy="68.5" rx="8" ry="3.5" fill="url(#flame)"/>
+  <rect x="42" y="65" width="9" height="7" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <path d="M48 57 L62.8 57.7 Q84 62.2 84 64 Q84 65.8 62.8 70.3 L48 71 Q44 64 48 57 Z" fill="url(#hull)" stroke="#1c2529" stroke-width="2.5"/>
+  <path d="M54 64 L58.8 64" stroke="#263238" stroke-width="1" opacity="0.45"/>
+  <rect x="56.8" y="59" width="6" height="10" fill="#ff00ff" opacity="0.9"/>
+  <ellipse cx="60.8" cy="64" rx="11.7" ry="3.2" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
+  <ellipse cx="62.8" cy="63" rx="5" ry="1.2" fill="#e1f5fe" opacity="0.7"/>
 </g>
-  <g transform="translate(-44 -18) translate(64 64) scale(0.62) translate(-64 -64)">
-  <path d="M59 56.8 L77 56.8 L84 43 L75.6 43 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
-  <path d="M75.6 43 L84 43 L80 49 L77.6 49 Z" fill="#ff00ff"/>
-  <path d="M59 71.2 L77 71.2 L84 85 L75.6 85 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
-  <path d="M75.6 85 L84 85 L80 79 L77.6 79 Z" fill="#ff00ff"/>
-  <ellipse cx="41" cy="58.5" rx="8" ry="4.5" fill="url(#flame)"/>
-  <rect x="43" y="54" width="9" height="9" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
-  <ellipse cx="41" cy="69.5" rx="8" ry="4.5" fill="url(#flame)"/>
-  <rect x="43" y="65" width="9" height="9" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
-  <path d="M49 55 L70.6 55.9 Q83 60.2 83 64 Q83 67.8 70.6 72.1 L49 73 Q45 64 49 55 Z" fill="url(#hull)" stroke="#1c2529" stroke-width="2.5"/>
-  <path d="M55 64 L66.6 64" stroke="#263238" stroke-width="1" opacity="0.45"/>
-  <rect x="57.2" y="57" width="6" height="14" fill="#ff00ff" opacity="0.9"/>
-  <rect x="54" y="52" width="17" height="5" rx="2" fill="#d99d48" stroke="#253d42"/><rect x="54" y="71" width="17" height="5" rx="2" fill="#d99d48" stroke="#253d42"/>
-  <ellipse cx="68.6" cy="64" rx="6.8" ry="4.1" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
-  <ellipse cx="70.6" cy="62.7" rx="3.1" ry="1.2" fill="#e1f5fe" opacity="0.7"/>
+  <g transform="translate(-22 18) translate(64 64) scale(0.62) translate(-64 -64)">
+  <path d="M60 58.4 L76 58.4 L76 43 L68.8 43 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M68.8 43 L76 43 L72 49 L70.8 49 Z" fill="#ff00ff"/>
+  <path d="M60 69.6 L76 69.6 L76 85 L68.8 85 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M68.8 85 L76 85 L72 79 L70.8 79 Z" fill="#ff00ff"/>
+  <ellipse cx="40" cy="59.5" rx="8" ry="3.5" fill="url(#flame)"/>
+  <rect x="42" y="56" width="9" height="7" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <ellipse cx="40" cy="68.5" rx="8" ry="3.5" fill="url(#flame)"/>
+  <rect x="42" y="65" width="9" height="7" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <path d="M48 57 L62.8 57.7 Q84 62.2 84 64 Q84 65.8 62.8 70.3 L48 71 Q44 64 48 57 Z" fill="url(#hull)" stroke="#1c2529" stroke-width="2.5"/>
+  <path d="M54 64 L58.8 64" stroke="#263238" stroke-width="1" opacity="0.45"/>
+  <rect x="56.8" y="59" width="6" height="10" fill="#ff00ff" opacity="0.9"/>
+  <ellipse cx="60.8" cy="64" rx="11.7" ry="3.2" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
+  <ellipse cx="62.8" cy="63" rx="5" ry="1.2" fill="#e1f5fe" opacity="0.7"/>
 </g>
-  <g transform="translate(-44 18) translate(64 64) scale(0.62) translate(-64 -64)">
-  <path d="M59 56.8 L77 56.8 L84 43 L75.6 43 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
-  <path d="M75.6 43 L84 43 L80 49 L77.6 49 Z" fill="#ff00ff"/>
-  <path d="M59 71.2 L77 71.2 L84 85 L75.6 85 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
-  <path d="M75.6 85 L84 85 L80 79 L77.6 79 Z" fill="#ff00ff"/>
-  <ellipse cx="41" cy="58.5" rx="8" ry="4.5" fill="url(#flame)"/>
-  <rect x="43" y="54" width="9" height="9" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
-  <ellipse cx="41" cy="69.5" rx="8" ry="4.5" fill="url(#flame)"/>
-  <rect x="43" y="65" width="9" height="9" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
-  <path d="M49 55 L70.6 55.9 Q83 60.2 83 64 Q83 67.8 70.6 72.1 L49 73 Q45 64 49 55 Z" fill="url(#hull)" stroke="#1c2529" stroke-width="2.5"/>
-  <path d="M55 64 L66.6 64" stroke="#263238" stroke-width="1" opacity="0.45"/>
-  <rect x="57.2" y="57" width="6" height="14" fill="#ff00ff" opacity="0.9"/>
-  <rect x="54" y="52" width="17" height="5" rx="2" fill="#d99d48" stroke="#253d42"/><rect x="54" y="71" width="17" height="5" rx="2" fill="#d99d48" stroke="#253d42"/>
-  <ellipse cx="68.6" cy="64" rx="6.8" ry="4.1" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
-  <ellipse cx="70.6" cy="62.7" rx="3.1" ry="1.2" fill="#e1f5fe" opacity="0.7"/>
+  <g transform="translate(-44 -36) translate(64 64) scale(0.62) translate(-64 -64)">
+  <path d="M60 58.4 L76 58.4 L76 43 L68.8 43 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M68.8 43 L76 43 L72 49 L70.8 49 Z" fill="#ff00ff"/>
+  <path d="M60 69.6 L76 69.6 L76 85 L68.8 85 Z" fill="url(#wing)" stroke="#1c2529" stroke-width="2"/>
+  <path d="M68.8 85 L76 85 L72 79 L70.8 79 Z" fill="#ff00ff"/>
+  <ellipse cx="40" cy="59.5" rx="8" ry="3.5" fill="url(#flame)"/>
+  <rect x="42" y="56" width="9" height="7" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <ellipse cx="40" cy="68.5" rx="8" ry="3.5" fill="url(#flame)"/>
+  <rect x="42" y="65" width="9" height="7" rx="2" fill="#37474f" stroke="#1c2529" stroke-width="1"/>
+  <path d="M48 57 L62.8 57.7 Q84 62.2 84 64 Q84 65.8 62.8 70.3 L48 71 Q44 64 48 57 Z" fill="url(#hull)" stroke="#1c2529" stroke-width="2.5"/>
+  <path d="M54 64 L58.8 64" stroke="#263238" stroke-width="1" opacity="0.45"/>
+  <rect x="56.8" y="59" width="6" height="10" fill="#ff00ff" opacity="0.9"/>
+  <ellipse cx="60.8" cy="64" rx="11.7" ry="3.2" fill="#4fc3f7" stroke="#01579b" stroke-width="1.5"/>
+  <ellipse cx="62.8" cy="63" rx="5" ry="1.2" fill="#e1f5fe" opacity="0.7"/>
 </g></g>
 </svg>

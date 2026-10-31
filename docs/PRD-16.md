@@ -172,7 +172,7 @@ Fortschritt im selben Commit aktualisiert. Änderungen bleiben fachlich getrennt
 
 | Paket | Inhalt | Nachweis vor Abschluss | Status |
 | --- | --- | --- | --- |
-| P01 | Aufzug- und acht Schiffsdesigns | Browsergalerie: acht Silhouetten und zwei Aufzüge geprüft; bestehende Spritepfade und Spielerfarben erhalten | Erledigt |
+| P01 | Aufzug- und acht Schiffsdesigns | Nach Nutzerkorrektur: acht gemalte PNGs und zwei Aufzug-PNGs nach aktuellen Zivilschiff-/Stadtreferenzen; SVG-Rückfall unverändert | Erledigt |
 | P02 | Ruinenbauplätze und Bild nach oben erweitern | Browser-Overlay aller Gruppen; 17 Stadt-/Kameratests; Originalbild unverändert, 128 px obere Fortsetzung | Erledigt |
 | P03 | Planetenstatistik, Rathaus und Wohnhaus | Filter anhand persistierter Questzustände; Wohnwerte aus Planeten-/Gebäudedaten; Regressionstests | Erledigt |
 | P04 | Panelhöhe und Zentrallager-Akkordeons | Verfügbare Höhe ab Menüleiste; sechs geschlossene Bereiche; DOM-Patcher bewahrt Öffnungszustand | Implementiert; visuelle Browserprüfung offen |
@@ -243,7 +243,11 @@ Ticks erforderlich. Keine zusätzlichen Optimierungen ohne belegten Bedarf.
 
 ## Grafiken (P01/P02)
 
-Schiffe und Aufzüge sind native SVGs; Generatoren reproduzieren die Designs.
-Nur die acht beauftragten Basisschiffe und zwei Aufzüge wurden ersetzt; die
+Nach Nutzerkorrektur am 31.10.2026 verwenden Schiffe und Aufzüge gemalte
+PNG-Illustrationen aus dem eingebauten ImageGen. Stilreferenzen sind die
+aktuellen PNGs von Spatz/Lastesel und das Ruinenstadtgemälde. Die zuvor
+erstellten SVG-Entwürfe wurden verworfen und die Rückfall-SVGs wiederhergestellt.
+Promptset und endgültige Pfade stehen in `docs/art/prd16/painted-assets.json`.
+Nur die acht beauftragten Basisschiff-PNGs und zwei Aufzüge wurden ersetzt; die
 18 Fraktionsgrafiken bleiben unverändert. Die gemeinsame Galerie unter
 `/dev/prd16-art.html` zeigt alle Designs und die 48 Bauplatzanker.

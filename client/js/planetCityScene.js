@@ -39,7 +39,7 @@ function loadArt() {
         return {image,x:left,y:top,w:right-left+1,h:bottom-top+1};
       });
       return {sprites};
-    }).then(async art=>({...art,housing:await Promise.all([1,2,3].map(level=>loadImage('/assets/art/cities/housing-'+level+'.png'))),extension:await loadImage('/assets/art/cities/ruins-city-extension.png'),elevators:await Promise.all(['small','large'].map(size=>loadImage('/assets/orbital_elevator_'+size+'.svg')))})).catch(error=>{artPromise=null;throw error;});
+    }).then(async art=>({...art,housing:await Promise.all([1,2,3].map(level=>loadImage('/assets/art/cities/housing-'+level+'.png'))),extension:await loadImage('/assets/art/cities/ruins-city-extension.png'),elevators:await Promise.all(['small','large'].map(size=>loadImage('/assets/art/cities/orbital-elevator-'+size+'.png')))})).catch(error=>{artPromise=null;throw error;});
 }
 function line(ctx,points,color,width) {ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();}
 function ellipse(ctx,x,y,rx,ry,fill) {ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill();}

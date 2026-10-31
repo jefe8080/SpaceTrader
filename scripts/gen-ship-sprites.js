@@ -43,14 +43,14 @@ const SHIPS = {
   fl_syndicate: { len: 110, w: 30, nose: 0.3, wing: { span: 12, sweep: 4, root: 44, tip: 36 }, pods: 4, engines: 4, fins: true, hull: ['#ffcdd2', '#4e342e'] },
   fx_syndicate: { len: 120, w: 33, nose: 0.3, wing: { span: 26, sweep: 12, root: 60, tip: 40 }, pods: 5, engines: 6, ring: true, fins: true, hull: ['#ef9a9a', '#3e2723'] },
   // PRD 15: Mehrzweck- und Militärmodelle im selben Comic-Stil (kräftige Konturen, Zweitonrumpf, Akzent über #ff00ff)
-  falke: { role:'courier', len:94, w:7, nose:1, wing:{span:38,sweep:36,root:28,tip:5},engines:2,fins:true,guns:1,hull:['#fff2cd','#8b654e'] },
-  keiler: { role:'freighter',len:88,w:24,nose:.12,wing:{span:9,sweep:-4,root:38,tip:15},pods:3,engines:3,guns:2,armor:true,hull:['#e7d7b6','#665850'] },
-  abfangstaffel: { role:'interceptor',squad:6,len:40,w:4,nose:1,wing:{span:13,sweep:16,root:14,tip:3},engines:1,hull:['#ffeab2','#735138'] },
-  bomberstaffel: { role:'bomber',squad:4,len:38,w:9,nose:.2,wing:{span:12,sweep:0,root:18,tip:7},engines:2,hull:['#e0d9b9','#4d615b'] },
-  korvette: { role:'escort',len:96,w:10,nose:.95,wing:{span:32,sweep:8,root:18,tip:6},engines:2,fins:true,guns:3,hull:['#e0eeec','#3e656b'] },
-  fregatte: { role:'frigate',len:104,w:17,nose:.7,wing:{span:22,sweep:28,root:50,tip:9},engines:3,guns:4,armor:true,hull:['#eee0bd','#5e7268'] },
-  zerstoerer: { role:'destroyer',len:112,w:18,nose:.3,wing:{span:30,sweep:5,root:54,tip:12},engines:4,guns:5,armor:true,hull:['#c8d6d8','#36464e'] },
-  kreuzer: { role:'cruiser',len:114,w:29,nose:.15,wing:{span:15,sweep:10,root:64,tip:22},engines:5,fins:true,guns:7,armor:true,hull:['#c9c9bb','#3e4f4c'] },
+  falke:        { len: 84, w: 9, nose: 0.95, wing: { span: 30, sweep: 24, root: 26, tip: 6 }, engines: 2, fins: true, guns: 2, hull: ['#fff8e1', '#8d6e63'] },
+  keiler:       { len: 96, w: 20, nose: 0.3, wing: { span: 14, sweep: 4, root: 34, tip: 26 }, pods: 2, engines: 3, guns: 3, armor: true, hull: ['#d7ccc8', '#4e342e'] },
+  abfangstaffel:{ squad: 6, len: 34, w: 5, nose: 1, wing: { span: 12, sweep: 10, root: 12, tip: 3 }, engines: 1, hull: ['#eceff1', '#455a64'] },
+  bomberstaffel:{ squad: 4, len: 40, w: 7, nose: 0.6, wing: { span: 14, sweep: 6, root: 16, tip: 6 }, engines: 2, hull: ['#cfd8dc', '#37474f'] },
+  korvette:     { len: 92, w: 12, nose: 0.85, wing: { span: 26, sweep: 18, root: 30, tip: 10 }, engines: 2, fins: true, guns: 3, hull: ['#e3f2fd', '#37474f'] },
+  fregatte:     { len: 106, w: 17, nose: 0.75, wing: { span: 30, sweep: 18, root: 40, tip: 14 }, engines: 3, fins: true, guns: 5, armor: true, hull: ['#e0e0e0', '#263238'] },
+  zerstoerer:   { len: 114, w: 21, nose: 0.65, wing: { span: 28, sweep: 14, root: 46, tip: 18 }, engines: 4, fins: true, guns: 6, armor: true, hull: ['#cfd8dc', '#212121'] },
+  kreuzer:      { len: 122, w: 27, nose: 0.5, wing: { span: 30, sweep: 12, root: 56, tip: 26 }, engines: 5, ring: true, fins: true, guns: 8, armor: true, hull: ['#b0bec5', '#1a2327'] },
 };
 
 const r1 = (v) => Math.round(v * 10) / 10;
@@ -114,15 +114,6 @@ function svg(p) {
     const gx = x0 + 18 + (i * (p.len - noseLen - 30)) / Math.max(1, (p.guns || 1) - 1), gy = cy + (i % 2 ? 1 : -1) * w * 0.45;
     parts.push(`<path d="M${r1(gx)} ${r1(gy)} L${r1(gx + 9)} ${r1(gy)}" stroke="#1c2529" stroke-width="2.5" stroke-linecap="round"/><circle cx="${r1(gx)}" cy="${r1(gy)}" r="3.2" fill="#ffca28" stroke="#1c2529" stroke-width="1.5"/>`);
   }
-  // PRD 16: role-specific silhouettes and functional details, shared comic linework.
-  if(p.role==='courier')parts.push('<path d="M38 57 70 44 54 58M38 71 70 84 54 70" fill="#ff00ff" stroke="#293e43" stroke-width="1.5"/>');
-  if(p.role==='freighter')parts.push('<path d="M91 48 111 52 111 76 91 80Z" fill="#746b5d" stroke="#27373a" stroke-width="3"/><path d="M105 57 120 57M105 71 120 71" stroke="#e8dfc5" stroke-width="4"/>');
-  if(p.role==='interceptor')parts.push('<path d="M62 60 80 64 62 68" fill="#ff00ff"/><path d="M73 60 89 60M73 68 89 68" stroke="#243539" stroke-width="2"/>');
-  if(p.role==='bomber')parts.push('<rect x="54" y="52" width="17" height="5" rx="2" fill="#d99d48" stroke="#253d42"/><rect x="54" y="71" width="17" height="5" rx="2" fill="#d99d48" stroke="#253d42"/>');
-  if(p.role==='escort')parts.push('<path d="M55 30 76 30 83 35 60 35ZM55 98 76 98 83 93 60 93Z" fill="#ff00ff" stroke="#263b40" stroke-width="2"/><circle cx="46" cy="64" r="7" fill="#b8e3d3" stroke="#263b40" stroke-width="2"/>');
-  if(p.role==='frigate')parts.push('<path d="M48 44 48 84M79 47 79 81" stroke="#b3d7cd" stroke-width="5"/><path d="M43 43 52 43M43 85 52 85M75 46 84 46M75 82 84 82" stroke="#ff00ff" stroke-width="3"/>');
-  if(p.role==='destroyer')parts.push('<path d="M68 42 114 47 119 51 72 50ZM68 86 114 81 119 77 72 78Z" fill="#d3af6b" stroke="#23373e" stroke-width="2"/><path d="M80 64 118 64" stroke="#8ed7d4" stroke-width="5"/>');
-  if(p.role==='cruiser')parts.push('<ellipse cx="37" cy="64" rx="9" ry="40" fill="none" stroke="#d6bc83" stroke-width="5"/><ellipse cx="37" cy="64" rx="9" ry="40" fill="none" stroke="#ff00ff" stroke-width="2" stroke-dasharray="4 5"/><path d="M72 42 97 49 97 79 72 86Z" fill="#6c827a" stroke="#203a38" stroke-width="2"/>');
   // Cockpit
   const ckx = x1 - noseLen - (p.drill ? 10 : 2);
   parts.push(`<ellipse cx="${r1(ckx)}" cy="${cy}" rx="${r1(Math.min(12, noseLen * 0.55))}" ry="${r1(Math.max(3, w * 0.45))}" fill="${p.glass || '#4fc3f7'}" stroke="#01579b" stroke-width="1.5"/>`);
@@ -135,7 +126,7 @@ function squadSvg(p) {
   const one = svg({ ...p, squad: 0 });
   const inner = one.slice(one.indexOf('<defs>'), one.lastIndexOf('</svg>'));
   const defs = inner.slice(0, inner.indexOf('</defs>') + 7), body = inner.slice(inner.indexOf('</defs>') + 7);
-  const slots = (p.role==='bomber'?[[0,-1],[0,1],[-2,-1],[-2,1]]:[[0, 0], [-1, -1], [-1, 1], [-2, -2], [-2, 2], [-3, 0]]).slice(0, p.squad);
+  const slots = [[0, 0], [-1, -1], [-1, 1], [-2, -2], [-2, 2], [-3, 0]].slice(0, p.squad);
   const g = slots.map(([c, r]) => `<g transform="translate(${c * 22} ${r * 18}) translate(64 64) scale(0.62) translate(-64 -64)">${body}</g>`).join('\n  ');
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">\n  <!-- Generiert von scripts/gen-ship-sprites.js. Staffel, Nase zeigt nach rechts. #ff00ff = Spielerfarbe -->\n  ${defs}\n  <g transform="translate(18 0)">${g}</g>\n</svg>\n`;
 }

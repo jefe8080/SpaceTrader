@@ -23,8 +23,9 @@ test('Jeder Schiffstyp hat eine austauschbare quadratische PNG-Illustration mit 
     assert.ok(url,ship.sprite);
     const png=await readFile(new URL('../client'+url,import.meta.url));
     assert.equal(png.subarray(1,4).toString(),'PNG');
-    assert.equal(png.readUInt32BE(16),512);
-    assert.equal(png.readUInt32BE(20),512);
+    const width=png.readUInt32BE(16),height=png.readUInt32BE(20);
+    assert.equal(width,height,'quadratische Darstellung ohne Verzerrung');
+    assert.ok(width>=512&&width<=2048,'native Spriteauflösung');
     assert.equal(png[25],6,'RGBA statt deckendem Rechteck');
   }
   assert.equal(shipArtUrl('station_hub'),null);

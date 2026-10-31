@@ -1,0 +1,66 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "references": [
+    "client/assets/art/ships/ship_spatz.png",
+    "client/assets/art/ships/ship_lastesel.png"
+  ],
+  "commonPrompt": "Hand-drawn detailed sci-fi fantasy comic illustration with expressive organic rounded forms, bold dark ink outlines, warm painterly shading, intricate steampunk engineering, believable worn enamel, blue engine glow; match the supplied civilian ships closely. Elevated three-quarter view, nose pointing toward the RIGHT and slightly down, engines at upper left, all top surfaces visible exactly like the references. Entire subject centered and isolated with generous 8 percent transparent margin, square canvas, genuinely transparent background, NO text, NO labels, NO ground shadow, no scene. This is a polished painted 2D sprite, never a geometric low-poly render, diagram, simple vector icon or blocky first-generation ship.",
+  "ships": [
+    {
+      "id": "falke",
+      "file": "client/assets/art/ships/ship_falke.png",
+      "subject": "Falke, small fast armed courier: sleek birdlike curved swept wings, two finely integrated laser barrels, small dark glass cockpit, two rounded engines, cream enamel and teal panels, brass seams, compact agile silhouette."
+    },
+    {
+      "id": "keiler",
+      "file": "client/assets/art/ships/ship_keiler.png",
+      "subject": "Keiler, medium armored armed cargo ship: stout boarlike plated rounded prow, several strapped freight pods, external pipes and brass reinforcement, three compact defensive turrets and three engines. Rust orange, cream and teal, purposeful sturdy freighter."
+    },
+    {
+      "id": "abfangstaffel",
+      "file": "client/assets/art/ships/ship_abfangstaffel.png",
+      "subject": "Hornissenstaffel: exactly SIX separate tiny agile interceptor spacecraft in a coherent V formation, each with curved swept wings and small pointed nose, one blue engine, miniature cannons, cream orange and teal. Six distinct whole craft, no cropping, no mothership."
+    },
+    {
+      "id": "bomberstaffel",
+      "file": "client/assets/art/ships/ship_bomberstaffel.png",
+      "subject": "Wespenstaffel: exactly FOUR separate stocky bomber spacecraft in a coherent staggered diamond formation, each with rounded armored cockpit, twin engine pods and clearly visible underslung bomb canisters. Cream, muted moss teal and ochre. Four distinct whole craft, no mothership."
+    },
+    {
+      "id": "korvette",
+      "file": "client/assets/art/ships/ship_korvette.png",
+      "subject": "Habicht, medium escort corvette: elegant compact raptor silhouette with tall rounded engine nacelles, glazed bridge, paired flak turrets, point defense guns, short forward prongs and layered curved armor. Cream teal brass with dark naval accents, clearly a combat escort."
+    },
+    {
+      "id": "fregatte",
+      "file": "client/assets/art/ships/ship_fregatte.png",
+      "subject": "Sperber, large frigate: long graceful armored ship with curved swept side hulls, four distinct shield generator pods softly glowing cyan, multiple detailed gun turrets, three engines, small glazed raised bridge. Cream weathered teal brass, substantial detailed warship."
+    },
+    {
+      "id": "zerstoerer",
+      "file": "client/assets/art/ships/ship_zerstoerer.png",
+      "subject": "Greif, large heavy destroyer: powerful elongated griffinlike warship with heavily plated prow, large recessed torpedo tubes, substantial gun turrets, four engines, layered curved armor, pipework and small orange lit bridge. Dark teal cream brass, heavier offensive silhouette than a frigate."
+    },
+    {
+      "id": "kreuzer",
+      "file": "client/assets/art/ships/ship_kreuzer.png",
+      "subject": "Bastion, extra large cruiser: imposing broad cathedral citadel silhouette with deeply layered rounded armor, many detailed heavy turrets, small raised bridge superstructure, five engines, a visible elaborate brass jump interdiction coil around the rear engineering section. Cream dark teal brass rust, the largest and heaviest ship of this series."
+    }
+  ],
+  "elevators": {
+    "references": [
+      "client/assets/art/cities/ruins-city-v2.png",
+      "client/assets/art/ships/ship_spatz.png"
+    ],
+    "commonPrompt": "Finished isometric 2D building sprite. Exact warm detailed hand-painted city style and isometric ground-plane perspective; detailed inked comic engineering, curved forms, teal/cream enamel and brass. Intricate expressive hand drawing, warm painterly shading, carved stone mixed with whimsical science-fiction engineering. Entire building and foundation visible, centered, generous transparent margin, portrait composition, no text, UI or landscape backdrop. Genuinely transparent background. No simple SVG look, schematic, low-poly render or blocky primitive geometry.",
+    "small": {
+      "file": "client/assets/art/cities/orbital-elevator-small.png",
+      "subject": "Compact graceful single lift tower with one rounded enclosed passenger/cargo capsule riding taut cables continuing off the top, ornate weathered sandstone foundation, cream enamel and teal machinery, copper pipes, small landing deck and delicate arches."
+    },
+    "large": {
+      "file": "client/assets/art/cities/orbital-elevator-large.png",
+      "subject": "Monumental elegant double tower / double lift industrial complex with two enclosed rounded cargo capsules at different heights, four cables continuing off the top, a broad elevated loading terrace, large ornate bronze upper docking ring, reinforced teal mechanical supports and weathered sandstone arches."
+    }
+  },
+  "notes": "SVG experiment rejected by user. Native PNG illustrations replace the actual rendered images; SVG fallback files restored. Interceptor formation corrected separately to exactly six craft."
+}
