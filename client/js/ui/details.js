@@ -312,6 +312,8 @@ function entityDetails(e) {
       infrastructure += `<div class="kv"><span>Verarbeitung</span><span>${recipeText(def.recipe)} (${def.recipe.time}s)</span>
         <span>Status</span><span>${m.eff >= 1 ? 'läuft' : m.eff > 0 ? 'langsam (keine Nahrung)' : 'steht still'}</span>
         <span>Versorgung</span><span>${supplyText(m)}</span></div>`;
+    } else if (e.type==='hotel'&&state.homeworld) {
+      infrastructure+='<p>Orbitalhotel mit begrenzten Gästeplätzen. Touristen bleiben 20 Minuten als Gäste und können anschließend wieder abgeholt werden.</p>';
     } else if (def.consume) {
       infrastructure += `<div class="muted">Kauft ${Object.keys(def.consume).map((g) => GOODS[g].name).join(', ')}.</div>`;
     } else if (def.buys) {
@@ -346,7 +348,7 @@ function entityDetails(e) {
   let quests=m && e.type!=='ruins' && (e.kind==='planet'||m.strategy==='shipyard')?questBoardSection(e,myDocked):'';
   if(e.salvageOwner===state.me.id) quests+=`<p>Persönlicher versiegelter Reliktfund. Nur das aktive manuelle Schiff kann ihn bergen.</p><button data-act="relicSalvage" data-ent="${e.id}" data-ship="${state.manualShip||''}" ${dockedHere.some(s=>s.id===state.manualShip)&&state.homeQuest?.salvage?.phase==='available'?'':'disabled'}>Versiegelten Fund bergen</button>`;
   if(e.archiveOwner===state.me.id) quests+=`<p>Persönliche Archiv-/Forschungsstelle. Studienvorlagen benötigen 30 freie Frachteinheiten.</p><button data-act="homeArchiveVisit" data-ent="${e.id}" data-ship="${state.manualShip||''}" ${dockedHere.some(s=>s.id===state.manualShip)?'':'disabled'}>Archiv untersuchen / Vorlage bergen</button>`;
-  const trade=m?marketTable(e,myDocked)+(e.kind==='planet'?eventSection(e,myDocked):'')+(e.type!=='ruins'?statsSection(e):''):'';
+  const trade=m?marketTable(e,myDocked)+(e.kind==='planet'?eventSection(e,myDocked):'')+statsSection(e):'';
   const management=(m && e.type!=='ruins'?propertySection(e):'')+(fav?`<label>Notiz <input class="fav-note" data-ent="${e.id}" maxlength="120" value="${esc(state.favorites[e.id].note||'')}"></label>`:'');
   const sections=[['trade','Handel',trade],['services','Infrastruktur & Dienste',infrastructure],['quests','Aufträge',quests],['management','Besitz & Verwaltung',management]].filter(([,,body])=>body);
   if(!sections.some(([id])=>id===locationSection)) locationSection='';
@@ -394,6 +396,8 @@ function statsSection(e) {
   const cell = (v) => (v ? fmtNum(v) : '<span class="muted">–</span>');
   h += `<table class="market stats"><tr><th>Ware</th><th>Produziert</th><th>Verbraucht</th><th title="Von Schiffen geliefert">Angeliefert</th><th title="Von Schiffen abgeholt">Abgeholt</th></tr>
     ${goods.map((g) => `<tr><td>${goodTag(g)}</td><td>${cell(tot.p[g])}</td><td>${cell(tot.c[g])}</td><td>${cell(tot.i[g])}</td><td>${cell(tot.o[g])}</td></tr>`).join('')}</table>`;
+  const sales=st.localSales;
+  if(sales)h+=`<h4>Lokaler Absatz · letzte 3 Stunden</h4><p>Im Verbrauch enthalten; Menge in Einheiten, tatsächlich bezahlter Erlös in Cr.</p><div style="overflow-x:auto"><table class="market"><tr><th>Ware</th><th>Verkauft (Einheiten)</th><th>Erlös (Cr)</th></tr>${Object.keys(sales.quantities).map(g=>`<tr><td>${goodTag(g)}</td><td>${cell(sales.quantities[g])}</td><td>${cell(sales.revenue[g])}</td></tr>`).join('')}</table></div><p>Lokale Verkaufseinnahmen gesamt: ${fmtNum(sales.total)} Cr</p>`;
   if (e.market.strategy === 'factory') h += `<div class="muted small-note">${fmt(cycles)} Produktionszyklen in 3 h</div>`;
   return h + '</div>';
 }

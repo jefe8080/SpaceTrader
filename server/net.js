@@ -32,6 +32,7 @@ export class Net {
     });
     game.on('log', (ship, msg) => this.sessions.get(ship.owner)?.socket.emit('log', { ship: ship.name, id: ship.id, msg }));
     game.on('sfx', (p, name) => this.sessions.get(p.id)?.socket.emit('sfx', name));
+    game.on('pilotLevelUp',(p,data)=>this.sessions.get(p.id)?.socket.emit('pilotLevelUp',data));
     game.on('player', () => this.broadcastPlayers()); // Level und Titel für die Tooltips der anderen
     game.on('notice', (p, msg) => p && this.sessions.get(p.id)?.socket.emit('notice', msg));
     // Konsortium geändert: Mitglieder und Eingeladene bekommen den neuen Stand; (null, p): nur dieser Spieler
@@ -371,6 +372,6 @@ function shipDetail(s, game) {
 function playerDetail(p) {
   return { guideRead: p.guideRead || [], stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1, governor: p.governor || 0, faction: p.faction || null,
     homeworld: p.homeworld || null, homeQuest: p.homeQuest || null, manualShip: p.manualShip || null, relic: p.relic || null,moduleBlueprints:p.moduleBlueprints||[],
-    flagshipAt: p.flagshipAt ?? null, xp: Math.floor(p.xp || 0), level: pilotLevel(p.xp), quest: p.quest || null, questLock: p.questLock || 0,
-    rep: p.rep || {}, questsDone: p.questsDone || 0, dogUntil: p.dogUntil || 0, mg: p.mg || null };
+    flagshipAt: p.flagshipAt ?? null, xp: Math.floor(p.xp || 0), level: pilotLevel(p.xp), quest: p.quest || null, quests:p.quests||[],questMinedUsed:p.questMinedUsed||{}, questLock: p.questLock || 0,
+    rep: p.rep || {},zoneVisits:p.zoneVisits||[], questsDone: p.questsDone || 0, dogUntil: p.dogUntil || 0, mg: p.mg || null };
 }

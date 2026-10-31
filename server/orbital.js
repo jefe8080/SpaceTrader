@@ -1,4 +1,5 @@
 import {SHIP_TYPES,SHIPYARD,PILOT_LICENSES,factionRank} from '../shared/config.js';
+import {activeSideQuests} from '../shared/side-quests.js';
 import {homeAccess,homeConstructionError,chargeHome} from './homeworld-operations.js';
 import {QUEST_DELIVERIES} from '../shared/advanced-homequests.js';
 import {applyPhysicalHull,initializeNewHull} from './physical-yards.js';
@@ -17,7 +18,7 @@ export function startOrbital(game,p,e,large,ship,confirmed){
   const staff=homeConstructionError(h);if(staff)return staff;
   if(!large){
     if(!confirmed)return 'Dauerhafte Schiffsabgabe ausdrücklich bestätigen.';
-    if(!ship||ship.owner!==p.id||ship.type!=='spatz'||ship.dockedAt!==e.id||ship.queue.length||ship.relicSpeed||game.shipOffers.has(ship.id)||p.quest?.ship===ship.id||p.relic?.operation?.ship===ship.id||p.homeQuest.salvage?.phase==='sealed'&&p.homeQuest.salvage.ship===ship.id)return 'Einen eigenen untätigen Spatz ohne Relikt und Questbindung hier andocken.';
+    if(!ship||ship.owner!==p.id||ship.type!=='spatz'||ship.dockedAt!==e.id||ship.queue.length||ship.relicSpeed||game.shipOffers.has(ship.id)||activeSideQuests(p).some(q=>q.ship===ship.id)||p.relic?.operation?.ship===ship.id||p.homeQuest.salvage?.phase==='sealed'&&p.homeQuest.salvage.ship===ship.id)return 'Einen eigenen untätigen Spatz ohne Relikt und Questbindung hier andocken.';
     if(Object.values(ship.cargo).some(n=>n>0)||Object.values(ship.moduleCargo||{}).some(n=>n>0)||ship.modules?.length)return 'Fracht und wiederverwendbare Module vor der dauerhaften Abgabe entladen beziehungsweise ausbauen.';
     if(game.shipsOf(p.id).length<2)return 'Mindestens ein steuerbares Schiff muss übrig bleiben.';
     o.infrastructureShips.push({id:ship.id,name:ship.name,type:ship.type,hullSource:ship.hullSource||null,at:game.time,purpose:'Kleiner Orbitalring'});game.removeShip(ship);

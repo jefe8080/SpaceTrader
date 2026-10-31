@@ -8,6 +8,7 @@ import { panelKinds, renderPlanetUi } from './planetPanel.js';
 import { questText } from './quests.js';
 import { sfx } from '../audio.js';
 import { fmtDuration } from '../util.js';
+import {activeSideQuests,sideQuestLimit} from '/shared/side-quests.js';
 
 const TAU = Math.PI * 2;
 const modal = $('mgModal');
@@ -45,10 +46,10 @@ panelKinds.smuggler = {
     h += `<div class="sub-title">Schmuggelauftrag</div>`;
     if (!o) h += `<div class="muted">Gerade kein Auftrag. Komm später wieder.</div>`;
     else {
-      const why = !ship ? 'Ein eigenes Schiff muss angedockt sein' : state.quest ? 'Du hast schon eine aktive Quest' : (state.questLock || 0) > state.time ? 'Nach einem Abbruch gesperrt' : '';
+      const why = !ship ? 'Ein eigenes Schiff muss angedockt sein' : activeSideQuests(state).length>=sideQuestLimit(state) ? 'Alle Nebenquestslots sind belegt' : (state.questLock || 0) > state.time ? 'Nach einem Abbruch gesperrt' : '';
       h += `<div class="quest-offer"><div>${questText(o)}</div><div class="qo-foot"><b>${fmt(o.reward.cr)} Cr</b>&nbsp;<span class="muted">· keine XP, kein Ruf</span><span style="flex:1"></span>
         <button class="small primary" data-pp="smug" ${why ? 'disabled' : ''} title="${esc(why)}">Annehmen</button></div></div>
-        <div class="muted small-note">Zählt als deine eine aktive Quest. Doppelte Belohnung, dafür keine Erfahrung und kein Questgeber-Level.</div>`;
+        <div class="muted small-note">Belegt einen Nebenquestslot (${activeSideQuests(state).length} / ${sideQuestLimit(state)} belegt). Doppelte Belohnung, dafür keine Erfahrung und kein Questgeber-Level.</div>`;
     }
     return h;
   },

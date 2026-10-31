@@ -1,4 +1,4 @@
-import { GOODS, canBuyFrom, canSellTo } from '/shared/config.js';
+import { GOODS, BELT_TYPES, canBuyFrom, canSellTo } from '/shared/config.js';
 import { state, esc, selectedShips, fleetOrder } from '../state.js';
 import { cmd } from '../net.js';
 import { typeName, playerPrice, flightSecs, fmtDuration, systemName, sectorName, dist } from '../util.js';
@@ -14,7 +14,7 @@ const card=$('favCard'), view=defaultTradeView();
 let rowIds=null, initialized=false;
 export const sectorOf=e=>sectorName(e);
 export const systemOf=e=>systemName(e);
-const number=v=>Number.isFinite(v)?v.toLocaleString('de-DE',{maximumFractionDigits:1}):'unbekannt';
+const number=v=>v===Infinity?'fortlaufend':Number.isFinite(v)?v.toLocaleString('de-DE',{maximumFractionDigits:1}):'unbekannt';
 const options=(items,value)=>items.map(([id,label])=>`<option value="${esc(id)}" ${id===value?'selected':''}>${esc(label)}</option>`).join('');
 function quote(e,g,dir) {
   const slot=e.market?.goods?.[g];
@@ -29,13 +29,14 @@ function quote(e,g,dir) {
 }
 function rows() {
   const ship=state.ships.get(view.ship);
-  return [...state.entities.values()].filter(e=>['planet','station'].includes(e.kind)).map(e=>{
+  return [...state.entities.values()].filter(e=>['planet','station','belt'].includes(e.kind)).map(e=>{
     const slot=e.market?.goods?.[view.good];
     const buy=view.good?quote(e,view.good,'buy'):null,sell=view.good?quote(e,view.good,'sell'):null;
-    const stock=Number.isFinite(slot?.stock)?Math.floor(slot.stock):null;
+    const resource=e.kind==='belt'&&BELT_TYPES[e.type]?.good===view.good;
+    const stock=resource?Infinity:Number.isFinite(slot?.stock)?Math.floor(slot.stock):null;
     const demand=Number.isFinite(slot?.cap)&&stock!=null?Math.max(0,Math.floor(slot.cap-slot.stock)):null;
-    return {id:e.id,e,name:e.name,kind:e.kind,type:typeName(e),system:systemOf(e),sector:sectorOf(e),favorite:!!state.favorites[e.id],hasGood:!!slot,
-      distance:ship?dist(ship,e):null,time:ship?flightSecs(ship,e):null,buy,sell,stock,demand,quantity:view.direction==='sell'?demand:view.direction==='buy'?stock:(buy!=null?stock:demand)};
+    return {id:e.id,e,name:e.name,kind:e.kind,placeType:`${e.kind}:${e.type}`,type:typeName(e),system:systemOf(e),sector:sectorOf(e),favorite:!!state.favorites[e.id],hasGood:!!slot||resource,
+      distance:ship?dist(ship,e):null,time:ship?flightSecs(ship,e):null,buy,sell,stock,demand,quantity:resource?stock:view.direction==='sell'?demand:view.direction==='buy'?stock:(buy!=null?stock:demand)};
   });
 }
 function shell() {
@@ -49,7 +50,7 @@ function shell() {
     <div class="trade-tabs"><button aria-current="page" data-trade-tab="places">Orte & Waren</button><button data-trade-tab="routes">Meine Routen</button></div>
     <div class="trade-filters">
       <label>Name <input data-filter="search" value="${esc(view.search)}" placeholder="Ort suchen"></label>
-      <label>Ortstyp <select data-filter="type">${options([['','alle'],['planet','Planeten'],['station','Basen / Stationen']],view.type)}</select></label>
+      <label>Ortstyp <select data-filter="type">${options([['','alle'],['planet','Alle Planeten'],['station','Alle Basen / Stationen'],['belt','Alle Rohstofffelder'],...[...new Map(all.map(r=>[r.placeType,r.type]))].sort((a,b)=>a[1].localeCompare(b[1],'de'))],view.type)}</select></label>
       <label>System <select data-filter="system">${options([['','alle'],...unique('system')],view.system)}</select></label>
       <label>Sektor <select data-filter="sector">${options([['','alle'],...unique('sector')],view.sector)}</select></label>
       <label>Ware <select data-filter="good">${options([['','keine'],...Object.entries(GOODS).filter(([,g])=>!state.homeworld||g.cls!=='passenger').sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([id,g])=>[id,g.name])],view.good)}</select></label>
@@ -72,9 +73,9 @@ function shell() {
 function rowHtml(r) {
   return `<tr data-place="${esc(r.id)}"><td><button data-f="star" data-id="${r.id}" aria-label="Favorit ${esc(r.name)} umschalten" aria-pressed="${r.favorite}">${r.favorite?'★':'☆'}</button></td>
   <td><button data-f="show" data-id="${r.id}">${esc(r.name)}</button><div class="muted">${esc(r.type)}</div><details><summary>Details & Notiz</summary><p>${esc(r.e.ownerName||'NPC')}</p><label>Notiz <input class="fav-note" data-id="${r.id}" maxlength="120" value="${esc(state.favorites[r.id]?.note||'')}" placeholder="Notiz speichern markiert als Favorit"></label></details></td>
-  <td>${esc(r.system)}<br><span class="muted">${esc(r.sector)}</span></td>
+  <td>${esc(r.system)}<br><span class="muted">${esc(r.sector)}</span>${r.e.kind==='belt'?`<div>${esc(GOODS[BELT_TYPES[r.e.type]?.good]?.name||'Rohstoff')} · Abbau mit passender Ausrüstung</div>`:''}</td>
   <td data-value="distance"></td><td data-value="time"></td><td data-value="buy"></td><td data-value="sell"></td><td data-value="quantity"></td>
-  <td><button data-f="fly" data-id="${r.id}" ${view.ship?'':'disabled'}>Anfliegen</button><details><summary>Aktionen</summary><div class="trade-actions"><button data-f="buy" data-id="${r.id}">Einkauf einreihen</button><button data-f="show" data-id="${r.id}">Karte & Handel</button><button data-f="route" data-id="${r.id}">Neue Route ab hier</button><label>Zu Route hinzufügen <select data-f="toRoute" data-id="${r.id}"><option value="">Route wählen</option><option value="draft">Offener / neuer Entwurf</option>${[...state.routes.values()].map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('')}</select></label></div></details></td></tr>`;
+  <td><button data-f="fly" data-id="${r.id}" ${view.ship?'':'disabled'}>${r.e.kind==='belt'?'Anfliegen / abbauen':'Anfliegen'}</button><details><summary>Aktionen</summary><div class="trade-actions">${r.e.kind!=='belt'?`<button data-f="buy" data-id="${r.id}">Einkauf einreihen</button>`:''}<button data-f="show" data-id="${r.id}">Karte & Details</button>${r.e.kind!=='belt'?`<button data-f="route" data-id="${r.id}">Neue Route ab hier</button><label>Zu Route hinzufügen <select data-f="toRoute" data-id="${r.id}"><option value="">Route wählen</option><option value="draft">Offener / neuer Entwurf</option>${[...state.routes.values()].map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('')}</select></label>`:''}</div></details></td></tr>`;
 }
 function update(explicit=false) {
   if(!initialized){view.ship=selectedShips()[0]?.id||'';initialized=true;}

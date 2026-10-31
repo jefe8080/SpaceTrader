@@ -49,7 +49,7 @@ socket.on('welcome', (d) => {
   state.me = d.you;
   resetGuide();
   state.guideRead = d.guideRead || [];
-  Object.assign(state, { profile: null, homeworld: null, homeQuest: null, relic: null, manualShip: null, homeDialogReplay: false, quest: null });
+  Object.assign(state, { profile: null, homeworld: null, homeQuest: null, relic: null, manualShip: null, homeDialogReplay: false, quest: null,quests:[],questMinedUsed:{} });
   state.players = d.players;
   state.cells = new Set(d.cells);
   state.entities = new Map(d.entities.map((e) => [e.id, e]));
@@ -95,7 +95,7 @@ socket.on('me', (d) => {
   state.guideRead = [...new Set([...(state.guideRead || []), ...(d.guideRead || [])])];
   Object.assign(state, { profile:d.profile,questsDone:d.questsDone, homeworld: d.homeworld, homeQuest: d.homeQuest, manualShip: d.manualShip, relic: d.relic,moduleBlueprints:d.moduleBlueprints||[], coverage:d.coverage||[],controlCapacity:d.controlCapacity||0 });
   Object.assign(state, { stopLoss: d.stopLoss, groups: d.groups, favorites: d.favorites, pilot: d.pilot, governor: d.governor, faction: d.faction, flagshipAt: d.flagshipAt,
-    xp: d.xp, level: d.level, quest: d.quest, questLock: d.questLock, rep: d.rep, dogUntil: d.dogUntil, mg: d.mg });
+    xp: d.xp, level: d.level, quest: d.quest, quests:d.quests||[],questMinedUsed:d.questMinedUsed||{},zoneVisits:d.zoneVisits||[], questLock: d.questLock, rep: d.rep, dogUntil: d.dogUntil, mg: d.mg });
   ui.scheduleRender(true);
 });
 socket.on('routes', (list) => {

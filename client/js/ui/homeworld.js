@@ -11,6 +11,8 @@ import {populationPanel} from './population.js';
 import {QUEST_DELIVERIES,STUDY_FINDS} from '/shared/advanced-homequests.js';
 import {SHIP_TYPES,SHIPYARD} from '/shared/config.js';
 import {warpPanel} from './colonies.js';
+import {housingPanel} from './housing.js';
+import {activeSideQuests} from '/shared/side-quests.js';
 
 let dialog, currentScene, closingScene;
 export function renderHomeDialog() {
@@ -56,8 +58,8 @@ export function homePanel(entity, item, ship) {
     const mode=entity.market.mode==='open'?'open':'private';
     const trade=`<h3>Handel</h3><p>Handelsmodus: <b>${mode==='open'?'offen':'privat'}</b></p><p>${mode==='open'?'Andere Spieler und NPCs können unreservierte Waren handeln.':'Nur du kannst auf das Lager zugreifen.'} Reservierte Waren bleiben geschützt.</p><button class="small" data-pp="homeTradeMode" data-mode="${mode==='open'?'private':'open'}">Handel ${mode==='open'?'auf privat stellen':'öffnen'}</button>`;
     const overview='<details><summary>Planetenübersicht</summary>'+homeBalance(entity)+'</details>'+trade+planetNamePanel(entity);
-    if(entity.id!==state.homeworld)return overview+'<h3>Laufende Quests</h3>'+(state.quest?'<p>'+questText(state.quest)+'</p>':'')+Object.entries(HOME_QUESTS).filter(([id])=>state.homeQuest?.active?.[id]&&!completed(id)).map(([id,q])=>'<p><b>'+id+' · '+esc(q.title)+'</b><br>'+esc(q.goal)+'</p>').join('')+'<button class="small" data-pp="homeSite" data-id="'+state.homeworld+'">Zur Hauptheimat zeigen</button>'+historyPanel()+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+warpPanel(entity);
-    let html = overview+(state.quest?'<h3>Laufender Auftrag</h3><p>'+questText(state.quest)+'</p>':'')+`<div class="muted">Hauptquests laufen unabhängig von normalen Quests. Mehrere freigeschaltete Zweige können gleichzeitig fortschreiten.</div>`;
+    if(entity.id!==state.homeworld)return overview+'<h3>Laufende Quests</h3>'+activeSideQuests(state).map(q=>'<p>'+questText(q)+'</p>').join('')+Object.entries(HOME_QUESTS).filter(([id])=>state.homeQuest?.active?.[id]&&!completed(id)).map(([id,q])=>'<p><b>'+id+' · '+esc(q.title)+'</b><br>'+esc(q.goal)+'</p>').join('')+'<button class="small" data-pp="homeSite" data-id="'+state.homeworld+'">Zur Hauptheimat zeigen</button>'+historyPanel()+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+warpPanel(entity);
+    let html = overview+(activeSideQuests(state).length?'<h3>Laufende Nebenquests</h3>'+activeSideQuests(state).map(q=>'<p>'+questText(q)+'</p>').join(''):'')+`<div class="muted">Hauptquests laufen unabhängig von normalen Quests. Mehrere freigeschaltete Zweige können gleichzeitig fortschreiten.</div>`;
     for (const [id, quest] of Object.entries(HOME_QUESTS)) {
       if(completed(id)||!state.homeQuest?.active?.[id])continue;
       const unlocked = true;
@@ -228,7 +230,7 @@ function operationPanel(entity,id,building){
 function structurePanel(entity,id){
   const home=entity.market.homeworld,building=home.structures.find(s=>s.id===id);if(!building)return '';
   const spec=homeStructureSpec(building);
-  let html=`<p>${building.status==='building'?`Bau läuft · ${Math.max(0,Math.ceil(building.readyAt-state.time))} s · Material und zwei einfache Kräfte gebunden`:'Betriebsbereite Anlage'}</p>
+  let html=(building.kind==='housing'?housingPanel(entity,building):'')+`<p>${building.status==='building'?`Bau läuft · ${Math.max(0,Math.ceil(building.readyAt-state.time))} s · Material und zwei einfache Kräfte gebunden`:'Betriebsbereite Anlage'}</p>
     <p>${spec.power} Energie · ${spec.workers.basic||0} einfach / ${spec.workers.skilled||0} Fach / ${spec.workers.specialist||0} Spezial</p>`;
   if (['silo','safeStorage'].includes(building.kind)) {
     const level=storageLevel(building), cost=storageUpgradeCost(building.kind,level+1);

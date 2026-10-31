@@ -1,4 +1,5 @@
 import {recordInventoryTrade} from './pilot-profile.js';
+import {recordLocalSale} from '../shared/local-sales.js';
 import { RECIPES, PLANET_TYPES, PROP_UPGRADES, FIXED, SHIP_TYPES, buyPrice, sellPrice,
   priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref } from '../shared/config.js';
 import { stat, applyLevel, ensureFactoryStorage } from './markets.js';
@@ -91,6 +92,7 @@ export function tickOwnedPlanet(game, e, prop, dt) {
     owner.credits += money;
     propBook(game, prop, 'inc', money);
     recordInventoryTrade(game,game.players.get(prop.player),g,'sell',n,money);
+    recordLocalSale(m,game.time,g,n,money);
     stat(m, game.time, 'c', g, n);
   }
 }

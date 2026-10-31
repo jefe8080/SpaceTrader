@@ -63,7 +63,7 @@ export function renderPlanetside(now, dt) {
   const e = state.entities.get(state.landed);
   if (!e) return;
   canvas.hidden = false;
-  const key = JSON.stringify([e.id, e.type, Object.entries(e.market.goods).map(([g,s]) => [g,s.role,s.fac]), e.market.bld?.fac, e.market.homeworld?.plots, e.market.homeworld?.structures?.map(s=>[s.id,s.kind,s.recipe,s.plot,s.status]),Object.entries(e.market.homeworld?.facilities||{}).map(([id,b])=>[id,b.status]),e.market.homeworld?.controlLevel,e.market.homeworld?.orbital&&[e.market.homeworld.orbital.small,e.market.homeworld.orbital.large,!!e.market.homeworld.orbital.project],e.market.economy?.specialization,e.market.economy?.infrastructure?.map(b=>[b.id,b.kind]),e.market.economy?.projects?.map(p=>[p.id,p.kind]), !!state.props.get(e.id)?.manage]);
+  const key = JSON.stringify([e.id, e.type, Object.entries(e.market.goods).map(([g,s]) => [g,s.role,s.fac]), e.market.bld?.fac, e.market.homeworld?.plots, e.market.homeworld?.structures?.map(s=>[s.id,s.kind,s.recipe,s.plot,s.status,s.level,s.upgrading]),Object.entries(e.market.homeworld?.facilities||{}).map(([id,b])=>[id,b.status]),e.market.homeworld?.controlLevel,e.market.homeworld?.orbital&&[e.market.homeworld.orbital.small,e.market.homeworld.orbital.large,!!e.market.homeworld.orbital.project],e.market.economy?.specialization,e.market.economy?.infrastructure?.map(b=>[b.id,b.kind,b.level,b.upgrading]),e.market.economy?.projects?.map(p=>[p.id,p.kind]), !!state.props.get(e.id)?.manage]);
   if (key !== scene.key) {
     const factoriesChanged = JSON.stringify(scene.items.filter(it => it.kind === 'factory').map(it => it.recipe)) !== JSON.stringify(e.market.bld?.fac ?? []);
     Object.assign(scene, buildItems(e), { key });
@@ -110,6 +110,7 @@ export function buildItems(e) {
   const r = planetRng(e.id, 3);
   const items = [{ kind: 'questhouse', label: 'Questhaus', w: 170 }];
   const rest = [];
+  for(const b of m.economy?.infrastructure||[])if(b.kind==='housing')rest.push({kind:'infrastructure',worldInfrastructure:b.id,key:'infra:'+b.id,label:'Wohnhaus Stufe '+(b.level||1),w:150});
   for (const [g, s] of Object.entries(m.goods)) {
     if (s.fac || (s.role !== 'produce' && s.role !== 'consume')) continue;
     rest.push({ kind: s.role === 'produce' ? 'produce' : 'consume', good: g, look: s.role === 'produce' ? lookOf(g) : 'store', label: `${s.role === 'produce' ? '' : 'Lager '}${GOODS[g].name}`, w: 150 + Math.floor(r() * 40) });

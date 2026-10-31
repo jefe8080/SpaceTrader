@@ -3,11 +3,12 @@ import { WORLD, GOODS, BELT_TYPES, QUEST, QUEST_TYPES, REP, RANKS, factionRank, 
   giverLevel, giverXpOf, planetFeatures, EXTRAS, freeFor } from '../shared/config.js';
 import { hexAt, hexKey, hexNeighbors } from '../shared/hex.js';
 import { missingInputs, stat } from './markets.js';
-import {homeStorageFree} from '../shared/homeworld.js';
+import {availableHomeStock} from '../shared/homeworld.js';
 import {passengerTrade,updatePassengerOffers,peopleOf,residentDepartureCapacity} from './population.js';
+import {activeSideQuests,sideQuestLimit,selectedSideQuest,removeSideQuest,minedQuestProgress,explorationOfferAvailable} from '../shared/side-quests.js';
 
 /**
- * Quests (PRD-2 Kapitel 9): Questtafeln an Planeten und Werften, eine aktive Quest je Spieler, keine Fristen.
+ * Nebenquests: Tafeln an Planeten und Werften, ein aktiver Slot je Pilotenlevel, keine Fristen.
  * Die Belohnung richtet sich nach dem geschätzten Aufwand (Flugminuten bei Speed 150 plus Stopps), nicht nach der Zeit.
  */
 
@@ -78,9 +79,9 @@ export function makeOffer(game, e, onlyType = null) {
   return null;
 }
 
-/** Märkte im Sektor des Questgebers innerhalb von QUEST.RANGE (ohne Spielerbesitz) */
+/** Real destinations, including owned sites; private/blocked sites need access. */
 function nearMarkets(game, e, range = QUEST.RANGE) {
-  return game.world.sectorEntities(e.sector).filter((x) => x !== e && x.market && x.kind !== 'wormhole' && dist(x, e) <= range && !game.ownership.has(x.id));
+  return game.world.sectorEntities(e.sector).filter((x) => x !== e && x.market && ['planet','station'].includes(x.kind) && dist(x,e)<=range && !x.market.homeworld?.warp && x.market.mode!=='private' && !(x.type==='ruins'&&x.market.homeworld?.facilities?.dock?.status!=='ready'));
 }
 const stop = QUEST.STOP_MIN;
 
@@ -93,7 +94,6 @@ const GEN = {
   },
   /** Material für den aktuellen Bau einer NPC-Werft */
   rush(game, e, level) {
-    if (e.market.owner) return null;
     const g = missingInputs(e.market).find((x) => GOODS[x].cls === 'normal');
     return g ? deliveryQuest(game, e, level, g) : null;
   },
@@ -141,7 +141,7 @@ const GEN = {
   },
   /** x Einheiten Erz oder Eis selbst abbauen und an die Werft liefern */
   mine(game, e, level) {
-    const belts = game.world.sectorEntities(e.sector).filter((b) => b.kind === 'belt' && ['ore', 'ice'].includes(BELT_TYPES[b.type].good) && dist(b, e) <= QUEST.RANGE);
+    const belts = game.world.sectorEntities(e.sector).filter((b) => b.kind === 'belt' && BELT_TYPES[b.type] && dist(b, e) <= QUEST.RANGE);
     if (!belts.length) return null;
     const b = belts.sort((x, y) => dist(x, e) - dist(y, e))[0];
     const g = BELT_TYPES[b.type].good;
@@ -162,9 +162,10 @@ function deliveryQuest(game, e, level, g) {
     const need = Object.entries(e.market.goods).find(([x]) => x === g)?.[1];
     if (need) amount = Math.max(5, Math.min(amount, Math.floor(need.cap - need.stock)));
   }
-  const srcs = nearMarkets(game, e, QUEST.RANGE * 1.5).filter((x) => x.market.goods[g] && canBuyFrom(x.market.goods[g]))
+  const srcs = nearMarkets(game, e, QUEST.RANGE * 1.5).filter((x) => viableSource(x,g))
     .sort((a, b) => dist(a, e) - dist(b, e)).slice(0, 3);
   const src = srcs.length ? pick(srcs) : null;
+  if(!src)return null;
   const effort = (src ? flightMinutes(2 * dist(e, src)) : flightMinutes(2 * 30000)) + 2 * stop;
   return { good: g, amount, source: src?.id || null, sourceName: src?.name || null, value: amount * base * (src?.market.goods[g].mod || 1), effort };
 }
@@ -173,18 +174,44 @@ function deliveryQuest(game, e, level, g) {
 /** Objekte, die einer Quest gehören (für die Besitzprüfung) */
 const questEntities = (q) => [q.source, q.pickup, q.dest, ...(q.stops || []), ['procure', 'rush', 'mine'].includes(q.type) ? q.giver : null].filter(Boolean);
 
+const viableSource=(e,g)=>!!e?.market?.goods[g]&&canBuyFrom(e.market.goods[g])&&(availableHomeStock(e.market,g)>0||e.market.goods[g].role==='produce'&&e.market.goods[g].rate>0);
+export function questOfferError(game,player,ship,q){
+  for(const id of questEntities(q)){
+    const e=game.world.entities.get(id),prop=game.ownership.get(id);
+    if(!e?.market)return 'Ein Auftragsziel existiert nicht mehr.';
+    if(e.market.homeworld?.warp)return 'Ein Auftragsziel ist im Warptransfer.';
+    if(prop?.mode==='private'&&!game.canUseStorage(prop,player.id))return 'Ein Auftragsziel ist privat und nicht zugänglich.';
+    if(e.type==='ruins'&&e.market.homeworld?.facilities?.dock?.status!=='ready')return 'Der Landeplatz eines Auftragsziels ist noch nicht betriebsbereit.';
+  }
+  if(['procure','rush'].includes(q.type)&&!viableSource(game.world.entities.get(q.source),q.good)&&(ship.cargo[q.good]||0)<q.amount)return 'Die angegebene Warenquelle ist derzeit nicht verfügbar. Angebot später erneut prüfen.';
+  if(q.type==='rush'&&!missingInputs(game.world.entities.get(q.giver).market).includes(q.good))return 'Die Werft benötigt dieses Material für ihren aktuellen Bau nicht mehr.';
+  if(q.type==='mine'){
+    const b=game.world.entities.get(q.belt);
+    if(b?.kind!=='belt'||BELT_TYPES[b.type]?.good!==q.good)return 'Das Abbauziel ist für diese Ware nicht geeignet.';
+    if(!(shipStats(ship).mining[GOODS[q.good]?.mine||'std']>0))return 'Für diesen Rohstoff braucht das Schiff passende Abbaugeräte.';
+  }
+  if(q.type==='explore'){
+    if(q.zone&&(!game.findZone(q.zone)||player.zoneVisits?.includes(q.zone)))return 'Dieses Sondergebiet wurde bereits besucht oder existiert nicht mehr.';
+    if(q.sector){
+      if(!game.world.sectors.has(q.sector))return 'Der Zielsektor existiert nicht mehr.';
+      if(!explorationOfferAvailable(q,player.zoneVisits,player.revealed))return 'In diesem Sektor ist nicht mehr genügend unerforschte Fläche für diesen Auftrag übrig.';
+    }
+  }
+  return null;
+}
+
 /** offers: Angebotsliste (Questtafel oder Schmugglerslot) */
 export function acceptQuest(game, player, ship, e, questId, offers = null) {
   if (!isGiver(e)) return 'Hier gibt es keine Questtafel.';
   if (ship.dockedAt !== e.id) return 'Dein Schiff muss beim Questgeber angedockt sein.';
-  if (player.quest) return 'Du hast schon eine aktive Quest.';
+  if (activeSideQuests(player).length>=sideQuestLimit(player)) return `Alle ${sideQuestLimit(player)} Nebenquestslots sind belegt (ein Slot je Pilotenlevel).`;
   const lock = (player.questLock || 0) - game.time;
   if (lock > 0) return `Nach dem Abbruch kannst du erst in ${Math.ceil(lock / 60)} min eine neue Quest annehmen.`;
   const list = offers || boardOf(e).offers;
   const i = list.findIndex((o) => o.id === questId);
   if (i < 0) return 'Diese Quest ist nicht mehr verfügbar.';
   const q = list[i];
-  if (questEntities(q).some((id) => game.canUseStorage(game.ownership.get(id), player.id))) return 'Diese Quest betrifft deinen eigenen Besitz oder den deines Konsortiums.';
+  const invalid=questOfferError(game,player,ship,q);if(invalid)return invalid;
   const st = shipStats(ship);
   if (q.type === 'tour' && st.passenger < q.tourists) return `Für ${q.tourists} Touristen braucht das Schiff Passagierkabinen mit ${q.tourists} Plätzen.`;
   if(game.profile==='homeworld'&&q.type==='tour'){
@@ -194,13 +221,12 @@ export function acceptQuest(game, player, ship, e, questId, offers = null) {
     let left=q.tourists;
     for(const batch of [...ship.passengers].reverse())if(batch.kind==='tourists'&&left){batch.quest=q.id;left-=batch.n;}
   }
-  if (q.type === 'mine' && !(st.mining.std > 0)) return 'Für diese Quest braucht das Schiff Abbaugeräte.';
   list.splice(i, 1);
   const quest = { ...q, accepted: Math.round(game.time), ship: ship.id, progress: 0 };
   if (q.type === 'courier') quest.state = 'pickup';
   if (q.type === 'tour') { quest.state = 'tour'; quest.visited = []; }
-  if (q.type === 'mine') quest.minedBase = minedBy(game, player, q.good);
-  player.quest = quest;
+  if (q.type === 'mine') {quest.minedBase = minedBy(game, player, q.good);quest.minedClaimBase=player.questMinedUsed?.[q.good]||0;}
+  if(!player.quest)player.quest=quest;else (player.quests||=[]).push(quest);
   // Ziele auf der Karte sichtbar machen
   for (const id of [q.giver, q.source, q.pickup, q.dest, q.belt, ...(q.stops || [])].filter(Boolean)) {
     const t = game.world.entities.get(id);
@@ -211,15 +237,15 @@ export function acceptQuest(game, player, ship, e, questId, offers = null) {
   game.emit('notice', player, `${q.smuggler ? 'Schmuggelauftrag' : 'Quest'} angenommen: ${QUEST_TYPES[q.type].name} für ${e.name}`);
   game.emit('sfx', player, 'questAccept');
   game.emit('entity', e);
-  questProgress(game, player, ship); // z.B. Ware schon an Bord
+  questProgress(game, player, ship, false);
   return undefined;
 }
 
-export function abortQuest(game, player) {
-  const q = player.quest;
-  if (!q) return 'Keine aktive Quest.';
+export function abortQuest(game, player, id=null) {
+  const q = selectedSideQuest(player,id);
+  if (!q) return activeSideQuests(player).length?'Bitte die abzubrechende Nebenquest eindeutig auswählen.':'Keine aktive Quest.';
   if(game.profile==='homeworld'&&q.type==='tour')for(const ship of game.shipsOf(player.id))for(const batch of ship.passengers||[])if(batch.quest===q.id)delete batch.quest;
-  player.quest = null;
+  removeSideQuest(player,q);
   player.questLock = game.time + QUEST.ABORT_LOCK;
   if (q.faction) {
     player.rep ||= {};
@@ -237,24 +263,33 @@ export const minedBy = (game, player, g) => game.shipsOf(player.id).reduce((a, s
  * Fortschritt prüfen, wenn ein eigenes Schiff irgendwo angedockt ist (beim Andocken und auf Knopfdruck).
  * Liefert true, wenn sich etwas getan hat.
  */
-export function questProgress(game, player, ship) {
-  const q = player.quest;
+export function questProgress(game, player, ship, explicit=true, id=null) {
+  const quests=id?[selectedSideQuest(player,id)].filter(Boolean):explicit?[selectedSideQuest(player)].filter(Boolean):activeSideQuests(player);
+  let changed=false;
+  for(const q of quests)if(progressQuest(game,player,ship,q,explicit))changed=true;
+  return changed;
+}
+function progressQuest(game,player,ship,q,explicit){
   if (!q || !ship.dockedAt) return false;
   const at = ship.dockedAt;
   switch (q.type) {
     case 'procure':
     case 'rush':
     case 'mine': {
+      if(!explicit)return false;
       if (at !== q.giver || (ship.cargo[q.good] || 0) < q.amount) return false;
-      if (q.type === 'mine' && minedBy(game, player, q.good) - q.minedBase < q.amount) return false;
-      const destination=game.world.entities.get(q.giver);
-      if(game.profile==='homeworld'&&(!destination?.market?.goods[q.good]||homeStorageFree(destination.market,q.good)<q.amount))return false;
+      if (q.type === 'mine' && minedQuestProgress(player,q,minedBy(game, player, q.good)) < q.amount) return false;
+      const destination=game.world.entities.get(q.giver),prop=game.ownership.get(q.giver);
+      if(!destination?.market||prop?.mode==='private'&&!game.canUseStorage(prop,player.id)||destination.market.homeworld?.warp)return false;
       ship.cargo[q.good] -= q.amount;
       if (!ship.cargo[q.good]) delete ship.cargo[q.good];
-      const e = game.world.entities.get(q.giver);
-      const slot = e?.market?.goods[q.good];
-      if (slot) { slot.stock = Math.min(slot.cap, slot.stock + q.amount); stat(e.market, game.time, 'i', q.good, q.amount); }
-      completeQuest(game, player);
+      // Dedicated quest handover: goods leave circulation, never enter the
+      // trade store and never produce an additional trade or local-sale payout.
+      destination.market.questDeliveries||=[];
+      destination.market.questDeliveries.push({quest:q.id,good:q.good,amount:q.amount,time:game.time});
+      destination.market.questDeliveries=destination.market.questDeliveries.slice(-100);
+      if(q.type==='mine'){player.questMinedUsed||={};player.questMinedUsed[q.good]=(player.questMinedUsed[q.good]||0)+q.amount;}
+      completeQuest(game, player,q);
       return true;
     }
     case 'courier':
@@ -264,7 +299,7 @@ export function questProgress(game, player, ship) {
         game.shipLog(ship, `Die versiegelte Sendung wurde bei ${game.world.entities.get(q.pickup)?.name||q.pickupName} an Bord gebracht.`);
         return true;
       }
-      if (q.state === 'deliver' && at === q.dest && ship.id === q.ship) { completeQuest(game, player); return true; }
+      if (q.state === 'deliver' && at === q.dest && ship.id === q.ship) { completeQuest(game, player,q); return true; }
       return false;
     case 'tour':
       if (ship.id !== q.ship) return false;
@@ -281,7 +316,7 @@ export function questProgress(game, player, ship) {
           for(const b of batches){h.population+=b.n;for(const qualification of Object.keys(h.workers))h.workers[qualification]+=b.workers[qualification]||0;if(h.civil)h.civil.budget+=b.wallet||0;}
           ship.passengers=ship.passengers.filter(b=>b.quest!==q.id);ship.cargo.tourists=(ship.cargo.tourists||0)-q.tourists;if(!ship.cargo.tourists)delete ship.cargo.tourists;updatePassengerOffers(e);
         }
-        completeQuest(game, player); return true;
+        completeQuest(game, player,q); return true;
       }
       return false;
     default:
@@ -291,25 +326,25 @@ export function questProgress(game, player, ship) {
 
 /** Erkundung: neu aufgedeckte Zellen im Zielsektor zählen */
 export function exploreCells(game, player, cells) {
-  const q = player.quest;
-  if (q?.type !== 'explore' || !q.sector) return;
+  for(const q of activeSideQuests(player)){
+  if (q?.type !== 'explore' || !q.sector) continue;
   for (const k of cells) {
     const [cx, cy] = k.split(',').map(Number);
     const h = hexAt((cx + 0.5) * WORLD.FOG_CELL, (cy + 0.5) * WORLD.FOG_CELL);
     if (hexKey(h.q, h.r) === q.sector) q.progress++;
   }
-  if (q.progress >= q.cells) completeQuest(game, player);
+  if (q.progress >= q.cells) completeQuest(game, player,q);
+  }
 }
 
 /** Erkundung: Sondergebiet besucht (ein eigenes Schiff ist darin) */
 export function exploreZone(game, player, zones) {
-  const q = player.quest;
-  if (q?.type === 'explore' && q.zone && zones.some((z) => z.id === q.zone)) completeQuest(game, player);
+  for(const q of activeSideQuests(player))if(q.type==='explore'&&q.zone&&zones.some(z=>z.id===q.zone))completeQuest(game,player,q);
 }
 
-function completeQuest(game, player) {
-  const q = player.quest;
-  player.quest = null;
+function completeQuest(game, player,q) {
+  if(!activeSideQuests(player).includes(q))return;
+  removeSideQuest(player,q);
   player.credits += q.reward.cr;
   player.questsDone = (player.questsDone || 0) + 1;
   game.addXp(player, q.reward.xp);

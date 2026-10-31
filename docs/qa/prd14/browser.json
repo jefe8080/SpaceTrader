@@ -1,0 +1,14 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "checks": "housing, infrastructure, quest selection and delivery ID, budgets, exact sales, ore filter without trade actions, popup close and no repeated popup",
+    "errors": []
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "checks": "housing, infrastructure, quest selection and delivery ID, budgets, exact sales, ore filter without trade actions, popup close and no repeated popup",
+    "errors": []
+  }
+]

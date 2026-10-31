@@ -2,6 +2,7 @@ import {planAgrarCity} from './planetAgrarLayout.js';
 import {planPaintedCity} from './planetPaintedLayout.js';
 import {PAINTED_CITIES} from './planetCitySites.js';
 import {HOME_CITY} from './planetHomeCitySites.js';
+import {housingLevel} from '../../shared/homeworld.js';
 /** Pure visual planning. Keys and economic state belong to buildItems, never to the renderer. */
 export const CITY_TYPES = {
   agrar: { name:'Agrarwelt', ground:'#8c9670', road:'#c5b08a', trim:'#849965', shape:0, terrain:0 },
@@ -45,7 +46,8 @@ export function citySprite(entity, item, goods = {}) {
   if (item.homeOrbital) return 24;
   if (item.kind === 'dog') return 23;
   if (item.kind === 'beggar') return 22;
-  const structure = entity.market?.homeworld?.structures?.find(s=>s.id===item.homeStructure);
+  const structure = entity.market?.homeworld?.structures?.find(s=>s.id===item.homeStructure)||entity.market?.economy?.infrastructure?.find(b=>b.id===item.worldInfrastructure);
+  if(structure?.kind==='housing')return 'housing-'+housingLevel(structure);
   if (structure) return ({housing:20,solar:21,school:14,researchWorkshop:8,spaceport:17,silo:1,safeStorage:5,moduleBench:16})[structure.kind] ?? 16;
   if (item.homeFacility) return ({dock:17,control:13,workshop:16,waterworks:0,foodplant:12,fueldepot:0,refinery:5,smelter:3})[item.homeFacility] ?? 16;
   if (item.kind === 'plot') return null;
@@ -61,10 +63,18 @@ export function citySprite(entity, item, goods = {}) {
   return FAMILY_CELL[storageFamily(item.good,goods)];
 }
 export function planCity(entity, items, previous = new Map(), recipeCategory) {
-  if(entity.type==='agrar')return planAgrarCity(entity,items,previous,recipeCategory);
-  if(entity.type==='ruins')return planPaintedCity(entity,items,HOME_CITY,previous,recipeCategory);
-  if(PAINTED_CITIES[entity.type])return planPaintedCity(entity,items,PAINTED_CITIES[entity.type],previous,recipeCategory);
-  throw new Error('Unbekannte Stadtillustration: '+entity.type);
+  const district=items.filter(it=>it.worldInfrastructure),base=items.filter(it=>!it.worldInfrastructure);
+  const plan=entity.type==='agrar'?planAgrarCity(entity,base,previous,recipeCategory):entity.type==='ruins'?planPaintedCity(entity,base,HOME_CITY,previous,recipeCategory):PAINTED_CITIES[entity.type]?planPaintedCity(entity,base,PAINTED_CITIES[entity.type],previous,recipeCategory):null;
+  if(!plan)throw new Error('Unbekannte Stadtillustration: '+entity.type);
+  if(district.length){
+    for(const [i,item] of district.entries()){
+      const x=140+i%8*175,y=1190+Math.floor(i/8)*190,w=140,h=170,box={x:x-w/2,y:y-h,width:w,height:h};
+      plan.records.push({key:item.key,item,x,y,w,h,box,painted:false,authored:false});
+    }
+    const height=1240+Math.floor((district.length-1)/8)*190;
+    plan.landscape={...plan.landscape,height};plan.bounds={...plan.bounds,height};
+  }
+  return plan;
 }
 /** World coordinates; reverse order agrees with the painter's rendering order. */
 export function pickCity(records,x,y) {

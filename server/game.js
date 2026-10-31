@@ -24,6 +24,8 @@ import {handlingAllowance,recordHandling} from './handling.js';
 import {tickColonies} from './colonies.js';
 import {tickWarps} from './warp.js';
 import { syncHomeQuests } from './quest-activation.js';
+import {localSalesSummary} from '../shared/local-sales.js';
+import {activeSideQuests} from '../shared/side-quests.js';
 import { tickRelics } from './relic.js';
 import { homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { coveredPath, pointCovered } from './coverage.js';
@@ -213,6 +215,7 @@ export class Game {
     p.xp = (p.xp || 0) + n;
     const after = pilotLevel(p.xp);
     if (after > before) {
+      this.emit('pilotLevelUp',p,{before,level:after});
       this.emit('notice', p, `Pilotenlevel ${after} erreicht${pilotTitle(p.xp) ? ': ' + pilotTitle(p.xp) : ` (Pilotenlizenz ${after} jetzt kaufbar)`}`);
       this.emit('sfx', p, 'levelUp');
       this.emit('player', p);
@@ -311,6 +314,7 @@ export class Game {
    */
   canGiveAway(player, ship) {
     if (ship.owner !== player.id) return 'Das ist nicht dein Schiff.';
+    if(activeSideQuests(player).some(q=>q.ship===ship.id&&(q.type==='tour'||q.type==='courier'&&q.state==='deliver')))return 'Zuerst den an dieses Schiff gebundenen Nebenauftrag abschließen oder abbrechen.';
     if (player.relic?.location.kind === 'ship' && player.relic.location.id === ship.id) return 'Vor der Abgabe den einzigartigen Reliktantrieb an einer eigenen Werkstatt ausbauen.';
     if (player.relic?.operation?.ship === ship.id) return 'Während der Reliktarbeit kann dieses Schiff nicht abgegeben werden.';
     if (player.homeQuest?.salvage?.phase === 'sealed' && player.homeQuest.salvage.ship === ship.id) return 'Zuerst den versiegelten Fund zur Heimatwerkstatt bringen.';
@@ -387,7 +391,7 @@ export class Game {
       }
     }
     if (!newCells.length) return;
-    if (p.quest?.type === 'explore') exploreCells(this, p, newCells);
+    if (activeSideQuests(p).some(q=>q.type==='explore')) exploreCells(this, p, newCells);
     const entities = [];
     for (const k of newCells) {
       for (const id of this.world.entitiesInCell(k)) {
@@ -478,7 +482,7 @@ export class Game {
       if (e.market.building) this.discover(p, 'ship', e.market.building.type);
       for (const m of e.market.modules || []) this.discover(p, 'module', m);
     }
-    if (p) questProgress(this, p, ship);
+    if (p) questProgress(this, p, ship, false);
     const tank = this.shipTank(ship);
     if ((this.profile!=='homeworld'||ship.queue[0]?.manualDirect||pointCovered(this,p,e)) && !ship.relicSpeed && tank > 0 && ship.autoRefuel > 0 && ship.fuel < tank * ship.autoRefuel && e.market?.goods.shipfuel && canBuyFrom(e.market.goods.shipfuel)) {
       this.refuel(ship, e);
@@ -523,6 +527,7 @@ export class Game {
     if (!p) return;
     for (const { sector, entities } of this.world.ensureAround(ship.x, ship.y)) this.onSectorCreated(sector, entities);
     const fx = zoneEffects(this.world.zonesNear(ship.x, ship.y), ship.x, ship.y, { void: hasAbility(ship, 'void') });
+    if(fx.zones?.length)p.zoneVisits=[...new Set([...(p.zoneVisits||[]),...fx.zones.map(z=>z.id)])];
     this.revealAround(p, ship.x, ship.y, shipStats(ship).sensor * fx.sensor);
     const h = hexAt(ship.x, ship.y);
     const key = hexKey(h.q, h.r);
@@ -536,7 +541,7 @@ export class Game {
         if (!sec.firstVisit) { sec.firstVisit = p.id; this.emit('notice', p, `Erstentdeckung: Sektor ${sec.name}`); }
       }
     }
-    if (p.quest?.type === 'explore' && fx.zones) exploreZone(this, p, fx.zones);
+    if (fx.zones&&activeSideQuests(p).some(q=>q.type==='explore')) exploreZone(this, p, fx.zones);
     for (const sy of this.world.systemsNear(ship.x, ship.y)) {
       if (p.known.system.has(sy.id)) continue;
       if (Math.hypot(sy.x - ship.x, sy.y - ship.y) <= WORLD.SYSTEM_DETECT) {
@@ -1055,6 +1060,7 @@ export class Game {
     const round = (o) => Object.fromEntries(Object.entries(o || {}).map(([g, v]) => [g, Math.round(v * 10) / 10]));
     return {
       id: e.id, bucketSecs: STATS.BUCKET_SECS, buckets: STATS.BUCKETS, now: Math.floor(this.time / STATS.BUCKET_SECS),
+      localSales: localSalesSummary(e.market,this.time),
       data: (e.market.stats || []).map((b) => ({ b: b.b, n: b.n, p: round(b.p), c: round(b.c), i: round(b.i), o: round(b.o), pr: round(b.pr) })),
     };
   }

@@ -1,4 +1,4 @@
-import {HOME_BUILDINGS,HOMEWORLD,availableHomeStock} from '../shared/homeworld.js';
+import {HOME_BUILDINGS,HOMEWORLD,availableHomeStock,homeStructureSpec,housingLevel,housingUpgradeCost} from '../shared/homeworld.js';
 import {WORLD_FOCI,specializationSpec} from '../shared/specializations.js';
 import {GOODS} from '../shared/goods.js';
 import {remoteManagementError} from './coverage.js';
@@ -21,12 +21,23 @@ export function specializationAccess(game,p,e){
 function charge(game,p,e,cost){
   const prop=game.ownership.get(e.id),payer=game.accountOf(prop.player),ships=game.shipsOf(p.id).filter(s=>s.dockedAt===e.id);
   if(payer.credits<cost.credits)return 'Nicht genug Credits beim Eigentümer.';
-  for(const [g,n] of Object.entries(cost.goods))if((e.market.goods[g]?.stock||0)+ships.reduce((n,s)=>n+(s.cargo[g]||0),0)<n)return `Es fehlen ${GOODS[g].name}.`;
+  for(const [g,n] of Object.entries(cost.goods))if(availableHomeStock(e.market,g)+ships.reduce((n,s)=>n+(s.cargo[g]||0),0)<n)return `Es fehlen ${GOODS[g].name}.`;
   payer.credits-=cost.credits;
   for(const [g,n] of Object.entries(cost.goods)){
-    let rest=n,take=Math.min(rest,e.market.goods[g]?.stock||0);if(take)e.market.goods[g].stock-=take;rest-=take;
+    let rest=n,take=Math.min(rest,availableHomeStock(e.market,g));if(take)e.market.goods[g].stock-=take;rest-=take;
     for(const s of ships){take=Math.min(rest,s.cargo[g]||0);s.cargo[g]=(s.cargo[g]||0)-take;rest-=take;if(!s.cargo[g])delete s.cargo[g];}
   }
+}
+export function upgradeWorldHousing(game,p,e,id){
+  const error=specializationAccess(game,p,e);if(error)return error;
+  const h=initialize(e),b=h.infrastructure.find(b=>b.id===id&&b.kind==='housing');
+  if(!b)return 'Einen fertiggestellten eigenen Wohnblock auswählen.';
+  if(b.upgrading||h.projects.some(j=>j.target===id))return 'Ein Ausbau läuft bereits.';
+  const level=housingLevel(b)+1,cost=housingUpgradeCost(level);if(!cost)return 'Höchste Wohnhausstufe 3 erreicht.';
+  if(freeBuilders(h)<2)return 'Zwei freie Bauarbeiter erforderlich.';
+  const blocked=charge(game,p,e,cost);if(blocked)return blocked;
+  const project=`housing_${++h.nextProject}`;b.upgrading=project;
+  h.projects.push({id:project,kind:'housingUpgrade',target:id,level,until:game.time+cost.seconds,bound:structuredClone(cost)});
 }
 export function startSpecialization(game,p,e,focus){
   const error=specializationAccess(game,p,e);if(error)return error;
@@ -73,6 +84,7 @@ export function tickSpecialization(game,e,dt){
     if(j.kind==='training'||j.until>game.time){pending.push(j);continue;}
     if(j.kind==='specialization')h.specialization={focus:j.focus,level:j.level};
     else if(j.kind==='infrastructure')h.infrastructure.push({id:j.id,kind:j.building});
+    else if(j.kind==='housingUpgrade'){const b=h.infrastructure.find(b=>b.id===j.target);if(b){b.level=j.level;delete b.upgrading;}}
   }
   h.projects=pending;
   grantSchoolStaff(h,h.infrastructure);
@@ -89,13 +101,13 @@ export function tickSpecialization(game,e,dt){
   for(const slot of Object.values(m.goods)){if(slot.specialUse){slot.rate=slot.baseRate||0;delete slot.specialUse;}}
   const operatingDemand=(goods)=>{for(const [g,n] of Object.entries(goods||{})){const slot=m.goods[g];if(slot&&slot.role!=='produce'){slot.baseRate??=slot.rate;slot.rate=(slot.specialUse?slot.rate:0)+n/3600;slot.specialUse=true;}}};
   for(const b of h.infrastructure){
-    const spec=HOME_BUILDINGS[b.kind];h.housing+=spec.housing||0;
+    const spec=homeStructureSpec(b);h.housing+=spec.housing||0;
     if(!spec.generation)continue;
     operatingDemand(spec.fuelPerHour);
     if(spec.fuelPerHour&&!Object.entries(spec.fuelPerHour).every(([g,n])=>availableHomeStock(m,g)+1e-8>=n*dt/3600)){allocations.push({id:b.id,state:'paused',reason:'Generatorbrennstoff fehlt'});continue;}
     if(assign(b.id,{...spec,power:0})&&(!spec.fuelPerHour||consume(spec.fuelPerHour,dt/3600)))generation+=spec.generation;
   }
-  for(const b of h.infrastructure){const spec=HOME_BUILDINGS[b.kind];if(spec.generation)continue;if(assign(b.id,spec)&&b.kind==='school')h.schoolCapacity++;}
+  for(const b of h.infrastructure){const spec=homeStructureSpec(b);if(spec.generation)continue;if(assign(b.id,spec)&&b.kind==='school')h.schoolCapacity++;}
   const s=h.specialization,spec=s&&specializationSpec(s.focus,s.level);
   if(spec){
     operatingDemand(spec.wear);
@@ -119,7 +131,7 @@ export function tickSpecialization(game,e,dt){
   }
   h.projects=h.projects.filter(j=>j.kind!=='training'||j.remaining>0);
   h.workforce={used,reserved};h.energy={used:power,generation};h.allocations=allocations;
-  h.supplyOverview=supplyOverview(h.population,h.workers,[...h.infrastructure.map(b=>HOME_BUILDINGS[b.kind]),...(spec&&!s.paused?[spec]:[])],reserved,generation);
+  h.supplyOverview=supplyOverview(h.population,h.workers,[...h.infrastructure.map(homeStructureSpec),...(spec&&!s.paused?[spec]:[])],reserved,generation);
   h.employmentFactor=.5+.5*Math.min(1,Object.values(used).reduce((a,b)=>a+b,0)/Math.max(1,Math.floor(h.population*.6)));
   if((h.supplyFactor||0)>=1){h.growthProgress+=Math.min(h.population*.02,s?.active&&spec.growthCap||100)*dt/3600;const n=Math.min(Math.floor(h.growthProgress),Math.max(0,h.housing-h.population));h.population+=n;h.growthProgress-=n;h.workers.basic+=Math.min(n,Math.max(0,Math.floor(h.population*.6)-Object.values(h.workers).reduce((a,b)=>a+b,0)));}
   updatePassengerOffers(e);

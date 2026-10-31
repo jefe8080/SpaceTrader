@@ -1,4 +1,4 @@
-import {GOODS,freeFor} from '../shared/config.js';
+import {GOODS,STATION_TYPES,freeFor} from '../shared/config.js';
 import {stat} from './markets.js';
 
 export const peopleOf=e=>e.market?.homeworld||e.market?.economy;
@@ -12,11 +12,19 @@ export function grantSchoolStaff(h,schools){
   }
 }
 export function initializePopulation(e){
+  if(e.type==='hotel'&&e.kind==='station'){
+    const h=e.market.economy||=( {cash:0,rate:0,population:0} );
+    h.population??=0;h.housing??=0;h.workers||={basic:0,skilled:0,specialist:0};h.visitors||=[];h.nextPassenger||=0;
+    h.visitorCapacity??=Math.round(STATION_TYPES.hotel.consume.tourists*1200);
+    e.market.goods.tourists||={role:'trade',rate:0,stock:0,cap:h.visitorCapacity,mod:1};
+    updatePassengerOffers(e);return;
+  }
   const h=peopleOf(e);if(!h||e.kind!=='planet')return;
   h.workers||={basic:Math.floor(h.population*.48),skilled:Math.floor(h.population*.12),specialist:0};
   if(!h.peopleRegistered){e.market.provenance||=[];e.market.provenance.push({id:`${e.id}:population`,source:'existing_population',amount:h.population});h.peopleRegistered=true;}
   grantSchoolStaff(h,e.type==='ruins'?(h.structures||[]).filter(s=>s.status==='ready'):h.infrastructure);
   h.housing??=Math.max(100,Math.ceil(h.population*1.2));h.visitors||=[];h.nextPassenger||=0;h.growthProgress||=0;
+  h.visitorCapacity??=e.type==='resort'?50:0;
   for(const [g,n] of Object.entries({water:.2,food:.1})){
     e.market.goods[g]||={role:'consume',rate:0,stock:0,cap:Math.max(200,h.population*n*4),mod:1};
     if(e.type!=='ruins')e.market.goods[g].rate=h.population*n/3600;
@@ -43,7 +51,7 @@ export function updatePassengerOffers(e){
   const reserved=reservedWorkers(h),available=Object.keys(reserved).reduce((n,q)=>n+Math.max(0,h.workers[q]-reserved[q]),0),leave=residentDepartureCapacity(h);
   for(const g of ['workers','tourists']){
     const s=e.market.goods[g];if(!s)continue;
-    s.rate=0;s.role='trade';s.cap=h.population;
+    s.rate=0;s.role='trade';s.cap=Math.max(h.population,h.visitorCapacity||0);
     s.stock=g==='workers'?Math.floor(Math.min(available,leave)):Math.floor(h.visitors.filter(v=>v.ready).reduce((n,v)=>n+v.n,0)+Math.min(leave,Math.max(0,h.population-total(h.workers))));
   }
 }
@@ -62,8 +70,11 @@ function cargoSync(ship){
   for(const g of ['workers','tourists']){const n=(ship.passengers||[]).filter(b=>b.kind===g).reduce((n,b)=>n+b.n,0);if(n)ship.cargo[g]=n;else delete ship.cargo[g];}
 }
 export function passengerTrade(game,ship,e,good,amount,dir,limit=0,free=false){
+  initializePopulation(e);
   const h=peopleOf(e),p=game.players.get(ship.owner),prop=game.ownership.get(e.id);
-  if(e.kind!=='planet'||!h||!p||ship.dockedAt!==e.id)return {n:0,reason:'Personentransport benötigt einen bewohnten Planeten und ein angedocktes Schiff.'};
+  if(!p||ship.dockedAt!==e.id)return {n:0,reason:'Das eigene Schiff muss am Standort angedockt sein.'};
+  if(!h||!(e.kind==='planet'||e.type==='hotel'))return {n:0,reason:'Dieser Standort hat keine touristischen Gästeplätze. Touristen können auf Paradieswelten und in Orbitalhotels untergebracht werden.'};
+  if(e.type==='hotel'&&good!=='tourists')return {n:0,reason:'Das Orbitalhotel nimmt ausschließlich Touristen als Gäste auf.'};
   if(prop?.mode==='private'&&!game.canUseStorage(prop,p.id))return {n:0,reason:'Privater Standort.'};
   if(h.warp)return {n:0,reason:'Standort im Warptransfer.'};
   if(e.type==='ruins'&&h.facilities.dock.status!=='ready')return {n:0,reason:'Landeplatz zuerst reparieren.'};
@@ -114,7 +125,12 @@ export function passengerTrade(game,ship,e,good,amount,dir,limit=0,free=false){
     delivered+=n;remaining-=n;
   }
   ship.passengers=ship.passengers.filter(b=>b.n>0);cargoSync(ship);updatePassengerOffers(e);stat(e.market,game.time,'i',good,delivered);
-  return {n:delivered,total:0,reason:delivered?undefined:'Kein freier Wohnraum oder Besucherplatz; Personen bleiben an Bord.'};
+  const occupied=h.visitors.reduce((n,v)=>n+v.n,0),capacity=h.visitorCapacity||0;
+  const returning=(ship.passengers||[]).some(b=>b.kind===good&&b.origin===e.id&&!b.quest);
+  const reason=good==='workers'||returning?'Kein freier Wohnraum für Ansiedlung oder Rückkehr; Personen bleiben an Bord.':
+    (ship.passengers||[]).some(b=>b.kind===good&&b.quest)?'Questgebundene Touristen werden über die Rundreisequest zurückgegeben.':
+    capacity<=0?'Dieser Planet hat keine touristischen Gästeplätze. Touristen können auf Paradieswelten und in Orbitalhotels untergebracht werden.':occupied>=capacity?`Keine Gästeplätze verfügbar: ${occupied} / ${capacity} belegt. Personen bleiben an Bord.`:'Keine frei verfügbaren Touristen an Bord.';
+  return {n:delivered,total:0,reason:delivered?undefined:reason};
 }
 
 export function tickVisitors(e,now){const h=peopleOf(e);if(!h?.visitors)return;for(const v of h.visitors)if(v.until<=now)v.ready=true;updatePassengerOffers(e);}

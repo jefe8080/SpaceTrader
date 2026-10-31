@@ -1,4 +1,6 @@
 import {recordInventoryTrade} from './pilot-profile.js';
+import {recordLocalSale} from '../shared/local-sales.js';
+import {CIVIL_GOODS,localDemandPerHour} from '../shared/local-demand.js';
 import {GOODS,SHIP_TYPES,SHIPYARD,WORLD,SUPPLY,buyPrice,sellPrice,canBuyFrom,canSellTo,NPC_OWNER} from '../shared/config.js';
 import {HOMEWORLD,availableHomeStock,homeStorageFree} from '../shared/homeworld.js';
 import {stat,tickHubEquilibrium} from './markets.js';
@@ -57,6 +59,7 @@ export function tickRealMarket(game,entity,dt){
   const market=entity.market,cash=ensureCash(entity),now=game.time;
   const structure=()=>JSON.stringify(Object.entries(market.goods).map(([g,s])=>[g,s.role,s.rate,s.cap]));
   const before=structure();
+  if(entity.type==='hotel')initializePopulation(entity);
   tickVisitors(entity,now);
   if(entity.kind==='planet'){
     initializePopulation(entity);
@@ -81,17 +84,39 @@ export function tickRealMarket(game,entity,dt){
   const foodNeed=food?.role==='consume'?Math.max(0,food.rate*dt):0;
   const supplied=foodNeed>0?Math.min(1,food.stock/foodNeed):0;
   market.eff=.25+.75*supplied;
-  const civilConsumption={};
+  tickCivilMoney(game,entity,dt);
   for(const [good,slot] of Object.entries(market.goods)){
     if(slot.role==='produce'&&naturalGood(good)){
       const amount=Math.max(0,Math.min(slot.cap-slot.stock,slot.rate*market.eff*dt));slot.stock+=amount;stat(market,now,'p',good,amount);
     }else if(slot.role==='consume'&&GOODS[good].cls!=='passenger'&&!slot.specialUse){
-      const amount=Math.min(slot.stock,slot.rate*dt);slot.stock-=amount;stat(market,now,'c',good,amount);
-      if(['water','food','clothing','medicine','consumer'].includes(good))civilConsumption[good]=amount;
+      if(CIVIL_GOODS.includes(good))consumeCivilGood(game,entity,good,slot.rate,dt);
+      else {const amount=Math.min(availableHomeStock(market,good),slot.rate*dt);slot.stock-=amount;stat(market,now,'c',good,amount);}
     }
   }
-  if(entity.kind!=='planet'){cash.supplyFactor=market.eff;cash.employmentFactor=.5;}tickCivilMoney(game,entity,dt,civilConsumption);
+  if(entity.kind!=='planet'){cash.supplyFactor=market.eff;cash.employmentFactor=.5;}
   if(structure()!==before)game.emit('entity',entity);
+}
+
+/** Warenentnahme und vollständige Bezahlung werden gemeinsam gebucht. */
+export function consumeCivilGood(game,entity,good,rate,dt){
+  const m=entity.market,h=m.homeworld||ensureCash(entity),prop=game.ownership.get(entity.id),owner=prop&&game.accountOf(prop.player);
+  const slot=m.goods[good],demand=localDemandPerHour(good,slot,prop,rate)*dt/3600;
+  let amount=Math.min(availableHomeStock(m,good),demand);
+  if(owner){
+    h.civil||={budget:0,consumptionPayments:0};
+    const price=game.fixedPriceOf(entity,prop,good),budget=h.civil.budget||0;
+    h.civil.purchaseLimited=!!h.civil.purchaseLimited||amount*price>budget+1e-8;
+    amount=Math.min(amount,budget/price);
+    const payment=amount*price;
+    if(payment>0){
+      h.civil.budget=Math.max(0,budget-payment);h.civil.consumptionPayments=(h.civil.consumptionPayments||0)+payment;owner.credits+=payment;
+      propBook(game,prop,'inc',payment);recordInventoryTrade(game,game.players.get(prop.player),good,'sell',amount,payment);
+      recordLocalSale(m,game.time,good,amount,payment);
+    }
+  }
+  if(slot)slot.stock=Math.max(0,slot.stock-amount);
+  stat(m,game.time,'c',good,amount);
+  return demand>0?amount/demand:1;
 }
 
 export function tickCivilMoney(game,entity,dt,consumption={}){
@@ -100,6 +125,7 @@ export function tickCivilMoney(game,entity,dt,consumption={}){
   home.civil||={budget:0,taxRate:.2,gross:0,taxes:0,consumptionPayments:0};
   for(const [key,value] of Object.entries({budget:0,taxRate:.2,gross:0,taxes:0,consumptionPayments:0}))home.civil[key]??=value;
   const civil=home.civil,income=HOMEWORLD.money.incomePerHour*home.population*(home.supplyFactor??.25)*(home.employmentFactor??.5);
+  civil.purchaseLimited=false;
   const gross=income*dt/3600,tax=gross*civil.taxRate;
   if(owner)owner.credits+=tax;civil.gross+=gross;civil.taxes+=tax;
   const budgetBeforeCap=civil.budget+gross-tax;
@@ -111,6 +137,7 @@ export function tickCivilMoney(game,entity,dt,consumption={}){
     civil.budget-=payment;civil.consumptionPayments+=payment;owner.credits+=payment;
     propBook(game,prop,'inc',payment);
     recordInventoryTrade(game,game.players.get(prop.player),good,'sell',amount,payment);
+    recordLocalSale(entity.market,game.time,good,price>0?payment/price:0,payment);
   }
   if(prop)propBook(game,prop,'inc',tax);
   civil.incomePerHour=income;

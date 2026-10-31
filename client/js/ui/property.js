@@ -11,6 +11,8 @@ import {populationPanel,handlePopulationAction} from './population.js';
 import {WORLD_FOCI,FOCUS_NAMES,specializationSpec} from '/shared/specializations.js';
 import {HOME_BUILDINGS} from '/shared/homeworld.js';
 import {handleColonyAction} from './colonies.js';
+import {CIVIL_GOODS,localDemandPerHour} from '/shared/local-demand.js';
+import {housingPanel} from './housing.js';
 
 const gov = () => GOVERNOR_LICENSES[state.governor || 0];
 /** Eigenes Konsortium (oder null) und Rang */
@@ -83,18 +85,19 @@ function manageSection(e, prop) {
   if (e.kind === 'planet') {
     h += `<div class="sub-title">${e.market.realEconomy?'Fixpreise und tatsächlicher Bedarf':'Fixpreis-Verbrauch der Bevölkerung'}</div><table class="market"><tr><th>Ware</th><th>Position</th><th>Preis</th><th>Verbrauch/h</th></tr>`;
     for (const [g, s] of Object.entries(e.market.goods)) {
-      if (s.role !== 'consume') continue;
+      if (s.role !== 'consume'||(e.market.realEconomy&&!CIVIL_GOODS.includes(g))) continue;
       const sv = prop.fixed[g] ?? FIXED.DEFAULT;
       const { pmin, pmax } = priceWindow(g, s.mod || 1);
       const rate = e.market.realEconomy?s.rate:(PLANET_TYPES[e.type].consume[g] || s.rate) * (e.size || 1);
       const R = fixedRref(rate, pmin, pmax);
       h += `<tr><td>${GOODS[g].name}</td><td><input type="range" class="prop-fixed" data-ent="${e.id}" data-good="${g}" min="${FIXED.MIN}" max="${FIXED.MAX}" step="0.05" value="${sv}"></td>
-        <td>${fixedPrice(pmin, pmax, sv).toFixed(1)}</td><td>${(e.market.realEconomy?rate*3600:fixedConsumptionPerHour(R, sv, pmin, pmax)).toFixed(0)}</td></tr>`;
+        <td>${fixedPrice(pmin, pmax, sv).toFixed(1)}</td><td>${localDemandPerHour(g,s,prop,rate).toFixed(0)}</td></tr>`;
     }
     h += e.market.realEconomy?'</table><p>Tatsächlicher ziviler Verbrauch zahlt aus begrenztem Konsumbudget. Betriebsmittel bezahlen keine fiktiven Erlöse.</p>':`</table><div class="muted small-note">Günstiger Preis = mehr Verbrauch: Position 0,3 bringt doppelt so viel Erlös wie 0,7 (bei voller Belieferung).</div>`;
   }
 
   if(e.market.realEconomy&&e.kind==='planet')return h+specializationPanel(e)+'</div>';
+  if(state.homeworld)return h+(e.market.strategy==='shipyard'?yardSection(e,prop):'')+'</div>';
   if(e.market.realEconomy&&e.market.strategy!=='shipyard')return h+'</div>';
   // Upgrades
   h += `<div class="sub-title">Ausbau (max. Stufe ${max})</div><table class="market"><tr><th>Linie</th><th>Stufe</th><th>Kosten nächste Stufe</th><th></th></tr>`;
@@ -130,6 +133,7 @@ export function specializationPanel(e){
   html+='<details><summary>Weitere Infrastruktur</summary>';
   for(const kind of ['solar','gasGenerator','reactor','housing','school','academy']){const spec=HOME_BUILDINGS[kind];html+=`<p>${spec.name}: ${costText(spec)}</p><button class="small" data-act="worldInfrastructure" data-ent="${e.id}" data-kind="${kind}">Bauen</button>`;}
   html+='</details>';
+  html+=(h.infrastructure||[]).filter(b=>b.kind==='housing').map(b=>housingPanel(e,b)).join('');
   html+=(h.projects||[]).map(j=>`<p>${esc(j.kind==='training'?`Ausbildung: ${j.to}`:j.focus||HOME_BUILDINGS[j.building]?.name)} · ${Math.ceil(j.remaining??Math.max(0,j.until-state.time))} s · ${esc(j.reason||'Material gebunden')}</p>`).join('');
   html+=`<button class="small" data-act="worldTrain" data-ent="${e.id}" data-qualification="skilled">10 Fachkräfte ausbilden · 120 s</button><button class="small" data-act="worldTrain" data-ent="${e.id}" data-qualification="specialist">10 Spezialisten ausbilden · 180 s</button>
     <p>Steuern: ${Math.round((h.civil?.taxRate??.2)*100)} % · Konsumbudget ${fmt(h.civil?.budget||0)} Cr · Steuerertrag ${fmt(h.civil?.taxes||0)} Cr · bezahlter ziviler Absatz ${fmt(h.civil?.consumptionPayments||0)} Cr</p><input id="worldTax-${e.id}" aria-label="Steuersatz" type="number" min="0" max="40" value="${Math.round((h.civil?.taxRate??.2)*100)}"><button class="small" data-act="worldTax" data-ent="${e.id}">Steuersatz setzen</button>`;
@@ -192,6 +196,7 @@ export function handlePropertyAction(d) {
   if(handleColonyAction(d))return true;
   if(handlePopulationAction(d))return true;
   switch (d.act) {
+    case 'housingUpgrade':cmd('housingUpgrade',{target:d.ent,id:d.id});return true;
     case 'worldSpecialize':cmd('worldSpecialize',{target:d.ent,focus:d.focus});return true;
     case 'worldInfrastructure':cmd('worldInfrastructure',{target:d.ent,kind:d.kind});return true;
     case 'worldTrain':cmd('worldTrain',{target:d.ent,qualification:d.qualification});return true;
