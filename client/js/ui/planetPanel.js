@@ -138,7 +138,7 @@ export function renderPlanetUi() {
   else if (it.kind === 'factory') body = factoryPanel(it, e);
   else if (it.kind === 'plot') body = plotPanel(it, e);
   else body = panelKinds[it.kind]?.render(it, e, ship) ?? '<div class="muted">Hier ist gerade nichts los.</div>';
-  const expanded=new Set([...panel.querySelectorAll('details[open]')].map(d=>d.querySelector('summary')?.textContent));
+  const expanded=new Set([...panel.querySelectorAll('details[open]')].map(d=>d.dataset.disclosure||d.querySelector('summary')?.textContent));
   const connection = e.type==='ruins' ? `<div class="small-note ${lost?'neg':'muted'}">${accessTo(e.id).local?'Lokaler Zugang':accessTo(e.id).remote?'Fernverbindung aktiv':'Verbindung verloren – Verwaltung gesperrt'}</div>` : '';
   const context = JSON.stringify([e.id, it.key]);
   const updatePanel = context === panelContext ? patchPanelContent : (element, html) => { element.innerHTML = html; };
@@ -148,7 +148,7 @@ export function renderPlanetUi() {
   const selectedRecipe = panel.querySelector('#homeRecipe');
   if (selectedRecipe) selectedRecipe.dispatchEvent(new Event('change', { bubbles: true }));
   syncManagementControls(lost);
-  for(const details of panel.querySelectorAll('details'))if(expanded.has(details.querySelector('summary')?.textContent))details.open=true;
+  for(const details of panel.querySelectorAll('details'))if(expanded.has(details.dataset.disclosure||details.querySelector('summary')?.textContent))details.open=true;
 }
 
 panel.addEventListener('click', ev => {
@@ -210,6 +210,7 @@ panel.addEventListener('click', (ev) => {
       const perform=()=>cmd('homeOrbital',{target:e.id,large,ship:large?undefined:ship,confirmed:!large});
       if(large)perform();else confirmAction('Dieser Spatz wird dauerhaft aus der steuerbaren Flotte entfernt und als Orbitalinfrastruktur erhalten. Fracht und Module müssen vorher entladen sein. Jetzt endgültig abgeben?',perform);return;
     }
+    case 'homeOrbitalUpgrade':cmd('homeOrbitalUpgrade',{target:e.id});return;
     case 'homeOrbitalBuild':cmd('homeOrbitalBuild',{target:e.id,type:d.type});return;
     case 'homeOrbitalClaim':cmd('homeOrbitalClaim',{target:e.id,id:d.id});return;
     case 'homeLogistics':{

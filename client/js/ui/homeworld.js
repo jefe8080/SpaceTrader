@@ -12,7 +12,9 @@ import {moduleStockPanel,moduleCraftPanel} from './modules.js';
 import {REFINEMENT_RECIPES} from '/shared/goods.js';
 import {populationPanel,homePrices} from './population.js';
 import {QUEST_DELIVERIES,STUDY_FINDS} from '/shared/advanced-homequests.js';
-import {SHIP_TYPES,SHIPYARD} from '/shared/config.js';
+import {shipSprite} from '../util.js';
+import {blueprintRank} from '/shared/combat.js';
+import {SHIP_TYPES,SHIPYARD,PILOT_LICENSES,factionRank} from '/shared/config.js';
 import {warpPanel} from './colonies.js';
 import {housingPanel} from './housing.js';
 import {activeSideQuests} from '/shared/side-quests.js';
@@ -163,19 +165,27 @@ const costLabel=cost=>`${fmt(cost.credits)} Cr · ${Object.entries(cost.goods).m
 function orbitalPanel(entity){
   const o=entity.market.homeworld.orbital;
   let html=`<h3>Orbitalring</h3><p>Kleiner Ring: ${o?.small?'betriebsbereit':'gebrochen'} · Großer Ring: ${o?.large?'betriebsbereit':`${o?.largeStage||0} / 2 Abschnitte`}. Eigener Orbitalanker, kein Bodenbauplatz.</p>`;
-  if(o?.project)html+=`<p>Ringbau ${o.project.kind==='small'?'klein':'groß'}, Abschnitt ${o.project.stage}: ${Math.ceil(o.project.remaining)} s · zwei Bauarbeiter gebunden.</p>`;
+  if(o?.large)html+=o.doubleYard?'<p><b>Doppelwerft aktiv · zwei freie Größenplätze</b></p>':o.project?.kind==='doubleYard'?'<p>Doppelwerft im Ausbau · '+Math.ceil(o.project.remaining)+' s</p>':
+    '<p>Doppelwerft: 100 Legierungen, 30 Schiffsbauteile, 10 Triebwerke, 4 Reaktorkerne · 600 s · keine Credits</p><button class="small" data-pp="homeOrbitalUpgrade" '+(o.project?'disabled title="Ringbau läuft bereits"':'')+'>Doppelwerft ausbauen</button>';
+  if(o?.project&&o.project.kind!=='doubleYard')html+=`<p>Ringbau ${o.project.kind==='small'?'klein':'groß'}, Abschnitt ${o.project.stage}: ${Math.ceil(o.project.remaining)} s · zwei Bauarbeiter gebunden.</p>`;
   else if(completed('H07')&&!o?.small){
     const ships=myShips().filter(s=>s.type==='spatz'&&s.dockedAt===entity.id);
     html+=`<p>100 Platten, 40 Elektronik und zehn Rumpfsegmente für H08 liefern. Ein Spatz wird dauerhaft aus der steuerbaren Flotte entfernt und als Infrastruktur erhalten. Vorher alle Fracht und Module ausladen.</p><select id="orbitalSurrender" aria-label="Dauerhaft abzugebender Spatz">${ships.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select><button class="small" data-pp="homeOrbital" data-large="false" ${ships.length?'':'disabled'}>Spatz dauerhaft abgeben und Ring aufbauen · 600 s</button>`;
   }else if(completed('H08')&&completed('H12')&&!o?.large)html+=`<button class="small" data-pp="homeOrbital" data-large="true">Großen Ring: Abschnitt ${(o?.largeStage||0)+1} starten · 600 s</button>`;
   for(const s of o?.infrastructureShips||[])html+=`<p>Infrastruktur: ${esc(s.name)} (${s.id}) · dauerhaft im Ring.</p>`;
   if(o?.small){
-    html+='<details><summary>Schiffbau mit echten Materialien</summary><p>Kleiner Betrieb: 20 Energie, acht einfache und sechs Fachkräfte. Große Fertigung zusätzlich: 60 Energie, zehn Fachkräfte, vier Spezialisten. Personal und Energie nur bei laufendem Bau.</p>';
+    html+='<h4>Schiffbau mit echten Materialien</h4><p>'+ (o.doubleYard?'Je Auftrag: bis M 20 Energie, 8 einfache und 6 Fachkräfte; L/XL 80 Energie, 8 einfache, 16 Fachkräfte und 4 Spezialisten.':'Kleiner Betrieb: 20 Energie, acht einfache und sechs Fachkräfte. Große Fertigung zusätzlich: 60 Energie, zehn Fachkräfte, vier Spezialisten.')+' Personal und Energie nur bei laufendem Bau.</p>';
+    html+='<p><b>Bauplätze: '+Object.keys(o.jobs).length+' / 2</b> · Ausgabe: '+(o.inventory.length+Object.keys(o.jobs).length)+' / 12 · '+(o.doubleYard?'zwei beliebige Größen':'ein Platz bis M, ein Platz L/XL')+'</p>';
     for(const [category,label] of Object.entries(SHIP_CATEGORIES)){
-    html+=`<h4>${label}</h4>`;
-    for(const [id,d] of Object.entries(SHIP_TYPES).filter(([id,d])=>!d.npc&&shipComparison(id).category===category&&(o.large||['craft','S','M'].includes(shipComparison(id).tier))).sort(compareShipTypes))html+=`<div class="orbital-ship" style="${d.faction?'background:'+FACTIONS[d.faction].color+'24;border-left:4px solid '+FACTIONS[d.faction].color:''}"><p>${d.name}: ${Object.entries(d.build).map(([g,n])=>`${n} ${GOODS[g].name}`).join(', ')}${d.currency?` + ${d.currency.n} ${GOODS[d.currency.good].name} · Fraktionsrang ${d.rank}`:''} · ${SHIPYARD.BUILD_TIME[d.cls]||SHIPYARD.BUILD_TIME[shipComparison(id).tier]} s</p><button class="small" data-pp="homeOrbitalBuild" data-type="${id}">Schiff bauen</button>${shipRatings(id)}</div>`;
+      const list=Object.entries(SHIP_TYPES).filter(([id,d])=>!d.npc&&shipComparison(id).category===category).sort(compareShipTypes);
+      html+='<details data-disclosure="orbital-'+category+'"><summary>'+label+' · '+list.length+' Schiffe</summary>';
+      for(const [id,d] of list){
+        const c=shipComparison(id),large=['L','XL'].includes(c.tier),goods={...d.build};if(d.currency)goods[d.currency.good]=(goods[d.currency.good]||0)+d.currency.n;
+        const reason=entity.market.homeworld.warp?'Standort im Warptransfer':large&&!o.large?'Großer Ring fehlt':!PILOT_LICENSES[state.pilot||1].classes.includes(d.cls)?'Pilotenlizenz fehlt':d.faction&&factionRank(state.rep?.[d.faction]||0)<blueprintRank(d)?'Bauplan benötigt Fraktionsrang '+blueprintRank(d):o.inventory.length+Object.keys(o.jobs).length>=12?'Alle zwölf Ausgabeplätze belegt':(o.doubleYard?Object.keys(o.jobs).length>=2:!!o.jobs[large?'large':'small'])?'Bauplatz belegt':Object.entries(goods).some(([g,n])=>availableHomeStock(entity.market,g)<n)?'Materialien fehlen außerhalb geschützter Reserven':null;
+        html+='<div class="orbital-ship" style="'+(d.faction?'background:'+FACTIONS[d.faction].color+'24;border-left:4px solid '+FACTIONS[d.faction].color:'')+'"><img width="80" height="64" style="object-fit:contain" src="'+shipSprite(id,state.me.color)+'" alt=""><h4>'+esc(d.name)+' · '+c.tier+'</h4><p>Laderaum '+fmt(d.cargo)+' · Tempo '+d.speed+' · Tank '+d.tank+'</p><p>'+Object.entries(d.build).map(([g,n])=>n+' '+GOODS[g].name).join(', ')+(d.currency?' + '+d.currency.n+' '+GOODS[d.currency.good].name+' · Fraktionsrang '+blueprintRank(d):'')+' · '+(SHIPYARD.BUILD_TIME[d.cls]||SHIPYARD.BUILD_TIME[c.tier])+' s</p><button class="small" data-pp="homeOrbitalBuild" data-type="'+id+'" '+(reason?'disabled':'')+'>Schiff bauen</button>'+(reason?'<p class="muted">'+reason+'</p>':'')+shipRatings(id)+'</div>';
+      }
+      html+='</details>';
     }
-    html+='</details>';
     for(const j of Object.values(o.jobs))html+=`<p>${SHIP_TYPES[j.type].name}: ${Math.ceil(j.remaining)} s · ${j.paused?'pausiert: Energie oder Personal fehlt':'in Fertigung'} · Ausgabeplatz reserviert.</p>`;
     for(const i of o.inventory)html+=`<p>${SHIP_TYPES[i.type].name} · ${esc(i.id)} · Tank voll bei Erstübernahme</p><button class="small" data-pp="homeOrbitalClaim" data-id="${i.id}">Vorhandenes Schiff in Flotte übernehmen</button>`;
   }
