@@ -290,6 +290,9 @@ function orderAt(sx, sy, append) {
   const [wx, wy] = screenToWorld(sx, sy);
   state.clickFx = { x: wx, y: wy, t: performance.now() };
   let target = { x: wx, y: wy };
+  // PRD 15: Rechtsklick auf ein anderes eigenes Schiff schickt die Auswahl dorthin; der Stack entsteht beim Treffen
+  const other = hit?.kind === 'ship' ? state.ships.get(hit.id) : null;
+  if (other && other.owner === state.me.id && !ships.some((s) => s.id === other.id)) { ui.joinShips(ships, other); return true; }
   if (hit?.kind === 'entity') target = state.entities.get(hit.id);
   else if (hit?.kind === 'system') { const sy = state.systems.get(hit.id); target = { x: sy.x + 1500, y: sy.y }; }
   else if (hit?.kind === 'sector') { const s = state.sectors.get(hit.id); target = s.hubPos ? { x: s.hubPos.x + 400, y: s.hubPos.y } : { x: s.bh.x + 3000, y: s.bh.y }; }

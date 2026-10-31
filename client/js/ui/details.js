@@ -21,6 +21,7 @@ import {colonyPanel,warpPanel} from './colonies.js';
 import { entityGuideKey, OBJECT_GUIDE } from '/shared/object-guide.js';
 import { showGuide } from './objectGuide.js';
 import { homeGoodLimit } from '/shared/homeworld.js';
+import { stackSection } from './war.js';
 
 const entName = (id) => esc(state.entities.get(id)?.name || 'unbekannter Ort');
 const dockedHereOwn = (id) => myShips().some((s) => s.dockedAt === id);
@@ -107,6 +108,7 @@ function shipDetails(s) {
     h += `<div class="warnbox">${Object.values(s.warn).map((w) => `<div>⚠ ${esc(w)}</div>`).join('')}
       <button class="small" data-act="clearWarn" data-ship="${s.id}">Quittieren</button></div>`;
   }
+  h += stackSection(s);
   const here = state.entities.get(s.dockedAt);
   const st = shipStats(s), hu = holdUsage(s);
   const mods = Object.entries(countModules(s));

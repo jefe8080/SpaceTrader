@@ -39,6 +39,10 @@ export const MIGRATIONS = [
     CREATE TABLE planet_buildings (entity TEXT PRIMARY KEY, data TEXT NOT NULL);
     CREATE TABLE sector_events (sector TEXT PRIMARY KEY, data TEXT NOT NULL);
   `),
+  // 4: PRD 15 Flottenkampf: Stacks, Schlachten, Fraktionssektoren, Trümmer und weitere Kriegszustände
+  (db) => db.exec(`
+    CREATE TABLE war (id TEXT PRIMARY KEY, data TEXT NOT NULL);
+  `),
 ];
 
 /** Tabellen mit (id, data) und optionalen Zusatzspalten */
@@ -60,6 +64,7 @@ const TABLES = {
   ship_offers: { key: ['ship'], cols: [] },
   planet_buildings: { key: ['entity'], cols: [] },
   sector_events: { key: ['sector'], cols: [] },
+  war: { key: ['id'], cols: [] },
 };
 
 export class Store {

@@ -698,7 +698,7 @@ kostet Geld und wird nicht automatisch kostenlos nach Gefechten gewährt.
 
 ## 14. Umsetzungspakete und Fortschritt
 
-Planung ist abgeschlossen; **sämtliche Implementierungspakete sind offen**.
+Planung ist abgeschlossen; die Umsetzung läuft paketweise (Stand siehe Tabelle).
 Nach jedem fachlich abgeschlossenen Paket: passende Prüfungen ausführen,
 Nachweise/Ergebnis hier ergänzen und zusammen mit dem Paket committen.
 Fehlgeschlagene oder nicht ausführbare Prüfungen ausdrücklich melden.
@@ -706,7 +706,7 @@ Fehlgeschlagene oder nicht ausführbare Prüfungen ausdrücklich melden.
 | Paket | Inhalt und prüfbares Ergebnis | Voraussetzung | Stand |
 |---|---|---|---|
 | P00 | Abgestimmtes PRD erstellen, auf Vollständigkeit prüfen und committen | Q81 | Abgeschlossen mit dem Planungscommit dieses Dokuments |
-| U01 | Physische Stacks, Zusammenflug, Mitgliedschaft, Reihenfolge, gemeinsame Reise und Routenintegration | P00 | Offen |
+| U01 | Physische Stacks, Zusammenflug, Mitgliedschaft, Reihenfolge, gemeinsame Reise und Routenintegration | P00 | Umgesetzt: `server/war/stacks.js`, Befehle `stackJoin/stackDetach/stackMove/routeStackNo`, Stackfenster im Schiffsdetail, Stacknummer in der Routenübersicht; Nachweis `tests/prd15-stacks.test.js` |
 | U02 | Klassen, Baupläne, Waffen-/Systemschema, alle Bestandsmodelle und neue Grund-/Mehrzweckmodelle; zentrale Wertetabellen und Migrationsentwurf | P00 | Offen |
 | U03 | Vollständiger Neuentwurf der 18 Fraktionsschiffwerte/Fähigkeiten und Freischaltungstabellen; neue stilkonforme Grafiken für neue Typen | U02 | Offen |
 | U04 | Serverseitige Schlachtinstanzen, Zeit/Speicherung, Bewegung, zwei Seiten, Beitritt und vollständige Schadenspipeline | U01, U02 | Offen |

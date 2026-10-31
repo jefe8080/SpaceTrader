@@ -32,3 +32,9 @@ export function orderShips(ships, target, append = false) {
 export function orderBuy(ships, target, good, amount, append = true) {
   cmd('order', { ships: ships.map((s) => s.id), order: { t: 'dock', target: target.id, actions: [{ op: 'buy', good, amount }] }, append });
 }
+
+/** PRD 15: Schiffe zu einem eigenen Schiff schicken, um einen Stack zu bilden */
+export function joinShips(ships, target) {
+  sfx('order');
+  cmd('stackJoin', { ships: ships.map((s) => s.id), target: target.id });
+}

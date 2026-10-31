@@ -14,6 +14,7 @@ import fun from './fun.js';
 import homeworld from './homeworld.js';
 import modules from './modules.js';
 import colonies from './colonies.js';
+import war from './war.js';
 import { OBJECT_GUIDE } from '../../shared/object-guide.js';
 import { V } from './validate.js';
 
@@ -21,7 +22,7 @@ import { V } from './validate.js';
  * Befehls-Handler. Jeder Handler: { args: { feld: validator }, run(ctx, args) -> Fehlertext | undefined }
  * ctx = { game, player }
  */
-const HANDLERS = { ...ship, ...trade, ...route, ...fleet, ...shipyard, ...property, ...quest, ...consortium, ...planet, ...fun, ...homeworld, ...modules,...colonies };
+const HANDLERS = { ...ship, ...trade, ...route, ...fleet, ...shipyard, ...property, ...quest, ...consortium, ...planet, ...fun, ...homeworld, ...modules,...colonies, ...war };
 HANDLERS.guideRead = {
   args: { key: V.key(OBJECT_GUIDE) },
   run({player}, {key}) {

@@ -9,6 +9,7 @@ import { consortiumView, consortiumOf } from './consortium.js';
 import { offersView } from './offers.js';
 import { eventsView } from './events.js';
 import { coverageAreas, controlCapacity } from './coverage.js';
+import { stacksView } from './war/stacks.js';
 
 const r1 = (v) => Math.round(v * 10) / 10;
 const MAX_MARKET_SUBS = 400;
@@ -197,7 +198,7 @@ export class Net {
     for (const id of s.sentDetail.keys()) if (!this.game.ships.has(id) || this.game.ships.get(id).owner !== p.id) s.sentDetail.delete(id);
     s.socket.emit('ships', { t: r1(this.game.time), credits: Math.floor(p.credits), ships });
     // Spielerdaten und Routen nur bei Änderung
-    const me = JSON.stringify({...playerDetail(p),profile:pilotProfile(this.game,p),coverage:this.game.profile==='homeworld'?coverageAreas(this.game,p):[],controlCapacity:controlCapacity(this.game,p)});
+    const me = JSON.stringify({...playerDetail(p),profile:pilotProfile(this.game,p),coverage:this.game.profile==='homeworld'?coverageAreas(this.game,p):[],controlCapacity:controlCapacity(this.game,p),stacks:stacksView(this.game,p)});
     if (me !== s.sentMe) { s.sentMe = me; s.socket.emit('me', JSON.parse(me)); }
     const routes = JSON.stringify([...this.game.routes.values()].filter((r) => r.owner === p.id));
     if (routes !== s.sentRoutes) { s.sentRoutes = routes; s.socket.emit('routes', JSON.parse(routes)); }
@@ -362,7 +363,7 @@ function shipDetail(s, game) {
   return {
     offer: game?.shipOffers.get(s.id)?.price ?? null,
     owner: s.owner, type: s.type, name: s.name, cargo: s.cargo, passengers:s.passengers||[],moduleCargo:s.moduleCargo||{}, log: s.log, group: s.group, ord: s.ord,
-    queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},relocationHold:s.relocationHold||null,
+    queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},relocationHold:s.relocationHold||null,stack:s.stack||null,rendezvous:s.rendezvous||null,
     nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,
     transit: s.transit ? s.transit.exit : null, zone: s.zone || null, marker: s.marker || null,
     fuel: Math.round((s.fuel || 0) * 10) / 10, autoRefuel: s.autoRefuel ?? 0, upg: s.upg || {}, modules: s.modules || [], upgValue: s.upgValue || 0, main: !!s.main, relicSpeed: s.relicSpeed || 0, mined: s.mined || {}, bonus: s.bonus || 0, yardLvl: s.yardLvl || 0,

@@ -2,6 +2,7 @@ import { GOODS, FLAGSHIP } from '../../shared/config.js';
 import { V, CmdError } from './validate.js';
 import { tradeAction } from './route.js';
 import { pointCovered, manualActionError, coveredPath, controlAdmissionCapacity } from '../coverage.js';
+import { isFollower, detachShip } from '../war/stacks.js';
 
 const MAX_QUEUE = 30;
 const isDirect=(player,ship,cmd,append)=>player.manualShip===ship.id&&!append&&!['route','harvest'].includes(cmd.t)&&(cmd.t!=='dock'||(cmd.actions?.length||0)<=1);
@@ -44,6 +45,8 @@ const queueCmd = (v, ctx) => {
 /** Befehl an Schiff übergeben: ersetzen oder anhängen */
 export function orderError(game, ship, cmd, append, routeOverride) {
   const player = game.players.get(ship.owner);
+  if (ship.captive) return `${ship.name} ist in Gefangenschaft und nimmt keine Befehle an.`;
+  if (ship.battle) return `${ship.name} kämpft; Befehle gibt es in der Schlachtansicht.`;
   if (game.profile === 'homeworld') {
     if (player?.relic?.operation?.ship === ship.id) return 'Das Schiff ist für die laufende Reliktarbeit gesperrt.';
     if (ship.relicSpeed && (cmd.t === 'route' || cmd.t === 'harvest' || append || (cmd.t === 'dock' && cmd.actions?.length > 1))) return 'Der Reliktträger unterstützt keine Automatisierung oder Befehlsfolgen.';
@@ -81,6 +84,10 @@ export function orderError(game, ship, cmd, append, routeOverride) {
 
 export function giveOrder(game, ship, cmd, append) {
   const error=orderError(game,ship,cmd,append);if(error)return error;
+  // PRD 15: Ein eigener Bewegungsbefehl löst ein gewähltes Mitglied aus seinem Stack
+  if (ship.stack && isFollower(game, ship)) detachShip(game, ship);
+  // Neuer manueller Auftrag ersetzt eine gespeicherte Fortsetzung
+  if (!append) delete ship.resume;
   if(game.profile==='homeworld')cmd={...cmd,manualDirect:isDirect(game.players.get(ship.owner),ship,cmd,append)};
   const c = { ...cmd, qid: ++ship.qid };
   if (!append) {

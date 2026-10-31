@@ -30,6 +30,8 @@ import { tickRelics } from './relic.js';
 import { homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { coveredPath, pointCovered } from './coverage.js';
 import {dispatchRealSupply,finishRealSupply,receiveMarketCash,spendMarketCash,downstreamDemand} from './real-economy.js';
+import { initWar, loadWar, saveWar, tickWarBefore, tickWarAfter } from './war/index.js';
+import { stackSpeed, removeFromStacks } from './war/stacks.js';
 
 export const WORLD_GEN_VERSION = 3; // Bestandswelt; Versionskonflikte lösen niemals einen Reset aus
 
@@ -61,6 +63,7 @@ export class Game {
     this.activity = new Map();   // Sektor -> letzte Spielzeit mit einem fliegenden Spielerschiff
     this.newDiscoveries = []; // [player, kind, key] seit dem letzten Speichern
     this.listeners = {};
+    initWar(this);
     if (!this.load()) {
       this.world = new World(seed ?? ((Math.random() * 2 ** 31) | 0),this.profile);
       this.world.ensureSector(0, 0);
@@ -78,6 +81,7 @@ export class Game {
     if (gen !== this.worldVersion) throw new Error('Inkompatible Weltversion; automatischer Reset ist gesperrt.');
     this.time = st.getMeta('time');
     this.counters = { ...this.counters, ...st.getMeta('counters') };
+    this.counters.stack ??= 0;
     this.world = new World(st.getMeta('seed'),this.profile);
     const markets = new Map(st.loadAll('markets').map((r) => [r.id, r.data]));
     const stats = groupRows(st.loadAll('market_stats'), 'entity');
@@ -126,6 +130,7 @@ export class Game {
       applyProperty(this, e, r.data);
     }
     this.shipStats = groupRows(st.loadAll('ship_stats'), 'ship');
+    loadWar(this);
     migrateNewHullInventory(this);
     for (const player of this.players.values()) syncHomeQuests(this, player);
     syncRouteReservations(this);
@@ -182,6 +187,7 @@ export class Game {
       n += st.sync('ship_offers', [...this.shipOffers.values()].map((o) => ({ key: [o.ship], data: o })));
       n += st.sync('sector_events', [...this.sectorEvents.values()].map((r) => ({ key: [r.sector], data: r })));
       n += st.sync('planet_buildings', [...this.buildings.values()].map((b) => ({ key: [b.entity], data: b })));
+      n += saveWar(this);
       n += st.sync('ship_stats', bucketRows(this.shipStats), false);
       n += st.sync('route_stats', bucketRows(this.routeStats), false);
       const minB = bucketOf(this.time) - SHIP_STATS.BUCKETS;
@@ -466,7 +472,8 @@ export class Game {
     return planPath(ship, { x, y }, this.knownWormholes(p), this.shipSpeed(ship), [...new Set(zones)]);
   }
 
-  shipSpeed(ship) { return shipStats(ship).speed; }
+  /** Reisetempo; ein Stack reist so schnell wie sein langsamstes Mitglied (PRD 15) */
+  shipSpeed(ship) { return ship.stack ? stackSpeed(this, ship) : shipStats(ship).speed; }
   shipTank(ship) { return shipStats(ship).tank || 0; }
 
   /** Beim Andocken: Auto-Tanken unter der eingestellten Schwelle */
@@ -660,6 +667,7 @@ export class Game {
     if(this.profile==='homeworld'){tickColonies(this,dt);tickWarps(this,dt);}
     tickRelics(this);
     for (const player of this.players.values()) syncHomeQuests(this, player);
+    tickWarBefore(this, dt);
     for (const s of this.ships.values()) {
       updateShip(s, dt, this);
       if (s.owner !== NPC_OWNER && (s.revX === undefined || Math.hypot(s.x - s.revX, s.y - s.revY) > 300)) {
@@ -668,6 +676,7 @@ export class Game {
         this.scan(s);
       }
     }
+    tickWarAfter(this, dt);
     this.econAcc += dt;
     if (this.econAcc >= 1) {
       for (const prop of this.ownership.values()) {
@@ -1049,6 +1058,7 @@ export class Game {
     const player=this.players.get(ship.owner);
     if(player?.manualShip===ship.id)player.manualShip=this.shipsOf(player.id).find(s=>s.id!==ship.id)?.id||null;
     if (ship.owner === NPC_OWNER) this.markNpc(ship, false);
+    removeFromStacks(this, ship);
     this.shipOffers.delete(ship.id);
     this.ships.delete(ship.id);
     this.shipStats.delete(ship.id);

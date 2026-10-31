@@ -295,6 +295,7 @@ function renderOverview() {
         <span class="rr-sal" title="Saldo 24 h">24 h <b class="${sum.d24 < 0 ? 'neg' : 'pos'}">${fmtK(sum.d24)}</b></span>
       </div>
       <div class="chips">${ships.map((s) => `<span class="chip">${shipSymbol(s)} ${esc(s.name)}${hasWarn(s) ? ' <span class="warn">⚠</span>' : ''}
+        <select class="small" data-stackno="${s.id}" data-id="${r.id}" title="Stacknummer: gleiche Nummern dieser Route reisen gemeinsam">${['–',1,2,3,4,5,6,7,8,9].map((n, i) => `<option value="${i}" ${(r.stackNo?.[s.id] || 0) === i ? 'selected' : ''}>${i ? 'Stack ' + n : 'kein Stack'}</option>`).join('')}</select>
         <button class="small ghost" data-r="unassign" data-id="${r.id}" data-ship="${s.id}" title="Von Route nehmen">✕</button></span>`).join('') || '<span class="muted">keine Schiffe</span>'}</div>
       <div class="btnrow">
         <button class="small" data-r="edit" data-id="${r.id}">✎ Bearbeiten</button>
@@ -341,6 +342,10 @@ function requestRouteStats() {
 }
 setInterval(() => { if (isOpen('routesOverview')) requestRouteStats(); }, 20000);
 
+ovCard.addEventListener('change', (ev) => {
+  const el = ev.target.closest('[data-stackno]');
+  if (el) cmd('routeStackNo', { route: el.dataset.id, ship: el.dataset.stackno, n: Number(el.value) });
+});
 ovCard.addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-r]');
   if (!b) return;

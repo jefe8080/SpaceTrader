@@ -7,6 +7,7 @@ import { availableHomeStock } from '../shared/homeworld.js';
 import { segmentCovered, pointCovered } from './coverage.js';
 import {loadRealSupply} from './real-economy.js';
 import {runLogistics} from './logistics.js';
+import { isFollower, stackOf, stackMembers, stackMayDepart, runJoin, runRendezvous, routeStackPending } from './war/stacks.js';
 
 const inZoneAt = (z, p) => inZone(z, p.x, p.y);
 
@@ -29,7 +30,7 @@ function approachPoint(ship, e) {
   return { x: e.x + (dx / d) * off, y: e.y + (dy / d) * off };
 }
 
-function flyTo(ship, tx, ty, dt, game) {
+export function flyTo(ship, tx, ty, dt, game) {
   const player=game.players.get(ship.owner);
   if(game.profile==='homeworld'&&player&&!ship.queue[0]?.manualDirect){
     const begun=ship.coverageLeg&&Math.hypot(ship.coverageLeg.x-tx,ship.coverageLeg.y-ty)<1e-5;
@@ -80,7 +81,12 @@ function flyTo(ship, tx, ty, dt, game) {
  */
 function followNav(ship, key, tx, ty, dt, game) {
   if (ship.transit) { runTransit(ship, game); return false; }
-  if (!ship.nav || ship.nav.key !== key) ship.nav = { key, legs: game.planLegs(ship, tx, ty).legs, i: 0 };
+  if (!ship.nav || ship.nav.key !== key) {
+    const plan = game.planLegs(ship, tx, ty);
+    // PRD 15: Ein Stack startet eine neue Strecke nur, wenn alle Mitglieder sie schaffen
+    if (ship.stack && !stackMayDepart(game, ship, plan)) { ship.state = 'waiting'; ship.nav = null; return false; }
+    ship.nav = { key, legs: plan.legs, i: 0 };
+  }
   const nav = ship.nav;
   while (nav.i < nav.legs.length - 1) {
     const leg = nav.legs[nav.i];
@@ -269,6 +275,7 @@ function runActions(ship, e, actions, st, dt, game, opts) {
 // ---------- Befehlsqueue ----------
 /** Ausführung je Befehlstyp. Rückgabe: true = erledigt, false = läuft noch */
 const EXEC = {
+  join(ship, c, dt, game) { return runJoin(ship, c, dt, game, flyTo); },
   logistics(ship,c,dt,game){return runLogistics(ship,c,dt,game,flyToEntity);},
   move(ship, c, dt, game) {
     if (!followNav(ship, `p:${c.x},${c.y}`, c.x, c.y, dt, game)) return false;
@@ -342,8 +349,12 @@ const EXEC = {
 };
 
 export function updateShip(ship, dt, game) {
+  // PRD 15: Gefangene, kämpfende und folgende Stackmitglieder führen keine eigenen Befehle aus
+  if (ship.captive || ship.battle) { ship.vx = 0; ship.vy = 0; return; }
+  if (ship.stack && isFollower(game, ship)) return;
   ship.vx = 0;
   ship.vy = 0;
+  if (ship.rendezvous) { runRendezvous(ship, dt, game, flyTo); return; }
   if(ship.relocationHold&&ship.queue.length){
     const hold=ship.relocationHold;
     if(ship.transit){runTransit(ship,game);if(ship.transit)return;hold.x=ship.x;hold.y=ship.y;}
@@ -386,6 +397,7 @@ function runRoute(ship, c, dt, game) {
 
   if (c.phase === 'travel') {
     if (route.paused) { ship.state = ship.dockedAt ? 'docked' : 'idle'; return false; }
+    if (ship.stack && routeStackPending(game, ship)) { ship.state = 'waiting'; return false; }
     if (!flyToEntity(ship, e, dt, game)) return false;
     c.phase = 'act';
     c.actionIdx = 0;
@@ -398,7 +410,20 @@ function runRoute(ship, c, dt, game) {
     }
     setWarn(ship,'coverage',null);
     ship.state = 'docked';
-    if (!runActions(ship, e, stop.actions, c, dt, game, { auto: true, route })) return false;
+    const st = stackOf(game, ship);
+    if (st?.routeKey) {
+      // Routenstack: Aufgaben je Halt in der eingestellten Schiffsreihenfolge, erst danach Weiterfahrt
+      c.mst ||= {};
+      for (const m of stackMembers(game, st)) {
+        if (m === ship) { if (!runActions(ship, e, stop.actions, c, dt, game, { auto: true, route })) return false; continue; }
+        const ms = (c.mst[m.id] ||= { actionIdx: 0 });
+        if (ms.finished) continue;
+        m.state = 'docked';
+        if (!runActions(m, e, stop.actions, ms, dt, game, { auto: true, route })) return false;
+        ms.finished = true;
+      }
+    } else if (!runActions(ship, e, stop.actions, c, dt, game, { auto: true, route })) return false;
+    c.mst = {};
     c.phase = 'wait';
     c.waitUntil = game.time + 2;
   }

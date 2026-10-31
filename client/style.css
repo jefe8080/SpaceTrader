@@ -540,3 +540,6 @@ body.fleet-collapsed #fleet .fleet-item img { width:30px; }
   body:has(#details:not([hidden])) #questBox .qb-head,
   body:has(#details:not([hidden])) #questBox .qb-foot { flex-wrap:wrap; }
 }
+
+/* PRD 15: Stacks, Schlacht und Fraktionen */
+.stack-row { display: flex; align-items: center; gap: 4px; padding: 2px 0; }
