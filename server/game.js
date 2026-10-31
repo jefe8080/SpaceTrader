@@ -1,3 +1,4 @@
+import {migrateBuildingRecipes} from './building-recipes.js';
 import {syncRouteReservations} from './route-capacity.js';
 import {migrateNewHullInventory} from './physical-yards.js';
 import { initializeProfile, syncInventoryBasis, recordGoodsTrade } from './pilot-profile.js';
@@ -139,6 +140,7 @@ export class Game {
     migrateWar(this); // PRD 15: wiederholbar und idempotent
     migrateNewHullInventory(this);
     for (const player of this.players.values()) syncHomeQuests(this, player);
+    migrateBuildingRecipes(this);
     syncRouteReservations(this);
     this.routeStats = groupRows(st.loadAll('route_stats'), 'route');
     if (this.verbose) console.log(`Spielstand geladen: ${this.players.size} Spieler, ${this.world.entities.size} Objekte, ${this.ships.size} Schiffe`);
@@ -412,7 +414,8 @@ export class Game {
         if(e.kind==='planet'){const stats=initializeProfile(this,p);if(!stats.discoveredPlanets.includes(e.id))stats.discoveredPlanets.push(e.id);}
         // Almanach: Rezept bzw. Planeten-/Feldtyp ist entdeckt, sobald der Markt in Sensorreichweite war
         const rk = recipeKey(e);
-        if (rk) this.discover(p, 'recipe', rk);
+        // Production recipes are unlocked by completed owned buildings (PRD 16).
+
         for (const it of e.market?.forSale || []) this.discover(p, 'ship', it.type);
         for (const m of e.market?.modules || []) this.discover(p, 'module', m);
         // Das andere Ende eines Wurmlochs ist schon bekannt: Verbindung gilt als aufgedeckt

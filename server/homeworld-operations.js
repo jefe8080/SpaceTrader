@@ -1,3 +1,4 @@
+import {unlockBuildingRecipes} from './building-recipes.js';
 import { GOODS, RECIPES,REFINEMENT_RECIPES } from '../shared/goods.js';
 import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, homeStorageFree, availableHomeStock, homeGoodCapacity, homeGoodLimit, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '../shared/homeworld.js';
 import { coverageAreas } from './coverage.js';
@@ -327,6 +328,7 @@ function populationStep(game,entity,dt,now) {
 function operationStep(game,entity,dt,now) {
   const market=entity.market,home=market.homeworld;
   completeConstruction(game,entity,now);
+  unlockBuildingRecipes(game,entity);
   home.storage=HOMEWORLD.start.storage;home.hazardStorage=home.certifiedHazardStorage??(completed(game.players.get(home.owner),'H06')?HOMEWORLD.start.hazardStorage:0);home.housing=home.baseHousing??HOMEWORLD.start.housing;
   for(const building of home.structures.filter(ready)){
     const spec=structureSpec(building);home.storage+=spec.storage||0;home.hazardStorage+=spec.hazardStorage||0;home.housing+=spec.housing||0;

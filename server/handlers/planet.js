@@ -1,3 +1,4 @@
+import {unlockBuildingRecipes} from '../building-recipes.js';
 import { RECIPES, factorySlots, factoryCost, recipeCat, RECIPE_CATS, isConsortiumOwner } from '../../shared/config.js';
 import { V, CmdError } from './validate.js';
 import { takeGoods, dockedOwn } from './property.js';
@@ -51,6 +52,7 @@ export default {
       payer.credits -= cost.credits;
       b.factories.push({ recipe, prog: 0 });
       game.refreshProperty(e);
+      unlockBuildingRecipes(game,e);
       if (cons) { clog(game, cons, player.id, 'factory', cost.credits, `${e.name}: ${RECIPES[recipe].name}`); game.emit('consortium', cons); }
       game.emit('notice', player, `${e.name}: ${RECIPES[recipe].name} gebaut`);
     },

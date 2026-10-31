@@ -178,7 +178,7 @@ Fortschritt im selben Commit aktualisiert. Änderungen bleiben fachlich getrennt
 | P04 | Panelhöhe und Zentrallager-Akkordeons | Verfügbare Höhe ab Menüleiste; sechs geschlossene Bereiche; DOM-Patcher bewahrt Öffnungszustand | Implementiert; visuelle Browserprüfung offen |
 | P05 | Schiffsalmanach, Kategorien, Farben und Ratings | 20 Tests: vollständige Kategorien, technische Größen, Staffel- und Sonderwaffenwerte, Orbitalregression | Implementiert; visuelle Browserprüfung offen |
 | P06 | Individuelle Erklärungen und aktuelle Grafiken | Vollständige Eintragsliste sowie Text-/Bildprüfung | Offen |
-| P07 | Rezeptfreischaltung und Bestandsmigration | Neubau, Fertigstellung, Abriss, Altstand und Wiederholung | Offen |
+| P07 | Rezeptfreischaltung und Bestandsmigration | 13 Tests: Fertigstellung, vorher gesperrt, Abriss, Laden und wiederholte Migration ohne XP | Erledigt |
 | P08 | Zivilbudget-Ursache und Korrektur | Reproduktion, Wirtschaftsregression und Neustart | Offen |
 | P09 | Angriffspopup und Warnton | Eigene/fremde Schlachten, Mehrfachereignisse und Audioeinstellungen | Offen |
 | P10 | Kampfzeitfaktor und Abschlussprüfung | Deterministischer Kampfvergleich, Persistenz und Performancevergleich | Offen |
