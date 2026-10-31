@@ -132,6 +132,7 @@ export function renderPlanetUi() {
   let body = '';
   if (e.type === 'ruins') body = homePanel(e, it, ship);
   else if (it.kind === 'questhouse') body = questBoardSection(e, ship, true)+(e.market.realEconomy?propertySection(e):'');
+  else if (it.worldInfrastructure) body = state.props.get(e.id)?.manage?specializationPanel(e):'<p>Wohngebiet des Planeten.</p>';
   else if (it.kind === 'produce' || it.kind === 'consume') body = goodBuilding(it, e);
   else if (it.kind === 'factory') body = factoryPanel(it, e);
   else if (it.kind === 'plot') body = plotPanel(it, e);

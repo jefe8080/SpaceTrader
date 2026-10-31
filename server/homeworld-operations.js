@@ -9,6 +9,7 @@ import {tickLogistics,productionAllowed,productionStock,consumeProductionReserva
 import {initializePopulation,tickVisitors,grantSchoolStaff} from './population.js';
 import {ORBITAL_OPERATION,tickOrbital} from './orbital.js';
 import {supplyOverview} from '../shared/supply-overview.js';
+import {housingLevel,housingUpgradeCost} from '../shared/homeworld.js';
 
 const QUALIFICATIONS = ['basic', 'skilled', 'specialist'];
 const qualified = () => ({ basic: 0, skilled: 0, specialist: 0 });
@@ -122,6 +123,19 @@ export function upgradeStorage(game, player, entity, id) {
   const project = 'storage_' + ++home.nextProject; building.upgrading = project;
   home.projects.push({id:project, kind:'storageUpgrade', target:id, level, until:game.time+cost.seconds, bound:structuredClone(cost)});
   notify(game, entity);
+}
+
+export function upgradeHomeHousing(game,player,entity,id){
+  const error=homeAccess(game,player,entity);if(error)return error;
+  const h=entity.market.homeworld;initializeHomeOperations(h);
+  const b=h.structures.find(b=>b.id===id&&b.kind==='housing'&&b.status==='ready');
+  if(!b)return 'Einen fertiggestellten eigenen Wohnblock auswählen.';
+  if(b.upgrading||h.projects.some(j=>j.target===id))return 'Ein Ausbau läuft bereits.';
+  const level=housingLevel(b)+1,cost=housingUpgradeCost(level);if(!cost)return 'Höchste Wohnhausstufe 3 erreicht.';
+  const team=homeConstructionError(h);if(team)return team;
+  const blocked=chargeHome(game,player,entity,cost);if(blocked)return blocked;
+  const project=`housing_${++h.nextProject}`;b.upgrading=project;
+  h.projects.push({id:project,kind:'housingUpgrade',target:id,level,until:game.time+cost.seconds,bound:structuredClone(cost)});notify(game,entity);
 }
 
 export function homeBuild(game,player,entity,kind,recipe,parentId,requestedPlot) {
@@ -239,7 +253,7 @@ function completeConstruction(game,entity,now) {
     home.capitalCosts||=[];home.capitalCosts.push({id:project.id,cost:structuredClone(project.bound||{credits:0,goods:{}})});
     if(project.kind==='construction'){
       const building=home.structures.find(s=>s.id===project.target);building.status='ready';building.completedAt=project.until;delete building.readyAt;building.bound=project.bound;
-    }else if(project.kind==='storageUpgrade'){
+    }else if(project.kind==='storageUpgrade'||project.kind==='housingUpgrade'){
       const building=home.structures.find(s=>s.id===project.target);building.level=project.level;delete building.upgrading;
     }else if(project.kind==='upgrade'){
       const building=home.structures.find(s=>s.id===project.target);building.upgrades||=[];building.upgrades.push(project.upgrade);delete building.upgrading;

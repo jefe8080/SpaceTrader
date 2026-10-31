@@ -11,6 +11,7 @@ import {populationPanel} from './population.js';
 import {QUEST_DELIVERIES,STUDY_FINDS} from '/shared/advanced-homequests.js';
 import {SHIP_TYPES,SHIPYARD} from '/shared/config.js';
 import {warpPanel} from './colonies.js';
+import {housingPanel} from './housing.js';
 
 let dialog, currentScene, closingScene;
 export function renderHomeDialog() {
@@ -228,7 +229,7 @@ function operationPanel(entity,id,building){
 function structurePanel(entity,id){
   const home=entity.market.homeworld,building=home.structures.find(s=>s.id===id);if(!building)return '';
   const spec=homeStructureSpec(building);
-  let html=`<p>${building.status==='building'?`Bau läuft · ${Math.max(0,Math.ceil(building.readyAt-state.time))} s · Material und zwei einfache Kräfte gebunden`:'Betriebsbereite Anlage'}</p>
+  let html=(building.kind==='housing'?housingPanel(entity,building):'')+`<p>${building.status==='building'?`Bau läuft · ${Math.max(0,Math.ceil(building.readyAt-state.time))} s · Material und zwei einfache Kräfte gebunden`:'Betriebsbereite Anlage'}</p>
     <p>${spec.power} Energie · ${spec.workers.basic||0} einfach / ${spec.workers.skilled||0} Fach / ${spec.workers.specialist||0} Spezial</p>`;
   if (['silo','safeStorage'].includes(building.kind)) {
     const level=storageLevel(building), cost=storageUpgradeCost(building.kind,level+1);

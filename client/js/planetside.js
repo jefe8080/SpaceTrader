@@ -110,6 +110,7 @@ export function buildItems(e) {
   const r = planetRng(e.id, 3);
   const items = [{ kind: 'questhouse', label: 'Questhaus', w: 170 }];
   const rest = [];
+  for(const b of m.economy?.infrastructure||[])if(b.kind==='housing')rest.push({kind:'infrastructure',worldInfrastructure:b.id,key:'infra:'+b.id,label:'Wohnhaus Stufe '+(b.level||1),w:150});
   for (const [g, s] of Object.entries(m.goods)) {
     if (s.fac || (s.role !== 'produce' && s.role !== 'consume')) continue;
     rest.push({ kind: s.role === 'produce' ? 'produce' : 'consume', good: g, look: s.role === 'produce' ? lookOf(g) : 'store', label: `${s.role === 'produce' ? '' : 'Lager '}${GOODS[g].name}`, w: 150 + Math.floor(r() * 40) });

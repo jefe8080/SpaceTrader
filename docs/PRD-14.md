@@ -315,10 +315,24 @@ und relevante neue Möglichkeiten zusammen verständlich dargestellt.
   und Wiederabholung bleiben erhalten. Fehlende Eignung, Vollbelegung,
   Andockung und private Zugänge werden getrennt erklärt. Acht vorhandene
   Bevölkerungstests und ein zusätzlicher integrierter Tourismusfall bestanden.
-- [ ] Schritt 5: Wohnhausstufen in beiden Baupfaden ergänzen, Ausbaukosten
+- [x] Schritt 5: Wohnhausstufen in beiden Baupfaden ergänzen, Ausbaukosten
   und Betriebswerte dokumentieren, drei Hochhausgrafiken erstellen und
   integrieren. Kapazitäten, Rechte, Kosten, Fertigstellung, Speichern/Laden
   und visuelle Darstellung prüfen.
+
+  Balancing: Stufe 1 unverändert 2000 Cr, 8 Barren, 60 s, 1 Strom;
+  Ausbau auf Stufe 2: 6000 Cr, 16 Barren + 8 Platten, 120 s, insgesamt
+  400 Wohnplätze und 2 Strom. Ausbau auf Stufe 3: 18000 Cr, 32 Barren +
+  24 Platten + 8 Elektronik, 240 s, insgesamt 800 Wohnplätze und 4 Strom.
+  Je Projekt zwei freie Bauarbeiter. Bisherige Kapazität bleibt bis zur
+  Fertigstellung nutzbar. Ein gemeinsamer Serverbefehl prüft beide Baupfade.
+  Drei generierte Grafiken sind in Wohnhauspanel und Stadt eingebunden;
+  gewöhnliche Planeten erhalten für gebaute Wohnhäuser ein separates
+  Wohnviertel unterhalb der bestehenden Stadtillustration.
+  Grafikprompts: `docs/qa/prd14/housing-prompts.md`. Bau-, Rechte-,
+  Doppelauftrag- und Datenbankneustarttest sowie 14 Bauregressionen bestanden.
+  Die ersten beiden neuen Testläufe korrigierten reine Fixturefehler
+  (Groß-/Kleinschreibung des Fehlertexts und fehlende Zielentdeckung).
 - [ ] Schritt 6: Alle Nebenquestarten überarbeiten, lagerunabhängige
   Questabgabe und konsistente Besitzregeln umsetzen. Aktive Aufgaben ohne
   Migration erhalten; Abschluss, Belohnung und Fehlermeldungen prüfen.

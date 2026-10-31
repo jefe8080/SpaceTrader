@@ -99,6 +99,12 @@ export function storageLevel(structure) {
   return Math.max(1, Math.min(5, Math.floor(structure.level || 1)));
 }
 
+export const housingLevel=building=>Math.max(1,Math.min(3,Math.floor(building.level||1)));
+export function housingUpgradeCost(level){
+  if(![2,3].includes(level))return null;
+  return level===2?{credits:6000,goods:{ingots:16,plates:8},seconds:120}:{credits:18000,goods:{ingots:32,plates:24,electronics:8},seconds:240};
+}
+
 export function storageUpgradeCost(kind, level) {
   if (!['silo', 'safeStorage'].includes(kind) || !Number.isInteger(level) || level < 2 || level > 5) return null;
   const factor = 2 ** (level - 2);
@@ -110,6 +116,7 @@ export function storageUpgradeCost(kind, level) {
 export function homeStructureSpec(structure) {
   const base = structure.kind === 'plant' ? industrySpec(structure.recipe) : HOME_BUILDINGS[structure.kind];
   const spec = { ...base, workers: { ...base.workers } };
+  if(structure.kind==='housing')Object.assign(spec,{housing:200*2**(housingLevel(structure)-1),power:2**(housingLevel(structure)-1)});
   const level = storageLevel(structure);
   if (structure.kind === 'silo') Object.assign(spec, { storage: 2000 * level, power: level, workers: { basic: level } });
   if (structure.kind === 'safeStorage') Object.assign(spec, { hazardStorage: 500 * level, power: 2 * level, workers: { skilled: Math.max(2, level) } });
@@ -171,7 +178,7 @@ export function homeStorageFree(market, good) {
 }
 
 export function availableHomeStock(market, good) {
-  const home = market.homeworld;
+  const home = market.homeworld||market.economy;
   const reserved = home ? (home.reserves?.[good] || 0) + Object.values(home.reservations || {}).reduce((sum, reservation) => sum + (reservation.goods[good] || 0), 0) : 0;
   return Math.max(0, (market.goods[good]?.stock || 0) - reserved);
 }

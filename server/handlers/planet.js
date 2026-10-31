@@ -5,6 +5,8 @@ import { clog } from '../consortium.js';
 import { remoteManagementError } from '../coverage.js';
 import {startSpecialization,startWorldInfrastructure,startWorldTraining,specializationAccess} from '../specializations.js';
 import {WORLD_FOCI} from '../../shared/specializations.js';
+import {upgradeWorldHousing} from '../specializations.js';
+import {upgradeHomeHousing} from '../homeworld-operations.js';
 
 /** Planet, an dem ein eigenes Schiff angedockt ist (Voraussetzung für die planetare Ansicht) */
 const landedPlanet = () => (v, ctx) => {
@@ -22,6 +24,7 @@ function payerFor(game, player, e) {
 }
 
 export default {
+  housingUpgrade:{args:{target:V.entity(),id:V.str(40,1)},run({game,player},{target,id}){return target.type==='ruins'?upgradeHomeHousing(game,player,target,id):upgradeWorldHousing(game,player,target,id);}},
   worldSpecialize:{args:{target:V.entity(),focus:V.oneOf(...new Set(Object.values(WORLD_FOCI).flat()))},run({game,player},{target,focus}){return startSpecialization(game,player,target,focus);}},
   worldInfrastructure:{args:{target:V.entity(),kind:V.oneOf('solar','gasGenerator','reactor','housing','school','academy')},run({game,player},{target,kind}){return startWorldInfrastructure(game,player,target,kind);}},
   worldTrain:{args:{target:V.entity(),qualification:V.oneOf('skilled','specialist')},run({game,player},{target,qualification}){return startWorldTraining(game,player,target,qualification);}},
