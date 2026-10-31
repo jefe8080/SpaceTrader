@@ -4,6 +4,7 @@ import { WORLD } from './config.js';
 
 /** Bestätigte Rahmenwerte des PRD und taktische Grundgrößen */
 export const COMBAT = {
+  TIME_SCALE: 0.5,                   // nur taktische Kampfzeit; nicht persistieren oder mehrfach anwenden
   MAP: { W: 6000, H: 4000 },          // taktische Karte (Kampfeinheiten)
   EDGE: 260,                          // Rückzugsbereich am Kartenrand
   ENGAGE: 900,                        // strategische Waffenreichweite: Begegnung eröffnet die Schlacht

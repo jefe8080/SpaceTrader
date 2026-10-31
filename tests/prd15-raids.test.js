@@ -1,3 +1,4 @@
+import { COMBAT } from '../shared/combat.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Game } from '../server/game.js';
@@ -89,7 +90,7 @@ test('PRD15 U10: Raid mit Plünderungsphase, Beute begrenzt durch Bestand und Fr
     run(game, 2);
     assert.equal(b.raid.phase, 'loot', 'ohne Verteidiger direkt Plünderungsphase');
     assert.ok(game.battles.has(b.id), 'Plünderung dauert sichtbar an');
-    run(game, A.LOOT_SECS + 2);
+    run(game, A.LOOT_SECS / COMBAT.TIME_SCALE + 2);
     assert.ok(!game.battles.has(b.id));
     const taken = Object.values(r.cargo).reduce((x, y) => x + y, 0);
     assert.ok(taken > 0 && taken <= free + 0.01, 'nicht mehr als freier Frachtraum');

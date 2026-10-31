@@ -181,7 +181,7 @@ Fortschritt im selben Commit aktualisiert. Änderungen bleiben fachlich getrennt
 | P07 | Rezeptfreischaltung und Bestandsmigration | 13 Tests: Fertigstellung, vorher gesperrt, Abriss, Laden und wiederholte Migration ohne XP | Erledigt |
 | P08 | Zivilbudget-Ursache und Korrektur | 16 Tests: Altkasse ohne Bevölkerungsfelder, Erschöpfung, Mangelversorgung, Obergrenzen und Nullbevölkerung | Erledigt |
 | P09 | Angriffspopup und Warnton | 8 Tests: nur Verteidiger, neue Schlachten getrennt, Beitritt stumm; bestehender Audio-Bus | Implementiert; visuelle/akustische Browserprüfung offen |
-| P10 | Kampfzeitfaktor und Abschlussprüfung | Deterministischer Kampfvergleich, Persistenz und Performancevergleich | Offen |
+| P10 | Kampfzeitfaktor und Abschlussprüfung | Deterministischer Zustandsvergleich, Reload-äquivalente JSON-Runde, Raid-Regression und Benchmark | Kampfzeit implementiert; Gesamtabnahme nach Grafiken |
 
 ## 8. Technische Ausgangspunkte und Grenzen
 
@@ -223,3 +223,20 @@ bleiben getrennt und unterliegen weiterhin ihren bisherigen Obergrenzen.
 Der Regressionstest bildet diesen Altzustand nach; ein konkreter privater
 Nutzerspielstand wurde dafür nicht verändert. Mangelversorgung erzeugt nach
 bestehender Regel weiterhin vermindertes Einkommen, keine unbegrenzte Zuwendung.
+
+## Kampfzeit und Performance (P10)
+
+`tickBattles` übersetzt reale Spielzeit genau einmal mit `COMBAT.TIME_SCALE=0.5`
+in taktische Zeit; `tickBattle` arbeitet ausschließlich in taktischer Zeit.
+Der Faktor wird nicht in Spielständen gespeichert und kann beim Laden nicht
+doppelt angewandt werden. Bewegung, Waffen, Geschosse, Regeneration,
+Sprungvorbereitung und auch Plünderungsphasen verwenden dieselbe Uhr.
+Deterministischer Test: 400 × 0,1 s verlangsamt = 400 × 0,05 s direkt,
+mit identischen Einheiten-, Projektil- und Schadenszuständen.
+
+Reproduzierbarer Microbenchmark: `node scripts/benchmark-prd16.js`, zwölf
+Kreuzer, 400 Ticks, ein Aufwärmlauf und fünf Messungen. Median auf diesem
+Rechner: Faktor 1: 102,19 ms; Faktor 0,5: 83,67 ms. Die simulierten Zeiträume
+sind verschieden (40/20 s); dies belegt keine allgemeine Performanceverbesserung.
+Für gleiche simulierte Zeit sind beim langsameren Tempo doppelt so viele
+Ticks erforderlich. Keine zusätzlichen Optimierungen ohne belegten Bedarf.

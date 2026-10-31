@@ -688,7 +688,7 @@ export function endBattle(game, b, winner, why = null) {
 }
 
 export function tickBattles(game, dt) {
-  for (const b of [...game.battles.values()]) tickBattle(game, b, dt);
+  for (const b of [...game.battles.values()]) tickBattle(game, b, dt * COMBAT.TIME_SCALE);
 }
 
 /** Schlachtsymbol für die Strategiekarte */
