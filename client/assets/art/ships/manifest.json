@@ -158,5 +158,45 @@
     "id": "f_syndicate",
     "file": "ship_f_syndicate.png",
     "source": "factions-2-atlas.png"
+  },
+  {
+    "id": "falke",
+    "file": "ship_falke.png",
+    "source": "scripts/art/prd15-ship-designs.js"
+  },
+  {
+    "id": "keiler",
+    "file": "ship_keiler.png",
+    "source": "scripts/art/prd15-ship-designs.js"
+  },
+  {
+    "id": "abfangstaffel",
+    "file": "ship_abfangstaffel.png",
+    "source": "scripts/art/prd15-ship-designs.js"
+  },
+  {
+    "id": "bomberstaffel",
+    "file": "ship_bomberstaffel.png",
+    "source": "scripts/art/prd15-ship-designs.js"
+  },
+  {
+    "id": "korvette",
+    "file": "ship_korvette.png",
+    "source": "scripts/art/prd15-ship-designs.js"
+  },
+  {
+    "id": "fregatte",
+    "file": "ship_fregatte.png",
+    "source": "scripts/art/prd15-ship-designs.js"
+  },
+  {
+    "id": "zerstoerer",
+    "file": "ship_zerstoerer.png",
+    "source": "scripts/art/prd15-ship-designs.js"
+  },
+  {
+    "id": "kreuzer",
+    "file": "ship_kreuzer.png",
+    "source": "scripts/art/prd15-ship-designs.js"
   }
 ]

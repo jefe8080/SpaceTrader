@@ -2,6 +2,8 @@
 export const PAINTED_SHIPS = new Set([
   'spatz', 'maulwurf', 'kolibri', 'lastesel', 'grubenhund', 'bussard', 'pelikan',
   'seekuh', 'mammut', 'wal', 'kondor', 'titan', 'leviathan', 'versorger',
+  // PRD 15: Mehrzweck- und Militärmodelle (scripts/art/prd15-ship-designs.js)
+  'falke', 'keiler', 'abfangstaffel', 'bomberstaffel', 'korvette', 'fregatte', 'zerstoerer', 'kreuzer',
   ...['miners', 'tech', 'nomads', 'order', 'league', 'syndicate']
     .flatMap(faction => ['fl_', 'fx_', 'f_'].map(prefix => prefix + faction)),
 ].map(id => 'ship_' + id));

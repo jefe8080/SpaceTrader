@@ -708,7 +708,7 @@ Fehlgeschlagene oder nicht ausführbare Prüfungen ausdrücklich melden.
 | P00 | Abgestimmtes PRD erstellen, auf Vollständigkeit prüfen und committen | Q81 | Abgeschlossen mit dem Planungscommit dieses Dokuments |
 | U01 | Physische Stacks, Zusammenflug, Mitgliedschaft, Reihenfolge, gemeinsame Reise und Routenintegration | P00 | Umgesetzt: `server/war/stacks.js`, Befehle `stackJoin/stackDetach/stackMove/routeStackNo`, Stackfenster im Schiffsdetail, Stacknummer in der Routenübersicht; Nachweis `tests/prd15-stacks.test.js` |
 | U02 | Klassen, Baupläne, Waffen-/Systemschema, alle Bestandsmodelle und neue Grund-/Mehrzweckmodelle; zentrale Wertetabellen und Migrationsentwurf | P00 | Umgesetzt: zentrale Tabellen in `shared/combat.js` (Klassen, Waffen, Systeme, Panzerung, Baupläne, Reparaturvorschau); neue Typen Falke, Keiler, Hornissen-/Wespenstaffel, Habicht, Sperber, Greif, Bastion; schnelle Zivilschiffe beschleunigt; Nachweis `tests/prd15-combat-data.test.js` |
-| U03 | Vollständiger Neuentwurf der 18 Fraktionsschiffwerte/Fähigkeiten und Freischaltungstabellen; neue stilkonforme Grafiken für neue Typen | U02 | Umgesetzt: 18 Fraktionsmodelle als Mehrzweck/Krieg mit Fähigkeit und Nachteil, kleine Laderäume der Kriegsschiffe, Rang 4 und Bauplan einen Rang nach Kauffreigabe; neue Typen erhalten generierte Comic-SVGs (Konturen, Zweitonrumpf). **Offen:** gemalte PNG-Illustrationen der acht neuen Typen durch die Grafikpipeline |
+| U03 | Vollständiger Neuentwurf der 18 Fraktionsschiffwerte/Fähigkeiten und Freischaltungstabellen; neue stilkonforme Grafiken für neue Typen | U02 | Umgesetzt: 18 Fraktionsmodelle als Mehrzweck/Krieg mit Fähigkeit und Nachteil, kleine Laderäume der Kriegsschiffe, Rang 4 und Bauplan einen Rang nach Kauffreigabe; neue Typen erhalten 512er-PNG-Illustrationen im Comic-Steampunk-Stil (`scripts/art/prd15-ship-designs.js`), SVG-Sprites bleiben als Rückfall |
 | U04 | Serverseitige Schlachtinstanzen, Zeit/Speicherung, Bewegung, zwei Seiten, Beitritt und vollständige Schadenspipeline | U01, U02 | Umgesetzt: `server/war/battle.js` (Instanzen, Aufstellung, Verstärkung vom Kartenrand, Sensorik je Seite, KI, Bewegung mit Antriebs-/Manöveranteilen, Feuerwinkel, Lenkwaffen mit Punktverteidigung, Strahlenaufbau, Brände, Schadenskontrolle), `shared/damage.js` (Schritte 4-8, Fläche, Ionen), `server/war/engage.js` (Angriffsbefehl, Flucht ziviler Ziele); Nachweis `tests/prd15-battle.test.js` |
 | U05 | Taktische Oberfläche, Sensorik, Systembefehle, Zuschauerrechte, KI-/Manuellwechsel, Staffeln und Effekte | U04 | Umgesetzt: Schlachtsymbole auf der Karte (Doppelklick), `client/js/ui/battle.js` (Auswahl, Rahmenauswahl, Rechtsklickbefehle, Hardpoint- und Systemlistenangriff, Haltung, Rückzugspolitik, Priorität, Schadenskontrolle, Effekte, Zustände mit Symbolen statt nur Farbe, schmale Ansicht), betrachterabhängige Sicht in `server/war/view.js`, Befehle `battleOrder/battleTactic/attack`; visuell geprüft am Testserver `scripts/dev-prd15.js` |
 | U06 | Rückzug, Sprungsperren, Kapitulation, Sieg/Unentschieden, Besitzwechsel, Gefangene, Freikauf, Trümmer und Berichte | U04, U05 | Serverseitig umgesetzt: Rückzug/Sprungsperre in `battle.js`, Ergebnisauflösung, Gefangene, Freikauf (`ransom`), Trümmerfelder (30 min) und Berichte in `server/war/outcome.js`; Nachweis `tests/prd15-battle.test.js`. Oberfläche folgt mit U05 |
@@ -872,9 +872,13 @@ Stack-/Diplomatiedaten im Client, Geschosse übersprangen den Einschlagsradius.
 
 ### Offene Punkte und bewusste Vereinfachungen
 
-- **Grafik:** Die acht neuen Typen nutzen generierte Comic-SVGs mit Konturen
-  und Zweitonrumpf. Gemalte PNG-Illustrationen im Stil der Bestandsbilder
-  stehen aus und müssen durch die Grafikpipeline nachgeliefert werden.
+- **Grafik:** Die acht neuen Typen haben seit dem Nachtrag 512 × 512
+  RGBA-Illustrationen im Comic-Steampunk-Stil der Bestandsbilder
+  (Dreiviertelansicht, genietete Platten, Messingkanten, glühende
+  Triebwerke). Sie sind reproduzierbar gezeichnet (`scripts/art/`), nicht
+  mit dem Bildgenerator der Bestandsbilder erzeugt, und wirken daher
+  geometrischer. Ein Austausch gegen gemalte Fassungen gleichen Namens ist
+  jederzeit möglich.
 - **Balance:** Erste Kalibrierung laut `docs/qa/prd15/balance.md`. Drei
   Sperber schlagen einen kostengleichen Greif weiterhin deutlich; Karawanen
   unterliegen Sternenläufern. Weitere Iterationen der Wertetabellen in
