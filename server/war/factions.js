@@ -238,7 +238,18 @@ export function syncFriendQuest(game, p) {
   if (!covers) return;
   w.friendQuestStarted = true;
   w.friendQuest = { stage: 1, gift: { ...F.GIFT } };
-  game.emit('notice', p, 'Freundschaftsquest: Bringe einer frei gewählten Fraktion ein Geschenk an ihren Verwaltungsplaneten.');
+  game.emit('friendQuest', p); // Netz meldet sofort, wenn online; sonst beim nächsten Login (announceFriendQuest)
+}
+
+export const FRIEND_QUEST_NOTICE = 'Freundschaftsquest: Bringe einer frei gewählten Fraktion ein Geschenk an ihren Verwaltungsplaneten.';
+
+/** Beim Login: Quest nachträglich starten und eine offline verpasste Meldung nachholen. Liefert true, wenn zu melden ist. */
+export function announceFriendQuest(game, p) {
+  syncFriendQuest(game, p);
+  const w = diplo(p);
+  if (!w.friendQuest || w.friendQuestAnnounced) return false;
+  w.friendQuestAnnounced = true;
+  return true;
 }
 
 /** Bau und Kauf weiterer Schiffe ab fünf eigenen Schiffen gesperrt, solange die erste Quest offen ist */

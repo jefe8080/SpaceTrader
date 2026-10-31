@@ -14,7 +14,7 @@ import { visibleBattles, battleView } from './war/view.js';
 import { ransomQuote } from './war/outcome.js';
 import { quoteFor, autoRepairOn, repairSiteError } from './war/repair.js';
 import { needsRepair } from '../shared/combat.js';
-import { fsecView } from './war/factions.js';
+import { fsecView, announceFriendQuest, FRIEND_QUEST_NOTICE } from './war/factions.js';
 import { diplo } from './war/diplomacy.js';
 
 const r1 = (v) => Math.round(v * 10) / 10;
@@ -42,6 +42,12 @@ export class Net {
     game.on('pilotLevelUp',(p,data)=>this.sessions.get(p.id)?.socket.emit('pilotLevelUp',data));
     game.on('player', () => this.broadcastPlayers()); // Level und Titel für die Tooltips der anderen
     game.on('notice', (p, msg) => p && this.sessions.get(p.id)?.socket.emit('notice', msg));
+    game.on('friendQuest', (p) => {
+      const s = this.sessions.get(p.id);
+      if (!s) return; // offline: Meldung folgt beim Login
+      diplo(p).friendQuestAnnounced = true;
+      s.socket.emit('notice', FRIEND_QUEST_NOTICE);
+    });
     // Konsortium geändert: Mitglieder und Eingeladene bekommen den neuen Stand; (null, p): nur dieser Spieler
     game.on('consortium', (c, p) => {
       if (p) { const s = this.sessions.get(p.id); if (s) this.sendConsortium(s); return; }
@@ -92,6 +98,7 @@ export class Net {
       this.sessions.set(player.id, session);
       player.lastSeen = Date.now();
       this.welcome(session);
+      if (announceFriendQuest(this.game, player)) socket.emit('notice', FRIEND_QUEST_NOTICE);
       console.log(`Login: ${player.name}`);
       this.broadcastPlayers();
     });

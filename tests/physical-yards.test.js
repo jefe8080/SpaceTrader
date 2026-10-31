@@ -6,7 +6,7 @@ import path from 'node:path';
 import {Game} from '../server/game.js';
 import {runCommand} from '../server/handlers/index.js';
 import {SHIP_TYPES,buildMaterials,sellValue,SHIPYARD} from '../shared/ships.js';
-import {tickPhysicalYard} from '../server/physical-yards.js';
+import {tickPhysicalYard,migrateNewHullInventory} from '../server/physical-yards.js';
 
 function fixture(file=':memory:'){
   const game=new Game(file,{seed:42,profile:'homeworld'}),player=game.createPlayer('Werft'),ship=game.shipsOf(player.id)[0],yard=game.world.entities.get('origin_yard');
@@ -79,4 +79,17 @@ test('Neustart erhält verbrauchte Baumaterialien, Rumpf-ID und Restzeit ohne er
   for(const good of Object.keys(buildMaterials('spatz')))assert.equal(f.yard.market.goods[good].stock,0);
   advance(f,25);assert.equal(f.yard.market.forSale.length,1);assert.equal(f.yard.market.forSale[0].id,id);close(f);
   assert.equal(path.dirname(directory),os.tmpdir());fs.rmSync(directory,{recursive:true,force:true});
+});
+
+test('Bestandswerften erhalten neu eingeführte Schiffstypen im Baukatalog und Almanach, wiederholbar ohne Lagerwachstum',()=>{
+  const f=fixture(),m=f.yard.market,added=SHIPYARD.ORDER.shipyard.filter(t=>['falke','keiler','korvette','abfangstaffel','bomberstaffel'].includes(t));
+  assert.equal(added.length,5);
+  m.yardCatalog=m.yardCatalog.filter(t=>!added.includes(t));for(const t of added)f.player.known.ship.delete(t);
+  migrateNewHullInventory(f.game);
+  for(const t of added)assert.ok(m.yardCatalog.includes(t),t);
+  const caps=JSON.stringify(Object.fromEntries(Object.entries(m.goods).map(([g,s])=>[g,[s.cap,s.baseCap]])));
+  migrateNewHullInventory(f.game);
+  assert.equal(JSON.stringify(Object.fromEntries(Object.entries(m.goods).map(([g,s])=>[g,[s.cap,s.baseCap]]))),caps,'Migration ist idempotent');
+  f.game.onDock(f.ship,f.yard);for(const t of added)assert.ok(f.player.known.ship.has(t),`Almanach: ${t}`);
+  close(f);
 });

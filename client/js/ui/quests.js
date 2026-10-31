@@ -107,12 +107,14 @@ function questTarget(q) {
 export function renderQuestBox() {
   const quests=activeSideQuests(state),q=selectedSideQuest(state,selectedQuest)||quests[0];selectedQuest=q?.id||null;
   const box = $('questBox');
-  box.hidden = !q && !state.homeworld;
+  box.hidden = !q && !state.homeworld && !state.war?.friendQuest;
   const selection = selectHomeQuest(HOME_QUESTS, state.homeQuest, selectedHomeQuest);
   selectedHomeQuest = selection.id;
   const home = HOME_QUESTS[selection.id];
   const navigation = selection.count > 1 ? `<button class="small" data-q="homePrev" aria-label="Vorherige Hauptquest">‹</button><span>${selection.index+1}/${selection.count}</span><button class="small" data-q="homeNext" aria-label="Nächste Hauptquest">›</button>` : '';
-  const homeSummary = state.homeworld && home ? `<div class="qb-head">⌂ Hauptquest · ${selection.id}<span style="flex:1"></span>${navigation}</div><p>${esc(home.title)}: ${esc(home.goal)}</p><button class="small" data-q="homeTarget">Heimat zeigen</button><hr>` : '';
+  const fq = state.war?.friendQuest;
+  const friendSummary = fq ? `<div class="qb-head">🤝 Freundschaftsquest</div><p>Bringe ${Object.entries(fq.gift).map(([good, n]) => `${n} ${g(good)}`).join(' und ')} als Geschenk zum Verwaltungsplaneten einer frei gewählten Fraktion.</p><hr>` : '';
+  const homeSummary = (state.homeworld && home ? `<div class="qb-head">⌂ Hauptquest · ${selection.id}<span style="flex:1"></span>${navigation}</div><p>${esc(home.title)}: ${esc(home.goal)}</p><button class="small" data-q="homeTarget">Heimat zeigen</button><hr>` : '') + friendSummary;
   if (!q) { setHtml(box, homeSummary); return; }
   const t = questTarget(q);
   const docked = myShips().filter((s) => s.dockedAt);

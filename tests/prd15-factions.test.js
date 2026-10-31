@@ -4,7 +4,7 @@ import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 import { FACTION_WAR as F } from '../shared/warfare.js';
 import { isGiver, makeOffer } from '../server/quests.js';
-import { ensureFactionSectors, poolAdd, poolSpend, capOf, receiveGoods, supplyOk, tickFactions, shipPurchaseBlock, syncFriendQuest, questTurnInBlock, spawnFactionShip } from '../server/war/factions.js';
+import { ensureFactionSectors, poolAdd, poolSpend, capOf, receiveGoods, supplyOk, tickFactions, shipPurchaseBlock, syncFriendQuest, announceFriendQuest, questTurnInBlock, spawnFactionShip } from '../server/war/factions.js';
 import { factionHostileTo, diplo } from '../server/war/diplomacy.js';
 import { startBattle, endBattle } from '../server/war/battle.js';
 
@@ -152,3 +152,20 @@ test('PRD15 U09: Beute einer Fraktion fließt in ihren Pool, ohne Doppelgutschri
   } finally { game.store.close(); }
 });
 
+
+test('PRD15 U09: Spieler mit bereits ausgebauter Leitstelle erhalten die Freundschaftsquest beim nächsten Login samt Meldung', () => {
+  const game = withFaction('homeworld');
+  try {
+    const p = game.createPlayer('Nachzügler');
+    game.world.entities.get(p.homeworld).market.homeworld.controlLevel = 2;
+    assert.equal(diplo(p).friendQuest, undefined);
+    assert.equal(announceFriendQuest(game, p), true, 'Login startet die Quest und meldet sie');
+    assert.ok(diplo(p).friendQuest);
+    assert.equal(announceFriendQuest(game, p), false, 'nur einmal gemeldet');
+    const q = game.createPlayer('Offline');
+    game.world.entities.get(q.homeworld).market.homeworld.controlLevel = 3;
+    syncFriendQuest(game, q); // Takt bzw. Migration, während der Spieler offline ist
+    assert.ok(diplo(q).friendQuest);
+    assert.equal(announceFriendQuest(game, q), true, 'offline verpasste Meldung wird beim Login nachgeholt');
+  } finally { game.store.close(); }
+});

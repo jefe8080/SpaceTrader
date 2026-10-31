@@ -3,15 +3,25 @@ import {stat} from './markets.js';
 
 export function preparePhysicalYard(entity){
   const m=entity.market;if(!['shipyard','factionyard'].includes(m.strategy))return;
-  m.yardCatalog=m.strategy==='factionyard'?Object.keys(SHIP_TYPES).filter(t=>SHIP_TYPES[t].faction===entity.faction):[...new Set(SHIPYARD.ORDER[entity.type]||[])];
   m.nextBuild=0;m.physicalShipsBuilt=0;
-  for(const type of m.yardCatalog)for(const [good,n] of Object.entries(SHIP_TYPES[type].build)){
-    m.goods[good]||={role:'consume',rate:0,stock:0,cap:1,mod:1};m.goods[good].cap=Math.max(m.goods[good].cap,Math.ceil(n*1.2));m.goods[good].baseCap=m.goods[good].cap;
-  }
+  syncYardCatalog(entity);
   if(entity.id==='origin_yard'){
     const item={id:'origin_yard:initial-spatz',source:'public_start_exception',type:'spatz',price:2500,fuel:SHIP_TYPES.spatz.tank};
     m.forSale.push(item);m.provenance.push({...item,claimedBy:null});
   }
+}
+
+const catalogFor=entity=>entity.market.strategy==='factionyard'?Object.keys(SHIP_TYPES).filter(t=>SHIP_TYPES[t].faction===entity.faction):[...new Set(SHIPYARD.ORDER[entity.type]||[])];
+
+/** Baukatalog aus der aktuellen Bauliste ableiten; Lagerplätze für das Baumaterial wachsen mit */
+export function syncYardCatalog(entity){
+  const m=entity.market;
+  m.yardCatalog=catalogFor(entity);
+  for(const type of m.yardCatalog)for(const [good,n] of Object.entries(SHIP_TYPES[type].build)){
+    m.goods[good]||={role:'consume',rate:0,stock:0,cap:1,mod:1};const need=Math.ceil(n*1.2);m.goods[good].cap=Math.max(m.goods[good].cap,need);m.goods[good].baseCap=Math.max(m.goods[good].baseCap??m.goods[good].cap,need);
+  }
+  // Bestehende Werftkasse muss auch den teuersten neuen Rumpf finanzieren können
+  if(m.economy)m.economy.rate=Math.max(m.economy.rate,...m.yardCatalog.map(type=>Object.entries(SHIP_TYPES[type].build).reduce((sum,[g,n])=>sum+GOODS[g].base*n,0)));
 }
 
 export function startPhysicalBuild(game,entity,type,order=null){
@@ -59,6 +69,8 @@ export function initializeNewHull(item){
 
 export function migrateNewHullInventory(game){
   for(const e of game.world.entities.values()){
+    // Bestandswerften erhalten neu eingeführte Schiffstypen (Baukatalog war bisher nur bei der Weltgenerierung gesetzt)
+    if(e.market?.yardCatalog&&['shipyard','factionyard'].includes(e.market.strategy)&&catalogFor(e).some(t=>!e.market.yardCatalog.includes(t)))syncYardCatalog(e);
     for(const item of e.market?.forSale||[])initializeNewHull(item);
     for(const item of e.market?.homeworld?.orbital?.inventory||[])initializeNewHull(item);
   }
