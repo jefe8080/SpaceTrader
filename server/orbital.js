@@ -29,17 +29,29 @@ export function startOrbital(game,p,e,large,ship,confirmed){
   game.emit('entity',e);
 }
 
+export const DOUBLE_YARD_COST={alloys:100,shipparts:30,engines:10,reactorcores:4};
+export function upgradeOrbital(game,p,e){
+  const error=homeAccess(game,p,e);if(error)return error;
+  const h=e.market.homeworld,o=h.orbital;
+  if(!o?.large)return 'Zuerst den großen Orbitalring fertigstellen.';
+  if(o.doubleYard)return 'Die Doppelwerft ist bereits fertig.';
+  if(o.project)return 'Ein Orbitalbauabschnitt läuft bereits.';
+  const staff=homeConstructionError(h);if(staff)return staff;
+  const blocked=chargeHome(game,p,e,{credits:0,goods:DOUBLE_YARD_COST});if(blocked)return blocked;
+  o.project={kind:'doubleYard',remaining:600,bound:{...DOUBLE_YARD_COST}};
+  game.emit('entity',e);
+}
 export function orbitalBuild(game,p,e,type){
   const error=homeAccess(game,p,e);if(error)return error;
   {const lock=shipPurchaseBlock(game,p);if(lock)return lock;}
   const h=e.market.homeworld,o=h.orbital,d=SHIP_TYPES[type];
   if(!o?.small||!d||d.npc)return 'Dieser Schiffstyp gehört nicht zum Orbitalbaukatalog.';
-  const tier=blueprint(type).tier,large=['L','XL'].includes(tier),slot=large?'large':'small';
+  const tier=blueprint(type).tier,large=['L','XL'].includes(tier),slot=o.doubleYard?['small','large'].find(slot=>!o.jobs[slot]):large?'large':'small';
   if(large&&!o.large)return 'Dafür muss der große Ring fertig sein.';
   const license=PILOT_LICENSES[p.pilot||1];if(!license.classes.includes(d.cls))return 'Die passende Pilotenlizenz fehlt.';
   // PRD 15: Der Bauplan folgt jeweils einen Ruflevel nach der Kauffreigabe
   if(d.faction&&factionRank(p.rep?.[d.faction]||0)<blueprintRank(d))return `Der Bauplan erfordert Fraktionsrang ${blueprintRank(d)}.`;
-  if(o.jobs[slot])return 'Dieser Orbitalbauplatz ist bereits belegt.';
+  if(!slot||o.jobs[slot])return 'Dieser Orbitalbauplatz ist bereits belegt.';
   if(o.inventory.length+Object.keys(o.jobs).length>=12)return 'Alle zwölf Ausgabeplätze sind belegt.';
   const goods={...d.build};if(d.currency)goods[d.currency.good]=(goods[d.currency.good]||0)+d.currency.n;
   const blocked=chargeHome(game,p,e,{credits:0,goods});if(blocked)return blocked;
@@ -57,11 +69,11 @@ export function tickOrbital(game,e,dt){
   const h=e.market.homeworld,o=h.orbital;if(!o)return;
   if(o.project){
     o.project.remaining=Math.max(0,o.project.remaining-dt);
-    if(o.project.remaining===0){if(o.project.kind==='small')o.small=true;else{o.largeStage=o.project.stage;if(o.largeStage===2)o.large=true;}o.project=null;game.emit('entity',e);}
+    if(o.project.remaining===0){if(o.project.kind==='doubleYard')o.doubleYard=true;else if(o.project.kind==='small')o.small=true;else{o.largeStage=o.project.stage;if(o.largeStage===2)o.large=true;}o.project=null;game.emit('entity',e);}
   }
   const active=slot=>h.allocations.some(a=>a.id===`orbital:${slot}`&&a.state==='active');
   for(const [slot,j] of Object.entries(o.jobs)){
-    const running=slot==='small'?active('small'):active('large')&&(!o.jobs.small||active('small'));j.paused=!running;
+    const running=o.doubleYard?active(slot):slot==='small'?active('small'):active('large')&&(!o.jobs.small||active('small'));j.paused=!running;
     if(!running)continue;j.remaining=Math.max(0,j.remaining-dt);
     if(j.remaining===0){const item={id:j.id,type:j.type,source:'materials',materials:j.materials,currencyPaid:j.currency,fuel:0};initializeNewHull(item);o.inventory.push(item);delete o.jobs[slot];game.emit('entity',e);}
   }

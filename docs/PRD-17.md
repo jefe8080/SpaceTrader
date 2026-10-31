@@ -178,13 +178,13 @@ erzeugen keine Bürgerkasse und keine unbeabsichtigten Gutschriften.
 
 ## Umsetzungsschritte und Fortschritt
 
-Alle Umsetzungspakete sind offen. Nach jedem abgeschlossenen Paket werden
+Die Umsetzung läuft anhand der folgenden Pakete. Nach jedem abgeschlossenen Paket werden
 passende Prüfungen ausgeführt, dieser Fortschritt aktualisiert und die
 zusammengehörigen Änderungen separat committet.
 
 | Paket | Umfang und Prüfung | Stand |
 | --- | --- | --- |
-| P01 | Doppelwerft: Ausbau, freie Bauplätze, unabhängiger Betrieb, Migration; gezielte Orbital-/Versorgungstests | Offen |
+| P01 | Doppelwerft: Ausbau, freie Bauplätze, unabhängiger Betrieb, Migration; gezielte Orbital-/Versorgungstests | Implementiert; 13 Orbital-/Betriebstests bestanden, Persistenzabnahme in P08 |
 | P02 | Orbitalring-Baumenü: Kategorien, Karten, Bauplatzanzeige; Browser- und Sichtprüfung bei mehreren Fenstergrößen | Offen |
 | P03 | Almanach und Rathaus: Aufklappbereiche und sichtbare Werte; Aktualisierungs- und Browserprüfung | Offen |
 | P04 | Wohnhäuser: Darstellung, Auswahlflächen und Zoom; visuelle Prüfung aller Stufen | Offen |

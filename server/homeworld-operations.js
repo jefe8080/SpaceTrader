@@ -1,3 +1,4 @@
+import {blueprint} from '../shared/combat.js';
 import {unlockBuildingRecipes} from './building-recipes.js';
 import { GOODS, RECIPES,REFINEMENT_RECIPES } from '../shared/goods.js';
 import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, homeStorageFree, availableHomeStock, homeGoodCapacity, homeGoodLimit, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '../shared/homeworld.js';
@@ -365,10 +366,17 @@ function operationStep(game,entity,dt,now) {
   }
   const units=[];
   for(const [id,count] of Object.entries(home.controlModules||{}))for(let i=0;i<count;i++)units.push({id:`control:${id}:${i}`,building:{},spec:CONTROL_MODULES[id],priority:70});
+  if(home.orbital?.doubleYard){
+    for(const [slot,job] of Object.entries(home.orbital.jobs)){
+      const large=['L','XL'].includes(blueprint(job.type).tier);
+      units.push({id:'orbital:'+slot,building:{},spec:large?{power:80,workers:{basic:8,skilled:16,specialist:4}}:ORBITAL_OPERATION.small,priority:60});
+    }
+  }else{
   if(home.orbital?.jobs?.small)units.push({id:'orbital:small',building:{},spec:ORBITAL_OPERATION.small,priority:61});
   if(home.orbital?.jobs?.large){
     const spec=home.orbital.jobs.small?ORBITAL_OPERATION.large:{power:80,workers:{basic:8,skilled:16,specialist:4}};
     units.push({id:'orbital:large',building:{},spec,priority:60});
+  }
   }
   for(const [id,building] of Object.entries(home.facilities)){
     if(!ready(building))continue;
@@ -394,7 +402,7 @@ function operationStep(game,entity,dt,now) {
   for(const unit of units){
     const {id,building,spec,recipe}=unit;
     if(unit.relicWorkshop&&relicWork)remaining.skilled+=2;
-    const reason=id==='orbital:large'&&home.orbital.jobs.small&&!allocations.some(a=>a.id==='orbital:small'&&a.state==='active')?'Grundring nicht in Betrieb':building.enabled===false?'Pausiert':(recipe?productionBlockReason(market,recipe,building.recipe||id):null)||(powerUsed+(spec.power||0)>generation?'Energie fehlt':null);
+    const reason=!home.orbital?.doubleYard&&id==='orbital:large'&&home.orbital.jobs.small&&!allocations.some(a=>a.id==='orbital:small'&&a.state==='active')?'Grundring nicht in Betrieb':building.enabled===false?'Pausiert':(recipe?productionBlockReason(market,recipe,building.recipe||id):null)||(powerUsed+(spec.power||0)>generation?'Energie fehlt':null);
     const emergency=['dock','control'].includes(id)&&reason==='Energie fehlt';
     if(emergency){allocations.push({id,state:'emergency',reason:'Unabhängige Notversorgung erhält Lagerzugang und Reichweite',power:0,workers:qualified()});continue;}
     if(!assign(id,spec,reason)){building.blocked=reason||'Personal fehlt';continue;}

@@ -8,7 +8,7 @@ import {HOME_STORY,storyAvailable} from '../../shared/home-story.js';
 import { relicSalvage, relicDeliver, relicWork } from '../relic.js';
 import {createLogistics,cancelLogistics} from '../logistics.js';
 import {deliverHomeQuest,visitHomeSite} from '../homequests.js';
-import {startOrbital,orbitalBuild,claimOrbital} from '../orbital.js';
+import {startOrbital,orbitalBuild,claimOrbital,upgradeOrbital} from '../orbital.js';
 import {SHIP_TYPES} from '../../shared/config.js';
 import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess,changeRefinement,upgradeStorage,demolishHome,setHomeLimit,abortHomeCycle } from '../homeworld-operations.js';
 
@@ -17,6 +17,7 @@ export default {
   homeQuestDeliver:{args:{target:V.entity(),quest:V.key(HOME_QUESTS),good:V.key(GOODS),amount:V.int(1,1e6)},run({game,player},{target,quest,good,amount}){return deliverHomeQuest(game,player,target,quest,good,amount);}},
   homeArchiveVisit:{args:{target:V.entity(),ship:V.ownShip()},run({game,player},{target,ship}){return visitHomeSite(game,player,ship,target);}},
   homeOrbital:{args:{target:V.entity(),large:V.bool(),ship:V.opt(V.ownShip()),confirmed:V.opt(V.bool(),false)},run({game,player},{target,large,ship,confirmed}){return startOrbital(game,player,target,large,ship,confirmed);}},
+  homeOrbitalUpgrade:{args:{target:V.entity()},run({game,player},{target}){return upgradeOrbital(game,player,target);}},
   homeOrbitalBuild:{args:{target:V.entity(),type:V.key(SHIP_TYPES)},run({game,player},{target,type}){return orbitalBuild(game,player,target,type);}},
   homeOrbitalClaim:{args:{target:V.entity(),id:V.str(100,1)},run({game,player},{target,id}){return claimOrbital(game,player,target,id);}},
   homeLogistics:{
