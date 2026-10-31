@@ -12,6 +12,13 @@ test('Trade: kombinierte Filter und Preisgrenzen folgen der Spielersicht',()=>{
  assert.equal(filterTradeRows(rows,v({favorites:true})).length,1);
  assert.equal(filterTradeRows(rows,v({search:'unbekannt'})).length,0);
 });
+
+test('PRD14: concrete planet and resource types combine with commodity and search filters without quotes',()=>{
+ const places=[...rows,{id:'ore',name:'Orion Erzfeld',kind:'belt',placeType:'belt:ore',hasGood:true,buy:null,sell:null,quantity:null},{id:'home',name:'Heimat',kind:'planet',placeType:'planet:ruins',hasGood:true,buy:0,sell:0,quantity:10}];
+ assert.deepEqual(filterTradeRows(places,v({type:'belt:ore',search:'orion'})).map(r=>r.id),['ore']);
+ assert.deepEqual(filterTradeRows(places,v({type:'planet:ruins'})).map(r=>r.id),['home']);
+ assert.equal(filterTradeRows(places,v({type:'belt',direction:'buy'})).length,0);
+});
 test('Trade: unbekannte Werte bleiben in beiden Richtungen am Ende, Gleichstände stabil',()=>{
  for(const descending of [false,true]) {
   const all=filterTradeRows(rows,v({good:'',sort:'distance',descending}));

@@ -11,7 +11,7 @@ export function compareTradeRows(a,b,view) {
 }
 export function filterTradeRows(rows,v) {
   return rows.filter(r=>(!v.search||r.name.toLocaleLowerCase('de').includes(v.search.toLocaleLowerCase('de')))
-    &&(!v.type||r.kind===v.type)&&(!v.system||r.system===v.system)&&(!v.sector||r.sector===v.sector)
+    &&(!v.type||r.kind===v.type||r.placeType===v.type)&&(!v.system||r.system===v.system)&&(!v.sector||r.sector===v.sector)
     &&(!v.favorites||r.favorite)&&(!v.good||r.hasGood)
     &&(!v.direction||r[v.direction]!=null)
     &&(v.price==='' || !v.good || !v.direction || (r[v.direction]!=null && (v.direction==='buy'?r.buy<=Number(v.price):r.sell>=Number(v.price))))

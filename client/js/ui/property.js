@@ -96,6 +96,7 @@ function manageSection(e, prop) {
   }
 
   if(e.market.realEconomy&&e.kind==='planet')return h+specializationPanel(e)+'</div>';
+  if(state.profile==='homeworld')return h+(e.market.strategy==='shipyard'?yardSection(e,prop):'')+'</div>';
   if(e.market.realEconomy&&e.market.strategy!=='shipyard')return h+'</div>';
   // Upgrades
   h += `<div class="sub-title">Ausbau (max. Stufe ${max})</div><table class="market"><tr><th>Linie</th><th>Stufe</th><th>Kosten nächste Stufe</th><th></th></tr>`;

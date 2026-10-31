@@ -293,9 +293,16 @@ und relevante neue Möglichkeiten zusammen verständlich dargestellt.
   behobene Ausbildungsregression auf. `npm ci` scheiterte am unnötigen
   nativen SQLite-Neubau; `npm ci --ignore-scripts` installiert die bereits
   enthaltene funktionsfähige Binärdatei unter Node 24.13.0.
-- [ ] Schritt 3: Filterbare Ortslisten um sämtliche Planetentypen und
+- [x] Schritt 3: Filterbare Ortslisten um sämtliche Planetentypen und
   Rohstofffelder erweitern; Kombinationen, Sichtbarkeit, Warenfilter und
   passende Aktionen prüfen. Alte wirkungslose Upgradeanzeige entfernen.
+
+  Ergebnis: Bekannte Planeten einschließlich Ruinen und alle Feldtypen
+  mit Einzeltypfiltern und Rohstofffilter. Felder haben keine Marktpreise,
+  Kauf- oder Handelsroutenaktionen; die vorhandene Navigation startet bei
+  geeigneten Schiffen den Abbau. Alte Besitz-Upgradelinien sind im aktuellen
+  Weltprofil auch an Werften ausgeblendet. Prüfung: fünf Trade-UI-Tests,
+  Syntax und Whitespace bestanden.
 - [ ] Schritt 4: Touristenaufnahme an Paradieswelten und Orbitalhotels
   korrigieren; konkrete Ablehnungsgründe ergänzen. Gästeplatzgrenzen,
   Aufenthalt, Wiederabholung, Rückkehr und unveränderte Personenbestände
