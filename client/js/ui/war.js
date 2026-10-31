@@ -94,6 +94,13 @@ export function ownWarSection(s) {
       <div class="muted">Vorschau: ${fmt(q?.cost || 0)} Cr (davon Munition ${fmt(q?.ammo || 0)} Cr), ${q?.secs || 0} s. Vollreparatur nur angedockt an zugänglicher Werft oder eigener Ruinenwelt mit Antriebswerkstatt.</div>
       ${s.repairHere ? `<button class="small" data-war="repair" data-ship="${s.id}" data-cost="${q?.cost || 0}">🔧 Jetzt reparieren</button>` : ''}</div>`;
   }
+  if (COMBAT_TYPES[s.type]?.cls === 'war' || (s.stack && stackById(s.stack)?.members[0] === s.id)) {
+    const m = s.posture?.mode || 'intercept';
+    h += `<div class="section"><div class="section-title">Strategische Haltung</div><div class="btnrow">
+      ${[['intercept', '⇢ Abfangen', 'Hilft eigenen und verbündeten Einheiten bis zu einer halben Sektorweite'], ['guard', '⛨ Bewachen', 'Sichert die aktuelle Position im Radius eines Viertel-Systemdurchmessers'], ['passive', '⏸ Passiv', 'Keine automatische Unterstützung']]
+        .map(([k, t, d]) => `<button class="small${m === k ? ' on' : ''}" data-war="posture" data-ship="${s.id}" data-mode="${k}" title="${d}">${t}</button>`).join('')}</div>
+      <div class="muted">Nur Kriegsschiffe und Stacks mit Kriegsschiffen lösen Unterstützung aus.</div></div>`;
+  }
   if (COMBAT_TYPES[s.type]?.weapons?.length || s.stack) h += `<label class="muted"><input type="checkbox" data-war-auto="${s.id}" ${s.autoRepair !== false ? 'checked' : ''}> Reparaturautomatik${s.stack ? ' (ganzer Stack)' : ''}</label>`;
   return h;
 }
@@ -101,6 +108,7 @@ export function ownWarSection(s) {
 warActions.attack = (d) => cmd('attack', { ships: selectedShips().map((x) => x.id), target: d.target });
 warActions.ransom = (d) => { if (confirm(`Schiff für ${fmt(Number(d.price))} Cr freikaufen?`)) cmd('ransom', { ship: d.ship, price: Number(d.price) }); };
 warActions.repair = (d) => { if (confirm(`Reparatur für ${fmt(Number(d.cost))} Cr starten?`)) cmd('repair', { ship: d.ship, cost: Number(d.cost) }); };
+warActions.posture = (d) => cmd('posture', { ship: d.ship, mode: d.mode });
 warActions.view = (d) => import('./battle.js').then((m) => m.openBattle(d.battle));
 
 

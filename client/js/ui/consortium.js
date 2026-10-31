@@ -52,7 +52,8 @@ function member(c) {
     <span>Name</span><span><span class="dot" style="background:${c.color}"></span> <b>${esc(c.name)}</b></span>
     <span>Level</span><span>${c.level} · max. ${L.maxProps} Besitztümer · Ausbau bis Stufe ${L.maxLevel}</span>
     <span>Pool</span><span><b>${fmt(c.pool)} Cr</b></span>
-    <span>Besitz</span><span>${c.props} / ${c.maxProps}</span></div>
+    <span>Besitz</span><span>${c.props} / ${c.maxProps}</span>
+    <span>Militärisches Bündnis</span><span><label><input type="checkbox" data-c-military ${c.military ? 'checked' : ''} ${master ? '' : 'disabled'}> automatische Unterstützung der Mitglieder</label> <span class="muted">(gilt für neue Begegnungen; Angriffe untereinander bleiben verboten)</span></span></div>
     ${c.level < MAX_CONSORTIUM_LEVEL ? `<div class="small-note">Nächstes Level ${next.level}: ${next.maxProps} Besitztümer, Ausbau bis ${next.maxLevel}, Kosten ${fmt(next.cost)} Cr aus dem Pool.
       ${master ? `<button class="small primary" data-c="levelUp" ${c.pool < next.cost ? 'disabled' : ''}>Aufsteigen</button>` : ''}</div>` : '<div class="muted small-note">Höchstes Level erreicht.</div>'}`);
 
@@ -126,6 +127,7 @@ card.addEventListener('input', (ev) => {
   else for (const x of extraSections) x.input?.(t);
 });
 card.addEventListener('change', (ev) => {
+  if (ev.target.matches?.('[data-c-military]')) { cmd('consortiumMilitary', { on: ev.target.checked }); return; }
   for (const x of extraSections) x.change?.(ev.target);
   if (ev.target.id === 'consAmount') renderCons();
 });

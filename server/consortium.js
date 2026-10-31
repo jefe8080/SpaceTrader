@@ -244,7 +244,7 @@ export function consortiumView(game, p, online = new Set()) {
   }).sort((a, b) => (a.rank === b.rank ? a.name.localeCompare(b.name) : a.rank === 'master' ? -1 : 1));
   return {
     id: c.id, name: c.name, color: c.color, level: c.level, pool: Math.floor(c.credits), maxProps: L.maxProps, maxLevel: L.maxLevel,
-    props: propCount(game, c), rank: c.members[p.id].rank, members, board: c.board,
+    props: propCount(game, c), rank: c.members[p.id].rank, members, board: c.board, military: c.military !== false,
     propList: [...game.ownership.values()].filter((x) => x.player === consortiumOwner(c.id)).map((x) => {
       const e = game.world.entities.get(x.entity);
       return { entity: x.entity, name: e?.name || '?', kind: e?.kind, type: e?.type, sector: e?.sector, mode: x.mode, customs: x.customs || 0, upg: x.upg, inc: Math.round(x.tot?.inc || 0) };

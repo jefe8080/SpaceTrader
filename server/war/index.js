@@ -4,6 +4,7 @@ import { tickBattles } from './battle.js';
 import { tickEngagements } from './engage.js';
 import { tickDebris } from './outcome.js';
 import { tickRepairs } from './repair.js';
+import { tickSupport, snapshotAllies, stockProtection } from './support.js';
 
 /** Persistente Kriegszustände: Präfix der Zeilen-ID in der Tabelle war -> Map am Spiel */
 const COLLECTIONS = { stack: 'stacks', battle: 'battles' };
@@ -15,6 +16,7 @@ export function initWar(game) {
   game.counters.stack ??= 0;
   game.counters.battle ??= 0;
   game.counters.debris ??= 0;
+  game.on('battleStart', (b) => snapshotAllies(game, b));
 }
 
 export function loadWar(game) {
@@ -43,5 +45,12 @@ export function tickWarBefore(game, dt) {
 export function tickWarAfter(game, dt) {
   syncStacks(game, dt);
   game.warAcc = (game.warAcc || 0) + dt;
-  if (game.warAcc >= 1) { game.warAcc = 0; tickDebris(game); tickRepairs(game); }
+  if (game.warAcc >= 1) {
+    game.warAcc = 0;
+    tickDebris(game);
+    tickRepairs(game);
+    tickSupport(game);
+    game.warSlow = (game.warSlow || 0) + 1;
+    if (game.warSlow % 60 === 1) stockProtection(game);
+  }
 }

@@ -5,6 +5,7 @@ import { COMBAT, WEAPONS, SYSTEMS, blueprint, ensureDamage, navalClass, maxHull 
 import { applyHit, applyArea, hitChance, systemEffect, kindFactor, systemExposed, wrap, shieldActive } from '../../shared/damage.js';
 import { stackOf, stackMembers, detachShip } from './stacks.js';
 import { ownerName } from './diplomacy.js';
+import { hooks } from './hooks.js';
 
 const { W, H } = COMBAT.MAP;
 const SENSOR_BASE = { craft: 900, S: 1300, M: 1600, L: 1900, XL: 2300 };
@@ -662,14 +663,14 @@ export function checkEnd(game, b) {
   if (b.t - b.lastHarm >= COMBAT.STALEMATE && !b.projectiles.length && !inbound(game, b)) return endBattle(game, b, null, 'stalemate');
 }
 
-/** Ergebnisauflösung (Paket U06) registriert sich hier */
-export const battleHooks = { resolve: null };
+/** Ergebnisauflösung (Paket U06) registriert sich in hooks.resolve */
+export const battleHooks = hooks;
 
 export function endBattle(game, b, winner, why = null) {
   if (b.ended) return;
   b.ended = { winner, why, t: Math.round(b.t) };
   logBattle(game, b, winner ? `Seite ${winner} gewinnt` : why === 'stalemate' ? 'Unentschieden: festgefahrene Schlacht' : 'Unentschieden');
-  battleHooks.resolve?.(game, b, winner, why);
+  hooks.resolve?.(game, b, winner, why);
   game.battles.delete(b.id);
   game.battleFx.delete(b.id);
   game.emit('battleEnd', b);

@@ -6,5 +6,6 @@ export const MODULE_RECIPES={
   sensor:{goods:{sensors:4,computers:2,powercells:2},seconds:90,facility:'researchWorkshop'},
   gascoll:{goods:{alloys:6,machinery:2,sensors:2},seconds:90,facility:'researchCenter'},
   drill:{goods:{alloys:8,machinery:4,robots:2},seconds:120,facility:'researchCenter'},
+  protect:{goods:{alloys:10,sensors:4,powercells:4},seconds:120,facility:'researchWorkshop'},
 };
 export const packedModuleCount=inventory=>Object.values(inventory||{}).reduce((sum,n)=>sum+n,0);

@@ -5,6 +5,8 @@ import {homeAccess,chargeHome,initializeHomeOperations} from './homeworld-operat
 import {manualActionError} from './coverage.js';
 import {ensureCash,receiveMarketCash,spendMarketCash} from './real-economy.js';
 import {propBook,strangerBlocked} from './property.js';
+// PRD 15: Schutzmodul nur an Werften
+const isYard=e=>e?.kind==='station'&&['shipyard','bigyard','factionyard'].includes(e.type);
 
 const touch=(game,entity)=>{entity.market.rev=(entity.market.rev||0)+1;game.emit('entity',entity);};
 const count=(inventory,module)=>inventory?.[module]||0;
@@ -48,6 +50,7 @@ export function transferModule(game,player,ship,entity,module,dir,amount=1){
 
 export function installModule(game,player,ship,module,source='cargo'){
   const entity=game.world.entities.get(ship.dockedAt),error=presence(game,player,ship,entity);if(error)return error;
+  if(MODULES[module].protect&&!isYard(entity))return 'Das Schutzmodul wird ausschließlich an einer Werft eingebaut.';
   const market=entity.market,prop=game.ownership.get(entity.id),own=prop?.player===player.id;
   if(market.homeworld?.warp)return 'Standort für Warp gesperrt.';
   if(prop&&!own&&!game.canUseStorage(prop,player.id)&&strangerBlocked(prop))return 'Privates Modullager.';
@@ -67,6 +70,7 @@ export function installModule(game,player,ship,module,source='cargo'){
 
 export function removePhysicalModule(game,player,ship,module,destination='cargo'){
   const entity=game.world.entities.get(ship.dockedAt),error=presence(game,player,ship,entity);if(error)return error;
+  if(MODULES[module].protect&&!isYard(entity))return 'Das Schutzmodul wird ausschließlich an einer Werft ausgebaut.';
   const market=entity.market;if(market.homeworld?.warp)return 'Standort für Warp gesperrt.';
   const index=(ship.modules||[]).indexOf(module);if(index<0)return 'Modul nicht eingebaut.';
   const modules=ship.modules.filter((_,i)=>i!==index),moduleCargo={...ship.moduleCargo};

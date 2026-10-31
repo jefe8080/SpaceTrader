@@ -4,7 +4,7 @@ import { blueprint, ensureDamage, needsRepair, repairQuote, maxHull, REPAIR } fr
 import { factionHostileTo } from './diplomacy.js';
 import { stackOf, stackMembers, leaderOf } from './stacks.js';
 import { drivesDestroyed } from './battle.js';
-import { outcomeHooks } from './outcome.js';
+import { hooks } from './hooks.js';
 import { setWarn } from '../ships.js';
 
 const YARD_TYPES = new Set(['shipyard', 'bigyard', 'factionyard']);
@@ -217,6 +217,6 @@ export function tickRepairs(game) {
   }
 }
 
-outcomeHooks.afterBattle.push((game, b, winner, byShip) => {
+hooks.afterBattle.push((game, b, winner, byShip) => {
   for (const ship of byShip.values()) if (game.ships.has(ship.id) && !ship.captive) maybeStartRepairRun(game, ship);
 });

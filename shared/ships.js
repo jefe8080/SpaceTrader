@@ -133,6 +133,8 @@ export const MODULES = {
   drill:     { name: 'Tiefbohrer', mine: 'drill', rate: 0.4, price: 200000, desc: 'Baut Gold, Diamant, Uran und Exotische Kristalle ab.' },
   acidex:    { name: 'Säureextraktor', mine: 'acid', rate: 1.5, price: 60000, desc: 'Gewinnt Säure aus Säurefeldern.' },
   sensor:    { name: 'Sensorphalanx', sensor: true, price: 90000, desc: 'Sensorreichweite +60 %, jedes weitere Modul +30 %.' },
+  // PRD 15: macht nur den Träger unangreifbar und ungefangen; halbe Fracht, 70 % Tempo, keine Bewaffnung; Ein-/Ausbau nur an Werften
+  protect:   { name: 'Schutzmodul', protect: true, price: 250000, desc: 'Träger unangreifbar und nicht gefangen nehmbar; reguläre Fracht halbiert, Tempo 70 %, Waffen deaktiviert. Ein- und Ausbau nur an Werften.' },
 };
 /** Sensorreichweite: Grundwert, Sensorphalanx +60 % für das erste und +30 % für jedes weitere Modul */
 export const SENSOR = { BASE: 2500, FIRST: 0.6, MORE: 0.3 };
@@ -179,9 +181,11 @@ export function shipStats(ship) {
   const mining = { std: (d.mining || 0) * b };
   for (const [id, k] of Object.entries(n)) if (MODULES[id].mine) mining[MODULES[id].mine] = moduleMiningRate(MODULES[id].rate, k) * b;
   if (d.ability === 'drill') mining.drill = Math.max(mining.drill || 0, DRILL_ABILITY_RATE * b);
-  const cargoTotal = Math.round(d.cargo * (1 + UPGRADES.cargo.per * (u.cargo || 0)) * b);
+  // PRD 15 Schutzmodul: reguläre Fracht halbiert (Modulplatz kommt hinzu), Tempo 70 %
+  const protect = (n.protect || 0) > 0;
+  const cargoTotal = Math.round(d.cargo * (1 + UPGRADES.cargo.per * (u.cargo || 0)) * b * (protect ? 0.5 : 1));
   return {
-    speed: d.speed * (1 + UPGRADES.speed.per * (u.speed || 0)) * b * (ship.relicSpeed || (ship.main ? FLAGSHIP.SPEED : 1)),
+    speed: d.speed * (1 + UPGRADES.speed.per * (u.speed || 0)) * b * (ship.relicSpeed || (ship.main ? FLAGSHIP.SPEED : 1)) * (protect ? 0.7 : 1),
     tank: d.tank * (1 + UPGRADES.tank.per * (u.tank || 0)) * b,
     cargoTotal,
     cargo: Math.max(0, cargoTotal - MODULE_SIZE * mods),

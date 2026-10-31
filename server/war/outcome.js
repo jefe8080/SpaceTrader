@@ -1,7 +1,8 @@
 // PRD 15 U06: Schlachtende. Kapitulation, Sieg/Unentschieden, Besitzwechsel, Gefangene, Freikauf, Trümmer und Berichte.
 import { SHIP_TYPES, GOODS, freeFor, WORLD } from '../../shared/config.js';
 import { COMBAT, navalClass, blueprint, maxHull, needsRepair } from '../../shared/combat.js';
-import { battleHooks, isActive, drivesDestroyed } from './battle.js';
+import { isActive, drivesDestroyed } from './battle.js';
+import { hooks } from './hooks.js';
 import { removeFromStacks, detachShip } from './stacks.js';
 import { ownerName, isFactionOwner, diplo } from './diplomacy.js';
 
@@ -12,7 +13,7 @@ export function immobile(game, b, u) {
 }
 
 /** Hooks späterer Pakete: Beute für Fraktionen (U09), Reparaturautomatik (U07), Raids (U10) */
-export const outcomeHooks = { factionLoot: null, afterBattle: [] };
+export const outcomeHooks = hooks;
 
 function report(game, owner, rep) {
   const p = game.players.get(owner);
@@ -29,7 +30,7 @@ function transferLoot(game, b, goods, winnerOwner, winners) {
   const moved = {};
   for (const [g, n0] of Object.entries(goods)) {
     let n = n0;
-    if (isFactionOwner(winnerOwner) && outcomeHooks.factionLoot) { const k = outcomeHooks.factionLoot(game, b, winnerOwner, g, n); moved[g] = (moved[g] || 0) + k; continue; }
+    if (isFactionOwner(winnerOwner) && hooks.factionLoot) { const k = hooks.factionLoot(game, b, winnerOwner, g, n); moved[g] = (moved[g] || 0) + k; continue; }
     for (const s of winners) {
       if (n <= 0) break;
       if (s.modules?.includes('protect')) continue; // geschützte Schiffe plündern nicht
@@ -137,7 +138,7 @@ export function ransom(game, player, ship) {
   player.credits -= q.price;
   const captor = game.accountOf(q.captor);
   if (captor) captor.credits += q.price;
-  else if (isFactionOwner(q.captor)) outcomeHooks.factionCredit?.(game, q.captor, q.price, ship.captive);
+  else if (isFactionOwner(q.captor)) hooks.factionCredit?.(game, q.captor, q.price, ship.captive);
   delete ship.captive;
   ship.cargo = {};
   ship.x = dest.x + dest.radius + WORLD.DOCK_OFFSET; ship.y = dest.y;
@@ -148,7 +149,7 @@ export function ransom(game, player, ship) {
   return null;
 }
 
-battleHooks.resolve = function resolve(game, b, winner, why) {
+hooks.resolve = function resolve(game, b, winner, why) {
   const loserSide = winner ? (winner === 'A' ? 'B' : 'A') : null;
   const winOwner = winner ? b.sides[winner].owners[0] : null;
   const goods = {};
@@ -206,7 +207,7 @@ battleHooks.resolve = function resolve(game, b, winner, why) {
     report(game, owner, { battle: b.id, t: Math.round(game.time), result: !winner ? 'draw' : side === winner ? 'win' : 'loss', why: why || null,
       enemies: b.sides[side === 'A' ? 'B' : 'A'].owners.map((o) => ownerName(game, o)), ...r, loot: side === winner ? loot : {} });
   }
-  for (const fn of outcomeHooks.afterBattle) fn(game, b, winner, byShip);
+  for (const fn of hooks.afterBattle) fn(game, b, winner, byShip);
 };
 
 export { needsRepair };

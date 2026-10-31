@@ -9,6 +9,7 @@ import { beginRetreat, isActive, defaultTactic } from '../war/battle.js';
 import { COMBAT, blueprint } from '../../shared/combat.js';
 import { kindFactor } from '../../shared/damage.js';
 import { startRepair, quoteFor } from '../war/repair.js';
+import { setAlliance } from '../war/support.js';
 
 const battleOf = () => (v, { game }) => { const b = game.battles.get(v); if (!b) throw new CmdError('Diese Schlacht ist beendet.'); return b; };
 const ORDER_TYPES = ['move', 'attack', 'escort', 'defend', 'distance', 'hold', 'ceasefire', 'retreat', 'ai', 'priority'];
@@ -142,6 +143,19 @@ export default {
       const st = stackOf(game, ship);
       if (st) st.autoRepair = on; else ship.autoRepair = on;
     },
+  },
+  /** Strategische Haltung je Schiff bzw. Stack: Abfangen (Standard), Bewachen eines Ortes oder passiv */
+  posture: {
+    args: { ship: V.ownShip(), mode: V.oneOf('intercept', 'guard', 'passive'), x: V.opt(V.num(-1e9, 1e9)), y: V.opt(V.num(-1e9, 1e9)) },
+    run({ game }, { ship, mode, x, y }) {
+      const lead = leaderOf(game, ship);
+      lead.posture = mode === 'guard' ? { mode, x: x ?? lead.x, y: y ?? lead.y } : { mode };
+    },
+  },
+  /** Militärisches Bündnis des gesamten Konsortiums (Standard aktiv, nur Leitung) */
+  consortiumMilitary: {
+    args: { on: V.bool() },
+    run({ game, player }, { on }) { return setAlliance(game, player, on) || undefined; },
   },
   /** Freikauf eines eigenen gefangenen Schiffes: fester Preis, vorher angezeigt */
   ransom: {
