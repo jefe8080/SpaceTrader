@@ -118,7 +118,7 @@ Ausgeklappt steht die bisherige vollständige Flottenbedienung zur Verfügung.
 ## Umsetzungsschritte und Fortschritt
 
 - [x] Anforderungen mit `grilling` abstimmen und PRD erstellen.
-- [ ] Schritt 1: Einheitlichen Landebutton und Reparaturfreigabe nach H04
+- [x] Schritt 1: Einheitlichen Landebutton und Reparaturfreigabe nach H04
   umsetzen; lokale/ferne Zugänge und Quest-/Besitzgrenzen prüfen.
 - [ ] Schritt 2: Alte Fabrikbauplätze vollständig wieder anbinden und
   manuelle Warengebäude-Upgrades entfernen; Baukosten, Rechte, Lager,

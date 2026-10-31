@@ -299,7 +299,7 @@ function entityDetails(e) {
   const dockedHere=ships.filter(s=>s.dockedAt===e.id);
   const myDocked=dockedHere.find(s=>s.id===locationShip) || dockedHere.find(s=>s.queue?.[0]?.t!=='route') || dockedHere[0];
   let h=`<div class="det-head"><img src="${entitySprite(e)}" alt=""><div style="flex:1"><div class="title">${esc(e.name)}</div><div class="type">${typeName(e)} · ${esc(systemName(e))} · ${esc(sectorName(e))} · ${esc(e.ownerName || (e.owner ? playerName(e.owner) : 'NPC'))}</div></div>
-  ${e.kind==='planet' && m?`<button data-act="land" data-ent="${e.id}" ${canLand(e.id)?'':'disabled'}>${accessTo(e.id).remote&&!accessTo(e.id).local?'Fernverwaltung öffnen':'Landen'}</button>`:''}
+  ${e.kind==='planet' && m?`<button data-act="land" data-ent="${e.id}" ${canLand(e.id)?'':'disabled'}>Landen</button>`:''}
   <button class="star" data-act="fav" data-ent="${e.id}" aria-label="Favorit umschalten" aria-pressed="${fav}">${fav?'★':'☆'}</button></div>`;
   if(ships.length) h+=`<div class="location-orders"><label>Schiff <select id="locationShip">${ships.map(s=>`<option value="${s.id}" ${s.id===locationShip?'selected':''}>${esc(s.name)}${s.dockedAt===e.id?' · angedockt':''}</option>`).join('')}</select></label><button data-act="sendSelected" data-ent="${e.id}" title="Shift: anhängen">Anfliegen</button></div>`;
   let infrastructure='';

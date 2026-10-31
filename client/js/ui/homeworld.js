@@ -91,7 +91,7 @@ export function homePanel(entity, item, ship) {
   const cost = facility === 'dock' ? { credits: 0, seconds: 15, goods: { ingots: 4 } }
     : facility === 'control' ? { credits: 500, seconds: 30, goods: { ingots: 4 } } : HOMEWORLD.industry.repair;
   let html = `<div class="kv"><span>Anlage</span><span>${esc(names[facility] || RECIPES[facility]?.name || facility)}</span><span>Zustand</span><span>${building.status === 'ready' ? 'Betriebsbereit' : building.status === 'building' ? 'Reparatur läuft · ' + Math.max(0, Math.ceil(building.readyAt - state.time)) + ' s' : 'Beschädigte Ruine'}</span></div>`;
-  if (facility === 'workshop' && building.status === 'ruined') html += '<p>Der Reliktfund führt zur Wiederherstellung dieser Werkstatt.</p>';
+  if (facility === 'workshop' && building.status === 'ruined' && !state.homeQuest?.completed?.H04) html += '<p>Der Reliktfund führt zur Wiederherstellung dieser Werkstatt.</p>';
   else if (building.status === 'ruined') html += `<p>${cost.credits} Cr · ${Object.entries(cost.goods).map(([g, n]) => n + ' ' + GOODS[g].name).join(', ')} · ${cost.seconds} s</p>
     <button class="primary" data-pp="homeRepair" data-facility="${facility}">Reparieren</button>`;
   if (facility === 'workshop') {

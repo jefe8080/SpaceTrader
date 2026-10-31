@@ -151,7 +151,7 @@ export function repairHome(game, player, entity, facility) {
   if (building.status !== 'ruined') return 'Diese Anlage ist bereits repariert oder im Bau.';
   const required = facility === 'dock' ? 'H00' : ['waterworks', 'foodplant'].includes(facility) ? 'H01' : ['control', 'fueldepot'].includes(facility) ? 'H02' : 'H03';
   if (!done(player, required)) return `Zuerst ${required} abschließen.`;
-  if (facility === 'workshop') return 'Die erste Antriebswerkstatt wird durch H04 freigeschaltet.';
+  if (facility === 'workshop' && !done(player, 'H04')) return 'Die erste Antriebswerkstatt wird durch H04 freigeschaltet.';
   const teamError=homeConstructionError(home);if(teamError)return teamError;
   const cost = facility === 'dock' ? { credits: 0, goods: { ingots: 4 }, seconds: 15 }
     : facility === 'control' ? { credits: 500, goods: { ingots: 4 }, seconds: 30 } : HOMEWORLD.industry.repair;
