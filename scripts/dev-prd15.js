@@ -12,6 +12,8 @@ if (!fs.existsSync(process.env.DB_FILE)) {
   const game = new Game(process.env.DB_FILE, { profile: 'homeworld', seed: 1515 });
   const p = game.createPlayer('QA15'), q = game.createPlayer('Gegner15');
   const home = game.world.entities.get(p.homeworld);
+  // Sektorweite Leitstelle: Direktbefehle im eigenen Sektor und Start der Freundschaftsquest
+  home.market.homeworld.controlLevel = 2;
   const mk = (pl, type, dx, dy) => { const s = game.spawnShip(pl, type, home); s.dockedAt = null; s.state = 'idle'; s.x = home.x + dx; s.y = home.y + dy; return s; };
   const own = [mk(p, 'kreuzer', 1500, 0), mk(p, 'fregatte', 1500, 80), mk(p, 'abfangstaffel', 1500, -80), mk(p, 'lastesel', 1500, 160)];
   const foe = [mk(q, 'zerstoerer', 2200, 0), mk(q, 'fx_tech', 2200, 100), mk(q, 'bomberstaffel', 2200, -100), mk(q, 'keiler', 2200, 200)];

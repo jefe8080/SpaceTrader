@@ -15,9 +15,9 @@ ersetzen abweichende Stellen dieser Vorlage. Nachträglich bestätigt wurde die
 verbindliche Orientierung aller neuen Grafiken am bisherigen
 Fantasy-Comic-Sci-Fi-Stil.
 
-Dieser Auftrag umfasst ausschließlich Planung, PRD und dessen Commit.
-Implementierung ist nicht beauftragt. PRD 14 wird unabhängig durch einen
-Kollegen bearbeitet und ist nach Nutzerangabe eine andere Baustelle.
+Der Planungsauftrag umfasste PRD und dessen Commit. Die Umsetzung wurde am
+31.10.2026 separat beauftragt und paketweise ausgeführt (Stand in Kapitel 14,
+Nachweise in Kapitel 16). PRD 14 wird unabhängig bearbeitet.
 
 ### Ausgangslage
 
@@ -698,7 +698,7 @@ kostet Geld und wird nicht automatisch kostenlos nach Gefechten gewährt.
 
 ## 14. Umsetzungspakete und Fortschritt
 
-Planung ist abgeschlossen; die Umsetzung läuft paketweise (Stand siehe Tabelle).
+Planung und Umsetzung aller Pakete sind abgeschlossen; offene Punkte stehen in Kapitel 16.
 Nach jedem fachlich abgeschlossenen Paket: passende Prüfungen ausführen,
 Nachweise/Ergebnis hier ergänzen und zusammen mit dem Paket committen.
 Fehlgeschlagene oder nicht ausführbare Prüfungen ausdrücklich melden.
@@ -716,7 +716,7 @@ Fehlgeschlagene oder nicht ausführbare Prüfungen ausdrücklich melden.
 | U08 | Strategisches Bewachen/Abfangen, Schutzmodul, Konsortiumsbündnis und Unterstützungsrechte | U01, U06, U07 | Umgesetzt: `server/war/support.js` (Abfangen bis halbe Sektorweite, Bewachen im lokalen Radius mit Rückkehr, nur Kriegsschiffe, kein Abbruch laufender Einsätze, keine Rufe während Reparatur, Bündnisstand je Begegnung), Schutzmodul in `shared/ships.js` (halbe Fracht, 70 % Tempo, Einbau nur an Werften, Rezept und Werftbestand), Bündnis-Checkbox nur für die Leitung; Nachweis `tests/prd15-support.test.js` |
 | U09 | Verwaltungsplaneten, Grundversorgung, Sektorpools/-level, neue Quests, Freundschaften, Leitstellenmodul und physische Goldtransporte | U03, U08 | Umgesetzt: `server/war/factions.js` mit Tabellen in `shared/warfare.js` (Verwaltungsplanet und Werft je Fraktion/Sektor, Pooldeckel, Level, Wasser/Nahrung mit Puffer und Abweisung bei vollem Lager, Bestpreisumwandlung, passives Einkommen nur bei Aktivität, Flottenbau bis 10 × Level, Goldtransporte mit Gutschrift bei Ankunft, Beute/Freikauf an Fraktionen), Quests nur an Verwaltungsplaneten mit Ruf/Fraktions-XP ohne Credits und Abgabesperre bei Versorgungslücke, Freundschaftsquest ab Leitstellenstufe 2 mit Bau-/Kaufsperre ab fünf Schiffen, Modul „galaktische Freundschaft“; Anzeige am Verwaltungsplaneten; Nachweis `tests/prd15-factions.test.js` |
 | U10 | Aggression, Friedensfristen, NPC-Flottenbau/-kriege, Raids, Beute, Planetenschutz und Reparatur | U08, U09 | Umgesetzt: `server/war/raids.js` (Aggression je Fraktion/Sektor/Spieler mit einmaligem 24-h-Friedenstimer, Pause bei Versorgung, Neutralität vor erster Freundschaft, Grenzabfangen, aggressionsgesteuerte Raids mit Zielgewichtung und Verteidigungsanteil, NPC-Kriege gegen Goldtransporte und Verwaltungsplaneten, Heimkehr/Beuteabgabe/Reparatur der Fraktionsflotten), Planetenraid mit sichtbarer Plünderungsphase, Beute bis Frachtraum, 24-h-Schutz, 50-%-Produktionsmalus bis zur Reparatur (Spieler per Befehl, NPC selbst); Nachweis `tests/prd15-raids.test.js` |
-| U11 | Bestandsmigration, integrierte Balance, Neustart-/Mehrspielertests und visuelle Gesamtabnahme | U01–U10 | Offen |
+| U11 | Bestandsmigration, integrierte Balance, Neustart-/Mehrspielertests und visuelle Gesamtabnahme | U01–U10 | Umgesetzt mit offenen Punkten (siehe Kapitel 16): `server/war/migrate.js` (wiederholbar), `tests/prd15-integration.test.js`, Vergleichsszenarien `sim/prd15-balance.js` mit Ergebnis `docs/qa/prd15/balance.md`, visuelle Abnahme am Testserver `scripts/dev-prd15.js` |
 
 Die Reihenfolge erlaubt parallele fachliche Vorarbeiten an U01/U02; eine
 Beauftragung von parallelen Agenten oder Implementierung ist damit nicht
@@ -849,6 +849,52 @@ integriertes Verhalten statt unverbundener Datenfelder.
     sowie relevante bestehende Regressionstests bestehen.
 
 ## 16. Prüfstand und Nachweise
+
+### Umsetzungsstand 31.10.2026
+
+Alle Pakete U01–U11 sind umgesetzt und paketweise committet. Automatisierte
+Prüfung: `npm test` mit 422 bestandenen Tests (davon 39 neue PRD-15-Tests in
+`tests/prd15-*.test.js`), keine Fehlschläge. Bestehende Alttests wurden nur
+dort angepasst, wo PRD 15 Regeln bewusst ersetzt (Typenzahl, Wirtschaftsprofil
+der Fraktionskriegsschiffe, PNG-Pflicht für neue Typen).
+
+Visuelle Abnahme am isolierten Testserver `node scripts/dev-prd15.js`
+(Port 3015, eigene Datenbank unter `data/prd15/`): Schlachtsymbol und
+Doppelklick, taktische Karte mit Auswahl, Zielpanel und Systemliste,
+Schildsektoren, Hardpoint-Zustände, Ionenstörung, Rückzug mit
+Sprungvorbereitung, Sprungsperrenradius, Kapitulations-/Zerstörungssymbole,
+Verlauf, schmale Ansicht (375 px), Schlacht über Serverneustart,
+Stackfenster mit Reihenfolge, Kampfprofil, strategische Haltung und
+Reparaturautomatik. Dabei gefundene und behobene Fehler: verlorene Klicks in
+der Seitenleiste, durchscheinendes Overlay, mehrdeutige Namen im Verlauf,
+Ionenstörung fälschlich als Bewegungsunfähigkeit, fehlende Übernahme von
+Stack-/Diplomatiedaten im Client, Geschosse übersprangen den Einschlagsradius.
+
+### Offene Punkte und bewusste Vereinfachungen
+
+- **Grafik:** Die acht neuen Typen nutzen generierte Comic-SVGs mit Konturen
+  und Zweitonrumpf. Gemalte PNG-Illustrationen im Stil der Bestandsbilder
+  stehen aus und müssen durch die Grafikpipeline nachgeliefert werden.
+- **Balance:** Erste Kalibrierung laut `docs/qa/prd15/balance.md`. Drei
+  Sperber schlagen einen kostengleichen Greif weiterhin deutlich; Karawanen
+  unterliegen Sternenläufern. Weitere Iterationen der Wertetabellen in
+  `shared/combat.js` und `shared/warfare.js` sind nötig.
+- **Sichtlinien:** Verdeckung wird über Systemlage und Feuerwinkel geprüft;
+  eine Blockade durch dazwischenliegende fremde Schiffsrümpfe ist nicht
+  modelliert.
+- **Bestpreis:** Umwandlung erhaltener Waren nutzt den Referenzpreis der Ware
+  als regulären Marktpreis (Annahme).
+- **Freundschaftsgeschenk:** 40 Nahrung und 40 Wasser (Annahme); das Modul
+  „galaktische Freundschaft“ kostet 75 Mio. Cr und wird per Befehl an der
+  eigenen Leitstelle gebaut, nicht über die Modulwerkbank.
+- **Verwaltungsanzeige** am Verwaltungsplaneten ist per Test abgesichert,
+  aber in der visuellen Abnahme nicht gesehen worden (kein bekannter
+  Fraktionssektor in der Testwelt).
+- **Zustimmung zu Zahlen:** Werte außerhalb der bestätigten PRD-Vorgaben sind
+  zentral konfigurierbare Kalibrierungsannahmen, keine beschlossenen
+  Interviewantworten.
+
+### Planungsprüfung (ursprünglich)
 
 Planungsdokument; noch keine Implementierung oder Implementierungsprüfung.
 Am 31.10.2026 wurden Dokumentstruktur, zentrale bestätigte Zahlen und Regeln

@@ -305,9 +305,12 @@ function nearestEdge(u) {
 }
 const inEdge = (u) => u.x <= COMBAT.EDGE || u.y <= COMBAT.EDGE || u.x >= W - COMBAT.EDGE || u.y >= H - COMBAT.EDGE;
 
+/** Bevorzugte Kampfentfernung: Reichweite der Waffenart mit dem größten Schadenspotenzial */
 function primaryRange(bp) {
-  const r = bp.weapons.filter((w) => w.w !== 'pd').map((w) => WEAPONS[w.w].range);
-  return r.length ? Math.max(...r) : 600;
+  const dps = {};
+  for (const w of bp.weapons) if (w.w !== 'pd') dps[w.w] = (dps[w.w] || 0) + WEAPONS[w.w].dmg * WEAPONS[w.w].rof * (WEAPONS[w.w].ramp || 1) * (WEAPONS[w.w].hullMul ?? 1);
+  const best = Object.entries(dps).sort((a, b) => b[1] - a[1])[0];
+  return best ? WEAPONS[best[0]].range : 600;
 }
 const broadside = (bp) => bp.weapons.filter((w) => w.arc && Math.abs(Math.abs(w.arc) - Math.PI / 2) < 0.1).length > bp.weapons.filter((w) => w.arc === 0 && !w.turret).length;
 
@@ -487,6 +490,8 @@ function fire(game, b, u, dt) {
       const ai = aiTarget(game, b, u);
       target = cand.includes(ai) ? ai : cand.sort((a, c) => Math.hypot(a.x - u.x, a.y - u.y) - Math.hypot(c.x - u.x, c.y - u.y))[0];
       if (u.type === 'bomberstaffel' || (bp.ability === 'precision' && W0.speed)) sys = exposedSystem(game, b, u, target);
+      // Ionenwaffen stören gezielt freiliegende Antriebe, Generatoren und Batterien
+      if (w.w === 'ion') sys = exposedSystem(game, b, u, target, ['shield', 'heavyb', 'engine', 'launcher', 'light']);
     }
     const ts = shipOf(game, target);
     // Systemangriff nur bei erfasstem Schiff, bekannter Systemposition und nicht verdecktem Angriffsweg
@@ -549,8 +554,11 @@ function moveProjectiles(game, b, dt) {
     p.life -= dt;
     if (p.life <= 0) continue;
     if (t && isActive(t) && (p.guided || p.hit)) p.a = Math.atan2(t.y - p.y, t.x - p.x);
-    p.x += Math.cos(p.a) * W0.speed * dt;
-    p.y += Math.sin(p.a) * W0.speed * dt;
+    // Einschlag, sobald das Ziel innerhalb der Schrittweite liegt (schnelle Geschosse überspringen sonst den Radius)
+    const step = W0.speed * dt;
+    const reach = t && p.hit && Math.hypot(t.x - p.x, t.y - p.y) <= step + 25;
+    if (reach) { p.x = t.x - Math.cos(p.a) * 20; p.y = t.y - Math.sin(p.a) * 20; }
+    else { p.x += Math.cos(p.a) * step; p.y += Math.sin(p.a) * step; }
     // Lenkwaffenabwehr: Punktverteidigung der Gegenseite in Reichweite, begrenzte Kapazität je Sekunde
     if (p.guided && interceptBy(game, b, p, dt)) { fx(game, b, { k: 'intercept', x: Math.round(p.x), y: Math.round(p.y) }); continue; }
     if (t && p.hit && Math.hypot(t.x - p.x, t.y - p.y) < 25) {
@@ -562,7 +570,8 @@ function moveProjectiles(game, b, dt) {
     keep.push(p);
   }
   b.projectiles = keep;
-  if (keep.length) b.lastHarm = b.t;
+  // Laufende Angriffe: nur treffende Geschosse halten die Schlacht offen, Fehlschüsse nicht
+  if (keep.some((p) => p.hit)) b.lastHarm = b.t;
 }
 
 function interceptBy(game, b, p, dt) {

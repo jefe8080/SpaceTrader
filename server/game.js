@@ -31,6 +31,7 @@ import { homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { coveredPath, pointCovered } from './coverage.js';
 import {dispatchRealSupply,finishRealSupply,receiveMarketCash,spendMarketCash,downstreamDemand} from './real-economy.js';
 import { initWar, loadWar, saveWar, tickWarBefore, tickWarAfter } from './war/index.js';
+import { migrateWar } from './war/migrate.js';
 import { stackSpeed, removeFromStacks } from './war/stacks.js';
 import { recordActivity } from './war/factions.js';
 import { productionFactor } from './war/raids.js';
@@ -135,6 +136,7 @@ export class Game {
     }
     this.shipStats = groupRows(st.loadAll('ship_stats'), 'ship');
     loadWar(this);
+    migrateWar(this); // PRD 15: wiederholbar und idempotent
     migrateNewHullInventory(this);
     for (const player of this.players.values()) syncHomeQuests(this, player);
     syncRouteReservations(this);

@@ -8,7 +8,7 @@ import { COMBAT_TYPES, NAVAL_CLASSES, COMBAT_ABILITIES, blueprint, maxHull, SYST
 /** Aktionen der Kriegsbedienung (data-war) */
 export const warActions = {};
 
-const stackById = (id) => (state.me?.stacks || []).find((st) => st.id === id);
+const stackById = (id) => (state.stacks || []).find((st) => st.id === id);
 
 /** Stackfenster: Mitglieder, Reihenfolge, Einzelauswahl und Ablösen */
 export function stackSection(s) {
@@ -125,9 +125,9 @@ $('details').addEventListener('change', (ev) => {
 const REL = { friend: '🤝 befreundet', hostile: '⚔ verfeindet', neutral: '◯ neutral' };
 /** Verwaltungsplanet: Fraktionssektor mit Pool, Level, Grundversorgung und Freundschaftsquest */
 export function adminSection(e, ship) {
-  const fs = (state.me?.war?.factions || []).find((f) => f.admin === e.id);
+  const fs = (state.war?.factions || []).find((f) => f.admin === e.id);
   if (!fs) return '';
-  const w = state.me.war;
+  const w = state.war;
   const pct = (v) => Math.round(v * 100);
   const sup = (g, label) => `<span>${label}</span><span><span class="bv-bar" role="img" aria-label="${fs.supply[g]} von ${fs.buffer}"><i style="width:${Math.min(100, fs.supply[g] / fs.buffer * 100)}%"></i></span> ${fs.supply[g]} / ${fs.buffer}</span>`;
   let h = `<div class="section"><div class="section-title">Verwaltungszentrum ${esc(fs.name)}</div><div class="kv">

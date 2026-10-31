@@ -567,3 +567,4 @@ body.fleet-collapsed #fleet .fleet-item img { width:30px; }
   .battle-body canvas { height: 55vh; flex: none; }
   .battle-panel { width: auto; border-left: none; border-top: 1px solid #29425e; flex: 1; }
 }
+.section button.on { outline: 2px solid #4fc3f7; }
