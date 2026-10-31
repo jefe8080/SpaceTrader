@@ -74,10 +74,10 @@ export function homePanel(entity, item, ship) {
           html+=`<p>${GOODS[g].name}: ${have} / ${n} unwiderruflich für diesen Auftrag gebunden</p>${remaining>0?`<input aria-label="Liefermenge ${id} ${GOODS[g].name}" id="questDelivery-${id}-${g}" type="number" min="1" max="${remaining}" value="${Math.min(10,remaining)}"><button class="small" data-pp="homeQuestDeliver" ${ship?'':'disabled title="Ein eigenes Schiff muss für die Lieferung hier angedockt sein"'} data-quest="${id}" data-good="${g}">Teilmenge liefern</button>`:''}`;
         }
         const site=state.homeQuest?.sites?.[id];
-        if(site)html+=`<p>Archivbesuch: ${state.homeQuest.visits?.[id]?'aufgezeichnet':'offen'}</p><button class="small" data-pp="homeSite" data-id="${site}">Archivstelle zeigen</button>`;
+        if(site&&!state.homeQuest.visits?.[id])html+=`<p>Archivbesuch: ${state.homeQuest.visits?.[id]?'aufgezeichnet':'offen'}</p><button class="small" data-pp="homeSite" data-id="${site}">Archivstelle zeigen</button>`;
       }
     }
-    for(const [module,find] of Object.entries(STUDY_FINDS))if(completed(find.quest))html+=`<p>${find.name}: ${state.homeQuest.finds?.[module]?'einmalige Vorlage geborgen':'Studienvorlage verfügbar'}</p><button class="small" data-pp="homeSite" data-id="${state.homeQuest.sites?.[module]||''}">Forschungsfund zeigen</button>`;
+    for(const [module,find] of Object.entries(STUDY_FINDS))if(completed(find.quest)&&!state.homeQuest.finds?.[module])html+=`<p>${find.name}: ${state.homeQuest.finds?.[module]?'einmalige Vorlage geborgen':'Studienvorlage verfügbar'}</p><button class="small" data-pp="homeSite" data-id="${state.homeQuest.sites?.[module]||''}">Forschungsfund zeigen</button>`;
     html+=`<p>Volle Grundversorgung: ${Math.floor(home.fullSupplySeconds||0)} / 1.800 s · Selbst ausgebildete Fachkräfte: ${home.trained?.skilled||0}</p>`+orbitalPanel(entity);
     html+='<h3>Eigene Welten und Expeditionen</h3>';
     for(const world of [...state.entities.values()].filter(e=>e.ruinsSite||e.market?.homeworld?.owner===state.me.id))html+=`<p>${esc(world.name)} · ${world.ruinsSite?'unbewohnter Standort':`Leitstelle ${world.market.homeworld.controlLevel}`}</p><button class="small" data-pp="homeSite" data-id="${world.id}">Standort zeigen</button>`;

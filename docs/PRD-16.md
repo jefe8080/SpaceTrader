@@ -174,7 +174,7 @@ Fortschritt im selben Commit aktualisiert. Änderungen bleiben fachlich getrennt
 | --- | --- | --- | --- |
 | P01 | Aufzug- und acht Schiffsdesigns | Visuelle Stilprüfung und Einbindung aller Varianten | Offen |
 | P02 | Ruinenbauplätze und Bild nach oben erweitern | Alle 48 Plätze, Wasserwerk, Zoom und Auswahl prüfen | Offen |
-| P03 | Planetenstatistik, Rathaus und Wohnhaus | Zustandsabhängige UI-Prüfung, Abholung und erneutes Laden | Offen |
+| P03 | Planetenstatistik, Rathaus und Wohnhaus | Filter anhand persistierter Questzustände; Wohnwerte aus Planeten-/Gebäudedaten; Regressionstests | Erledigt |
 | P04 | Panelhöhe und Zentrallager-Akkordeons | Verschiedene Fenstergrößen und automatische Aktualisierung | Offen |
 | P05 | Schiffsalmanach, Kategorien, Farben und Ratings | Vollständigkeit und Abgleich mit zentralen Spieldaten | Offen |
 | P06 | Individuelle Erklärungen und aktuelle Grafiken | Vollständige Eintragsliste sowie Text-/Bildprüfung | Offen |

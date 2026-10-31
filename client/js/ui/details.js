@@ -352,7 +352,7 @@ function entityDetails(e) {
   let quests=m && e.type!=='ruins' && (e.kind==='planet'||m.strategy==='shipyard')?questBoardSection(e,myDocked):'';
   if(e.salvageOwner===state.me.id) quests+=`<p>Persönlicher versiegelter Reliktfund. Nur das aktive manuelle Schiff kann ihn bergen.</p><button data-act="relicSalvage" data-ent="${e.id}" data-ship="${state.manualShip||''}" ${dockedHere.some(s=>s.id===state.manualShip)&&state.homeQuest?.salvage?.phase==='available'?'':'disabled'}>Versiegelten Fund bergen</button>`;
   if(e.archiveOwner===state.me.id) quests+=`<p>Persönliche Archiv-/Forschungsstelle. Studienvorlagen benötigen 30 freie Frachteinheiten.</p><button data-act="homeArchiveVisit" data-ent="${e.id}" data-ship="${state.manualShip||''}" ${dockedHere.some(s=>s.id===state.manualShip)?'':'disabled'}>Archiv untersuchen / Vorlage bergen</button>`;
-  const trade=m?marketTable(e,myDocked)+(e.kind==='planet'?eventSection(e,myDocked):'')+statsSection(e):'';
+  const trade=m?marketTable(e,myDocked)+(e.kind==='planet'?eventSection(e,myDocked):'')+(e.kind==='planet'?'':statsSection(e)):'';
   const management=(m && e.type!=='ruins'?propertySection(e):'')+(fav?`<label>Notiz <input class="fav-note" data-ent="${e.id}" maxlength="120" value="${esc(state.favorites[e.id].note||'')}"></label>`:'');
   const sections=[['trade','Handel',trade],['services','Infrastruktur & Dienste',infrastructure],['quests','Aufträge',quests],['management','Besitz & Verwaltung',management]].filter(([,,body])=>body);
   if(!sections.some(([id])=>id===locationSection)) locationSection='';
