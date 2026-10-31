@@ -414,7 +414,8 @@ export class Game {
         if(e.kind==='planet'){const stats=initializeProfile(this,p);if(!stats.discoveredPlanets.includes(e.id))stats.discoveredPlanets.push(e.id);}
         // Almanach: Rezept bzw. Planeten-/Feldtyp ist entdeckt, sobald der Markt in Sensorreichweite war
         const rk = recipeKey(e);
-        // Production recipes are unlocked by completed owned buildings (PRD 16).
+        // Natural resources and services remain discoverable; manufacturing needs ownership.
+        if(rk&&!(e.kind==='station'&&recipeOf(e.type)))this.discover(p,'recipe',rk);
 
         for (const it of e.market?.forSale || []) this.discover(p, 'ship', it.type);
         for (const m of e.market?.modules || []) this.discover(p, 'module', m);

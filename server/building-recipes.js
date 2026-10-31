@@ -13,7 +13,7 @@ export function unlockBuildingRecipes(game,entity){
   }
  }else for(const b of entity.market?.bld?.factories||[])recipes.add(b.recipe);
  const added=[];
- for(const id of recipes)if(RECIPES[id]&&!player.known.recipe.has(id)){player.known.recipe.add(id);game.newDiscoveries.push([player.id,'recipe',id]);added.push(id);}
+ for(const id of recipes){const key='st:'+id;if(RECIPES[id]&&!player.known.recipe.has(key)){player.known.recipe.add(key);game.newDiscoveries.push([player.id,'recipe',key]);added.push(key);}}
  if(added.length)game.emit('reveal',player,{recipes:added});
 }
 export function migrateBuildingRecipes(game){for(const entity of game.world.entities.values())if(entity.market)unlockBuildingRecipes(game,entity);}

@@ -175,10 +175,10 @@ test('Treibstoff: Verbrauch im Flug, leerer Tank 30 %, Auto-Tanken beim Andocken
   assert.ok(ship.tot.fuel > 0, 'Treibstoffkosten in der Statistik');
 });
 
-test('Almanach: Rezepte werden über die Sensoren entdeckt', () => {
+test('Almanach: Sensoren entdecken Rohstoffquellen, Produktionsrezepte benötigen eigene Gebäude', () => {
   const g = new Game(':memory:', { seed: 9 });
   const p = g.createPlayer('Anna');
-  assert.ok(p.known.recipe.has('st:smelter'), 'Schmelzwerk im Startsystem');
+  assert.ok(!p.known.recipe.has('st:smelter'), 'Fremdes Schmelzwerk schaltet kein Produktionsrezept frei');
   assert.ok(p.known.recipe.has('pl:mining'));
   assert.ok(!p.known.recipe.has('st:aiforge'));
 });
