@@ -1,12 +1,19 @@
 // PRD 15: Einstiegspunkt der Kriegssysteme. Laden, Speichern und Takt aller Teilsysteme.
 import { formRouteStacks, syncStacks } from './stacks.js';
+import { tickBattles } from './battle.js';
+import { tickEngagements } from './engage.js';
+import { tickDebris } from './outcome.js';
 
 /** Persistente Kriegszustände: Präfix der Zeilen-ID in der Tabelle war -> Map am Spiel */
-const COLLECTIONS = { stack: 'stacks' };
+const COLLECTIONS = { stack: 'stacks', battle: 'battles' };
 
 export function initWar(game) {
   game.stacks = new Map();
+  game.battles = new Map();
+  game.battleFx = new Map(); // flüchtige Effekte für die Darstellung, nicht gespeichert
   game.counters.stack ??= 0;
+  game.counters.battle ??= 0;
+  game.counters.debris ??= 0;
 }
 
 export function loadWar(game) {
@@ -25,11 +32,15 @@ export function saveWar(game) {
 }
 
 /** Vor der Schiffsbewegung */
-export function tickWarBefore(game) {
+export function tickWarBefore(game, dt) {
   formRouteStacks(game);
+  tickBattles(game, dt);
+  tickEngagements(game, dt);
 }
 
 /** Nach der Schiffsbewegung */
 export function tickWarAfter(game, dt) {
   syncStacks(game, dt);
+  game.warAcc = (game.warAcc || 0) + dt;
+  if (game.warAcc >= 1) { game.warAcc = 0; tickDebris(game); }
 }

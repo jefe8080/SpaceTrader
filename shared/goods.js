@@ -242,4 +242,6 @@ export const BELT_TYPES = {
   diamond:   { name: 'Diamantfeld',     good: 'diamond',     sprite: 'asteroid_crystal', dust: '#e1f5fe', weight: 0.8 },
   uranium:   { name: 'Uranfeld',        good: 'uranium',     sprite: 'asteroid_rare',    dust: '#76ff03', weight: 0.8 },
   exotic:    { name: 'Exotenfeld',      good: 'exocrystals', sprite: 'asteroid_crystal', dust: '#18ffff', weight: 0.6 },
+  // PRD 15: Trümmerfeld zerstörter Kriegsschiffe (nie generiert, Weight 0); enthält mehrere Baurohstoffe
+  debris:    { name: 'Trümmerfeld',     good: 'plates',      sprite: 'asteroid_rock',    dust: '#b0bec5', weight: 0 },
 };

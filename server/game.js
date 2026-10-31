@@ -82,6 +82,8 @@ export class Game {
     this.time = st.getMeta('time');
     this.counters = { ...this.counters, ...st.getMeta('counters') };
     this.counters.stack ??= 0;
+    this.counters.battle ??= 0;
+    this.counters.debris ??= 0;
     this.world = new World(st.getMeta('seed'),this.profile);
     const markets = new Map(st.loadAll('markets').map((r) => [r.id, r.data]));
     const stats = groupRows(st.loadAll('market_stats'), 'entity');

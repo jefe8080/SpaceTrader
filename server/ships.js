@@ -8,6 +8,8 @@ import { segmentCovered, pointCovered } from './coverage.js';
 import {loadRealSupply} from './real-economy.js';
 import {runLogistics} from './logistics.js';
 import { isFollower, stackOf, stackMembers, stackMayDepart, runJoin, runRendezvous, routeStackPending } from './war/stacks.js';
+import { runAttack, runFlee } from './war/engage.js';
+import { mineDebris } from './war/outcome.js';
 
 const inZoneAt = (z, p) => inZone(z, p.x, p.y);
 
@@ -146,6 +148,7 @@ function flyToEntity(ship, e, dt, game) {
 /** Baut ab, liefert true, wenn nichts mehr abgebaut werden kann (voll / Menge erreicht / kein passendes Gerät). */
 function mineStep(ship, e, dt, limit = Infinity) {
   if (e.kind !== 'belt') return true;
+  if (e.debris) return mineDebris(ship, e, dt, miningRate(ship, 'ore'));
   return extract(ship, BELT_TYPES[e.type].good, (e.richness || 1), dt, limit);
 }
 
@@ -276,6 +279,7 @@ function runActions(ship, e, actions, st, dt, game, opts) {
 /** Ausführung je Befehlstyp. Rückgabe: true = erledigt, false = läuft noch */
 const EXEC = {
   join(ship, c, dt, game) { return runJoin(ship, c, dt, game, flyTo); },
+  attack(ship, c, dt, game) { return runAttack(ship, c, dt, game, flyTo); },
   logistics(ship,c,dt,game){return runLogistics(ship,c,dt,game,flyToEntity);},
   move(ship, c, dt, game) {
     if (!followNav(ship, `p:${c.x},${c.y}`, c.x, c.y, dt, game)) return false;
@@ -355,6 +359,7 @@ export function updateShip(ship, dt, game) {
   ship.vx = 0;
   ship.vy = 0;
   if (ship.rendezvous) { runRendezvous(ship, dt, game, flyTo); return; }
+  if (ship.fleeFrom && runFlee(ship, dt, game, flyTo)) return;
   if(ship.relocationHold&&ship.queue.length){
     const hold=ship.relocationHold;
     if(ship.transit){runTransit(ship,game);if(ship.transit)return;hold.x=ship.x;hold.y=ship.y;}

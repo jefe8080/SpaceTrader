@@ -3,6 +3,8 @@ import { V, CmdError } from './validate.js';
 import { manualActionError } from '../coverage.js';
 import { stackOf, stackBlocker, detachShip, reorderStack, leaderOf } from '../war/stacks.js';
 import { giveOrder } from './ship.js';
+import { attackerError, targetError } from '../war/engage.js';
+import { ransom, ransomQuote } from '../war/outcome.js';
 
 const ownStack = () => (v, { game, player }) => {
   const st = game.stacks.get(v);
@@ -46,6 +48,33 @@ export default {
     run({ game }, { stack, ship, dir }) {
       if (ship.stack !== stack.id) return 'Das Schiff gehört nicht zu diesem Stack.';
       return reorderStack(game, stack, ship.id, dir);
+    },
+  },
+  /** Ausdrücklicher Angriffsbefehl; normale Flugbefehle sind keine Angriffe */
+  attack: {
+    args: { ships: V.ownShips(24), target: (v, { game }) => { const t = game.ships.get(v); if (!t) throw new CmdError('Unbekanntes Ziel.'); return t; } },
+    run({ game, player }, { ships, target }) {
+      for (const s of ships) {
+        if (s.captive || s.battle) return `${s.name} ist nicht einsatzbereit.`;
+        const err = attackerError(game, s) || targetError(game, s, target);
+        if (err) return err;
+        if (s.repairHold) return `${s.name} muss vor erneutem Kampfeinsatz repariert werden.`;
+      }
+      if (target.owner !== player.id && !game.isKnown(player, target)) return 'Ziel liegt außerhalb deiner Erfassung.';
+      for (const s of ships) {
+        const err = giveOrder(game, s, { t: 'attack', target: target.id }, false);
+        if (err) return err;
+      }
+    },
+  },
+  /** Freikauf eines eigenen gefangenen Schiffes: fester Preis, vorher angezeigt */
+  ransom: {
+    args: { ship: V.ownShip(true, true), price: V.int(0, 1e12) },
+    run({ game, player }, { ship, price }) {
+      const q = ransomQuote(game, ship);
+      if (!q) return 'Das Schiff ist nicht gefangen.';
+      if (q.price !== price) return `Der Freikaufpreis beträgt ${q.price} Cr.`;
+      return ransom(game, player, ship) || undefined;
     },
   },
   /** Stacknummer 1-9 je Schiff innerhalb einer Route (0 = keine Nummer, eigenständig) */

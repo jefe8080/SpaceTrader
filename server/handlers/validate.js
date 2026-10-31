@@ -33,9 +33,12 @@ export const V = {
   },
   opt: (fn, dflt = undefined) => (v, ctx) => (v === undefined || v === null || v === '' ? dflt : fn(v, ctx)),
   /** Eigenes Schiff, liefert das Schiffsobjekt. Im Konsortium angebotene Schiffe sind gesperrt (außer locked = true). */
-  ownShip: (locked = false) => (v, { game, player }) => {
+  ownShip: (locked = false, war = false) => (v, { game, player }) => {
     const s = game.ships.get(v);
     if (!s || s.owner !== player.id) fail('Unbekanntes Schiff.');
+    // PRD 15: Gefangene und kämpfende Schiffe nehmen nur ihre eigenen Kriegsbefehle an
+    if (!war && s.captive) fail(`${s.name} ist in Gefangenschaft.`);
+    if (!war && s.battle) fail(`${s.name} kämpft; Befehle gibt es in der Schlachtansicht.`);
     if (!locked && game.shipOffers?.has(s.id)) fail(`${s.name} ist im Konsortium angeboten und nimmt keine Befehle an.`);
     return s;
   },
