@@ -8,7 +8,7 @@ import {seedRuinSite} from './ruin-sites.js';
  * Die Welt: unendliches Hex-Raster aus Sektoren, die bei Annäherung vollständig erzeugt werden.
  */
 export class World {
-  constructor(seed,profile='legacy') {
+  constructor(seed,profile='homeworld') {
     this.seed = seed;
     this.profile=profile;
     this.sectors = new Map();   // "q,r" -> Sektor

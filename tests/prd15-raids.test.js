@@ -8,6 +8,7 @@ import { ensureFactionSectors, spawnFactionShip, recordActivity } from '../serve
 import { diplo } from '../server/war/diplomacy.js';
 import { productionFactor, raidError, tickRaids } from '../server/war/raids.js';
 import { freeFor } from '../shared/config.js';
+import { coverAll, reveal } from './world-helper.js';
 
 function withFaction() {
   for (let seed = 1; seed < 60; seed++) {
@@ -27,6 +28,7 @@ test('PRD15 U10: einmaliger Friedenstimer, Aggression nur danach, durch Aktivit�
   try {
     const fs = [...game.fsecs.values()][0];
     const p = game.createPlayer('Grenzgänger');
+    coverAll(game, p);
     const w = diplo(p);
     fs.ok = false;
     minutes(game, 1);
@@ -76,6 +78,7 @@ test('PRD15 U10: Raid mit Plünderungsphase, Beute begrenzt durch Bestand und Fr
     const fs = [...game.fsecs.values()][0];
     const admin = game.world.entities.get(fs.admin);
     const p = game.createPlayer('Räuber');
+    coverAll(game, p);
     diplo(p).friends = [['miners', 'tech', 'nomads', 'order', 'league', 'syndicate'].find((f) => f !== fs.faction)];
     const yard = game.world.entities.get('origin_yard');
     const r = game.spawnShip(p, 'keiler', yard);

@@ -40,7 +40,7 @@ import { productionFactor } from './war/raids.js';
 
 export class Game {
   /** dbFile: Pfad zur SQLite-Datei oder ':memory:' */
-  constructor(dbFile, { seed, verbose = false, profile = 'legacy' } = {}) {
+  constructor(dbFile, { seed, verbose = false, profile = 'homeworld' } = {}) {
     this.verbose = verbose;
     this.profile = profile;
     this.worldVersion = worldProfile(profile).version;

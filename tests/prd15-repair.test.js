@@ -4,10 +4,13 @@ import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 import { ensureDamage, blueprint, maxHull, needsRepair } from '../shared/combat.js';
 import { maybeStartRepairRun, nearestRepairSite } from '../server/war/repair.js';
+import { coverAll, reveal } from './world-helper.js';
 
 const setup = () => {
   const game = new Game(':memory:', { seed: 5 });
   const p = game.createPlayer('Werft');
+  coverAll(game, p);
+  reveal(game, p, ...game.world.sectorEntities('0,0'));
   const yard = game.world.entities.get('origin_yard');
   const s = game.spawnShip(p, 'fregatte', yard);
   s.dockedAt = null; s.x = yard.x + 3000; s.y = yard.y; s.queue = [];
@@ -41,13 +44,14 @@ test('PRD15 U07: Reparaturautomatik fährt zur Werft, zahlt einmal, repariert vo
     assert.equal(nearestRepairSite(game, s).id, s.queue[0].target);
     run(game, 40);
     assert.match(s.warn.repair || '', /Cr nötig/, 'Geldmangel pausiert sichtbar');
-    assert.equal(p.credits, 10, 'keine Schulden, keine Teilzahlung');
+    // Die Heimatwelt bringt nebenbei kleine Einnahmen; eine Teilzahlung läge weit darunter
+    assert.ok(p.credits >= 10 && p.credits < 11, 'keine Schulden, keine Teilzahlung');
     p.credits = 1e7;
     run(game, 3);
     const paid = 1e7 - p.credits;
     assert.ok(paid > 0);
     run(game, 200);
-    assert.equal(1e7 - p.credits, paid, 'Zahlung genau einmal');
+    assert.ok(Math.abs(1e7 - p.credits - paid) < 5, 'Zahlung genau einmal');
     assert.equal(s.dmg.hull, maxHull('fregatte'));
     assert.equal(s.dmg.sys.jump1, blueprint('fregatte').systems.find((x) => x.id === 'jump1').hp, 'zerstörte Systeme an der Werft wiederhergestellt');
     assert.equal(s.repairRun, undefined);

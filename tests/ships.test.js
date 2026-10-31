@@ -6,6 +6,7 @@ import { SHIP_TYPES, MODULES, PILOT_LICENSES, GOODS, YARD_MARGIN, FACTIONS, ABIL
 import { STEP, moduleMiningRate } from '../shared/ships.js';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
+import { dockAt } from './world-helper.js';
 const PRD15_TYPES = ['falke', 'keiler', 'abfangstaffel', 'bomberstaffel', 'korvette', 'fregatte', 'zerstoerer', 'kreuzer'];
 
 test('Kombo-Kapazität: 1 Modul 30, 2 Module 65, 3 Module 100', () => {
@@ -69,14 +70,15 @@ test('Pilotenlizenz: Klassen, unbegrenzte Flotte, Kauf nur am Hub', () => {
   assert.deepEqual(PILOT_LICENSES[2].classes, ['S', 'M']);
   const g = new Game(':memory:', { seed: 3 });
   const p = g.createPlayer('Anna');
-  const ship = g.shipsOf(p.id)[0];
   const yard = g.world.entities.get('origin_yard');
+  const hub = g.world.entities.get('origin_hub');
+  for (const e of [yard, hub]) g.revealAround(p, e.x, e.y, 500);
+  const ship = dockAt(g.shipsOf(p.id)[0], yard);
   yard.market.forSale = [{ type: 'lastesel', price: 100 }];
   assert.match(runCommand(g, p, { cmd: 'buyShip', target: yard.id, index: 0 }), /Pilotenlizenz 2/);
   assert.match(runCommand(g, p, { cmd: 'buyLicense', kind: 'pilot' }), /nur am Handels-Hub/);
   // zum Hub
-  const hub = g.world.entities.get('origin_hub');
-  ship.x = hub.x + hub.radius + 30; ship.y = hub.y; ship.dockedAt = hub.id;
+  dockAt(ship, hub);
   p.credits = 25000;
   assert.match(runCommand(g, p, { cmd: 'buyLicense', kind: 'pilot' }), /Pilotenlevel 2/, 'Lizenz doppelt gesperrt: Level und Credits');
   p.xp = 100;
@@ -90,55 +92,6 @@ test('Pilotenlizenz: Klassen, unbegrenzte Flotte, Kauf nur am Hub', () => {
   assert.equal(runCommand(g, p, { cmd: 'upgrade', ship: ship.id, line: 'cargo' }), undefined);
   assert.match(runCommand(g, p, { cmd: 'upgrade', ship: ship.id, line: 'cargo' }), /höchstens Stufe 2/);
   assert.equal(ship.upg.cargo, 2);
-});
-
-test('Module: Kauf an großer Werft, Ausbau mit 50 % Erstattung', () => {
-  const g = new Game(':memory:', { seed: 3 });
-  const p = g.createPlayer('Anna');
-  const ship = g.shipsOf(p.id)[0];
-  ship.type = 'lastesel';
-  const big = [...g.world.entities.values()].find((e) => e.type === 'bigyard');
-  const mod = big.market.modules[0];
-  ship.dockedAt = big.id;
-  p.credits = 1e6;
-  assert.equal(runCommand(g, p, { cmd: 'buyModule', ship: ship.id, module: mod }), undefined);
-  assert.deepEqual(ship.modules, [mod]);
-  const before = p.credits;
-  assert.equal(runCommand(g, p, { cmd: 'removeModule', ship: ship.id, module: mod }), undefined);
-  assert.equal(p.credits - before, MODULES[mod].price * 0.5);
-  assert.deepEqual(ship.modules, []);
-});
-
-test('Hauptschiff: Tempo ×4, Verbrauch ×4 pro Sekunde, keine Routen, 5 min Sperre', () => {
-  const g = new Game(':memory:', { seed: 3 });
-  const p = g.createPlayer('Anna');
-  const ship = g.shipsOf(p.id)[0];
-  const base = shipStats(ship).speed;
-  runCommand(g, p, { cmd: 'routeSave', name: 'R', stops: [{ targetId: 'origin_fuel', actions: [] }], assign: [ship.id] });
-  assert.equal(ship.queue[0].t, 'route');
-  assert.equal(runCommand(g, p, { cmd: 'flagship', ship: ship.id }), undefined);
-  assert.ok(ship.main);
-  assert.equal(ship.queue.length, 0, 'Routenbefehle entfernt');
-  assert.equal(shipStats(ship).speed, base * 4);
-  assert.equal(shipStats(ship).burn, 4);
-  const route = [...g.routes.values()][0];
-  assert.match(runCommand(g, p, { cmd: 'routeAssign', route: route.id, ships: [ship.id], append: false }), /Hauptschiff/);
-  assert.match(runCommand(g, p, { cmd: 'flagship', ship: null }), /erst in/);
-  g.time += 301;
-  assert.equal(runCommand(g, p, { cmd: 'flagship', ship: null }), undefined);
-  assert.ok(!ship.main);
-  // Verbrauch pro Strecke bleibt gleich
-  ship.main = true;
-  ship.dockedAt = null;
-  const f0 = ship.fuel, x0 = ship.x;
-  runCommand(g, p, { cmd: 'order', ships: [ship.id], order: { t: 'move', x: ship.x + 50000, y: ship.y } });
-  g.tick(1);
-  const perUnitMain = (f0 - ship.fuel) / (ship.x - x0);
-  ship.main = false;
-  const f1 = ship.fuel, x1 = ship.x;
-  g.tick(1);
-  const perUnit = (f1 - ship.fuel) / (ship.x - x1);
-  assert.ok(Math.abs(perUnitMain / perUnit - 1) < 0.01, `${perUnitMain} vs ${perUnit}`);
 });
 
 test('Sensorphalanx: +60 % für das erste, +30 % für jedes weitere Modul', () => {
@@ -190,37 +143,37 @@ test('Fraktionswerft: doppelt gesperrt durch Rang und Lizenz, Währung aus dem L
     yard = [...g.world.entities.values()].find((e) => e.market?.strategy === 'factionyard');
   }
   assert.ok(yard, 'Fraktionswerft gefunden');
-  assert.equal(yard.market.forSale.length, 3);
+  const type = yard.market.yardCatalog.find((t) => SHIP_TYPES[t].cls === 'L');
+  const d = SHIP_TYPES[type];
+  yard.market.forSale = [{ id: 'qa-hull', source: 'materials', type, price: 1000, faction: true, currency: structuredClone(d.currency) }];
   const p = g.createPlayer('Anna');
-  const ship = g.shipsOf(p.id)[0];
   g.revealAround(p, yard.x, yard.y, 1500);
-  ship.x = yard.x + yard.radius + 28; ship.y = yard.y; ship.dockedAt = yard.id;
-  const lIdx = yard.market.forSale.findIndex((it) => SHIP_TYPES[it.type].cls === 'L');
-  const it = yard.market.forSale[lIdx];
+  const ship = dockAt(g.shipsOf(p.id)[0], yard);
   p.credits = 1e9;
   p.pilot = 3;
-  assert.match(runCommand(g, p, { cmd: 'buyFactionShip', target: yard.id, index: lIdx }), /Rang 1/);
-  for(let i=0;i<13;i++)g.spawnShip(p,'spatz',yard);
+  assert.match(runCommand(g, p, { cmd: 'buyFactionShip', target: yard.id, index: 0 }), /Rang 1/);
   p.rep = { [yard.faction]: 100 };
   p.pilot = 2;
-  assert.match(runCommand(g, p, { cmd: 'buyFactionShip', target: yard.id, index: lIdx }), /Pilotenlizenz 3/);
+  assert.match(runCommand(g, p, { cmd: 'buyFactionShip', target: yard.id, index: 0 }), /Pilotenlizenz 3/);
   p.pilot = 3;
-  assert.match(runCommand(g, p, { cmd: 'buyFactionShip', target: yard.id, index: lIdx }), /Es fehlen/);
+  assert.match(runCommand(g, p, { cmd: 'buyFactionShip', target: yard.id, index: 0 }), /Es fehlen/);
   ship.type = 'lastesel';
   ship.modules = ['shielded', 'shielded', 'shielded', 'shielded'];
-  ship.cargo[it.currency.good] = it.currency.n;
-  assert.equal(runCommand(g, p, { cmd: 'buyFactionShip', target: yard.id, index: lIdx }), undefined);
-  assert.equal(g.shipsOf(p.id).length, 15);
-  assert.equal(yard.market.forSale.length, 3, 'dauerhaft im Angebot');
-  assert.match(runCommand(g, p, { cmd: 'buyShip', target: yard.id, index: 0 }), /Fraktionswerft/);
+  ship.cargo[d.currency.good] = d.currency.n;
+  assert.equal(runCommand(g, p, { cmd: 'buyFactionShip', target: yard.id, index: 0 }), undefined);
+  assert.equal(g.shipsOf(p.id).length, 2);
+  assert.equal(yard.market.forSale.length, 0, 'realer Rumpf verlässt das Angebot');
+  assert.equal(ship.cargo[d.currency.good], undefined, 'Währung aus dem Laderaum bezahlt');
 });
 
 test('Bestellslot: Anzahlung 2 × Katalogpreis, Vorrang beim Bau, 10 min Vorkaufsrecht', () => {
   const g = new Game(':memory:', { seed: 3 });
   const p = g.createPlayer('Anna');
   const q = g.createPlayer('Bert');
-  const ship = g.shipsOf(p.id)[0];
   const yard = g.world.entities.get('origin_yard');
+  for (const x of [p, q]) g.revealAround(x, yard.x, yard.y, 500);
+  const ship = dockAt(g.shipsOf(p.id)[0], yard);
+  dockAt(g.shipsOf(q.id)[0], yard);
   const m = yard.market;
   p.credits = 100000;
   assert.match(runCommand(g, p, { cmd: 'yardOrder', target: yard.id, type: 'kolibri' }), /Almanach/);

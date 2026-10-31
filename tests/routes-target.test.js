@@ -2,10 +2,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Game } from '../server/game.js';
 import { updateShip } from '../server/ships.js';
+import { coverAll, reveal } from './world-helper.js';
 
 function fixture(have, amount = 100, op = 'buy') {
   const game = new Game(':memory:', { seed: 3 });
   const player = game.createPlayer('Route');
+  coverAll(game, player);
+  reveal(game, player, ...game.world.sectorEntities('0,0'));
   const ship = game.shipsOf(player.id)[0];
   ship.type = 'lastesel';
   ship.cargo = { ore: have, grain: 10 };

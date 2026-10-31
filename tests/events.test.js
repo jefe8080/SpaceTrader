@@ -16,8 +16,8 @@ test('Sondernachfrage: Timer nur in aktiven Sektoren, manueller Verkauf zum Fest
   const g = new Game(':memory:', { seed: 8 });
   const p = g.createPlayer('Eva');
   tickEvents(g, 1);
-  const rec = g.sectorEvents.get('0,0');
-  assert.ok(rec && !rec.event, 'Timer läuft im Startsektor');
+  const rec = g.sectorEvents.get(g.world.entities.get(p.homeworld).sector);
+  assert.ok(rec && !rec.event, 'Timer läuft im Heimatsektor');
   rec.timer = 0.5;
   tickEvents(g, 1);
   const ev = rec.event;

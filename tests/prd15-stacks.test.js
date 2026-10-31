@@ -6,11 +6,14 @@ import path from 'node:path';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 import { shipStats } from '../shared/config.js';
+import { coverAll, reveal } from './world-helper.js';
 
 const setup = (file = ':memory:') => {
   const game = new Game(file, { seed: 7 });
   const p = game.createPlayer('Stapler');
+  coverAll(game, p);
   const yard = game.world.entities.get('origin_yard');
+  reveal(game, p, ...game.world.sectorEntities('0,0'));
   const a = game.shipsOf(p.id)[0];
   const b = game.spawnShip(p, 'lastesel', yard);
   const c = game.spawnShip(p, 'kolibri', yard);

@@ -15,7 +15,8 @@ export function setupCons(seed = 3) {
   a.xp = 200; a.credits = 1e7; b.credits = 1e6;
   const hub = g.world.entities.get('origin_hub');
   const ship = g.shipsOf(a.id)[0];
-  ship.dockedAt = hub.id; ship.x = hub.x + hub.radius + 20; ship.y = hub.y;
+  ship.dockedAt = hub.id; ship.state = 'docked'; ship.x = hub.x + hub.radius + 20; ship.y = hub.y;
+  for (const p of [a, b, c3]) g.revealAround(p, hub.x, hub.y, 500);
   return { g, a, b, c3, hub, ship };
 }
 const cmd = (g, p, name, args = {}) => runCommand(g, p, { cmd: name, ...args });
@@ -154,9 +155,6 @@ test('Konsortiumsbesitz: Kauf aus dem Pool, Lager zum Fixpreis, Verwaltung nur H
   // Verwaltung
   assert.match(cmd(g, b, 'propMode', { target: planet.id, mode: 'private' }), /Handelsmeister/);
   assert.equal(cmd(g, a, 'propMode', { target: planet.id, mode: 'private' }), undefined);
-  // Ausbaugrenze nach Konsortiumslevel (Level 1: Stufe 2)
-  prop.upg.storage = 2;
-  assert.match(cmd(g, a, 'propUpgrade', { target: planet.id, line: 'storage' }), /Konsortiumslevel 1/);
   // Herauskaufen
   const price2 = propertyPriceOf(planet, prop);
   const ac = a.credits;
@@ -176,6 +174,7 @@ test('Konsortiumsbesitz: Kauf aus dem Pool, Lager zum Fixpreis, Verwaltung nur H
 test('Kartendaten: Kauf überträgt den Stand ohne XP und Almanach, Verkäufer erhält 90 %', () => {
   const { g, a, b, c } = withCons();
   const sec = g.world.sectors.get('0,0');
+  g.discover(a, 'sector', '0,0');
   g.revealAround(a, sec.bh.x, sec.bh.y, 40000);
   assert.equal(cmd(g, a, 'cMapOffer', { sector: '0,0', price: 10000 }), undefined);
   const o = [...g.mapOffers.values()][0];

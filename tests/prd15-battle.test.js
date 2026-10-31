@@ -10,6 +10,7 @@ import { COMBAT, WEAPONS, armorFactor, ensureDamage, blueprint, maxHull } from '
 import { applyHit, applyArea, systemExposed } from '../shared/damage.js';
 import { startBattle, tickBattle, beginRetreat, joinBattle, endBattle } from '../server/war/battle.js';
 import { ransomQuote } from '../server/war/outcome.js';
+import { coverAll } from './world-helper.js';
 
 const unit = (type) => { const ship = { type }; ensureDamage(ship); const bp = blueprint(type); return { ship, u: { state: 'fight', shields: bp.shields.map((s) => s.max), shieldDelay: [], ion: {}, jam: {}, fires: [] } }; };
 
@@ -87,6 +88,7 @@ const arena = () => {
   const game = new Game(':memory:', { seed: 3 });
   const p = game.createPlayer('Angreifer'), q = game.createPlayer('Verteidiger');
   const yard = game.world.entities.get('origin_yard');
+  for (const x of [p, q]) { coverAll(game, x); game.revealAround(x, yard.x, yard.y, 5000); }
   const war = game.spawnShip(p, 'korvette', yard);
   const civ = game.spawnShip(q, 'lastesel', yard);
   for (const s of [war, civ]) { s.dockedAt = null; s.state = 'idle'; s.queue = []; }

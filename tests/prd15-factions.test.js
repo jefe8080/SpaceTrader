@@ -8,9 +8,9 @@ import { ensureFactionSectors, poolAdd, poolSpend, capOf, receiveGoods, supplyOk
 import { factionHostileTo, diplo } from '../server/war/diplomacy.js';
 import { startBattle, endBattle } from '../server/war/battle.js';
 
-function withFaction(profile = 'legacy') {
+function withFaction() {
   for (let seed = 1; seed < 60; seed++) {
-    const game = new Game(':memory:', { seed, profile });
+    const game = new Game(':memory:', { seed });
     for (let q = -2; q <= 2; q++) for (let r = -2; r <= 2; r++) game.world.ensureSector(q, r);
     ensureFactionSectors(game);
     const factions = new Set([...game.fsecs.values()].map((f) => f.faction));
@@ -99,7 +99,7 @@ test('PRD15 U09: Goldtransport belastet Start, schreibt erst bei Ankunft gut; Ab
 });
 
 test('PRD15 U09: Freundschaftsquest ab Leitstellenstufe 2; Neutralität davor; Geschenk befreundet eine und verfeindet fünf; Bau/Kauf-Sperre ab fünf Schiffen', () => {
-  const game = withFaction('homeworld');
+  const game = withFaction();
   try {
     const p = game.createPlayer('Diplomat');
     const fs = [...game.fsecs.values()][0];
@@ -154,7 +154,7 @@ test('PRD15 U09: Beute einer Fraktion fließt in ihren Pool, ohne Doppelgutschri
 
 
 test('PRD15 U09: Spieler mit bereits ausgebauter Leitstelle erhalten die Freundschaftsquest beim nächsten Login samt Meldung', () => {
-  const game = withFaction('homeworld');
+  const game = withFaction();
   try {
     const p = game.createPlayer('Nachzügler');
     game.world.entities.get(p.homeworld).market.homeworld.controlLevel = 2;

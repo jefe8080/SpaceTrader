@@ -44,16 +44,20 @@ test('Stahlkoloss teilt seinen freigegebenen Raum; NPCs behalten ihre Kapazität
 test('Modulausbau prüft hypothetische Gesamtbelegung und erlaubt legale Umsortierung', () => {
   const game = new Game(':memory:', { seed: 3 });
   const player = game.createPlayer('Fracht');
+  const yard = game.world.entities.get('origin_yard');
+  game.revealAround(player, yard.x, yard.y, 500);
   const ship = game.shipsOf(player.id)[0];
   ship.type = 'lastesel';
-  ship.dockedAt = 'origin_yard';
-  for (const [cargo, blocked] of [[{ ore: 230 }, false], [{ ore: 255 }, true], [{ chemicals: 60 }, true]]) {
+  ship.dockedAt = yard.id; ship.x = yard.x + yard.radius + 20; ship.y = yard.y;
+  // Das ausgebaute Modul belegt danach 30 Einheiten im Laderaum
+  for (const [cargo, blocked] of [[{ ore: 200 }, false], [{ ore: 255 }, true], [{ chemicals: 60 }, true]]) {
     ship.modules = ['shielded', 'shielded'];
+    ship.moduleCargo = {};
     ship.cargo = cargo;
     const before = structuredClone(ship.cargo), credits = player.credits;
     const result = runCommand(game, player, { cmd: 'removeModule', ship: ship.id, module: 'shielded' });
     if (blocked) {
-      assert.match(result, /Fracht passt nicht/);
+      assert.match(result, /Ausbau blockiert/);
       assert.equal(ship.modules.length, 2);
       assert.equal(player.credits, credits);
     } else {

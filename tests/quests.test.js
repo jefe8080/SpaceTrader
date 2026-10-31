@@ -4,8 +4,11 @@ import { QUEST, XP, PILOT_LEVELS, pilotLevel, pilotTitle, giverLevel, questRewar
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 import { makeOffer, boardOf, refreshBoards } from '../server/quests.js';
+import { reveal } from './world-helper.js';
 
 const dockAt = (ship, e) => { ship.x = e.x + e.radius + 28; ship.y = e.y; ship.dockedAt = e.id; ship.queue = []; };
+/** Startsektor aufdecken: Questgeber und Ziele liegen dort, die Heimatwelt woanders. */
+const revealStart = (g, p) => reveal(g, p, ...g.world.sectorEntities('0,0'));
 
 test('Pilotenlevel: XP-Kurve, Titel ab Level 7', () => {
   assert.equal(pilotLevel(0), 1);
@@ -34,26 +37,26 @@ test('Nebenquellen: Sektorbesuch, Almanach, keine XP beim Start', () => {
   assert.equal(p.xp, XP.RECIPE + XP.SHIP);
 });
 
-test('Hauptschiff: manueller Handel bringt 1 XP je 1.000 Cr Gewinn, höchstens 40 je Stunde', () => {
+test('Manueller Handel bringt 1 XP je 1.000 Cr Gewinn, höchstens 40 je Stunde', () => {
   const g = new Game(':memory:', { seed: 5 });
   const p = g.createPlayer('Anna');
   const ship = g.shipsOf(p.id)[0];
-  ship.main = true;
   ship.basis = { ore: 10 };
   ship.cargo.ore = 100;
-  g.tradeBasis(ship, 'ore', 100, 26000, 'sell'); // 25.000 Gewinn
+  g.tradeBasis(ship, 'ore', 100, 26000, 'sell', { manual: true }); // 25.000 Gewinn
   assert.equal(p.xp, 25);
-  g.tradeBasis(ship, 'ore', 100, 100000, 'sell');
+  g.tradeBasis(ship, 'ore', 100, 100000, 'sell', { manual: true });
   assert.equal(p.xp, XP.TRADE_MAX_H, 'gedeckelt');
-  const other = g.spawnShip(p, 'spatz', g.world.entities.get('origin_yard'));
   g.time += 3600;
-  g.tradeBasis(other, 'ore', 10, 50000, 'sell');
-  assert.equal(p.xp, XP.TRADE_MAX_H, 'nur das Hauptschiff');
+  g.tradeBasis(ship, 'ore', 10, 50000, 'sell', { manual: true, auto: true });
+  g.tradeBasis(ship, 'ore', 10, 50000, 'sell');
+  assert.equal(p.xp, XP.TRADE_MAX_H, 'nur manueller Handel');
 });
 
 test('Questtafel: Angebot erscheint, Annahme nur angedockt, eine Quest gleichzeitig', () => {
   const g = new Game(':memory:', { seed: 5 });
   const p = g.createPlayer('Anna');
+  revealStart(g, p);
   const ship = g.shipsOf(p.id)[0];
   const planet = g.world.entities.get('origin_urban');
   refreshBoards(g, new Set([planet.sector]));
@@ -74,11 +77,16 @@ test('Questtafel: Angebot erscheint, Annahme nur angedockt, eine Quest gleichzei
 test('Beschaffung: Ware liefern bringt Credits, XP für Spieler und Questgeber', () => {
   const g = new Game(':memory:', { seed: 5 });
   const p = g.createPlayer('Anna');
+  revealStart(g, p);
   const ship = g.shipsOf(p.id)[0];
   ship.type = 'lastesel';
   const planet = g.world.entities.get('origin_urban');
+  // Ohne Fabriken braucht die Beschaffung eine reale Quelle mit Bestand in der Nähe
+  const source = g.world.entities.get('origin_agrar');
+  for (const [good, slot] of Object.entries(planet.market.goods)) if (slot.role === 'consume') source.market.goods[good] = { role: 'trade', rate: 0, stock: 500, cap: 1000, mod: 1 };
   const o = makeOffer(g, planet, 'procure');
   assert.ok(o && o.amount >= 5 && o.reward.cr > 0 && o.reward.xp > 0);
+  assert.equal(o.source, source.id);
   boardOf(planet).offers.push(o);
   dockAt(ship, planet);
   assert.equal(runCommand(g, p, { cmd: 'questAccept', ship: ship.id, target: planet.id, quest: o.id }), undefined);
@@ -95,6 +103,7 @@ test('Beschaffung: Ware liefern bringt Credits, XP für Spieler und Questgeber',
 test('Kurier: Abholen bei z, Abliefern bei a, beim Andocken', () => {
   const g = new Game(':memory:', { seed: 5 });
   const p = g.createPlayer('Anna');
+  revealStart(g, p);
   const ship = g.shipsOf(p.id)[0];
   const planet = g.world.entities.get('origin_agrar');
   const o = makeOffer(g, planet, 'courier');
@@ -113,6 +122,7 @@ test('Kurier: Abholen bei z, Abliefern bei a, beim Andocken', () => {
 test('Abbau: nur selbst abgebaute Ware zählt', () => {
   const g = new Game(':memory:', { seed: 5 });
   const p = g.createPlayer('Anna');
+  revealStart(g, p);
   const ship = g.shipsOf(p.id)[0];
   ship.type = 'maulwurf';
   const yard = g.world.entities.get('origin_yard');
@@ -132,6 +142,7 @@ test('Abbau: nur selbst abgebaute Ware zählt', () => {
 test('Erkundung: neu aufgedeckte Zellen im Zielsektor zählen, Abschluss automatisch', () => {
   const g = new Game(':memory:', { seed: 5 });
   const p = g.createPlayer('Anna');
+  revealStart(g, p);
   const ship = g.shipsOf(p.id)[0];
   const planet = g.world.entities.get('origin_urban');
   let o;
@@ -146,52 +157,18 @@ test('Erkundung: neu aufgedeckte Zellen im Zielsektor zählen, Abschluss automat
   assert.ok(p.xp >= o.reward.xp);
 });
 
-test('Planetenlevel: +10 % Raten, +15 % Lager, Zusatzwaren bei 2/4/6, Kaufpreis ×(1 + 0,4 L)', async () => {
-  const { PLANET_EXTRAS, GIVER_LEVELS, propertyPrice } = await import('../shared/config.js');
+test('Planetenlevel: echte Wirtschaft behält Raten, Lager, Waren und Kaufpreis', async () => {
+  const { GIVER_LEVELS, propertyPrice } = await import('../shared/config.js');
   const g = new Game(':memory:', { seed: 5 });
   const planet = [...g.world.entities.values()].find((e) => e.kind === 'planet' && !e.noBuy && e.type === 'mining');
   const m = planet.market;
-  const ore = m.goods.ore, rate0 = ore.rate, cap0 = ore.cap, price0 = propertyPrice(planet);
+  const ore = m.goods.ore, rate0 = ore.rate, cap0 = ore.cap, goods0 = Object.keys(m.goods).length, price0 = propertyPrice(planet);
   g.addGiverXp(planet, GIVER_LEVELS[2]);
   assert.equal(m.lvl, 2);
-  assert.ok(Math.abs(ore.rate / rate0 - 1.2) < 1e-9);
-  assert.equal(ore.cap, Math.round(cap0 * 1.3));
-  const [x2, x4, x6] = PLANET_EXTRAS.mining;
-  assert.equal(m.goods[x2].role, 'produce', 'Level 2: neue Ware produziert');
-  assert.ok(!m.goods[x4] || m.goods[x4].role === 'trade');
-  assert.ok(Math.abs(propertyPrice(planet) / price0 - 1.8) < 1e-3);
-  g.addGiverXp(planet, GIVER_LEVELS[6]);
-  assert.equal(m.lvl, 6);
-  assert.equal(m.goods[x4].role, 'consume');
-  assert.equal(m.goods[x6].role, 'produce');
-});
-
-test('Werftlevel: Bonus haftet am gebauten Schiff', async () => {
-  const { GIVER_LEVELS, SHIP_TYPES, shipStats } = await import('../shared/config.js');
-  const g = new Game(':memory:', { seed: 5 });
-  const p = g.createPlayer('Anna');
-  const yard = [...g.world.entities.values()].find((e) => e.market?.strategy === 'shipyard' && e.type === 'shipyard' && !e.noBuy);
-  g.addGiverXp(yard, GIVER_LEVELS[4]);
-  const m = yard.market;
-  m.forSale = [];
-  m.building = null;
-  m.nextBuild = 0;
-  m.waitSince = null;
-  for (const [gd, n] of Object.entries(SHIP_TYPES.spatz.build)) m.goods[gd].stock = n;
-  g.tick(1.5);
-  assert.ok(m.building, 'Bau gestartet');
-  assert.ok(Math.abs(m.building.bonus - 0.2) < 1e-9);
-  m.building.remaining = 0;
-  g.tick(1.5);
-  const it = m.forSale.find((x) => x.bonus);
-  assert.ok(it && it.yardLvl === 4);
-  const ship = g.shipsOf(p.id)[0];
-  g.revealAround(p, yard.x, yard.y, 1500);
-  ship.x = yard.x + yard.radius + 28; ship.y = yard.y; ship.dockedAt = yard.id;
-  p.credits = 1e7;
-  assert.equal(runCommand(g, p, { cmd: 'buyShip', target: yard.id, index: m.forSale.indexOf(it) }), undefined);
-  const s = g.shipsOf(p.id).find((x) => x.bonus);
-  assert.ok(Math.abs(shipStats(s).speed / SHIP_TYPES[s.type].speed - 1.2) < 1e-9);
+  assert.equal(ore.rate, rate0);
+  assert.equal(ore.cap, cap0);
+  assert.equal(Object.keys(m.goods).length, goods0, 'keine Zusatzwaren');
+  assert.equal(propertyPrice(planet), price0);
 });
 
 test('Fraktionsruf: Quest bei Fraktionsplaneten bringt Ruf, Abbruch kostet Ruf, nie unter die Rangschwelle', () => {
@@ -216,7 +193,9 @@ test('PRD-3 Kalibrierung: Erkundung halbe XP, Sektor-XP halbiert, Ruf 0,67 je XP
 test('Letztes Schiff: Verkauf und Recycling zentral gesperrt', () => {
   const g = new Game(':memory:', { seed: 5 });
   const p = g.createPlayer('Solo');
-  const s = g.shipsOf(p.id)[0];
+  const yard = g.world.entities.get('origin_yard');
+  reveal(g, p, yard);
+  const s = dockAt(g.shipsOf(p.id)[0], yard) || g.shipsOf(p.id)[0];
   assert.match(g.canGiveAway(p, s), /letztes Schiff/);
   assert.match(runCommand(g, p, { cmd: 'sellShip', ship: s.id }), /letztes Schiff/);
   const s2 = g.spawnShip(p, 'spatz', g.world.entities.get('origin_yard'));

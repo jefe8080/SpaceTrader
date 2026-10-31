@@ -37,14 +37,21 @@ test('Weltprofil und neue Version bleiben nach Neustart erhalten, Altwelt wird u
     const player = first.createPlayer('Dhoinen');
     first.time = 123;
     first.close();
-    const before = digest(file);
-    assert.throws(() => new Game(file), /Inkompatible Welt/);
-    assert.equal(digest(file), before);
     const loaded = new Game(file, { profile: 'homeworld' });
     assert.equal(loaded.worldVersion, 5);
     assert.equal(loaded.time, 123);
     assert.equal(loaded.players.get(player.id).name, 'Dhoinen');
     loaded.close();
+    // Eine Welt mit anderem Profil wird unverändert abgewiesen
+    const legacy = path.join(root, 'legacy.db');
+    const other = new Game(legacy, { seed: 42 });
+    other.save();
+    other.store.setMeta('worldProfile', 'legacy');
+    other.store.setMeta('worldGen', 3);
+    other.store.close();
+    const before = digest(legacy);
+    assert.throws(() => new Game(legacy), /Inkompatible Welt/);
+    assert.equal(digest(legacy), before);
   });
 });
 

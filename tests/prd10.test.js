@@ -7,6 +7,7 @@ import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 import { tickHomeworld } from '../server/homeworld.js';
 import { homeStorageUsage, homeStorageFree, HOME_BUILDINGS, storageUpgradeCost, homeStructureSpec, controlUpgradeCost } from '../shared/homeworld.js';
+import {coverAll,reveal} from './world-helper.js';
 
 function fixture(file = ':memory:') {
   const game = new Game(file, { profile: 'homeworld', seed: 42 });
@@ -122,6 +123,7 @@ test('PRD10: Routenoption und Reservierungen bleiben nach echtem Speichern und L
  const folder=fs.mkdtempSync(path.join(os.tmpdir(),'prd10-route-')),file=path.join(folder,'world.db');
  const game=new Game(file,{seed:3}),p=game.createPlayer('Route'),ship=game.shipsOf(p.id)[0];
  const a=game.world.entities.get('origin_hub'),b=game.world.entities.get('origin_yard');
+ coverAll(game,p);reveal(game,p,a,b);
  a.market.goods.ore={role:'produce',stock:100,cap:1000,mod:1};b.market.goods.ore={role:'consume',stock:0,cap:100,mod:1};
  const stops=[{targetId:a.id,actions:[{op:'buy',good:'ore',amount:80}]},{targetId:b.id,actions:[{op:'sell',good:'ore',amount:0}]}];
  assert.equal(runCommand(game,p,{cmd:'routeSave',name:'Geschützt',stops,onlyWithTargetSpace:true}),undefined);
@@ -146,6 +148,7 @@ test('PRD10: Quest- und Orbitalrümpfe übersteigen die alte Flottenobergrenze o
 });
 test('PRD10: öffentliche und eigene Werften erlauben Erwerb über dem alten Flottenlimit',()=>{
  const game=new Game(':memory:',{seed:3}),p=game.createPlayer('Flotte'),yard=game.world.entities.get('origin_yard');
+ reveal(game,p,yard);
  for(let i=0;i<6;i++)game.spawnShip(p,'spatz',yard);
  const ship=game.shipsOf(p.id)[0];ship.dockedAt=yard.id;ship.x=yard.x;ship.y=yard.y;p.credits=1e6;
  yard.market.forSale=[{type:'spatz',price:100}];const before=game.shipsOf(p.id).length;

@@ -7,6 +7,9 @@ test('PRD14: side quest types have real targets and reject unavailable condition
  const game=new Game(':memory:',{seed:5});
  try{
   const p=game.createPlayer('Aufträge'),ship=game.shipsOf(p.id)[0],planet=game.world.entities.get('origin_urban'),yard=game.world.entities.get('origin_yard');ship.type='maulwurf';ship.modules=['cabin'];
+  // Ohne Fabriken brauchen Liefer- und Eilaufträge eine reale Quelle mit Bestand
+  const source=game.world.entities.get('origin_agrar');
+  for(const giver of [planet,yard])for(const [good,slot] of Object.entries(giver.market.goods))if(slot.role==='consume')source.market.goods[good]={role:'trade',rate:0,stock:500,cap:1000,mod:1};
   for(const type of ['procure','courier','tour','explore','mine','rush']){
     const giver=['mine','rush'].includes(type)?yard:planet;let q;
     for(let i=0;i<100&&!q;i++)q=makeOffer(game,giver,type);

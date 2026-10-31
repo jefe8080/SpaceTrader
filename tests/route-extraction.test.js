@@ -3,16 +3,19 @@ import assert from 'node:assert/strict';
 import { Game } from '../server/game.js';
 import { updateShip } from '../server/ships.js';
 import { BELT_TYPES, freeFor } from '../shared/config.js';
+import { coverAll } from './world-helper.js';
 
 function fixture(type = 'ore', protect = true) {
   const game = new Game(':memory:', { seed: 3 }), player = game.createPlayer('Abbau');
+  coverAll(game, player);
   const ship = game.shipsOf(player.id)[0], good = BELT_TYPES[type]?.good || 'nebulagas';
   Object.assign(ship, { type: 'mammut', cargo: {}, modules: ['drill', 'acidex', 'shielded', 'gascoll'] });
   const source = type === 'gas'
     ? { id: 'source', name: 'Gassammler', kind: 'station', type: 'gasharvester', market: { goods: { [good]: { stock: 500, cap: 1000, role: 'produce', mod: 1 } } } }
     : { id: 'source', name: 'Vorkommen', kind: 'belt', type, richness: 1 };
-  game.world.entities.set(source.id, source); ship.dockedAt = source.id; player.credits = 1e9;
   const target = game.world.entities.get('origin_hub');
+  Object.assign(source, { x: target.x + 2000, y: target.y, sector: target.sector });
+  game.world.entities.set(source.id, source); ship.dockedAt = source.id; player.credits = 1e9;
   target.market.goods = { [good]: { stock: 40, cap: 1000, role: 'trade', mod: 1 } };
   target.market.homeworld = { storage: 1000, hazardStorage: 500, limits: { [good]: 50 } };
   game.ownership.set(target.id, { player: player.id });
@@ -101,7 +104,7 @@ test('Bergbau und Gassammlereinkauf können gemeinsamen Zielplatz nicht doppelt 
     f.target.market.homeworld.storage = 100; f.target.market.homeworld.limits = { ore: 80, nebulagas: 80 };
     f.target.market.goods.ore.stock = 0;
     f.target.market.goods.nebulagas = { stock: 0, cap: 100, role: 'trade', mod: 1 };
-    const gas = { id: 'gas', kind: 'station', type: 'gasharvester', name: 'Gassammler', market: { goods: { nebulagas: { stock: 500, cap: 1000, role: 'produce', mod: 1 } } } };
+    const gas = { id: 'gas', kind: 'station', type: 'gasharvester', name: 'Gassammler', market: { goods: { nebulagas: { stock: 500, cap: 1000, role: 'produce', mod: 1 } } }, x: f.source.x, y: f.source.y + 2000, sector: f.source.sector };
     f.game.world.entities.set(gas.id, gas);
     const route = { id: 'gas-route', owner: f.player.id, onlyWithTargetSpace: true, stops: [
       { targetId: gas.id, actions: [{ op: 'buy', good: 'nebulagas' }] },

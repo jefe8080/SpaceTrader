@@ -4,6 +4,7 @@ import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 import { diffMarket } from '../server/net.js';
 import { unitPrice, buyPrice, sellPrice, GOODS, PRICE } from '../shared/config.js';
+import { coverAll, dockAt, reveal } from './world-helper.js';
 
 test('Preisformel: Basispreis × Standort-Modifier × Füllstandskurve ± Spread', () => {
   const g = 'ore', base = GOODS[g].base;
@@ -66,17 +67,19 @@ test('Markt-Delta enthält nur Änderungen', () => {
 test('Befehlsqueue: ersetzen, anhängen, abarbeiten', () => {
   const g = new Game(':memory:', { seed: 7 });
   const p = g.createPlayer('Anna');
-  const ship = g.shipsOf(p.id)[0];
+  coverAll(g, p);
+  reveal(g, p, ...g.world.sectorEntities('0,0'));
+  const ship = dockAt(g.shipsOf(p.id)[0], g.world.entities.get('origin_yard'));
   const order = (o, append = false) => runCommand(g, p, { cmd: 'order', ships: [ship.id], order: o, append });
   assert.equal(order({ t: 'wait', secs: 2 }), undefined);
   assert.equal(order({ t: 'move', x: ship.x + 50, y: ship.y }, true), undefined);
-  assert.equal(order({ t: 'goto', target: 'origin_smelter' }, true), undefined);
+  assert.equal(order({ t: 'goto', target: 'origin_hub' }, true), undefined);
   assert.deepEqual(ship.queue.map((c) => c.t), ['wait', 'move', 'goto']);
   for (let i = 0; i < 25; i++) g.tick(0.1);
   assert.ok(!ship.queue.some((c) => c.t === 'wait'), 'Warten nach 2 s beendet');
   for (let i = 0; i < 400 && ship.queue.length; i++) g.tick(0.25);
   assert.equal(ship.queue.length, 0);
-  assert.equal(ship.dockedAt, 'origin_smelter');
+  assert.equal(ship.dockedAt, 'origin_hub');
   assert.ok(ship.tot.dist > 0 && ship.tot.f >= 1, 'Strecke und Flüge gezählt');
   order({ t: 'wait', secs: 5 });
   assert.deepEqual(ship.queue.map((c) => c.t), ['wait'], 'Ersetzen leert die Queue');
@@ -85,11 +88,13 @@ test('Befehlsqueue: ersetzen, anhängen, abarbeiten', () => {
 test('Routenvorlage: mehrere Schiffe, Änderung wirkt auf alle, Stop-Loss', () => {
   const g = new Game(':memory:', { seed: 7 });
   const p = g.createPlayer('Anna');
-  const s1 = g.shipsOf(p.id)[0];
+  coverAll(g, p);
+  reveal(g, p, ...g.world.sectorEntities('0,0'));
+  const s1 = dockAt(g.shipsOf(p.id)[0], g.world.entities.get('origin_yard'));
   const s2 = g.spawnShip(p, 'spatz', g.world.entities.get('origin_yard'));
   const stops = [
     { targetId: 'origin_mining', actions: [{ op: 'buy', good: 'ore' }] },
-    { targetId: 'origin_smelter', actions: [{ op: 'sell', good: 'ore' }] },
+    { targetId: 'origin_hub', actions: [{ op: 'sell', good: 'ore' }] },
   ];
   assert.equal(runCommand(g, p, { cmd: 'routeSave', name: 'Erz', stops, assign: [s1.id, s2.id] }), undefined);
   const route = [...g.routes.values()][0];

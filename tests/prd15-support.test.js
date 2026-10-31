@@ -6,12 +6,14 @@ import { shipStats, SHIP_TYPES } from '../shared/config.js';
 import { COMBAT } from '../shared/combat.js';
 import { startBattle } from '../server/war/battle.js';
 import { targetError } from '../server/war/engage.js';
+import { coverAll, reveal } from './world-helper.js';
 
 const run = (game, secs, dt = 0.2) => { for (let t = 0; t < secs; t += dt) game.tick(dt); };
 const world = () => {
   const game = new Game(':memory:', { seed: 9 });
   const p = game.createPlayer('Wache'), q = game.createPlayer('Pirat');
   const yard = game.world.entities.get('origin_yard');
+  for (const x of [p, q]) { coverAll(game, x); reveal(game, x, ...game.world.sectorEntities('0,0')); }
   const place = (s, dx, dy) => { s.dockedAt = null; s.state = 'idle'; s.queue = []; s.x = yard.x + dx; s.y = yard.y + dy; return s; };
   return { game, p, q, yard, place };
 };

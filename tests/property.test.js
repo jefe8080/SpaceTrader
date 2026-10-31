@@ -5,6 +5,7 @@ import { fixedPrice, fixedConsumptionPerHour, fixedRref, priceWindow, propertyKi
 import { fixedRevenuePerHour } from '../shared/property.js';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
+import { dockAt } from './world-helper.js';
 
 test('Fixpreis-Verbrauch: s = 0,3 bringt doppelt so viel Erlös wie s = 0,7', () => {
   const { pmin, pmax } = priceWindow('food');
@@ -22,20 +23,21 @@ function setup(type = null) {
   const g = new Game(':memory:', { seed: 21 });
   const a = g.createPlayer('Anna');
   const b = g.createPlayer('Bert');
-  const target = [...g.world.entities.values()].find((e) => (type ? e.type === type || e.kind === type : e.market?.strategy === 'factory') && propertyKind(e));
+  const target = [...g.world.entities.values()].find((e) => (type ? e.type === type || e.kind === type : e.market?.strategy === 'shipyard') && propertyKind(e) && !e.market.homeworld);
   for (const p of [a, b]) g.revealAround(p, target.x, target.y, 3000);
-  const ship = g.shipsOf(a.id)[0];
-  ship.x = target.x + target.radius + 20; ship.y = target.y; ship.dockedAt = target.id;
+  const ship = dockAt(g.shipsOf(a.id)[0], target);
   return { g, a, b, target, ship };
 }
 
 test('Besitz: Kauf nur mit Lizenz, vor Ort, nicht Hub/Start/Fraktion', () => {
   const { g, a, target, ship } = setup();
-  assert.equal(propertyKind(g.world.entities.get('origin_smelter')), null, 'Startsystem nicht kaufbar');
+  assert.equal(propertyKind(g.world.entities.get('origin_yard')), null, 'Startsystem nicht kaufbar');
   assert.equal(propertyKind(g.world.entities.get('origin_hub')), null, 'Hub nicht kaufbar');
   assert.match(runCommand(g, a, { cmd: 'buyProperty', target: target.id }), /Gouverneurslizenz/);
   a.governor = 1; a.faction = { name: 'Annas Kontor', color: '#ff0000' };
   a.credits = 1e8;
+  assert.match(runCommand(g, a, { cmd: 'buyProperty', target: target.id }), /Gouverneurslizenz 2/);
+  a.governor = 2;
   ship.dockedAt = null;
   assert.match(runCommand(g, a, { cmd: 'buyProperty', target: target.id }), /vor Ort/);
   ship.dockedAt = target.id;
@@ -44,13 +46,18 @@ test('Besitz: Kauf nur mit Lizenz, vor Ort, nicht Hub/Start/Fraktion', () => {
   assert.equal(a.credits, 1e8 - price);
   assert.equal(target.market.owner, a.id);
   assert.equal(target.ownerName, 'Annas Kontor');
-  // Limit der Lizenz
-  const other = [...g.world.entities.values()].find((e) => e !== target && propertyKind(e) === 'factory');
-  g.revealAround(a, other.x, other.y, 500);
-  ship.dockedAt = other.id;
-  assert.match(runCommand(g, a, { cmd: 'buyProperty', target: other.id }), /höchstens 1/);
+  // Limit der Lizenz; die persönliche Heimatwelt zählt nicht mit
+  const others = [...g.world.entities.values()].filter((e) => e !== target && propertyKind(e) === 'shipyard');
+  for (const other of others.slice(0, 2)) {
+    g.revealAround(a, other.x, other.y, 500);
+    ship.dockedAt = other.id;
+    assert.equal(runCommand(g, a, { cmd: 'buyProperty', target: other.id }), undefined);
+  }
+  g.revealAround(a, others[2].x, others[2].y, 500);
+  ship.dockedAt = others[2].id;
+  assert.match(runCommand(g, a, { cmd: 'buyProperty', target: others[2].id }), /höchstens 3/);
   // Planeten erst ab Lizenz 3
-  const planet = [...g.world.entities.values()].find((e) => propertyKind(e) === 'planet' && e.kind === 'planet');
+  const planet = [...g.world.entities.values()].find((e) => propertyKind(e) === 'planet' && e.kind === 'planet' && !e.market.homeworld);
   g.revealAround(a, planet.x, planet.y, 500);
   ship.dockedAt = planet.id;
   assert.match(runCommand(g, a, { cmd: 'buyProperty', target: planet.id }), /Gouverneurslizenz 3/);
@@ -58,7 +65,7 @@ test('Besitz: Kauf nur mit Lizenz, vor Ort, nicht Hub/Start/Fraktion', () => {
 });
 
 test('Besitzerwirtschaft: eigenes Lager kostenlos, Fremde zahlen an den Besitzer, Zoll, privat', () => {
-  const { g, a, b, target, ship } = setup();
+  const { g, a, b, target, ship } = setup('planet');
   a.governor = 3; a.faction = { name: 'A', color: '#ff0000' }; a.credits = 1e8;
   runCommand(g, a, { cmd: 'buyProperty', target: target.id });
   const out = Object.keys(target.market.goods).find((x) => target.market.goods[x].role === 'produce');
@@ -109,7 +116,7 @@ test('Eigene Werft: Bau auf Befehl, Übernahme in die Flotte, Recycling', () => 
   const m = target.market;
   m.forSale = [];
   for (const [gd, n] of Object.entries(SHIP_TYPES.spatz.build)) m.goods[gd].stock = n;
-  assert.match(runCommand(g, a, { cmd: 'yardBuild', target: target.id, type: 'lastesel' }), /Klasse/);
+  assert.match(runCommand(g, a, { cmd: 'yardBuild', target: target.id, type: 'lastesel' }), /Pilotenlizenz/);
   assert.equal(runCommand(g, a, { cmd: 'yardBuild', target: target.id, type: 'spatz' }), undefined);
   for (let i = 0; i < 60; i++) g.tick(1);
   assert.equal(m.forSale.length, 1);

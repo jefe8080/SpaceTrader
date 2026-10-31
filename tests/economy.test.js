@@ -105,37 +105,6 @@ test('NPC-Ladung: 10 % des Ziellagers, 5 bis 40, nur was passt', () => {
   assert.equal(supplyLoad({ cap: 300, stock: 297 }), 0);
 });
 
-test('Planeten-Abholer: nur in Sektoren mit Spieleraktivität, höchstens einer je Markt und Ware', () => {
-  const g = new Game(':memory:', { seed: 9 });
-  const planet = g.world.entities.get('origin_urban');
-  const food = planet.market.goods.food;
-  const plant = g.world.entities.get('origin_foodplant');
-  plant.market.goods.food.stock = plant.market.goods.food.cap; // Produzent über dem Ziel
-  food.stock = 0;
-  food.target = 0.4;
-  g.tick(1.5);
-  const haulers = () => [...g.ships.values()].filter((s) => s.owner === 'npc' && s.queue[0]?.haul);
-  assert.equal(haulers().length, 0, 'ohne Spieler kein Abholer');
-  const p = g.createPlayer('Anna');
-  // Sensorlauf markiert den Heimatsektor als aktiv; die Quelle kann kurz durch einen Versorger belegt sein
-  let h = [];
-  for (let i = 0; i < 600 && !h.length; i++) {
-    g.tick(1.5);
-    h = haulers().filter((s) => s.queue[0].stationId === planet.id && s.queue[0].good === 'food');
-    const keys = [...g.ships.values()].filter((s) => s.owner === 'npc').flatMap((s) => [s.queue[0].stationId + ':' + s.queue[0].good, s.queue[0].sourceId + ':' + s.queue[0].good]);
-    assert.equal(new Set(keys).size, keys.length, 'höchstens ein NPC-Schiff je Markt und Ware');
-  }
-  assert.equal(h.length, 1, 'genau ein Abholer für Nahrung');
-  assert.equal(h[0].queue[0].amount, supplyLoad(food));
-  assert.ok(h[0].queue[0].amount <= SUPPLY.LOAD_MAX);
-  // fliegt hin, lädt, liefert ab
-  const before = food.stock;
-  for (let i = 0; i < 3000 && g.ships.has(h[0].id); i++) g.tick(0.5);
-  assert.ok(!g.ships.has(h[0].id), 'Abholer ist fertig');
-  assert.ok(food.stock > before, 'Lieferung angekommen');
-  assert.ok(p);
-});
-
 test('Händlerrolle: Planeten 5-10 Händler-Waren, Ultraselten nur am Hub', () => {
   const { entities } = generateSector(31, -1, 2);
   for (const e of entities.filter((x) => x.market)) {
@@ -166,10 +135,15 @@ test('Treibstoff: Verbrauch im Flug, leerer Tank 30 %, Auto-Tanken beim Andocken
   g.tick(1);
   assert.ok(Math.abs(ship.x - x0 - SHIP_TYPES[ship.type].speed * 0.3) < 1, 'nur 30 % Tempo');
   assert.ok(ship.warn.fuel);
-  runCommand(g, p, { cmd: 'order', ships: [ship.id], order: { t: 'goto', target: 'origin_fuel' } });
+  // Tankstelle in der Nähe: Treibstoff im Handelslager des Hubs
+  const hub = g.world.entities.get('origin_hub');
+  hub.market.goods.shipfuel.stock = 500;
+  g.revealAround(p, hub.x, hub.y, 500);
+  ship.x = hub.x + 1500; ship.y = hub.y;
+  runCommand(g, p, { cmd: 'order', ships: [ship.id], order: { t: 'goto', target: hub.id } });
   ship.fuel = 0.1;
   for (let i = 0; i < 4000 && ship.queue.length; i++) g.tick(0.5);
-  assert.equal(ship.dockedAt, 'origin_fuel');
+  assert.equal(ship.dockedAt, hub.id);
   assert.ok(ship.fuel > tank * 0.95, `aufgetankt: ${ship.fuel}`);
   assert.ok(!ship.warn.fuel);
   assert.ok(ship.tot.fuel > 0, 'Treibstoffkosten in der Statistik');

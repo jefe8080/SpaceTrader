@@ -162,8 +162,25 @@ Fortschritt wird im selben Commit aktualisiert.
   - Selbsttest (2 Minuten, zwei Läufe mit `3e992d7`): keine Abweichung. Gegenprobe
     0 gegen 2 Minuten: 6.325 abweichende Zeilen, der Vergleich erkennt also
     Zustandsänderungen.
-- [ ] **S2: Tests.** Legacy-Tests auf `homeworld` umstellen oder löschen (E3),
+- [x] **S2: Tests.** Legacy-Tests auf `homeworld` umstellen oder löschen (E3),
   solange der Legacy-Code noch vorhanden ist.
+  - Der Standard von `Game` und `World` ist jetzt `homeworld`; der Legacy-Code ist
+    noch vorhanden. Damit laufen alle Tests in `homeworld` (vorher 60 Fehlschläge
+    in 20 Dateien).
+  - Neue Hilfe `tests/world-helper.js`: Leitstellenabdeckung (`coverAll`),
+    Andocken (`dockAt`) und Aufdecken (`reveal`). Automatische Befehle und Ziele
+    im Startsektor brauchen in `homeworld` Abdeckung und Sichtbarkeit.
+  - Gelöscht als reine Legacy-Tests: Hauptschiff (Tempo, Sperre), Modulkauf an
+    großer Werft mit 50 % Erstattung, Werftlevel-Bonus beim NPC-Bau,
+    Planeten-Abholer (`checkHaul`). Für Module, Werften und NPC-Versorgung gibt es
+    `homeworld`-Tests in `physical-modules`, `physical-yards` und `real-economy`.
+  - An `homeworld`-Regeln angepasst: Besitz (Werft statt Fabrik), Fraktionswerft
+    und Bestellslot (reale Rümpfe), Handels-XP (manueller statt Hauptschiff-Handel),
+    Planetenlevel (ohne Wirkung in der echten Wirtschaft), Beschaffungsquests
+    (reale Quelle), Treibstoff (Hub statt Treibstoffdepot), Routen und Krieg
+    (Abdeckung), Modulausbau (Modul landet im Laderaum), Weltprofil (Altwelt per
+    Meta-Eintrag).
+  - Ergebnis: `npm test` 382 von 382 grün.
 - [ ] **S3: Server.**
   - Profil-Abfragen auflösen und Legacy-Pfade entfernen.
   - `Game` und `World` ohne `profile`.

@@ -104,7 +104,8 @@ test('PRD7: restart retains unconfirmed introductions, pending starts, names and
 
 test('PRD7: actual manual and automated sales count once; partial weighted costs and unknown goods', () => {
   const game=new Game(':memory:',{seed:42}),player=game.createPlayer('Trader'),ship=game.shipsOf(player.id)[0];
-  const market={id:'accounting',kind:'station',name:'Handel',market:{goods:{ore:{role:'trade',stock:500,cap:1000,mod:1}}}};
+  // Hub-Händler: Ankauf braucht freie Lagerkapazität und Marktkasse aus dem vorherigen Verkauf
+  const market={id:'accounting',kind:'station',type:'hub',name:'Handel',market:{goods:{ore:{role:'trade',stock:500,cap:1000,mod:1}}}};
   player.credits=100000;ship.cargo={};ship.dockedAt=market.id;
   const bought=game.trade(ship,market,'ore',20,'buy');
   assert.equal(bought.n,20);assert.equal(pilotProfile(game,player).revenue,0);
