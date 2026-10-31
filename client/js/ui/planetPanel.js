@@ -20,6 +20,7 @@ import {handleColonyAction} from './colonies.js';
 import { firstGuide, showGuide } from './objectGuide.js';
 import { buildingGuideKey } from '/shared/object-guide.js';
 import {recipeWithStock, stockLabel, planetSummary} from './productionDisplay.js';
+import {housingPanel} from './housing.js';
 
 const bar = $('planetBar');
 const panel = $('planetPanel');
@@ -132,7 +133,7 @@ export function renderPlanetUi() {
   let body = '';
   if (e.type === 'ruins') body = homePanel(e, it, ship);
   else if (it.kind === 'questhouse') body = questBoardSection(e, ship, true)+(e.market.realEconomy?propertySection(e):'');
-  else if (it.worldInfrastructure) body = state.props.get(e.id)?.manage?specializationPanel(e):'<p>Wohngebiet des Planeten.</p>';
+  else if (it.worldInfrastructure) {const building=e.market.economy?.infrastructure?.find(b=>b.id===it.worldInfrastructure);body=building&&state.props.get(e.id)?.manage?housingPanel(e,building):'<p>Wohngebiet des Planeten.</p>';}
   else if (it.kind === 'produce' || it.kind === 'consume') body = goodBuilding(it, e);
   else if (it.kind === 'factory') body = factoryPanel(it, e);
   else if (it.kind === 'plot') body = plotPanel(it, e);

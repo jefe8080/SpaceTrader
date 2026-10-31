@@ -14,7 +14,7 @@ const card=$('favCard'), view=defaultTradeView();
 let rowIds=null, initialized=false;
 export const sectorOf=e=>sectorName(e);
 export const systemOf=e=>systemName(e);
-const number=v=>Number.isFinite(v)?v.toLocaleString('de-DE',{maximumFractionDigits:1}):'unbekannt';
+const number=v=>v===Infinity?'fortlaufend':Number.isFinite(v)?v.toLocaleString('de-DE',{maximumFractionDigits:1}):'unbekannt';
 const options=(items,value)=>items.map(([id,label])=>`<option value="${esc(id)}" ${id===value?'selected':''}>${esc(label)}</option>`).join('');
 function quote(e,g,dir) {
   const slot=e.market?.goods?.[g];
@@ -33,7 +33,7 @@ function rows() {
     const slot=e.market?.goods?.[view.good];
     const buy=view.good?quote(e,view.good,'buy'):null,sell=view.good?quote(e,view.good,'sell'):null;
     const resource=e.kind==='belt'&&BELT_TYPES[e.type]?.good===view.good;
-    const stock=resource?(Number.isFinite(e.remaining)?Math.floor(e.remaining):null):Number.isFinite(slot?.stock)?Math.floor(slot.stock):null;
+    const stock=resource?Infinity:Number.isFinite(slot?.stock)?Math.floor(slot.stock):null;
     const demand=Number.isFinite(slot?.cap)&&stock!=null?Math.max(0,Math.floor(slot.cap-slot.stock)):null;
     return {id:e.id,e,name:e.name,kind:e.kind,placeType:`${e.kind}:${e.type}`,type:typeName(e),system:systemOf(e),sector:sectorOf(e),favorite:!!state.favorites[e.id],hasGood:!!slot||resource,
       distance:ship?dist(ship,e):null,time:ship?flightSecs(ship,e):null,buy,sell,stock,demand,quantity:resource?stock:view.direction==='sell'?demand:view.direction==='buy'?stock:(buy!=null?stock:demand)};

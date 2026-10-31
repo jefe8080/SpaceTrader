@@ -6,9 +6,10 @@ import path from 'node:path';
 import {Game} from '../server/game.js';
 import {runCommand} from '../server/handlers/index.js';
 import {boardOf,exploreCells,exploreZone,questProgress} from '../server/quests.js';
-import {activeSideQuests} from '../shared/side-quests.js';
+import {activeSideQuests,explorationOfferAvailable,SIDE_QUEST_SECTOR_CELLS} from '../shared/side-quests.js';
 import {levelUpBenefits} from '../shared/level-up.js';
 import {WORLD} from '../shared/config.js';
+import {passengerTrade,transferPassengers} from '../server/population.js';
 const setup=(file=':memory:')=>{
  const game=new Game(file,{profile:'homeworld',seed:42}),p=game.createPlayer('Parallel'),e=game.world.entities.get(p.homeworld),s=game.shipsOf(p.id)[0];
  s.dockedAt=e.id;e.market.homeworld.facilities.dock.status='ready';s.cargo.water=10;
@@ -46,6 +47,8 @@ test('PRD14: parallel mining cannot reuse the same mined quantities',()=>{
  }finally{game.store.close();}
 });
 test('PRD14: exploration progresses additional slots and XP emits only real level transitions',()=>{
+ assert.equal(explorationOfferAvailable({type:'explore',zone:'visited'},['visited']),false);
+ assert.equal(explorationOfferAvailable({type:'explore',sector:'0,0',cells:SIDE_QUEST_SECTOR_CELLS},[],new Set(['0,0'])),false);
  const {game,p,e}=setup();try{
   p.quest=offer(e,'delivery');p.quests=[{...offer(e,'zone','explore'),zone:'qa-zone',progress:0}];
   exploreZone(game,p,[{id:'qa-zone'}]);assert.equal(activeSideQuests(p).length,1);assert.equal(p.quest.id,'delivery');
@@ -54,5 +57,20 @@ test('PRD14: exploration progresses additional slots and XP emits only real leve
   const events=[];game.on('pilotLevelUp',(_,event)=>events.push(event));p.xp=0;game.addXp(p,99);game.addXp(p,1);game.addXp(p,0);game.addXp(p,30000);
   assert.deepEqual(events,[{before:1,level:2},{before:2,level:7}]);assert.equal(p.pilot,1);
   const benefits=levelUpBenefits(2,7);assert.equal(benefits.additionalSlots,5);assert.equal(benefits.slotLimit,7);assert.deepEqual(benefits.licenses.map(l=>l.level),[3,4,5,6]);assert.equal(levelUpBenefits(7,7),null);
+ }finally{game.store.close();}
+});
+
+test('PRD14: parallel tours bind separate people; abort and transfer cannot reuse the other batch',()=>{
+ const {game,p,s}=setup();try{
+  p.xp=100;s.modules=['cabin'];const e=[...game.world.entities.values()].find(e=>e.kind==='planet'&&e.type!=='ruins'&&e.market?.economy?.workers),h=e.market.economy,n=h.population;
+  s.dockedAt=e.id;game.revealAround(p,e.x,e.y,1000);
+  boardOf(e).offers=['tour1','tour2'].map(id=>({...offer(e,id,'tour'),tourists:10,stops:['origin_hub'],stopNames:['Hub']}));
+  for(const quest of ['tour1','tour2'])assert.equal(runCommand(game,p,{cmd:'questAccept',target:e.id,ship:s.id,quest}),undefined);
+  assert.equal(s.cargo.tourists,20);assert.equal(h.population,n-20);assert.deepEqual(s.passengers.map(b=>b.quest),['tour1','tour2']);
+  assert.equal(runCommand(game,p,{cmd:'questAbort',quest:'tour1'}),undefined);assert.equal(s.passengers[1].quest,'tour2');
+  const second=game.spawnShip(p,'spatz',e);second.modules=['cabin'];second.dockedAt=e.id;
+  transferPassengers(s,second,'tourists',100);assert.equal(second.cargo.tourists,10);assert.equal(s.cargo.tourists,10);assert.equal(s.passengers[0].quest,'tour2');
+  s.dockedAt='origin_hub';questProgress(game,p,s,false);assert.equal(p.quest.state,'return');s.dockedAt=e.id;assert.equal(questProgress(game,p,s,false),true);assert.equal(h.population,n-10);
+  assert.equal(passengerTrade(game,second,e,'tourists',10,'sell').n,10);assert.equal(h.population,n);assert.equal(s.cargo.tourists,undefined);
  }finally{game.store.close();}
 });

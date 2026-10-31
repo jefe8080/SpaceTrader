@@ -59,6 +59,7 @@ export function tickRealMarket(game,entity,dt){
   const market=entity.market,cash=ensureCash(entity),now=game.time;
   const structure=()=>JSON.stringify(Object.entries(market.goods).map(([g,s])=>[g,s.role,s.rate,s.cap]));
   const before=structure();
+  if(entity.type==='hotel')initializePopulation(entity);
   tickVisitors(entity,now);
   if(entity.kind==='planet'){
     initializePopulation(entity);

@@ -261,11 +261,13 @@ und relevante neue Möglichkeiten zusammen verständlich dargestellt.
 
 ## Umfangsgrenzen
 
-- Dieser Auftrag liefert ausschließlich dieses PRD und dessen Commit.
-- Keine Spielcodeänderung, Assetgenerierung, Datenmigration oder Umsetzung
-  der nachfolgenden Arbeitsschritte ohne weiteren Umsetzungsauftrag.
+- Der ursprüngliche Planungsauftrag wurde mit dem anschließenden
+  Umsetzungsauftrag auf alle acht nachfolgenden Schritte erweitert.
+- Spielcode und die drei Wohnhausgrafiken gehören nun zum Auftrag;
+  eine flächendeckende Bestandsdatenmigration bleibt ausgeschlossen.
 - Keine Storyquest-Überarbeitung und kein neues Tourismusgebäude.
-- Kein automatischer Push oder andere Veröffentlichung.
+- Der abschließende Push auf `master` ist ausdrücklich ohne weitere
+  Rückfrage autorisiert. Andere Veröffentlichungen sind nicht beauftragt.
 
 ## Geplante Umsetzungsschritte und Fortschritt
 
@@ -362,15 +364,28 @@ und relevante neue Möglichkeiten zusammen verständlich dargestellt.
   und tatsächlich verfügbare Lizenzen samt separatem Kauf und Klassen.
   Auf Level 7 existiert keine Lizenz 7; das Popup benennt dies korrekt.
   28 gezielte Tests einschließlich echter Datenbankneustarts bestanden.
-- [ ] Schritt 8: Zusammenspiel und relevante Regressionstests abschließen;
+- [x] Schritt 8: Zusammenspiel und relevante Regressionstests abschließen;
   breite und schmale Ansichten visuell prüfen und Nachweise dokumentieren.
+
+  Ergebnis: Gesamtsuite mit 383 Tests bestanden. Browserabnahme in Edge bei
+  1440 × 900 und 390 × 844 ohne JavaScriptfehler: Wohnhausdarstellung,
+  Ausbauaktion, Rohstofffilter ohne Handelsaktionen, Questauswahl mit
+  eindeutiger Abgabe-ID, zivile Budgets, Absatzstatistik, schließbares Popup
+  und ausbleibende Wiederholung bei normalen Aktualisierungen.
+  Randkorrekturen: Heimatpreisregler unterstützen zivile Waren in ihren
+  allgemeinen Lagerrollen; vorhandene Hotels initialisieren ihre
+  Gästeverwaltung auch nach Laden; gewöhnliche Wohnhäuser öffnen direkt
+  ihr eigenes Panel, und Stufenwechsel aktualisieren die Stadtgrafik.
+  Persönlich erledigte Erkundungsangebote werden ausgeblendet. Die mobile
+  Questauswahl bleibt neben geöffneten Ortsdetails separat scrollbar.
+  Detaillierte Nachweise: `docs/qa/prd14/README.md`.
 
 Bei späterer Umsetzung werden nach jedem fachlich abgeschlossenen Schritt
 passende Prüfungen ausgeführt, Fortschritt und Ergebnisse hier aktualisiert
 und gemeinsam mit dem Schritt committet. Fehlgeschlagene oder nicht
 ausführbare Prüfungen werden ausdrücklich dokumentiert.
 
-## Abnahmekriterien für die spätere Umsetzung
+## Abnahmekriterien der Umsetzung
 
 1. Tatsächliche lokale Verkäufe erscheinen je Ware mit Menge und bezahlten
    Credits getrennt vom übrigen Verbrauch. Die Summe der lokalen
@@ -441,7 +456,7 @@ keine bereits durchgeführte Änderung:
   `tests/population.test.js`, `tests/real-economy.test.js` und
   `tests/property.test.js`; Storyquesttests dienen nur der Regression.
 
-## Prüfstand dieses Planungsauftrags
+## Prüfstand des ursprünglichen Planungsauftrags
 
 Es wurden Anforderungen und relevante bestehende Regeln gelesen; Spielcode
 und Assets wurden nicht verändert. Umsetzungstests und visuelle
@@ -449,3 +464,12 @@ Spielabnahme sind noch nicht durchgeführt und für diesen reinen
 Planungsauftrag nicht erforderlich. Vor dem Dokumentationscommit werden
 Dokumentdiff, Änderungsumfang und Whitespace geprüft. Die vollständige
 Spieltestsuite ist erst für die spätere Umsetzung vorgesehen.
+
+## Abschließender Prüfstand der Umsetzung
+
+Umsetzung am 31.10.2026 abgeschlossen. Die Gesamtsuite und die browserbasierten
+Prüfungen sind unter `docs/qa/prd14/` dokumentiert. Die Prüfläufe verwenden
+isolierte In-Memory- beziehungsweise temporäre Datenbanken; vorhandene
+Spielstände wurden nicht verändert. Alle fachlichen Schritte wurden
+getrennt committet. Der abschließende Commit enthält diese Abnahme und
+die dabei gefundenen Randkorrekturen.

@@ -6,7 +6,7 @@ import { $, setHtml } from './dom.js';
 import { bus } from './bus.js';
 import { HOME_QUESTS } from '/shared/homeworld.js';
 import { selectHomeQuest } from '/shared/quest-selection.js';
-import {activeSideQuests,sideQuestLimit,selectedSideQuest,minedQuestProgress} from '/shared/side-quests.js';
+import {activeSideQuests,sideQuestLimit,selectedSideQuest,minedQuestProgress,explorationOfferAvailable} from '/shared/side-quests.js';
 let selectedHomeQuest = null;
 let selectedQuest=null;
 
@@ -57,7 +57,7 @@ export function questBoardSection(e, dockedShip, inHouse = false) {
   const m = e.market;
   const lvl = giverLevel(m.qxp || 0);
   const next = GIVER_LEVELS[lvl + 1];
-  const offers = m.board || [];
+  const offers = (m.board || []).filter(q=>explorationOfferAvailable(q,state.zoneVisits,state.cells));
   let h = `<div class="section"><div class="section-title">Questtafel · Level ${lvl}${next ? ` <span class="muted" style="text-transform:none;letter-spacing:0">(${fmt(m.qxp || 0)} / ${fmt(next)} XP)</span>` : ''}</div>`;
   if (!offers.length) h += `<div class="muted">Keine Aufträge. Neue erscheinen alle ${QUEST.EVERY[0] / 60} bis ${QUEST.EVERY[1] / 60} min (${QUEST.SLOTS[lvl]} ${QUEST.SLOTS[lvl] > 1 ? 'Plätze' : 'Platz'}).</div>`;
   for (const q of offers) {

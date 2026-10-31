@@ -5,7 +5,7 @@ import { hexAt, hexKey, hexNeighbors } from '../shared/hex.js';
 import { missingInputs, stat } from './markets.js';
 import {availableHomeStock} from '../shared/homeworld.js';
 import {passengerTrade,updatePassengerOffers,peopleOf,residentDepartureCapacity} from './population.js';
-import {activeSideQuests,sideQuestLimit,selectedSideQuest,removeSideQuest,minedQuestProgress} from '../shared/side-quests.js';
+import {activeSideQuests,sideQuestLimit,selectedSideQuest,removeSideQuest,minedQuestProgress,explorationOfferAvailable} from '../shared/side-quests.js';
 
 /**
  * Nebenquests: Tafeln an Planeten und Werften, ein aktiver Slot je Pilotenlevel, keine Fristen.
@@ -194,8 +194,7 @@ export function questOfferError(game,player,ship,q){
     if(q.zone&&(!game.findZone(q.zone)||player.zoneVisits?.includes(q.zone)))return 'Dieses Sondergebiet wurde bereits besucht oder existiert nicht mehr.';
     if(q.sector){
       if(!game.world.sectors.has(q.sector))return 'Der Zielsektor existiert nicht mehr.';
-      let known=0;for(const key of player.revealed){const [x,y]=key.split(',').map(Number),h=hexAt((x+.5)*WORLD.FOG_CELL,(y+.5)*WORLD.FOG_CELL);if(hexKey(h.q,h.r)===q.sector)known++;}
-      if(SECTOR_CELLS-known<q.cells)return 'In diesem Sektor ist nicht mehr genügend unerforschte Fläche für diesen Auftrag übrig.';
+      if(!explorationOfferAvailable(q,player.zoneVisits,player.revealed))return 'In diesem Sektor ist nicht mehr genügend unerforschte Fläche für diesen Auftrag übrig.';
     }
   }
   return null;

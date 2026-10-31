@@ -6,6 +6,7 @@ import { newProperty, buildableTypes, propBook } from '../property.js';
 import { consortiumOf, isMaster, propCount, clog } from '../consortium.js';
 import { remoteManagementError } from '../coverage.js';
 import {startPhysicalBuild,applyPhysicalHull} from '../physical-yards.js';
+import {CIVIL_GOODS} from '../../shared/local-demand.js';
 
 /**
  * Verwaltbarer Besitz: eigener oder (als Handelsmeister) Besitz des eigenen Konsortiums.
@@ -89,7 +90,7 @@ export default {
   propFixed: {
     args: { target: ownProp(), good: V.key(GOODS), s: V.num(FIXED.MIN, FIXED.MAX) },
     run(ctx, { target: { e, prop }, good, s }) {
-      if (e.kind !== 'planet' || e.market.goods[good]?.role !== 'consume') return 'Fixpreise gibt es nur für den Verbrauch eigener Planeten.';
+      if (e.kind !== 'planet' || !(e.market.homeworld?CIVIL_GOODS.includes(good):e.market.goods[good]?.role==='consume')) return 'Fixpreise gibt es nur für den zivilen Verbrauch eigener Planeten.';
       prop.fixed[good] = Math.round(s * 100) / 100;
     },
   },

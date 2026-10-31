@@ -312,6 +312,8 @@ function entityDetails(e) {
       infrastructure += `<div class="kv"><span>Verarbeitung</span><span>${recipeText(def.recipe)} (${def.recipe.time}s)</span>
         <span>Status</span><span>${m.eff >= 1 ? 'läuft' : m.eff > 0 ? 'langsam (keine Nahrung)' : 'steht still'}</span>
         <span>Versorgung</span><span>${supplyText(m)}</span></div>`;
+    } else if (e.type==='hotel'&&state.homeworld) {
+      infrastructure+='<p>Orbitalhotel mit begrenzten Gästeplätzen. Touristen bleiben 20 Minuten als Gäste und können anschließend wieder abgeholt werden.</p>';
     } else if (def.consume) {
       infrastructure += `<div class="muted">Kauft ${Object.keys(def.consume).map((g) => GOODS[g].name).join(', ')}.</div>`;
     } else if (def.buys) {

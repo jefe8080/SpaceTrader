@@ -9,6 +9,8 @@ import {specializationSpec,WORLD_FOCI} from '../shared/specializations.js';
 import {GOODS,propertyPrice} from '../shared/config.js';
 import {handlingAllowance,recordHandling} from '../server/handling.js';
 import {HOME_BUILDINGS} from '../shared/homeworld.js';
+import {localDemandPerHour} from '../shared/local-demand.js';
+import {localSalesSummary} from '../shared/local-sales.js';
 
 function fixture(type='mining'){
   const game=new Game(':memory:',{seed:42,profile:'homeworld'}),player=game.createPlayer('Ausbau');
@@ -71,7 +73,15 @@ test('Questgeberlevel erzeugt weder zusätzliches Angebot noch höheren Besitzwe
 
 test('Ziviler Grundbedarf folgt realer Einwohnerzahl; Unterversorgung zerstört keine Einwohner',()=>{
   const f=fixture(),population=f.h.population;stock(f,{water:1000,food:1000});f.h.housing=population;
-  tickRealMarket(f.game,f.e,3600);assert(f.h.population>=population);assert(Math.abs(f.e.market.goods.water.stock-(1000-population*.2))<1e-8);assert(Math.abs(f.e.market.goods.food.stock-(1000-population*.1))<1e-8);
+  tickRealMarket(f.game,f.e,3600);assert(f.h.population>=population);
+  const sales=localSalesSummary(f.e.market,f.game.time),prop=f.game.ownership.get(f.e.id);
+  for(const g of ['water','food']){
+    assert.equal(f.e.market.goods[g].rate,population*(g==='water'?.2:.1)/3600);
+    const taken=1000-f.e.market.goods[g].stock;
+    assert(taken<=localDemandPerHour(g,f.e.market.goods[g],prop)+1e-8);
+    assert(Math.abs(taken-(sales.quantities[g]||0))<1e-8);
+  }
+  assert(sales.total<=f.h.civil.gross-f.h.civil.taxes+1e-8);assert(f.h.civil.purchaseLimited);
   stock(f,{water:0,food:0});const before=f.h.population;tickRealMarket(f.game,f.e,7*86400);assert.equal(f.h.population,before);close(f);
 });
 

@@ -1,4 +1,15 @@
 import {pilotLevel} from './progression.js';
+import {WORLD} from './config.js';
+import {hexAt,hexKey} from './hex.js';
+export const SIDE_QUEST_SECTOR_CELLS=Math.round(Math.PI*WORLD.SECTOR_RADIUS**2/WORLD.FOG_CELL**2);
+export function explorationOfferAvailable(quest,zoneVisits=[],cells=new Set()){
+  if(quest.type!=='explore')return true;
+  if(quest.zone)return !zoneVisits.includes(quest.zone);
+  if(!quest.sector)return false;
+  let known=0;
+  for(const key of cells){const [x,y]=key.split(',').map(Number),h=hexAt((x+.5)*WORLD.FOG_CELL,(y+.5)*WORLD.FOG_CELL);if(hexKey(h.q,h.r)===quest.sector)known++;}
+  return SIDE_QUEST_SECTOR_CELLS-known>=quest.cells;
+}
 
 /** Read old saves in place: the original quest remains the first slot. */
 export function activeSideQuests(player){

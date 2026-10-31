@@ -373,5 +373,5 @@ function playerDetail(p) {
   return { guideRead: p.guideRead || [], stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1, governor: p.governor || 0, faction: p.faction || null,
     homeworld: p.homeworld || null, homeQuest: p.homeQuest || null, manualShip: p.manualShip || null, relic: p.relic || null,moduleBlueprints:p.moduleBlueprints||[],
     flagshipAt: p.flagshipAt ?? null, xp: Math.floor(p.xp || 0), level: pilotLevel(p.xp), quest: p.quest || null, quests:p.quests||[],questMinedUsed:p.questMinedUsed||{}, questLock: p.questLock || 0,
-    rep: p.rep || {}, questsDone: p.questsDone || 0, dogUntil: p.dogUntil || 0, mg: p.mg || null };
+    rep: p.rep || {},zoneVisits:p.zoneVisits||[], questsDone: p.questsDone || 0, dogUntil: p.dogUntil || 0, mg: p.mg || null };
 }

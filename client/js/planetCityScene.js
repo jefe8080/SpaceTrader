@@ -159,8 +159,11 @@ export class PlanetCityScene {
   drawRecord(ctx,r){
     const item=r.item,cell=citySprite(this.entity,item,GOODS),active=r.key===this.selected||r.key===this.hover;
     if(typeof cell==='string'&&cell.startsWith('housing-')){
-      const level=Number(cell.slice(-1)),w=r.w,h=r.h*(1+(level-1)*.2);
-      ctx.drawImage(this.art.housing[level-1],r.x-w/2,r.y-h,w,h);
+      const level=Number(cell.slice(-1)),image=this.art.housing[level-1];
+      // Authored alpha bounds keep foundations aligned across three different canvases.
+      const [x,y,sw,sh]=[[200,30,1155,954],[415,7,763,1009],[223,7,815,1296]][level-1];
+      const w=Math.max(80,r.w),h=w*sh/sw;
+      ctx.drawImage(image,x,y,sw,sh,r.x-w/2,r.y-h,w,h);
       if(active||this.names)this.drawName(ctx,r);return;
     }
     if(active){

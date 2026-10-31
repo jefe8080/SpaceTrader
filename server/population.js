@@ -129,7 +129,7 @@ export function passengerTrade(game,ship,e,good,amount,dir,limit=0,free=false){
   const returning=(ship.passengers||[]).some(b=>b.kind===good&&b.origin===e.id&&!b.quest);
   const reason=good==='workers'||returning?'Kein freier Wohnraum für Ansiedlung oder Rückkehr; Personen bleiben an Bord.':
     (ship.passengers||[]).some(b=>b.kind===good&&b.quest)?'Questgebundene Touristen werden über die Rundreisequest zurückgegeben.':
-    capacity<=0?'Dieser Planet hat keine touristischen Gästeplätze. Touristen können auf Paradieswelten und in Orbitalhotels untergebracht werden.':`Keine Gästeplätze verfügbar: ${occupied} / ${capacity} belegt. Personen bleiben an Bord.`;
+    capacity<=0?'Dieser Planet hat keine touristischen Gästeplätze. Touristen können auf Paradieswelten und in Orbitalhotels untergebracht werden.':occupied>=capacity?`Keine Gästeplätze verfügbar: ${occupied} / ${capacity} belegt. Personen bleiben an Bord.`:'Keine frei verfügbaren Touristen an Bord.';
   return {n:delivered,total:0,reason:delivered?undefined:reason};
 }
 

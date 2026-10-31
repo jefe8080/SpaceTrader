@@ -533,4 +533,10 @@ body.fleet-collapsed #fleet .fleet-item img { width:30px; }
 .level-up-dialog li { margin-bottom: 10px; }
 .housing-card { padding: 10px 0; border-bottom: 1px solid #627e6c; }
 #questBox .btnrow { flex-wrap: wrap; }
+#questBox { max-height: min(60vh, 480px); overflow-y: auto; }
 #questBox [aria-pressed="true"] { border-color: #e6be73; background: #456258; }
+@media(max-width:600px) {
+  body:has(#details:not([hidden])) #questBox { left:4px; width:145px; overflow-wrap:anywhere; }
+  body:has(#details:not([hidden])) #questBox .qb-head,
+  body:has(#details:not([hidden])) #questBox .qb-foot { flex-wrap:wrap; }
+}
