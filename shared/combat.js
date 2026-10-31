@@ -155,7 +155,6 @@ export const COMBAT_ABILITIES = {
 
 export const navalClass = (type) => COMBAT_TYPES[type]?.cls || 'civil';
 export const isWarship = (type) => navalClass(type) === 'war';
-export const isSquadron = (type) => !!COMBAT_TYPES[type]?.squad;
 
 /**
  * Bauplan eines Typs: Systeme mit fester Position, Waffen mit Zuordnung, Schildsektoren mit Generator.
@@ -205,7 +204,6 @@ export function blueprint(type) {
 }
 
 /** Anzahl anwählbarer Systeme (für den PRD-Richtwertvergleich) */
-export const systemCount = (type) => blueprint(type).systems.length;
 
 /** Kampfzustand eines Schiffes außerhalb der Schlacht anlegen bzw. ergänzen (bleibende Schäden) */
 export function ensureDamage(ship) {

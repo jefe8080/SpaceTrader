@@ -10,8 +10,7 @@ import { startBattle, endBattle, isActive, logBattle } from './battle.js';
 import { stackOf, stackMembers, mergeShips, leaderOf } from './stacks.js';
 import { isProtected } from './engage.js';
 import { diplo, factionOwner, factionOfOwner, isFactionOwner, factionHostileTo, attackBlock, neutralPhase, isFriend } from './diplomacy.js';
-import { fsecOfEntity, warshipsOf, poolSpend, receiveGoods } from './factions.js';
-import { hooks } from './hooks.js';
+import { warshipsOf, poolSpend, receiveGoods } from './factions.js';
 import { setWarn } from '../ships.js';
 
 const aggrKey = (fs) => fs.key;

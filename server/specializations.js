@@ -1,4 +1,4 @@
-import {HOME_BUILDINGS,HOMEWORLD,availableHomeStock,homeStructureSpec,housingLevel,housingUpgradeCost} from '../shared/homeworld.js';
+import {HOME_BUILDINGS,availableHomeStock,homeStructureSpec,housingLevel,housingUpgradeCost} from '../shared/homeworld.js';
 import {WORLD_FOCI,specializationSpec} from '../shared/specializations.js';
 import {GOODS} from '../shared/goods.js';
 import {remoteManagementError} from './coverage.js';

@@ -58,7 +58,6 @@ export function closeBattle() {
   battleId = null;
   socket.emit('battleView', { id: null });
 }
-export const battleOpen = () => !!el && !el.hidden;
 
 socket.on('battle', (v) => {
   if (!el || v.id !== battleId) return;

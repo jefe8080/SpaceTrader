@@ -8,7 +8,7 @@ import { ransom, ransomQuote } from '../war/outcome.js';
 import { beginRetreat, isActive, defaultTactic } from '../war/battle.js';
 import { COMBAT, blueprint } from '../../shared/combat.js';
 import { kindFactor } from '../../shared/damage.js';
-import { startRepair, quoteFor } from '../war/repair.js';
+import { startRepair } from '../war/repair.js';
 import { setAlliance } from '../war/support.js';
 import { supplyDelivery, deliverGift, buyGalacticFriendship } from '../war/factions.js';
 import { raidError, repairPlanet } from '../war/raids.js';

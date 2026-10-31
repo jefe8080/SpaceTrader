@@ -1,6 +1,6 @@
 import {recordInventoryTrade} from './pilot-profile.js';
 import {recordLocalSale} from '../shared/local-sales.js';
-import { RECIPES, PLANET_TYPES, PROP_UPGRADES, FIXED, SHIP_TYPES, buyPrice, sellPrice,
+import { RECIPES, PROP_UPGRADES, FIXED, SHIP_TYPES, buyPrice, sellPrice,
   priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref } from '../shared/config.js';
 import { stat, applyLevel, ensureFactoryStorage } from './markets.js';
 import { addToBuckets } from './stats.js';

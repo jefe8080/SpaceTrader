@@ -5,7 +5,7 @@ import { revealQuestTarget } from './quest-activation.js';
 import { WORLD, GOODS, BELT_TYPES, QUEST, QUEST_TYPES, REP, RANKS, factionRank, questReward, flightMinutes, canBuyFrom, shipStats,
   giverLevel, giverXpOf, planetFeatures, EXTRAS, freeFor } from '../shared/config.js';
 import { hexAt, hexKey, hexNeighbors } from '../shared/hex.js';
-import { missingInputs, stat } from './markets.js';
+import { missingInputs } from './markets.js';
 import {availableHomeStock} from '../shared/homeworld.js';
 import {passengerTrade,updatePassengerOffers,peopleOf,residentDepartureCapacity} from './population.js';
 import {activeSideQuests,sideQuestLimit,selectedSideQuest,removeSideQuest,minedQuestProgress,explorationOfferAvailable} from '../shared/side-quests.js';

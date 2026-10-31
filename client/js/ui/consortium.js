@@ -2,7 +2,7 @@
 import { CONSORTIUM, CONSORTIUM_LEVELS, MAX_CONSORTIUM_LEVEL, RANK } from '/shared/config.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
-import { $, registerModal, openModal, closeModal, setHtml } from './dom.js';
+import { $, registerModal, closeModal, setHtml } from './dom.js';
 
 const card = $('consCard');
 /** Aufgeklappte Bereiche (überleben das Neuzeichnen) */
@@ -138,5 +138,4 @@ card.addEventListener('toggle', (ev) => {
 }, true);
 
 registerModal('consModal', renderCons);
-export const openConsortium = () => openModal('consModal');
 export const rerenderConsortium = renderCons;

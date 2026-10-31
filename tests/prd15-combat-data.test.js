@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SHIP_TYPES, factionRank, RANKS } from '../shared/config.js';
-import { COMBAT, COMBAT_TYPES, COMBAT_ABILITIES, WEAPONS, SYSTEMS, ARMOR, armorFactor, blueprint, systemCount, navalClass, systemState, ensureDamage, needsRepair, repairQuote, blueprintRank } from '../shared/combat.js';
+import { COMBAT, COMBAT_TYPES, COMBAT_ABILITIES, WEAPONS, SYSTEMS, ARMOR, armorFactor, blueprint, navalClass, systemState, ensureDamage, needsRepair, repairQuote, blueprintRank } from '../shared/combat.js';
 import { FACTIONS } from '../shared/factions.js';
 
 test('PRD15 U02: jeder Schiffstyp hat Klasse, Kampfdefinition und festen Bauplan', () => {
@@ -26,6 +26,7 @@ test('PRD15 U02: jeder Schiffstyp hat Klasse, Kampfdefinition und festen Bauplan
 });
 
 test('PRD15 U02: Systemzahlen folgen den Richtwerten; Staffeln ohne anwählbare Systeme', () => {
+  const systemCount = (t) => blueprint(t).systems.length;
   const range = (t, lo, hi) => { const n = systemCount(t); assert.ok(n >= lo && n <= hi, `${t}: ${n} Systeme`); };
   for (const t of ['abfangstaffel', 'bomberstaffel']) assert.equal(systemCount(t), 0);
   for (const t of ['kolibri', 'maulwurf']) range(t, 2, 3);

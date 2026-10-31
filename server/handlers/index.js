@@ -48,4 +48,3 @@ export function runCommand(game, player, msg) {
   }
 }
 
-export const commandNames = () => Object.keys(HANDLERS);

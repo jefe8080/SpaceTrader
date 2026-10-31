@@ -1,5 +1,5 @@
 // NPC-Fraktionen: Archetypen mit Namensschema, Farbe, Spezialisierung, Schiffswährung und Fraktionsschiff.
-import {GOODS,REFINED_FOR_RAW,refinedAmountFor} from './goods.js';
+import {REFINED_FOR_RAW,refinedAmountFor} from './goods.js';
 
 export const FACTION = {
   CLUSTER_EVERY: 3,     // ca. 1 Fraktionscluster je 3 Sektoren

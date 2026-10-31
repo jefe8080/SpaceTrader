@@ -72,11 +72,11 @@ export function supplyLoad(slot) {
   return Math.min(free, SUPPLY.LOAD_MAX, Math.max(SUPPLY.LOAD_MIN, Math.floor(slot.cap * SUPPLY.LOAD_SHARE)));
 }
 
-import { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES } from './goods.js';
+import { GOODS } from './goods.js';
 export { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES, RECIPES, TIER_NAMES, CARGO_CLASSES, MINE_CLASSES, ULTRA, STATION_FOOD } from './goods.js';
-export { FACTIONS, FACTION_SHIPS, FACTION, ABILITIES, factionShips } from './factions.js';
-export { SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, STEP, YARD_MARGIN, MODULE_SIZE, MODULE_REFUND, SENSOR, FLAGSHIP, sensorFactor,
-  upgradeCost, moduleCapacity, moduleMiningRate, shipStats, holdOf, holdFor, hasAbility, holdUsage, freeFor, cargoFits, sellValue, countModules, buildMaterials } from './ships.js';
+export { FACTIONS, FACTION, ABILITIES, factionShips } from './factions.js';
+export { SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, YARD_MARGIN, MODULE_SIZE, MODULE_REFUND, SENSOR, FLAGSHIP,
+  upgradeCost, moduleCapacity, shipStats, holdOf, holdFor, hasAbility, holdUsage, freeFor, cargoFits, sellValue, countModules } from './ships.js';
 
 export * from './progression.js';
 export * from './consortium.js';
@@ -89,7 +89,7 @@ export { FACTS } from './facts.js';
 import { PRICE, curveMax, curveMin } from './price.js';
 export { PRICE, curveMax, curveMin };
 export { GOVERNOR_LICENSES, UNLOCK_NAMES, PROP_UPGRADES, FIXED, CUSTOMS_MAX, RECYCLE_SHARE, propertyKind, minGovernorFor, propertyBasePrice,
-  propertyPrice, propUpgradeCost, extraOptions, priceWindow, fixedPrice, fixedRevenuePerHour, fixedConsumptionPerHour, fixedRref } from './property.js';
+  propertyPrice, propUpgradeCost, extraOptions, priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref } from './property.js';
 
 export function unitPrice(good, stock, cap, mod = 1) {
   const r = Math.max(0, Math.min(1, stock / cap));

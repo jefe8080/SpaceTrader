@@ -14,7 +14,7 @@ import { tickMarket, stat, missingInputs, applyLevel, runRecipe } from './market
 import { updateShip, setWarn } from './ships.js';
 import { Store } from './db.js';
 import { addToBuckets, bucketOf, summary, sumWindow, balance, SHIP_STATS } from './stats.js';
-import { applyProperty, releaseMarket, tickOwnedPlanet, strangerBlocked, payForDelivery, sellToSupplier, propBook } from './property.js';
+import { applyProperty, releaseMarket, tickOwnedPlanet, strangerBlocked, payForDelivery, propBook } from './property.js';
 import { flushRevenue, trimLog, isMaster } from './consortium.js';
 import { removeOffersOf } from './offers.js';
 import { tickEvents, sellToEvent } from './events.js';
@@ -37,8 +37,6 @@ import { migrateWar } from './war/migrate.js';
 import { stackSpeed, removeFromStacks } from './war/stacks.js';
 import { recordActivity, tradeAdminSupply } from './war/factions.js';
 import { productionFactor } from './war/raids.js';
-
-export const WORLD_GEN_VERSION = 3; // Bestandswelt; Versionskonflikte lösen niemals einen Reset aus
 
 export class Game {
   /** dbFile: Pfad zur SQLite-Datei oder ':memory:' */

@@ -97,7 +97,6 @@ const SFX = {
   attackWarning: (t) => seq(t,[440,880,440,880],.16,{dur:.2,vol:.28,type:'sawtooth',filter:2200}),
   error: (t) => { tone(t, { f: 150, f2: 110, dur: 0.22, vol: 0.25, type: 'sawtooth', filter: 900 }); tone(t + 0.1, { f: 140, f2: 100, dur: 0.2, vol: 0.2, type: 'sawtooth', filter: 900 }); },
 };
-export const SFX_NAMES = Object.keys(SFX);
 
 const lastPlayed = {};
 /** Effekt abspielen; 80-ms-Schutz außer für getrennte neue Angriffswarnungen. */
@@ -197,7 +196,6 @@ function planetNote(t, f, dur, tb, vib, wet) {
 // ---------------- Musik ----------------
 // Moll-Tonleiter (natürlich) und Akkordstufen; Grundton wechselt gelegentlich
 const MINOR = [0, 2, 3, 5, 7, 8, 10];
-const DEGREES = [0, 3, 4, 5, 6, 2]; // i, iv, v, VI, VII, III
 const NEXT = { 0: [3, 5, 6, 4], 3: [0, 4, 5, 6], 4: [0, 5, 3], 5: [3, 6, 0, 2], 6: [0, 2, 5], 2: [5, 3, 6] };
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const midi = (n) => 440 * 2 ** ((n - 69) / 12);

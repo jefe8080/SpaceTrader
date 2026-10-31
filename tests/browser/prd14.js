@@ -3,7 +3,7 @@ import {state} from '/js/state.js';
 import {GOODS,PLANET_TYPES,BELT_TYPES} from '/shared/config.js';
 import {renderQuestBox} from '/js/ui/quests.js';
 import {renderDetails} from '/js/ui/details.js';
-import {openFavorites} from '/js/ui/favorites.js';
+import {openModal} from '/js/ui/dom.js';
 import {enterPlanet,leavePlanet,renderPlanetUi,openBuilding} from '/js/ui/planetPanel.js';
 import {scene} from '/js/planetside.js';
 import {showLevelUp} from '/js/ui/levelUp.js';
@@ -28,7 +28,7 @@ window.prd14={
  home:level=>{ship.dockedAt=home.id;enterPlanet(home.id);openBuilding(scene.items.find(i=>i.homeStructure==='housing-'+level),true);},
  normal:()=>{ship.dockedAt=normal.id;enterPlanet(normal.id);openBuilding(scene.items.find(i=>i.worldInfrastructure==='infra-3'),true);},
  economy:()=>{leavePlanet();ship.dockedAt=normal.id;state.selected={kind:'entity',id:normal.id};renderDetails();},
- places:()=>{leavePlanet();openFavorites();},
+ places:()=>{leavePlanet();openModal('favorites');},
  level:()=>showLevelUp({before:1,level:7}),
  refresh:()=>{renderQuestBox();renderPlanetUi();renderDetails();},
 };

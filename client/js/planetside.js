@@ -54,10 +54,6 @@ export function hidePlanetside() {
   viewer?.hide();
   status('');
 }
-export function pickBuilding(x, y) {
-  const key = viewer?.pick(x, y);
-  return scene.items.find(it => it.key === key) ?? null;
-}
 export function getPlanetView() { return viewer; }
 export function renderPlanetside(now, dt) {
   const e = state.entities.get(state.landed);

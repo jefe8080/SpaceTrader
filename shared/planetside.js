@@ -8,24 +8,7 @@ export const BUILDING = {
   STORAGE: 0.15,      // Lager der Ware +15 % je Level
   MAX_PUBLIC: 6,      // jeder Spieler bis Level 6
   MAX_OWNER: 10,      // Level 7 bis 10 nur bei eigenem Besitz (bzw. Handelsmeister bei Konsortiumsbesitz)
-  BASE_CR: 50000,     // Credits: 50.000 × 1,8^(L−1) × Planetengröße
-  STEP: 1.8,
-  XP_CR: 2000,        // Questgeber-XP: 1 je 2.000 Cr Ausbauwert (Credits plus Warenwert zum Basispreis)
 };
-/** Waren je Levelstufe, Mengen × Level (wie bei propUpgradeCost) */
-const BUILDING_GOODS = [
-  [3, { plates: 10, machinery: 2, gears: 4 }],
-  [6, { electronics: 4, robots: 1, hullparts: 1 }],
-  [10, { robots: 2, aicores: 1, habitats: 1 }],
-];
-export function buildingUpgradeCost(e, level) {
-  const credits = Math.round(BUILDING.BASE_CR * BUILDING.STEP ** (level - 1) * (e.size || 1) / 100) * 100;
-  const base = BUILDING_GOODS.find(([max]) => level <= max)[1];
-  const goods = Object.fromEntries(Object.entries(base).map(([g, n]) => [g, Math.ceil(n * level)]));
-  return { credits, goods };
-}
-/** Wert eines Ausbaus für die Questgeber-XP */
-export const upgradeValue = (cost) => cost.credits + Object.entries(cost.goods).reduce((a, [g, n]) => a + n * GOODS[g].base, 0);
 /** Wirksames Level: ohne Besitz auf 6 gedeckelt */
 export const effectiveLevel = (lvl, owned) => Math.min(lvl || 0, owned ? BUILDING.MAX_OWNER : BUILDING.MAX_PUBLIC);
 export const buildingRateMul = (lvl) => 1 + BUILDING.RATE * lvl;

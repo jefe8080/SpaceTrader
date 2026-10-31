@@ -5,7 +5,7 @@ import {questText} from './quests.js';
 import {HOME_STORY,storyAvailable,storyDialogReady} from '/shared/home-story.js';
 import { GOODS, RECIPES,recipeText } from '/shared/config.js';
 import {recipeWithStock} from './productionDisplay.js';
-import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock, homeGoodCapacity, homeGoodLimit, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '/shared/homeworld.js';
+import { HOME_QUESTS, HOMEWORLD, HOME_BUILDINGS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock, homeGoodCapacity, homeGoodLimit, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '/shared/homeworld.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import {moduleStockPanel,moduleCraftPanel} from './modules.js';

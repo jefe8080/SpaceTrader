@@ -1,4 +1,4 @@
-import { GOODS, SHIP_TYPES, BELT_TYPES, canBuyFrom, canSellTo } from '/shared/config.js';
+import { GOODS, BELT_TYPES, canBuyFrom, canSellTo } from '/shared/config.js';
 import { state, esc, fmtK, fleetOrder, selectedShips } from '../state.js';
 import { socket, cmd } from '../net.js';
 import { typeName, playerPrice, dist, shipSymbol, hasWarn, actionText, canMine } from '../util.js';
@@ -374,8 +374,6 @@ ovCard.addEventListener('click', (ev) => {
 });
 
 registerModal('routesOverview', () => { syncSubs(); renderOverview(); }, () => syncSubs());
-
-export function openRoutesOverview() { openModal('routesOverview'); requestRouteStats(); }
 
 // =====================================================================
 // Routen-Menü am Schiff

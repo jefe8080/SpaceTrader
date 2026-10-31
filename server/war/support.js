@@ -102,8 +102,6 @@ export function stockProtection(game) {
   }
 }
 
-export const isYard = (e) => e?.kind === 'station' && ['shipyard', 'bigyard', 'factionyard'].includes(e.type);
-
 /** Militärisches Bündnis des Konsortiums: nur die Leitung (Handelsmeister) darf es ändern */
 export function setAlliance(game, player, on) {
   const c = game.consortia.get(player.consortium);

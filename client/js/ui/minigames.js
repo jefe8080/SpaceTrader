@@ -347,7 +347,6 @@ const SKILL = {
   },
   shells(rng, dog) {
     const swaps = dog ? 6 : 9, step = dog ? 520 : 380;
-    const pos = [0, 1, 2]; // Hütchen -> Platz
     const ball = Math.floor(rng() * 3);
     const seq = Array.from({ length: swaps }, () => { const a = Math.floor(rng() * 3); let b = Math.floor(rng() * 2); if (b >= a) b++; return [a, b]; });
     const t0 = performance.now() + 1400;

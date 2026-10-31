@@ -2,7 +2,7 @@ import { GOODS, BELT_TYPES, canBuyFrom, canSellTo } from '/shared/config.js';
 import { state, esc, selectedShips, fleetOrder } from '../state.js';
 import { cmd } from '../net.js';
 import { typeName, playerPrice, flightSecs, fmtDuration, systemName, sectorName, dist } from '../util.js';
-import { $, registerModal, openModal, closeModal, isOpen, toast } from './dom.js';
+import { $, registerModal, closeModal, toast } from './dom.js';
 import { orderShips, orderBuy } from './orders.js';
 import { openRouteEditor, addStopToRoute } from './routes.js';
 import { storagePrice } from './property.js';
@@ -129,5 +129,3 @@ function showBuy(e){
  const f=$('favBuy');f.hidden=false;f.innerHTML=`<b>Einkaufen bei ${esc(e.name)}</b><select id="favBuyGood">${options(goods.map(g=>[g,GOODS[g].name]),view.good)}</select><input id="favBuyAmt" type="number" min="0" placeholder="Menge (0 = max.)"><button data-f="doBuy" data-id="${e.id}">In Queue einreihen</button><button data-f="cancelBuy">Abbrechen</button>`;f.scrollIntoView({block:'nearest'});
 }
 registerModal('favorites',()=>{if(!$('tradeRows')){if(!initialized){view.ship=selectedShips()[0]?.id||'';initialized=true;}shell();}else update();},()=>extraSubs.favorites.clear(),{liveWhileTyping:true});
-export const openFavorites=()=>openModal('favorites');
-export const favoritesOpen=()=>isOpen('favorites');

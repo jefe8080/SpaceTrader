@@ -6,7 +6,6 @@ const SQRT3 = Math.sqrt(3);
 export const HEX_SIZE = WORLD.HEX_SPACING / SQRT3;
 
 export const hexKey = (q, r) => q + ',' + r;
-export const parseHexKey = (k) => k.split(',').map(Number);
 
 export function hexCenter(q, r) {
   return { x: HEX_SIZE * SQRT3 * (q + r / 2), y: HEX_SIZE * 1.5 * r };

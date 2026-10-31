@@ -1,9 +1,9 @@
 // PRD 15 U06: Schlachtende. Kapitulation, Sieg/Unentschieden, Besitzwechsel, Gefangene, Freikauf, Trümmer und Berichte.
 import { SHIP_TYPES, GOODS, freeFor, WORLD } from '../../shared/config.js';
-import { COMBAT, navalClass, blueprint, maxHull, needsRepair } from '../../shared/combat.js';
-import { isActive, drivesDestroyed } from './battle.js';
+import { COMBAT, navalClass, maxHull, needsRepair } from '../../shared/combat.js';
+import { drivesDestroyed } from './battle.js';
 import { hooks } from './hooks.js';
-import { removeFromStacks, detachShip } from './stacks.js';
+import { removeFromStacks } from './stacks.js';
 import { ownerName, isFactionOwner, diplo } from './diplomacy.js';
 
 const unitsOf = (b) => Object.values(b.units);
@@ -11,9 +11,6 @@ const unitsOf = (b) => Object.values(b.units);
 export function immobile(game, b, u) {
   return drivesDestroyed(game.ships.get(u.ship));
 }
-
-/** Hooks späterer Pakete: Beute für Fraktionen (U09), Reparaturautomatik (U07), Raids (U10) */
-export const outcomeHooks = hooks;
 
 function report(game, owner, rep) {
   const p = game.players.get(owner);
@@ -94,12 +91,6 @@ export function mineDebris(ship, e, dt, rate) {
     return false;
   }
   return true;
-}
-
-function placeOutside(game, b, ship, u, dist = 0) {
-  const a = u ? Math.atan2(u.y - COMBAT.MAP.H / 2, u.x - COMBAT.MAP.W / 2) : Math.random() * Math.PI * 2;
-  ship.x = b.x + Math.cos(a) * dist + (Math.random() - 0.5) * 60;
-  ship.y = b.y + Math.sin(a) * dist + (Math.random() - 0.5) * 60;
 }
 
 function release(game, ship) {

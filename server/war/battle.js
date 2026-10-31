@@ -674,9 +674,6 @@ export function checkEnd(game, b) {
   if (b.t - b.lastHarm >= COMBAT.STALEMATE && !b.projectiles.length && !inbound(game, b)) return endBattle(game, b, null, 'stalemate');
 }
 
-/** Ergebnisauflösung (Paket U06) registriert sich in hooks.resolve */
-export const battleHooks = hooks;
-
 export function endBattle(game, b, winner, why = null) {
   if (b.ended) return;
   b.ended = { winner, why, t: Math.round(b.t) };

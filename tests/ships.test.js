@@ -1,8 +1,9 @@
 import { navalClass } from '../shared/combat.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SHIP_TYPES, MODULES, PILOT_LICENSES, GOODS, YARD_MARGIN, STEP, FACTIONS, ABILITIES,
-  moduleCapacity, moduleMiningRate, upgradeCost, shipStats, freeFor, sellValue } from '../shared/config.js';
+import { SHIP_TYPES, MODULES, PILOT_LICENSES, GOODS, YARD_MARGIN, FACTIONS, ABILITIES,
+  moduleCapacity, upgradeCost, shipStats, freeFor, sellValue } from '../shared/config.js';
+import { STEP, moduleMiningRate } from '../shared/ships.js';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 const PRD15_TYPES = ['falke', 'keiler', 'abfangstaffel', 'bomberstaffel', 'korvette', 'fregatte', 'zerstoerer', 'kreuzer'];

@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fixedPrice, fixedRevenuePerHour, fixedConsumptionPerHour, fixedRref, priceWindow, propertyKind, propertyPrice,
+import { fixedPrice, fixedConsumptionPerHour, fixedRref, priceWindow, propertyKind, propertyPrice,
   GOVERNOR_LICENSES, SHIP_TYPES, FIXED } from '../shared/config.js';
+import { fixedRevenuePerHour } from '../shared/property.js';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BUILDING, buildingUpgradeCost, factorySlots, factoryCost, planetFeatures, RECIPE_CATS, RECIPES, LEVEL_FX } from '../shared/config.js';
+import { BUILDING, factorySlots, factoryCost, planetFeatures, RECIPE_CATS, RECIPES, LEVEL_FX } from '../shared/config.js';
 import { refreshSmuggler } from '../server/quests.js';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';

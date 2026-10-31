@@ -1,14 +1,14 @@
-import {canLand,accessTo} from '../planetside.js';
+import {canLand} from '../planetside.js';
 import { GOODS, SHIP_TYPES, STATION_TYPES, PLANET_TYPES, BELT_TYPES, SUPPLY, recipeText, canBuyFrom, canSellTo } from '/shared/config.js';
-import { state, myShips, fmt, fmtK, esc, playerColor, playerName, selectedShips, fleetOrder } from '../state.js';
+import { state, fmt, fmtK, esc, playerColor, playerName, selectedShips, fleetOrder } from '../state.js';
 import { socket, cmd } from '../net.js';
-import { typeName, entitySprite, shipSprite, goodTag, playerPrice, cargoUsed, statusText, queueText, shipSymbol, hasWarn, flightSecs, fmtDuration, systemName, sectorName } from '../util.js';
+import { typeName, entitySprite, shipSprite, goodTag, playerPrice, cargoUsed, statusText, queueText, shipSymbol, hasWarn, systemName, sectorName } from '../util.js';
 import { ZONE_TYPES, ABILITIES } from '/shared/config.js';
 import { openAlmanac } from './almanac.js';
 import { shipyardSection, hubSection, factionYardSection, outpostSection, bonusBadge, repLine } from './shipyard.js';
 import { propertySection, governorSection, handlePropertyAction, handlePropertyChange, storagePrice } from './property.js';
 import { FACTIONS } from '/shared/factions.js';
-import { shipStats, holdUsage, countModules, MODULES as MODS, holdOf, FLAGSHIP } from '/shared/ships.js';
+import { shipStats, holdUsage, countModules, MODULES as MODS, FLAGSHIP } from '/shared/ships.js';
 import { $, setHtml, typing } from './dom.js';
 import { barChart, fmtNum, stockBar } from './charts.js';
 import { bus } from './bus.js';
@@ -24,7 +24,6 @@ import { homeGoodLimit } from '/shared/homeworld.js';
 import { stackSection, combatSection, foreignWarSection, ownWarSection, adminSection, raidSection } from './war.js';
 
 const entName = (id) => esc(state.entities.get(id)?.name || 'unbekannter Ort');
-const dockedHereOwn = (id) => myShips().some((s) => s.dockedAt === id);
 /** Sektorname an einer Position (oder "Leerraum") */
 function sectorOfPoint(p) {
   for (const s of state.sectors.values()) if (Math.hypot(s.bh.x - p.x, s.bh.y - p.y) < 80000) return 'Sektor ' + s.name;
@@ -96,7 +95,6 @@ function shipDetails(s) {
     <div class="type">${def.name}${own ? '' : ' · ' + esc(s.task ? 'Station' : playerName(s.owner))}</div></div></div>`;
   if (s.task) return h + npcTaskHtml(s);
   if (!own) return h + `<div class="muted">${def.desc}</div>` + foreignWarSection(s);
-  const used = cargoUsed(s);
   h += `<div class="status-line">${shipSymbol(s)} ${s.transit ? 'Im Wurmloch …' : statusText(s)}</div>`;
   if (s.offer !== null && s.offer !== undefined) {
     h += `<div class="warnbox">🤝 Im Konsortium für ${fmt(s.offer)} Cr angeboten, gesperrt.

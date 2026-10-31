@@ -25,12 +25,10 @@ import './consortium.js';
 import './consortiumTrade.js';
 
 export { renderLogin, loginError, enterGame, leaveGame, addLog, updateTooltip, renderTop } from './hud.js';
-export { toast, hint, closeTopModal, toggleModal, typing } from './dom.js';
+export { toast, closeTopModal, toggleModal, typing } from './dom.js';
 export { requestStats } from './details.js';
 export { dialogMarkets } from './subs.js';
-export { openRoutesOverview, openRouteEditor } from './routes.js';
-export { openFavorites } from './favorites.js';
-export { openAlmanac, refreshAlmanac } from './almanac.js';
+export { refreshAlmanac } from './almanac.js';
 export { orderShips, joinShips } from './orders.js';
 export { enterPlanet, leavePlanet, openBuilding, closeBuilding, renderPlanetUi, planetEscape } from './planetPanel.js';
 export { mgOpen, closeGame } from './minigames.js';

@@ -3,7 +3,7 @@ import {GOODS,MODULES,NPC_OWNER,propertyBasePrice} from '../shared/config.js';
 import {HOMEWORLD} from '../shared/homeworld.js';
 import {hexAt,hexKey} from '../shared/hex.js';
 import {moveWorldEntity} from './ruin-sites.js';
-import {pointCovered,coverageAreas} from './coverage.js';
+import {coverageAreas} from './coverage.js';
 
 const goodsValue=goods=>Object.entries(goods||{}).reduce((sum,[g,n])=>sum+(GOODS[g]?.base||0)*n,0);
 const costValue=cost=>(cost?.credits||0)+goodsValue(cost?.goods);

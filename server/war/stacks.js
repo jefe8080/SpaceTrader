@@ -262,19 +262,6 @@ export function routeStackPending(game, leader) {
   return false;
 }
 
-/** Laufender Routenstand des Leitschiffs auf Mitglieder spiegeln (kein Überspringen beim Ablösen) */
-export function mirrorRouteProgress(game, st) {
-  const [leader, ...rest] = stackMembers(game, st);
-  const lc = leader?.queue[0];
-  if (lc?.t !== 'route') return;
-  for (const m of rest) {
-    const mc = m.queue.find((c) => c.t === 'route' && c.route === lc.route);
-    if (!mc) continue;
-    const ms = lc.mst?.[m.id];
-    Object.assign(mc, { idx: lc.idx, done: lc.done, phase: lc.phase === 'act' ? (ms?.finished ? 'wait' : 'act') : lc.phase, actionIdx: ms?.actionIdx ?? 0, waitUntil: lc.waitUntil });
-  }
-}
-
 /** Sichtbarer Stackzustand für den Besitzer */
 export function stacksView(game, player) {
   return [...game.stacks.values()].filter((st) => st.owner === player.id).map((st) => ({

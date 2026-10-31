@@ -1,7 +1,7 @@
 import {blueprint} from '../shared/combat.js';
 import {unlockBuildingRecipes} from './building-recipes.js';
 import { GOODS, RECIPES,REFINEMENT_RECIPES } from '../shared/goods.js';
-import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, homeStorageFree, availableHomeStock, homeGoodCapacity, homeGoodLimit, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '../shared/homeworld.js';
+import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock, homeGoodCapacity, homeGoodLimit, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '../shared/homeworld.js';
 import { coverageAreas } from './coverage.js';
 import { planetAccess } from '../shared/planet-access.js';
 import {tickCivilMoney,consumeCivilGood} from './real-economy.js';

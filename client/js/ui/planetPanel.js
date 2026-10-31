@@ -5,7 +5,6 @@ import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import { goodTag } from '../util.js';
 import { $, setHtml, toast,confirmAction } from './dom.js';
-import { stockBar } from './charts.js';
 import { questBoardSection } from './quests.js';
 import { scene, canLand, accessTo, resetPlanetside, selectBuilding, hidePlanetside, getPlanetView } from '../planetside.js';
 import { sfx } from '../audio.js';

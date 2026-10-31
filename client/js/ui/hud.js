@@ -1,7 +1,7 @@
-import { GOODS, SHIP_TYPES, PILOT_LICENSES, PILOT_LEVELS, canBuyFrom } from '/shared/config.js';
+import { GOODS, SHIP_TYPES, PILOT_LEVELS } from '/shared/config.js';
 import { state, myShips, fmt, esc, playerColor, playerName, selectedShips } from '../state.js';
 import { socket, cmd } from '../net.js';
-import { typeName, playerPrice, flightSecs, fmtDuration } from '../util.js';
+import { typeName, flightSecs, fmtDuration } from '../util.js';
 import { $, setHtml } from './dom.js';
 
 // ---------------- Login ----------------

@@ -1,11 +1,11 @@
 // Besitz: Kauf, Verwaltung eigener Planeten und Stationen, eigene Werften, Besitzübersicht (Taste B)
 import { GOODS, SHIP_TYPES, RECIPES, GOVERNOR_LICENSES, UNLOCK_NAMES, PROP_UPGRADES, FIXED, CUSTOMS_MAX,
-  propertyKind, minGovernorFor, propertyPrice, propUpgradeCost, extraOptions, priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref, PLANET_TYPES,
+  propertyKind, minGovernorFor, propertyPrice, propUpgradeCost, extraOptions, priceWindow, fixedPrice, PLANET_TYPES,
   CONSORTIUM_LEVELS } from '/shared/config.js';
 import { state, fmt, fmtK, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import { shipSprite, typeName, systemName, sectorName, entitySprite } from '../util.js';
-import { $, registerModal, openModal, closeModal, setHtml } from './dom.js';
+import { $, registerModal, closeModal, setHtml } from './dom.js';
 import { bus } from './bus.js';
 import {populationPanel,handlePopulationAction} from './population.js';
 import {WORLD_FOCI,FOCUS_NAMES,specializationSpec} from '/shared/specializations.js';
@@ -89,7 +89,6 @@ function manageSection(e, prop) {
       const sv = prop.fixed[g] ?? FIXED.DEFAULT;
       const { pmin, pmax } = priceWindow(g, s.mod || 1);
       const rate = e.market.realEconomy?s.rate:(PLANET_TYPES[e.type].consume[g] || s.rate) * (e.size || 1);
-      const R = fixedRref(rate, pmin, pmax);
       h += `<tr><td>${GOODS[g].name}</td><td><input type="range" class="prop-fixed" data-ent="${e.id}" data-good="${g}" min="${FIXED.MIN}" max="${FIXED.MAX}" step="0.05" value="${sv}"></td>
         <td>${fixedPrice(pmin, pmax, sv).toFixed(1)}</td><td>${localDemandPerHour(g,s,prop,rate).toFixed(0)}</td></tr>`;
     }
@@ -252,4 +251,3 @@ card.addEventListener('click', (ev) => {
   }
 });
 registerModal('propsModal', renderProps);
-export const openProps = () => openModal('propsModal');

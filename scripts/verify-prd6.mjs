@@ -99,7 +99,7 @@ try {
  await page.evaluate(()=>document.getElementById('toasts').replaceChildren());
  await page.screenshot({path:new URL('desktop-location.png',out).pathname.replace(/^\/([A-Z]:)/,'$1')});
  await page.setViewportSize({width:390,height:844});
- await page.evaluate(async()=>{(await import('/js/ui/favorites.js')).openFavorites();});
+ await page.evaluate(async()=>{(await import('/js/ui/dom.js')).openModal('favorites');});
  await page.evaluate(()=>document.getElementById('toasts').replaceChildren());
  await page.screenshot({path:new URL('narrow-places.png',out).pathname.replace(/^\/([A-Z]:)/,'$1')});
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
@@ -116,7 +116,7 @@ try {
  await page.screenshot({path:new URL('narrow-profile.png',out).pathname.replace(/^\/([A-Z]:)/,'$1')});
  await page.locator('.main-nav summary').first().tap();
  assert.equal(await page.locator('#pilotProfile').evaluate(e=>e.open),false);
- await page.evaluate(async()=>{(await import('/js/ui/favorites.js')).openFavorites();});
+ await page.evaluate(async()=>{(await import('/js/ui/dom.js')).openModal('favorites');});
  await page.locator('[data-filter="search"]').focus();await page.keyboard.press('Escape');
  assert.ok(await page.locator('#tradeHub').evaluate(e=>e.hidden));
  assert.deepEqual(errors,[]);
