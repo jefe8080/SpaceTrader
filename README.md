@@ -16,7 +16,6 @@ Dann http://localhost:3000 öffnen. Entwicklung mit automatischem Neustart: `npm
 | Befehl | Zweck |
 |---|---|
 | `npm test` | Unit-Tests (node:test) |
-| `npm run sim -- --hours 8 --bots 3` | Historische Vergleichssimulation für die frühere Wirtschaft; PRD 5 verwendet `sim:progression` |
 | `npm run sim:homeworld -- --seed 42` | Reproduzierbarer PRD-5-Einstieg H00–H06 mit echten Flügen, Käufen und Reliktbergung |
 | `npm run sim:homeworld -- --decision-seconds 30` | Einstieg mit ausdrücklich modellierter Lese-/Entscheidungszeit; keine Verzögerung im eigentlichen Spiel |
 | `npm run sim:progression` | Vollständiger Einzelspielerpfad H00–H13 mit realer Finanzierung, Produktion und Zweitgründung |
@@ -24,8 +23,8 @@ Dann http://localhost:3000 öffnen. Entwicklung mit automatischem Neustart: `npm
 | `npm run reset` | Löscht die ausgewählte Weltdatei samt SQLite-Seitendateien; Server vorher beenden |
 | `npm run sprites` | Schiffsgrafiken neu erzeugen |
 
-Der neue Hauptspielstand liegt in `data/world-v5/spacetrader.db` (SQLite, Profil `homeworld`, Weltversion 5; alle 15 s und beim Beenden mit Strg+C gespeichert).
-Inkompatible Weltversionen werden vor Migrationen lesend geprüft und mit Fehlermeldung abgewiesen. Es gibt keinen automatischen Reset.
+Der neue Hauptspielstand liegt in `data/world-v5/spacetrader.db` (SQLite, Weltart `homeworld`, Weltversion 5; alle 15 s und beim Beenden mit Strg+C gespeichert).
+Es gibt nur noch die Heimatwelt; das frühere Weltprofil `legacy` ist mit [PRD 18](docs/PRD-18.md) entfernt. Andere Weltversionen werden vor Migrationen lesend geprüft und mit Fehlermeldung abgewiesen. Es gibt keinen automatischen Reset.
 
 Die Entwicklungswelt bleibt davon getrennt:
 
@@ -33,8 +32,8 @@ Die Entwicklungswelt bleibt davon getrennt:
 npm run dev:prd5
 ```
 
-Dieser Entwicklungsserver verwendet Port 3005 und `data/prd5/spacetrader.db` (Profil `homeworld`, Weltversion 5).
-Ein eigener Pfad lässt sich über `DB_FILE` wählen. Der frühere Pfad `data/spacetrader.db` wird vom neuen Profil nicht verwendet; es gibt keine Übernahme alter Spielstände. `npm start` erzeugt beim ersten Start die neue Hauptwelt. Die grafische Prüfoberfläche wird nur mit `DEV_TOOLS=1` beziehungsweise dem Entwicklungsstarter bereitgestellt.
+Dieser Entwicklungsserver verwendet Port 3005 und `data/prd5/spacetrader.db` (Weltversion 5).
+Ein eigener Pfad lässt sich über `DB_FILE` wählen. Der frühere Pfad `data/spacetrader.db` wird nicht verwendet; es gibt keine Übernahme alter Spielstände. `npm start` erzeugt beim ersten Start die neue Hauptwelt. Die grafische Prüfoberfläche wird nur mit `DEV_TOOLS=1` beziehungsweise dem Entwicklungsstarter bereitgestellt.
 Warenquellen und ihre Nachweise stehen im [Warenquelleninventar](docs/PRD-5-warenquellen.md); Bilanz-/Balanceannahmen und Prüfergebnisse unter `docs/qa/prd5-u17/`.
 
 **Sicherheit:** Es gibt keine Authentifizierung. Wer einen Spielernamen kennt, übernimmt das Konto.
@@ -92,7 +91,7 @@ Die einmaligen GitHub-Einstellungen und die Umstellung des Servers stehen in der
 | `client/js/planetside.js` | Planetare Ansicht: prozedurale Seitenansicht mit Gebäuden |
 | `client/js/ui/*` | Oberfläche: Flotte, Details, Routen, Favoriten, Almanach, Werft, Besitz, Quests, Tonmenü, Konsortium, Sondernachfrage, Gebäude-Panel, Minispiele |
 | `client/js/audio.js` | Prozedurale Effekte und Ambient-Musik per WebAudio (keine Audiodateien) |
-| `sim/simulate.js` | Headless-Simulation mit Bots |
+| `sim/*` | Headless-Simulationen der Heimatwelt (Einstieg, Fortschritt, QA-Szenarien) und Kampfbilanz |
 | `tests/*.test.js` | Tests für Preisformel, Modifier, Fixpreis, Kombo-Kapazität, Navigation, Generierung u.a. |
 
 ## Spielregeln im Überblick
@@ -102,21 +101,21 @@ Die einmaligen GitHub-Einstellungen und die Umstellung des Servers stehen in der
   Ca. jeder dritte Sektor hat einen Fraktionscluster.
 - **Wirtschaft:** Preis = Basispreis × Standort-Modifier × Füllstandskurve ± 6 % Spread. Händler kaufen und verkaufen
   dieselbe Ware. Ultraseltene Waren kauft nur der Hub (und Fraktionen als Schiffswährung).
-  NPC-Märkte kehren zum Ziel-Füllstand zurück (Halbwertszeit 45 min), Planeten würfeln ihre Nachfrage alle 2 bis 6 h neu.
-  Planeten schicken in Sektoren mit Spieleraktivität Abholer zu Fabriken; NPC-Schiffe laden höchstens 40 Einheiten.
+  Öffentliche Märkte arbeiten mit echter Wirtschaft: reale Förderung, Bestände und Marktkassen, keine öffentlichen Fabriken.
+  In Sektoren mit Spieleraktivität kaufen NPC-Abholer bei realen Produzenten; NPC-Schiffe laden höchstens 40 Einheiten.
 - **Schiffe:** S, M, L, XL und Fraktion. Pilotenlizenz 1 bis 6 am Hub, Lizenz n erfordert Pilotenlevel n. Upgrades
   (Tempo, Tank, Laderaum) und Module (Passagierkabine, Geschirmte Kammer, Abbaugeräte, Sensorphalanx).
-  Ein Schiff kann **Hauptschiff** sein: Tempo ×4, Verbrauch ×4 pro Sekunde, keine Routen, 5 min Sperre nach jedem Wechsel.
-- **Erfahrung:** XP aus Quests (Hauptquelle), Sektorbesuchen, Almanach-Einträgen und manuellem Handel des Hauptschiffs.
+  Außerhalb der eigenen Leitstellenabdeckung erhält nur das manuell gesteuerte Schiff einzelne Direktbefehle.
+- **Erfahrung:** XP aus Quests (Hauptquelle), Sektorbesuchen, Almanach-Einträgen und manuellem Handel.
   Routenhandel bringt keine XP. Pilotenlevel 1 bis 7, Level 7 trägt einen Titel.
 - **Quests:** Questtafeln an Planeten und Werften (Beschaffung, Kurier, Rundreise, Erkundung, Abbau, Eilbestellung),
-  eine Quest je Spieler, keine Fristen, Abbruch sperrt 10 min. Planeten und Werften steigen dadurch bis Level 6:
-  Planeten produzieren mehr und schalten Waren frei, Werften bauen bessere Schiffe (+5 % je Level).
+  keine Fristen, Abbruch sperrt 10 min. Planeten und Werften steigen dadurch bis Level 6; das Level verändert
+  Questschwierigkeit und Angebot, Leistung entsteht durch konkrete Infrastruktur.
 - **Fraktionen:** Ruf aus Quests bei Fraktionsplaneten, Ränge 0 bis 3. Je Fraktion ein L-, XL- und Spezialschiff,
   gesperrt durch Rang und Pilotenlizenz, Preis in Credits plus Schiffswährung.
 - **Bestellslot:** NPC-Werften nehmen eine Bestellung an (Anzahlung 2 × Katalogpreis), die Vorrang vor der Bauliste hat.
 - **Besitz:** Gouverneurslizenz am Hub, Kauf vor Ort. Eigenes Lager, Erlöse aus Fremdhandel, Fixpreis-Verbrauch auf
-  Planeten, Zoll, offen/privat, Ausbau in vier Linien, eigene Werften mit Bau auf Befehl.
+  Planeten, Zoll, offen/privat, Spezialisierung, eigene Werften mit Bau aus realem Material.
 - **Konsortien:** Gründung am Hub ab Pilotenlevel 2, Ränge Händler und Handelsmeister, Pool mit Gebühren (Einzahlen 10 %,
   Auszahlen 20 %), Level 1 bis 6, gemeinsamer Besitz mit Lager zum Fixpreis, Karten- und Schiffshandel, Schwarzes Brett, Log.
 - **Sondernachfrage:** In Sektoren mit Spielerschiffen alle 20 bis 60 min ein Event an einem NPC-Planeten, Festpreis
@@ -195,20 +194,8 @@ Die offenen Punkte aus PRD-2 Kapitel 16 sind in Kapitel 17 entschieden. Bei der 
 
 ## Stand der Kalibrierung
 
-`npm run sim` mit 3 Bots über 12 h im Heimatsektor (Seed 42), Stand PRD-2:
-
-- **Märkte:** keine leeren oder vollen Lagerplätze mehr (vorher dauerhaft 0 oder 100 %), mittlere Abweichung vom
-  Ziel-Füllstand ca. 5 Prozentpunkte. Keine Fabrik steht still.
-- **Quests (Hauptschiff, Spatz):** 86 bis 117 Quests in 12 h, 11 bis 26 k Cr/h Belohnung, 83 bis 107 XP/h,
-  Pilotenlevel 3 nach 12 h. Ziel laut PRD-2 sind 100 bis 200 XP/h; Erkundung und Rundreisen macht der Bot nicht.
-- **Handel:** Der Handelsgewinn der Bots ist deutlich gesunken (frühe Phase Ø ca. 3 k Cr/h, ohne Drift 12 bis 30 k Cr/h).
-  Er enthält allerdings auch die Einkäufe für Beschaffungsquests, deren Erstattung als Questbelohnung zählt.
-  Ursache ist die Drift: Ein leergekaufter Markt erholt sich wie gewollt erst in 1 bis 2 h, der Durchsatz je Markt
-  sinkt dadurch. Das ist das Risiko aus PRD-2 Kapitel 14; Stellschraube ist `ECON.HALF_LIFE` in `shared/config.js`.
-- Die mittlere Phase (10 bis 20 Schiffe) erreichen die Bots nicht. Weitere Kalibrierung mit echten Spielsitzungen.
-- **PRD-3 (6 h, 3 Bots):** 94 bis 173 XP/h je Bot mit Quests (Ziel 125 bis 160). Einzelne Bots bleiben in manchen Läufen
-  am Start hängen (0 Handelsaufträge, unter 60 XP/h); das tritt auch ohne PRD-3 auf und liegt am Bot, nicht am Spiel.
-  Konsortien, Sondernachfrage, Gebäude-Ausbau und Minispiele nutzt der Bot nicht, sie sind noch nicht kalibriert.
+Die Kalibrierung der früheren Wirtschaft (`npm run sim`, Drift-Märkte, Hauptschiff) ist mit PRD 18 entfallen.
+Die Heimatwelt wird mit `npm run sim:homeworld` und `npm run sim:progression` geprüft; Ergebnisse stehen unter `docs/qa/`.
 
 ## Nicht im Umfang
 

@@ -237,10 +237,29 @@ Fortschritt wird im selben Commit aktualisiert.
     Planetenansicht ohne Konsolen- oder Serverfehler. Werft-, Fraktionswerft- und
     Hubabschnitte mit den echten Client-Modulen gerendert, weil im frischen
     Spielstand keine Werft aufgedeckt war.
-- [ ] **S5: Shared, Sims, Skripte, Doku.**
+- [x] **S5: Shared, Sims, Skripte, Doku.**
   - Nicht mehr erreichbare Konstanten entfernen (per `knip`).
   - Sims und Skripte nach den Annahmen behandeln.
   - README und `docs/container-deployment.md` anpassen.
+  - knip (Produktionsmodus, Einstiege `server/index.js` und `client/js/main.js`,
+    Client-Importe `/shared/*` aufgelöst): gegenüber `3e992d7` keine neuen
+    Befunde, 158 statt 165 ungenutzte Exporte. Entfernt
+    wurden zuletzt die toten Reexporte `countModules`, `holdUsage`, `fixedRref`
+    und `fixedConsumptionPerHour` aus `shared/config.js`.
+  - `sim/simulate.js`: **entfernt** samt npm-Script `sim`. Die Sim kalibrierte die
+    alte Handelswirtschaft (Drift, Hauptschiff, Start-Spatz im Startsektor); in
+    der Heimatwelt übernehmen `sim:homeworld` und `sim:progression`.
+  - `sim/prd15-balance.js`: **bleibt**, läuft jetzt in `homeworld`. Kampf hängt
+    nicht von der Wirtschaft ab; gleiche Sieger in allen sechs Szenarien, Dauer und
+    Restrumpf schwanken im Rahmen des ungeseedeten Zufalls. Die QA-Datei
+    `docs/qa/prd15/balance.md` bleibt unverändert.
+  - `scripts/benchmark-prd16.js`: **bleibt**, läuft in `homeworld` (reine
+    Schlachtlogik).
+  - README: Profil-Hinweise, Hauptschiff, Drift-Märkte, Planetenausbau und die
+    alte Kalibrierung ersetzt bzw. entfernt. `docs/container-deployment.md`: Verweis
+    auf das Weltprofil ersetzt. Historische QA-Anleitungen unter `docs/qa/`
+    nennen noch `WORLD_PROFILE=homeworld`; die Variable wird ignoriert und die
+    Anleitungen bleiben als Prüfprotokoll unverändert.
 - [ ] **S6: Abnahme.**
   - Vergleich mit dem Prod-Spielstand ohne Abweichung.
   - Sims und Browser-Test erfolgreich.

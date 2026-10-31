@@ -65,7 +65,7 @@ import { GOODS } from './goods.js';
 export { GOODS, PLANET_TYPES, STATION_TYPES, BELT_TYPES, RECIPES, TIER_NAMES, CARGO_CLASSES, MINE_CLASSES, ULTRA, STATION_FOOD } from './goods.js';
 export { FACTIONS, FACTION, ABILITIES, factionShips } from './factions.js';
 export { SHIP_TYPES, SHIP_CLASSES, SHIPYARD, UPGRADES, MODULES, PILOT_LICENSES, YARD_MARGIN, MODULE_SIZE, SENSOR,
-  upgradeCost, moduleCapacity, shipStats, holdOf, holdFor, hasAbility, holdUsage, freeFor, cargoFits, sellValue, countModules } from './ships.js';
+  upgradeCost, moduleCapacity, shipStats, holdOf, holdFor, hasAbility, freeFor, cargoFits, sellValue } from './ships.js';
 
 export * from './progression.js';
 export * from './consortium.js';
@@ -78,7 +78,7 @@ export { FACTS } from './facts.js';
 import { PRICE, curveMax, curveMin } from './price.js';
 export { PRICE, curveMax, curveMin };
 export { GOVERNOR_LICENSES, UNLOCK_NAMES, PROP_UPGRADES, FIXED, CUSTOMS_MAX, RECYCLE_SHARE, propertyKind, minGovernorFor, propertyBasePrice,
-  propertyPrice, priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref } from './property.js';
+  propertyPrice, priceWindow, fixedPrice } from './property.js';
 
 export function unitPrice(good, stock, cap, mod = 1) {
   const r = Math.max(0, Math.min(1, stock / cap));

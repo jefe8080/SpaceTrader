@@ -43,7 +43,7 @@ Umgebungsvariablen, Neustartregeln und insbesondere das Daten-Volume unter `/app
 beibehalten. Das Dockerfile verwendet `DB_FILE=/app/data/world-v5/spacetrader.db`.
 Falls deine Container-Konfiguration noch `DB_FILE=/app/data/spacetrader.db` setzt,
 entferne diese Überschreibung oder ändere sie auf `/app/data/world-v5/spacetrader.db`.
-Der alte Pfad wird vom aktuellen Weltprofil ausdrücklich abgewiesen. Alte Spielstände
+Der alte Pfad wird beim Start ausdrücklich abgewiesen. Alte Spielstände
 werden nicht automatisch übernommen; die bisherige Datenbank bleibt im Volume erhalten.
 Wenn du bereits einen gültigen PRD-5-Spielstand unter einem anderen eigenen Pfad nutzt,
 behalte diesen Pfad bei.
