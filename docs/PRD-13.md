@@ -125,7 +125,7 @@ Ausgeklappt steht die bisherige vollständige Flottenbedienung zur Verfügung.
   Produktionsbetrieb und erhaltene Questlevel-Beschleunigung prüfen.
 - [x] Schritt 3: Schulpersonal für beide Baupfade und einmalige Migration
   bestehender Schulen umsetzen; Mehrfachgutschriften ausschließen.
-- [ ] Schritt 4: Planetenübersicht in den oberen Balken integrieren und
+- [x] Schritt 4: Planetenübersicht in den oberen Balken integrieren und
   einklappbare Flottenliste mit gespeichertem Zustand umsetzen.
 - [ ] Schritt 5: Zusammenspiel, vorhandene Regressionstests und visuelle
   Darstellung bei breiten und schmalen Ansichten prüfen.

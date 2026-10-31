@@ -1,6 +1,6 @@
 // Planetare Ansicht: Kopfzeile und Gebäude-Panel (PRD-3 Kapitel 6). Weitere Gebäude (Unterhaltung, Schmuggler,
 // Bettler, Hund, Schule) hängen sich über panelKinds ein.
-import { GOODS, RECIPES, RECIPE_CATS, BUILDING, PLANET_TYPES, buildingUpgradeCost, factoryCost, factorySlots, recipeCat, effectiveLevel, recipeText } from '/shared/config.js';
+import { GOODS, RECIPES, RECIPE_CATS, PLANET_TYPES, factoryCost, factorySlots, recipeCat, recipeText } from '/shared/config.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
 import { goodTag } from '../util.js';
@@ -90,9 +90,9 @@ function syncManagementControls(lost){
 }
 
 export function renderPlanetUi() {
-  const viewed=state.landed&&state.entities.get(state.landed),summary=$('planetSummary');
-  summary.hidden=!viewed;
-  if(viewed){setHtml(summary,planetSummary(viewed));summary.style.top=`${Math.ceil($('topbar').getBoundingClientRect().bottom)+64}px`;}
+  const viewed=state.landed&&state.entities.get(state.landed);
+  const summary=$('planetSummary');
+  if(viewed&&summary)setHtml(summary,planetSummary(viewed));
   // Keep recipe stocks live even while an adjacent form retains keyboard focus.
   if(viewed)for(const label of panel.querySelectorAll('[data-production-recipe]')){
     const id=label.dataset.productionRecipe;if(RECIPES[id])label.outerHTML=recipeWithStock(viewed.market,RECIPES[id],id);
@@ -111,9 +111,13 @@ export function renderPlanetUi() {
   if (!e) return;
   setHtml(bar, `<button class="small" data-pp="leave">Planet verlassen <kbd>Esc</kbd></button>
     <button class="small" data-pp="overview" title="Zur gesamten Stadt zurückkehren">Übersicht</button>
-    <button class="small" data-pp="names" aria-pressed="${cityNames}" title="Namen aller Stadtorte anzeigen">Namen</button>`);
+    <button class="small" data-pp="names" aria-pressed="${cityNames}" title="Namen aller Stadtorte anzeigen">Namen</button>
+    <div id="planetSummary" aria-label="Planetenversorgung">${planetSummary(e)}</div>`);
   bar.setAttribute('aria-label', `${e.name} · ${PLANET_TYPES[e.type].name}`);
   bar.style.top = `${Math.ceil($('topbar').getBoundingClientRect().bottom)+12}px`;
+  if(innerWidth>1100)panel.style.top=`${Math.ceil(bar.getBoundingClientRect().bottom)+12}px`;
+  else panel.style.removeProperty('top');
+  panel.style.maxHeight=`${Math.max(80,Math.min(innerHeight*.46,innerHeight-bar.getBoundingClientRect().bottom-24))}px`;
   getPlanetView()?.setNames(cityNames);
   if (!current) return;
   // Gebäude kann nach Änderungen (Abriss, Bau) neu nummeriert sein

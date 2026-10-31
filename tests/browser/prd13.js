@@ -1,0 +1,14 @@
+import './prd12.js';
+import {state} from '/js/state.js';
+import {renderFleet} from '/js/ui/fleet.js';
+import {loadAssets} from '/js/assets.js';
+import {bus} from '/js/ui/bus.js';
+import {renderPlanetUi,enterPlanet} from '/js/ui/planetPanel.js';
+state.me.color='#83c8bb';
+Object.assign(state.ships.get('qa-ship'),{type:'spatz',name:'Heimatkurier',state:'docked',fuel:6});
+state.ships.set('qa-second',{id:'qa-second',owner:'qa',type:'lastesel',name:'Versorger',state:'flying',cargo:{},queue:[],fuel:20,ord:1});
+bus.select=selected=>{state.selected=selected;renderFleet();};
+await loadAssets();
+renderFleet();
+enterPlanet('qa-home');
+addEventListener('resize',renderPlanetUi);

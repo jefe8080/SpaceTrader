@@ -15,6 +15,23 @@ const filterFn = {
 };
 
 let lastClicked = null;
+let fleetCollapsed=false;
+try{fleetCollapsed=localStorage.getItem('st_fleet_collapsed')==='true';}catch{}
+function syncFleetCollapse(){
+  document.body.classList.toggle('fleet-collapsed',fleetCollapsed);
+  const button=$('btnFleetToggle');
+  button.textContent=fleetCollapsed?'▶':'◀';
+  button.setAttribute('aria-expanded',String(!fleetCollapsed));
+  button.setAttribute('aria-label',fleetCollapsed?'Flotte ausklappen':'Flotte einklappen');
+  button.title=button.getAttribute('aria-label');
+}
+$('btnFleetToggle').addEventListener('click',()=>{
+  fleetCollapsed=!fleetCollapsed;
+  try{localStorage.setItem('st_fleet_collapsed',String(fleetCollapsed));}catch{}
+  syncFleetCollapse();
+  bus.renderAll();
+});
+syncFleetCollapse();
 /** Gruppe eines Schiffes (null, wenn keine oder nicht mehr vorhanden) */
 const groupOf = (s) => (s.group && state.groups.some((x) => x.id === s.group) ? s.group : null);
 
@@ -54,7 +71,7 @@ function shipRow(s) {
   const sel = state.selection.has(s.id) || (state.selected?.kind === 'ship' && state.selected.id === s.id);
   const sal = state.fleetStats.ships[s.id] || 0;
   const warn = hasWarn(s) ? `<span class="warn" title="${esc(Object.values(s.warn).join('\n'))}">⚠</span>` : '';
-  return `<div class="fleet-item${sel ? ' sel' : ''}" data-ship="${s.id}" draggable="true">
+  return `<div class="fleet-item${sel ? ' sel' : ''}" data-ship="${s.id}" title="${esc(s.name)}" draggable="true">
     <span class="sym">${shipSymbol(s)}</span>
     <img src="${shipSprite(s.type, state.me.color)}" alt="">
     <div class="fi-main">

@@ -157,13 +157,6 @@ button.ghost:hover { border-color: var(--panel-border); }
 .pos { color: var(--good); }
 .kv .recipe-stock.pos { color: var(--good); }
 .kv .recipe-stock.neg { color: var(--bad); }
-#planetSummary { left:316px; width:300px; font-size:12px; pointer-events:none; }
-#planetSummary .kv { margin-top:5px; font-size:12px; }
-#planetSummary .kv > span:nth-child(even), #planetSummary .kv span span { color:var(--text); }
-#planetSummary .kv span.neg { color:var(--bad); }
-@media(max-width:1100px) {
-  #planetSummary { left:12px; width:min(300px,calc(100vw - 24px)); padding:7px 10px; }
-}
 .warn { color: #ffb74d; }
 .link { cursor: pointer; text-decoration: underline dotted; }
 #stopLossBtn.set { border-color: rgba(255, 183, 77, 0.5); }
@@ -488,3 +481,35 @@ details[open]>summary { color:var(--accent2); }
 .object-guide img { display: block; width: 100%; max-width: 340px; height: 180px; object-fit: contain; margin: 12px auto; }
 .object-guide-dialog { background: #14202d; color: #e4edf4; border: 1px solid #63828e; border-radius: 12px; width: min(520px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); overflow: auto; padding: 20px; box-sizing: border-box; }
 .object-guide-dialog::backdrop { background: #000a; }
+
+/* PRD 13: integrated planet supplies and a persistent compact fleet. */
+body.landed #planetBar { left:316px; right:16px; width:auto; padding:7px 10px; background:var(--panel); border:1px solid var(--panel-border); gap:6px 10px; }
+#planetSummary { flex:1 1 100%; min-width:0; font-size:12px; }
+#planetSummary > b { display:block; margin-bottom:4px; }
+#planetSummary .kv { display:flex; flex-wrap:wrap; align-items:center; gap:3px 8px; margin:0; font-size:12px; }
+#planetSummary .kv > span:nth-child(odd) { color:var(--muted); }
+#planetSummary .kv > span:nth-child(even), #planetSummary .kv span span { color:var(--text); }
+#planetSummary .kv span.neg { color:var(--bad); }
+body.fleet-collapsed #fleet { width:76px; padding:6px; }
+body.fleet-collapsed #fleet .panel-head { justify-content:center; }
+body.fleet-collapsed #fleet .panel-head > :not(#btnFleetToggle),
+body.fleet-collapsed #fleetFilter,
+body.fleet-collapsed #fleet .group-head,
+body.fleet-collapsed #fleet .fi-main,
+body.fleet-collapsed #fleet .saldo { display:none; }
+body.fleet-collapsed #fleet .fleet-item { padding:5px 2px; gap:4px; }
+body.fleet-collapsed #fleet .fleet-item img { width:30px; }
+body.fleet-collapsed.landed #planetBar { left:98px; }
+@media(max-width:1100px) {
+  body.landed #fleet { display:flex; max-height:35dvh; }
+  body.landed #planetBar { left:202px; right:10px; }
+  body.fleet-collapsed.landed #planetBar { left:92px; }
+  body.landed #planetBar .muted { display:initial; }
+}
+@media(max-width:600px) {
+  body.landed #planetBar { left:158px; right:6px; padding:6px; }
+  body.fleet-collapsed.landed #planetBar { left:86px; }
+  #planetSummary .kv { display:grid; grid-template-columns:auto minmax(0,1fr); gap:3px 5px; }
+  #planetSummary .kv .small-note { grid-column:1 / -1; margin:0; }
+  body.fleet-collapsed #fleet { width:76px; }
+}
