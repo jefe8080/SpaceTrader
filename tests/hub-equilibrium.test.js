@@ -7,7 +7,7 @@ import {ECON,targetOf,NPC_OWNER,ULTRA} from '../shared/config.js';
 
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
 test('Auch gespeicherte Hubs erhalten historische Drift mit individuellen Rollenzielen',()=>{
-  const game=new Game(':memory:',{seed:42,profile:'homeworld'});
+  const game=new Game(':memory:',{seed:42});
   try{
     const hub=game.world.entities.get('origin_hub'),m=hub.market;
     const trades=Object.values(m.goods).filter(s=>s.role==='trade');
@@ -29,7 +29,7 @@ test('Auch gespeicherte Hubs erhalten historische Drift mit individuellen Rollen
 });
 
 test('Hub-Handelswaren sind kaufbar und ohne externe Zielnachfrage wieder verkäuflich',()=>{
-  const game=new Game(':memory:',{seed:42,profile:'homeworld'});
+  const game=new Game(':memory:',{seed:42});
   try{
     const player=game.createPlayer('Hubhandel'),hub=game.world.entities.get('origin_hub');
     const ship=game.shipsOf(player.id)[0];ship.dockedAt=hub.id;ship.x=hub.x;ship.y=hub.y;

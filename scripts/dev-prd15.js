@@ -2,14 +2,13 @@
 // Verwendet nie die aktive Standarddatenbank. Aufruf: node scripts/dev-prd15.js
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-process.env.WORLD_PROFILE = 'homeworld';
 process.env.PORT ||= '3015';
 process.env.DB_FILE ||= fileURLToPath(new URL('../data/prd15/spacetrader.db', import.meta.url));
 
 if (!fs.existsSync(process.env.DB_FILE)) {
   const { Game } = await import('../server/game.js');
   const { startBattle } = await import('../server/war/battle.js');
-  const game = new Game(process.env.DB_FILE, { profile: 'homeworld', seed: 1515 });
+  const game = new Game(process.env.DB_FILE, { seed: 1515 });
   const p = game.createPlayer('QA15'), q = game.createPlayer('Gegner15');
   const home = game.world.entities.get(p.homeworld);
   // Sektorweite Leitstelle: Direktbefehle im eigenen Sektor und Start der Freundschaftsquest

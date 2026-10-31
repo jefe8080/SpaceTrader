@@ -8,9 +8,8 @@ import {seedRuinSite} from './ruin-sites.js';
  * Die Welt: unendliches Hex-Raster aus Sektoren, die bei Annäherung vollständig erzeugt werden.
  */
 export class World {
-  constructor(seed,profile='homeworld') {
+  constructor(seed) {
     this.seed = seed;
-    this.profile=profile;
     this.sectors = new Map();   // "q,r" -> Sektor
     this.systems = new Map();   // System-ID -> System
     this.entities = new Map();  // ID -> Planet, Station, Asteroidenfeld, Wurmloch
@@ -49,15 +48,13 @@ export class World {
     if (this.sectors.has(key)) return null;
     const { sector, entities } = generateSector(this.seed, q, r);
     this.addSector(sector);
-    // Wurmloch-Enden können schon von einem Nachbarsektor angelegt sein
-    const fresh = entities.filter((e) => !this.entities.has(e.id)&&(this.profile!=='homeworld'||!STATION_TYPES[e.type]?.recipe));
-    if(this.profile==='homeworld'){
-      seedRuinSite(sector,fresh);
-      for(const entity of fresh)preparePublicEntity(entity);
-      // Distance premiums must use the actual public producers after removal
-      // of factories and synthetic planetary products, not discarded objects.
-      applyLocationMods(fresh,rng(hashN(this.seed,q,r,511)));
-    }
+    // Wurmloch-Enden können schon von einem Nachbarsektor angelegt sein; öffentliche Fabriken gibt es nicht
+    const fresh = entities.filter((e) => !this.entities.has(e.id)&&!STATION_TYPES[e.type]?.recipe);
+    seedRuinSite(sector,fresh);
+    for(const entity of fresh)preparePublicEntity(entity);
+    // Distance premiums must use the actual public producers after removal
+    // of factories and synthetic planetary products, not discarded objects.
+    applyLocationMods(fresh,rng(hashN(this.seed,q,r,511)));
     for (const e of fresh) this.addEntity(e);
     return { sector, entities: fresh };
   }

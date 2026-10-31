@@ -27,7 +27,6 @@ export function stackBlocker(game, ship) {
   if (ship.captive) return `${ship.name} ist in Gefangenschaft.`;
   if (ship.battle) return `${ship.name} kämpft gerade.`;
   if (ship.transit) return `${ship.name} ist im Wurmloch.`;
-  if (ship.main) return `${ship.name} ist dein Hauptschiff und bleibt eigenständig.`;
   if (game.shipOffers?.has(ship.id)) return `${ship.name} ist im Konsortium angeboten.`;
   return null;
 }

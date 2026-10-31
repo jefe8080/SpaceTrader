@@ -93,7 +93,6 @@ export function offerShip(game, p, ship, price) {
   if (ship.state !== 'docked' || !ship.dockedAt) return 'Das Schiff muss angedockt sein.';
   if (Object.keys(ship.cargo).length) return 'Erst den Laderaum leeren.';
   if (ship.queue.length) return 'Das Schiff darf keine Befehle oder Route haben.';
-  if (ship.main) return 'Das Hauptschiff kannst du nicht anbieten.';
   const err = game.canGiveAway(p, ship);
   if (err) return err;
   game.shipOffers.set(ship.id, { ship: ship.id, seller: p.id, consortium: c.id, price, created: Date.now() });
@@ -147,7 +146,6 @@ export function transferShip(game, ship, to) {
   ship.queue = [];
   ship.warn = {};
   ship.fails = {};
-  ship.main = false;
   ship.basis = {};
   delete ship.marker;
   ship.revX = undefined; // Sensoren laufen für den neuen Besitzer

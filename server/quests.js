@@ -221,7 +221,7 @@ export function acceptQuest(game, player, ship, e, questId, offers = null) {
   if(q.faction&&factionHostileTo(game,q.faction,player.id))return 'Feindliche Fraktionen vergeben keine Aufträge.';
   const st = shipStats(ship);
   if (q.type === 'tour' && st.passenger < q.tourists) return `Für ${q.tourists} Touristen braucht das Schiff Passagierkabinen mit ${q.tourists} Plätzen.`;
-  if(game.profile==='homeworld'&&q.type==='tour'){
+  if(q.type==='tour'){
     const residents=peopleOf(e);if(!residents||Math.min(residentDepartureCapacity(residents),residents.population-Object.values(residents.workers||{}).reduce((n,v)=>n+v,0))<q.tourists||freeFor(ship,'tourists')<q.tourists)return 'Nicht genügend reale Touristen oder freie Kabinenplätze.';
     const loaded=passengerTrade(game,ship,e,'tourists',q.tourists,'buy',0,true);
     if(loaded.n!==q.tourists){if(loaded.n)passengerTrade(game,ship,e,'tourists',loaded.n,'sell');return 'Nicht genügend reale Touristen oder freie Kabinenplätze.';}
@@ -251,7 +251,7 @@ export function acceptQuest(game, player, ship, e, questId, offers = null) {
 export function abortQuest(game, player, id=null) {
   const q = selectedSideQuest(player,id);
   if (!q) return activeSideQuests(player).length?'Bitte die abzubrechende Nebenquest eindeutig auswählen.':'Keine aktive Quest.';
-  if(game.profile==='homeworld'&&q.type==='tour')for(const ship of game.shipsOf(player.id))for(const batch of ship.passengers||[])if(batch.quest===q.id)delete batch.quest;
+  if(q.type==='tour')for(const ship of game.shipsOf(player.id))for(const batch of ship.passengers||[])if(batch.quest===q.id)delete batch.quest;
   removeSideQuest(player,q);
   player.questLock = game.time + QUEST.ABORT_LOCK;
   if (q.faction) {
@@ -324,12 +324,10 @@ function progressQuest(game,player,ship,q,explicit){
         return true;
       }
       if (q.state === 'return' && at === q.giver) {
-        if(game.profile==='homeworld'){
-          const e=game.world.entities.get(q.giver),h=peopleOf(e),batches=(ship.passengers||[]).filter(b=>b.quest===q.id);
-          if(batches.reduce((n,b)=>n+b.n,0)!==q.tourists||!h)return false;
-          for(const b of batches){h.population+=b.n;for(const qualification of Object.keys(h.workers))h.workers[qualification]+=b.workers[qualification]||0;}
-          ship.passengers=ship.passengers.filter(b=>b.quest!==q.id);ship.cargo.tourists=(ship.cargo.tourists||0)-q.tourists;if(!ship.cargo.tourists)delete ship.cargo.tourists;updatePassengerOffers(e);
-        }
+        const e=game.world.entities.get(q.giver),h=peopleOf(e),batches=(ship.passengers||[]).filter(b=>b.quest===q.id);
+        if(batches.reduce((n,b)=>n+b.n,0)!==q.tourists||!h)return false;
+        for(const b of batches){h.population+=b.n;for(const qualification of Object.keys(h.workers))h.workers[qualification]+=b.workers[qualification]||0;}
+        ship.passengers=ship.passengers.filter(b=>b.quest!==q.id);ship.cargo.tourists=(ship.cargo.tourists||0)-q.tourists;if(!ship.cargo.tourists)delete ship.cargo.tourists;updatePassengerOffers(e);
         completeQuest(game, player,q); return true;
       }
       return false;

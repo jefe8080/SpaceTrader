@@ -14,7 +14,7 @@ import {giveOrder} from '../server/handlers/ship.js';
 import {updateShip} from '../server/ships.js';
 
 function fixture(file=':memory:'){
-  const game=new Game(file,{seed:42,profile:'homeworld'}),p=game.createPlayer('Archiv'),e=game.world.entities.get(p.homeworld),h=e.market.homeworld,s=game.shipsOf(p.id)[0];
+  const game=new Game(file,{seed:42}),p=game.createPlayer('Archiv'),e=game.world.entities.get(p.homeworld),h=e.market.homeworld,s=game.shipsOf(p.id)[0];
   p.homeQuest.completed=Object.fromEntries(['H00','H01','H02','H03','H04','H05','H06'].map(id=>[id,{at:0}]));p.credits=1e6;p.pilot=5;
   h.population=1000;h.workers={basic:400,skilled:100,specialist:30};h.controlLevel=1;
   for(const id of ['dock','control'])h.facilities[id].status='ready';
@@ -116,7 +116,7 @@ test('H14 und H17 verbessern denselben einzigartigen Antrieb auf ×5 und ×6, oh
 
 test('Neustart erhält Teillieferung, Ringbauabschnitt, abgegebenes Infrastrukturschiff und Studienfund',()=>{
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'prd5-ring-')),file=path.join(directory,'world.db'),f=fixture(file);unlock(f,'H07','H09');revealHomeSites(f.game,f.p,f.e);const find=f.game.world.entities.get(f.p.homeQuest.sites.sensor);f.s.dockedAt=find.id;f.s.manualDock=find.id;runCommand(f.game,f.p,{cmd:'homeArchiveVisit',target:find.id,ship:f.s.id});f.s.dockedAt=f.e.id;deliver(f,'H08');const second=f.game.spawnShip(f.p,'spatz',f.e);second.dockedAt=f.e.id;command(f,'homeOrbital',{large:false,ship:second.id,confirmed:true});advance(f,200);f.game.close();
-  const game=new Game(file,{profile:'homeworld'}),home=game.world.entities.get(f.e.id);assert.equal(home.market.homeworld.orbital.project.remaining,400);assert.equal(game.ships.has(second.id),false);assert.equal(home.market.homeworld.questDeliveries.H08.plates,100);
+  const game=new Game(file),home=game.world.entities.get(f.e.id);assert.equal(home.market.homeworld.orbital.project.remaining,400);assert.equal(game.ships.has(second.id),false);assert.equal(home.market.homeworld.questDeliveries.H08.plates,100);
   assert.equal(game.ships.get(f.s.id).moduleCargo.sensor,1);assert(game.players.get(f.p.id).homeQuest.finds.sensor);
   game.time+=400;tickHomeworld(game,home,400);assert.equal(home.market.homeworld.orbital.small,true);game.store.close();fs.rmSync(directory,{recursive:true,force:true});
 });

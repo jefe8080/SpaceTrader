@@ -173,9 +173,9 @@ export function dispatchRealSupply(game,entity){
     const price=buyPrice(good,source.market.goods[good])*(1+(game.ownership.get(source.id)?.customs||0));
     const amount=Math.min(wanted,Math.floor(availableHomeStock(source.market,good)),Math.floor(cash.cash/price));if(amount<1)continue;
     const budget=Math.min(cash.cash,amount*price*1.25);cash.cash-=budget;
-    const ship=game.spawnNpcShip(entity,true);
+    const ship=game.spawnNpcShip(entity);
     ship.queue=[{t:'supply',stationId:entity.id,sourceId:source.id,good,amount,phase:'toSource',haul:true,real:true,cash:budget}];
-    game.markNpc(ship,true);market.supply={state:'active',shipId:ship.id,sourceId:source.id,good};return;
+    market.supply={state:'active',shipId:ship.id,sourceId:source.id,good};return;
   }
 }
 

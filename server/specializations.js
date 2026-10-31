@@ -14,7 +14,7 @@ function initialize(e){
   return h;
 }
 export function specializationAccess(game,p,e){
-  if(game.profile!=='homeworld'||e.type==='ruins'||e.kind!=='planet')return 'Spezialisierung benötigt einen gewöhnlichen Planeten.';
+  if(e.type==='ruins'||e.kind!=='planet')return 'Spezialisierung benötigt einen gewöhnlichen Planeten.';
   if(!game.canManage(game.ownership.get(e.id),p.id))return 'Nur der Besitzer oder ein Handelsmeister darf diesen Standort ausbauen.';
   return remoteManagementError(game,p,e);
 }

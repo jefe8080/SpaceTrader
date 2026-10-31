@@ -28,7 +28,7 @@ function tickAggression(game, mins) {
       if (!admin) continue;
       const key = aggrKey(fs);
       // Einmaliger Friedenstimer ab erster Erfassung durch die eigene Leitstelle; Ausbau/Verlust setzen ihn nicht zurück
-      if (w.peace[key] === undefined && (game.profile !== 'homeworld' || coveredPoint(areas, admin))) w.peace[key] = game.time;
+      if (w.peace[key] === undefined && coveredPoint(areas, admin)) w.peace[key] = game.time;
       if (w.peace[key] === undefined || game.time - w.peace[key] < A.PEACE) continue;
       // Ausreichende Versorgung pausiert den Anstieg, senkt aber nicht
       if (fs.ok) continue;

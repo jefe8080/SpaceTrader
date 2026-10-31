@@ -1,8 +1,8 @@
-import { GOODS, SHIP_TYPES, SHIPYARD, GOVERNOR_LICENSES, UNLOCK_NAMES, PROP_UPGRADES, FIXED, CUSTOMS_MAX, RECYCLE_SHARE, PILOT_LICENSES,
-  propertyKind, minGovernorFor, propertyPrice, propUpgradeCost, extraOptions, LEVEL_FX, giverLevel, shipStats,
+import { GOODS, SHIP_TYPES, GOVERNOR_LICENSES, UNLOCK_NAMES, FIXED, CUSTOMS_MAX, RECYCLE_SHARE, PILOT_LICENSES,
+  propertyKind, minGovernorFor, propertyPrice, shipStats,
   CONSORTIUM_LEVELS, consortiumOwner, isConsortiumOwner } from '../../shared/config.js';
 import { V, CmdError } from './validate.js';
-import { newProperty, buildableTypes, propBook } from '../property.js';
+import { newProperty } from '../property.js';
 import { consortiumOf, isMaster, propCount, clog } from '../consortium.js';
 import { remoteManagementError } from '../coverage.js';
 import {startPhysicalBuild,applyPhysicalHull} from '../physical-yards.js';
@@ -10,7 +10,7 @@ import {CIVIL_GOODS} from '../../shared/local-demand.js';
 
 /**
  * Verwaltbarer Besitz: eigener oder (als Handelsmeister) Besitz des eigenen Konsortiums.
- * Liefert { e, prop, cons, payer, maxLevel }: payer zahlt Ausbau (Spieler bzw. Pool), maxLevel aus Lizenz bzw. Konsortiumslevel.
+ * Liefert { e, prop, cons }.
  */
 const ownProp = () => (v, ctx) => {
   const e = V.entity()(v, ctx);
@@ -19,7 +19,7 @@ const ownProp = () => (v, ctx) => {
   const prop = game.ownership.get(e.id);
   if (!game.canManage(prop, player.id)) throw new CmdError(prop && game.canUseStorage(prop, player.id) ? 'Verwalten dürfen nur Handelsmeister.' : 'Das gehört dir nicht.');
   const cons = isConsortiumOwner(prop.player) ? game.accountOf(prop.player) : null;
-  return { e, prop, cons, payer: cons || player, maxLevel: cons ? CONSORTIUM_LEVELS[cons.level].maxLevel : governor(player)?.maxLevel || 0 };
+  return { e, prop, cons };
 };
 const governor = (player) => GOVERNOR_LICENSES[player.governor || 0];
 /** Freier Platz in der eigenen Gouverneurslizenz und passende Freischaltung (Fehlertext oder null) */
@@ -95,33 +95,6 @@ export default {
     },
   },
 
-  propUpgrade: {
-    args: { target: ownProp(), line: V.key(PROP_UPGRADES), extra: V.opt(V.str(30)) },
-    run({ game, player }, { target: { e, prop, cons, payer, maxLevel: max }, line, extra }) {
-      if(game.profile==='homeworld')return 'In der neuen Welt werden konkrete Infrastruktur und Spezialisierungen ausgebaut.';
-      const lvl = (prop.upg[line] || 0) + 1;
-      if (lvl > max) return cons ? `Konsortiumslevel ${cons.level} erlaubt höchstens Ausbaustufe ${max}.` : `Gouverneurslizenz ${player.governor} erlaubt höchstens Ausbaustufe ${max}.`;
-      if (line === 'extra') {
-        const opts = extraOptions(e);
-        if (e.market.strategy !== 'shipyard') {
-          if (!extra || !opts.includes(extra)) return 'Bitte eine Zusatzproduktion aus der Liste wählen.';
-          if (prop.extras.includes(extra)) return 'Diese Produktion läuft schon.';
-        }
-      }
-      const cost = propUpgradeCost(e, line, lvl);
-      if (payer.credits < cost.credits) return cons ? 'Nicht genug Credits im Pool.' : 'Nicht genug Credits.';
-      const err = takeGoods(dockedOwn(game, player, e), cost.goods);
-      if (err) return err;
-      payer.credits -= cost.credits;
-      propBook(game, prop, 'exp', cost.credits);
-      prop.upg[line] = lvl;
-      if (line === 'extra' && extra) prop.extras.push(extra);
-      game.refreshProperty(e);
-      if (cons) { clog(game, cons, player.id, 'upgrade', cost.credits, `${e.name}: ${PROP_UPGRADES[line].name} ${lvl}`); game.emit('consortium', cons); }
-      game.emit('notice', player, `${e.name}: ${PROP_UPGRADES[line].name} Stufe ${lvl}`);
-    },
-  },
-
   // ---------- Konsortiumsbesitz (PRD-3 4.4) ----------
   /** Für das Konsortium kaufen: Handelsmeister, Schiff vor Ort, eigene Lizenz schaltet die Objektart frei, Limit und Pool */
   cBuyProperty: {
@@ -193,20 +166,9 @@ export default {
   // ---------- Eigene Werften ----------
   yardBuild: {
     args: { target: ownProp(), type: V.key(SHIP_TYPES) },
-    run(ctx, { target: { e, prop }, type }) {
-      const m = e.market;
-      if(ctx.game.profile==='homeworld'){
-        if(!PILOT_LICENSES[ctx.player.pilot||1].classes.includes(SHIP_TYPES[type].cls))return 'Für diese Schiffsklasse fehlt die Pilotenlizenz.';
-        return startPhysicalBuild(ctx.game,e,type);
-      }
-      if (m.strategy !== 'shipyard') return 'Keine Werft.';
-      if (!buildableTypes(e, prop).includes(type)) return 'Diese Klasse kann die Werft (noch) nicht bauen.';
-      if (m.building) return 'Die Werft baut bereits.';
-      const req = SHIP_TYPES[type].build;
-      for (const [g, n] of Object.entries(req)) if ((m.goods[g]?.stock || 0) < n) return `Es fehlen ${Math.ceil(n - (m.goods[g]?.stock || 0))} ${GOODS[g].name} im Werftlager.`;
-      for (const [g, n] of Object.entries(req)) m.goods[g].stock -= n;
-      const lvl = giverLevel(m.qxp);
-      m.building = { type, remaining: SHIPYARD.BUILD_TIME[SHIP_TYPES[type].cls], bonus: lvl * LEVEL_FX.YARD_BONUS, yardLvl: lvl };
+    run(ctx, { target: { e }, type }) {
+      if(!PILOT_LICENSES[ctx.player.pilot||1].classes.includes(SHIP_TYPES[type].cls))return 'Für diese Schiffsklasse fehlt die Pilotenlizenz.';
+      return startPhysicalBuild(ctx.game,e,type);
     },
   },
   yardClaim: {
@@ -218,7 +180,7 @@ export default {
       if (!lic.classes.includes(SHIP_TYPES[item.type].cls)) return 'Für diese Klasse fehlt dir die Pilotenlizenz.';
       e.market.forSale.splice(index, 1);
       const s = game.spawnShip(player, item.type, e);
-      if(game.profile==='homeworld')applyPhysicalHull(s,item);
+      applyPhysicalHull(s,item);
       if (item.bonus) Object.assign(s, { bonus: item.bonus, yardLvl: item.yardLvl, fuel: shipStats({ ...s, bonus: item.bonus }).tank });
       game.shipLog(s, `In die Flotte übernommen von ${e.name}`);
     },

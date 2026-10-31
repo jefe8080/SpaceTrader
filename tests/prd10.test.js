@@ -10,7 +10,7 @@ import { homeStorageUsage, homeStorageFree, HOME_BUILDINGS, storageUpgradeCost, 
 import {coverAll,reveal} from './world-helper.js';
 
 function fixture(file = ':memory:') {
-  const game = new Game(file, { profile: 'homeworld', seed: 42 });
+  const game = new Game(file, { seed: 42 });
   const player = game.createPlayer('Betrieb'), entity = game.world.entities.get(player.homeworld);
   const home = entity.market.homeworld, ship = game.shipsOf(player.id)[0];
   ship.dockedAt = entity.id; player.credits = 1e6;
@@ -60,7 +60,7 @@ test('PRD10: Lagerausbau prüft Zugang und Mittel und überlebt Neustart ohne Do
   assert.match(command(f,'homeStorageUpgrade',{id:b.id}),/eigenen/);f.home.owner=owner;
   assert.equal(command(f,'homeStorageUpgrade',{id:b.id}),undefined);
   advance(f,30);f.game.save();f.game.store.close();
-  const game=new Game(file,{profile:'homeworld'}),entity=game.world.entities.get(f.entity.id);
+  const game=new Game(file),entity=game.world.entities.get(f.entity.id);
   assert.equal(entity.market.homeworld.structures[0].level,1);
   game.time+=30;tickHomeworld(game,entity,30);
   assert.equal(entity.market.homeworld.structures[0].level,2);assert.equal(entity.market.homeworld.storage,6000);
@@ -163,7 +163,7 @@ test('PRD10: alte laufende Leitstellenprojekte und gespeicherte Lagerwerte bleib
  f.home.projects.push({id:'alt-control',kind:'control',level:2,until:60,bound:{credits:8000,goods:{plates:10,wires:4}}});
  f.home.reserves={ore:900};f.home.limits={ore:40};f.entity.market.goods.ore.stock=75;
  const credits=f.player.credits;f.game.save();f.game.store.close();
- const game=new Game(file,{profile:'homeworld'}),entity=game.world.entities.get(f.entity.id),h=entity.market.homeworld;
+ const game=new Game(file),entity=game.world.entities.get(f.entity.id),h=entity.market.homeworld;
  assert.equal(h.reserves.ore,900);assert.equal(h.limits.ore,40);assert.equal(entity.market.goods.ore.stock,75);
  game.time=60;tickHomeworld(game,entity,60);
  assert.equal(h.structures[0].level,1);assert.equal(h.storage,4000);assert.equal(h.controlLevel,2);

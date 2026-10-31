@@ -9,7 +9,7 @@ import { createHomeworld, tickHomeworld, ringCoordinates } from '../server/homew
 import { HOMEWORLD } from '../shared/homeworld.js';
 
 function fixture(seed = 42, db = ':memory:') {
-  const game = new Game(db, { profile: 'homeworld', seed });
+  const game = new Game(db, { seed });
   const player = game.createPlayer('Heimat');
   const entity = game.world.entities.get(player.homeworld);
   const ship = game.shipsOf(player.id)[0];
@@ -40,7 +40,7 @@ function deliver(f, good, amount) {
 }
 
 test('Persönliche Heimat: gleichzeitige und spätere Spieler haben Abstand, getrennte Systeme und Grundquellen', () => {
-  const game = new Game(':memory:', { profile: 'homeworld', seed: 17 });
+  const game = new Game(':memory:', { seed: 17 });
   const homes = [];
   for (let i = 0; i < 24; i++) {
     const player = game.createPlayer(`Kapitän ${i}`), home = game.world.entities.get(player.homeworld);
@@ -58,7 +58,7 @@ test('Persönliche Heimat: gleichzeitige und spätere Spieler haben Abstand, get
 });
 
 test('Erschöpfte Startringe erweitern die Suche ringweise', () => {
-  const game = new Game(':memory:', { profile: 'homeworld', seed: 9 });
+  const game = new Game(':memory:', { seed: 9 });
   for (const {q,r} of [...ringCoordinates(1),...ringCoordinates(2)]) {
     game.world.ensureSector(q,r);
     for(const system of game.world.sectors.get(`${q},${r}`).systems) game.world.addEntity({id:'occupied_'+system.id,type:'ruins',kind:'planet',system:system.id,sector:system.sector,x:system.x,y:system.y,radius:100});
@@ -120,7 +120,7 @@ test('Neustart erhält Reparaturtimer, Starthilfen und Heimatidentität ohne neu
     f=fixture(23,db);begin(f);command(f,'homeRepair',{facility:'waterworks'});advance(f,12);
     const {id}=f.player,homeId=f.entity.id,credits=f.player.credits;
     f.game.close();
-    const game=new Game(db,{profile:'homeworld'}),player=game.players.get(id),entity=game.world.entities.get(homeId);
+    const game=new Game(db),player=game.players.get(id),entity=game.world.entities.get(homeId);
     f={game,player,entity,home:entity.market.homeworld};
     assert.equal(createHomeworld(game,player),entity);
     assert.equal(player.credits,credits);assert.equal(f.home.grants.length,3);

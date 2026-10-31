@@ -181,11 +181,34 @@ Fortschritt wird im selben Commit aktualisiert.
     (Abdeckung), Modulausbau (Modul landet im Laderaum), Weltprofil (Altwelt per
     Meta-Eintrag).
   - Ergebnis: `npm test` 382 von 382 grün.
-- [ ] **S3: Server.**
+- [x] **S3: Server.**
   - Profil-Abfragen auflösen und Legacy-Pfade entfernen.
   - `Game` und `World` ohne `profile`.
   - `world-profile.js` wird zur reinen Startprüfung.
   - Vergleich aus S1 ohne Abweichung.
+  - Umgesetzt: alle `game.profile`-Abfragen in Spiel, Welt, Abdeckung, Abfertigung,
+    Ereignissen, Schiffen, Quests, Spezialisierung, Krieg und Handlern zugunsten von
+    `homeworld` aufgelöst. `world-profile.js` exportiert `WORLD_GEN`/`WORLD_KIND`,
+    `checkWorldFile` und `runtimeOptions` (ohne `WORLD_PROFILE`); `/api/status`
+    liefert nur noch das Protokoll.
+  - Entfernt, weil in `homeworld` unerreichbar: Befehl `flagship` samt
+    Hauptschiff-Sperren, `propUpgrade`, alter Werftbau (`buildableTypes`,
+    `yardClasses`), alte Modul-Ein- und -Ausbauzweige, alte NPC-Versorger
+    (`checkSupply`, `checkHaul`, `sendNpc`, `findSource`, `npcBusy`),
+    `tickOwnedPlanet`, `payForDelivery`, Legacy-Startspieler, Drift- und
+    Strategie-Ticks der Märkte (alle öffentlichen Märkte haben `realEconomy`).
+  - Bleibt, weil in `homeworld` erreichbar: Hub-Gleichgewicht (`tickHubEquilibrium`
+    mit Drift), fehlende Zutaten für Eilaufträge, `applyProperty`/`applyLevel` für
+    gekaufte Heimatwelt-Rohstoffquellen (`homeResource`, ohne `realEconomy`),
+    Gouverneurslizenz, Fabriken auf Bauplätzen, Konsortiumsstufen.
+  - Der Optionsparameter `profile` ist aus Tests, Sims und Skripten entfernt;
+    nur `scripts/compare-prd18.mjs` übergibt ihn noch für den Referenzcode.
+  - Tests: Hilfsprüfungen auf entfernte Interna angepasst (`findSource`,
+    `markNpc`, `npcBusy`, `flagship`, `WORLD_PROFILE`), außerdem die reinen
+    Legacy-Tests NPC-Ladung, Drift und Nachfrage-Schwankung gelöscht.
+    `npm test` 379 von 379 grün.
+  - Vergleich mit dem Prod-Spielstand (30 min): **keine Abweichung**, SHA-256
+    identisch mit der Referenz.
 - [ ] **S4: Client.**
   - Weichen über `state.homeworld` und `realEconomy` auflösen.
   - Legacy-UI entfernen.

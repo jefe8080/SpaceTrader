@@ -9,7 +9,7 @@ import {SHIP_TYPES,buildMaterials,sellValue,SHIPYARD} from '../shared/ships.js';
 import {tickPhysicalYard,migrateNewHullInventory} from '../server/physical-yards.js';
 
 function fixture(file=':memory:'){
-  const game=new Game(file,{seed:42,profile:'homeworld'}),player=game.createPlayer('Werft'),ship=game.shipsOf(player.id)[0],yard=game.world.entities.get('origin_yard');
+  const game=new Game(file,{seed:42}),player=game.createPlayer('Werft'),ship=game.shipsOf(player.id)[0],yard=game.world.entities.get('origin_yard');
   player.credits=1e7;ship.dockedAt=yard.id;ship.x=yard.x;ship.y=yard.y;game.revealAround(player,yard.x,yard.y,1000);game.onDock(ship,yard);
   return {game,player,ship,yard};
 }
@@ -74,7 +74,7 @@ test('Schiffsankauf benötigt reale Kasse und erhält Module, Ausbau und tatsäc
 test('Neustart erhält verbrauchte Baumaterialien, Rumpf-ID und Restzeit ohne erneutes Einstiegsangebot',()=>{
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'prd5-yard-')),file=path.join(directory,'world.db');
   let f=fixture(file);assert.equal(command(f,'buyShip',{index:0}),undefined);supply(f,'spatz');advance(f,1);advance(f,15);
-  const id=f.yard.market.building.id;f.game.close();const game=new Game(file,{profile:'homeworld'});
+  const id=f.yard.market.building.id;f.game.close();const game=new Game(file);
   f={game,yard:game.world.entities.get('origin_yard')};assert.equal(f.yard.market.forSale.length,0);assert.equal(f.yard.market.building.remaining,25);assert.equal(f.yard.market.building.id,id);
   for(const good of Object.keys(buildMaterials('spatz')))assert.equal(f.yard.market.goods[good].stock,0);
   advance(f,25);assert.equal(f.yard.market.forSale.length,1);assert.equal(f.yard.market.forSale[0].id,id);close(f);

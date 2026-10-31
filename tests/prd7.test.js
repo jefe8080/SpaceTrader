@@ -16,7 +16,7 @@ import { Net } from '../server/net.js';
 import { GAME_PROTOCOL, serverVersionError } from '../shared/protocol.js';
 
 function fixture() {
-  const game = new Game(':memory:', { profile: 'homeworld', seed: 42 });
+  const game = new Game(':memory:', { seed: 42 });
   const player = game.createPlayer('Pilot');
   const home = game.world.entities.get(player.homeworld);
   const ship = game.shipsOf(player.id)[0];
@@ -32,11 +32,11 @@ test('PRD7: old saved pilot receives active H00 and a populated profile on actua
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'spacetrader-old-entry-')),file=path.join(directory,'world.db');
   let game;
   try {
-    game=new Game(file,{profile:'homeworld',seed:42});
+    game=new Game(file,{seed:42});
     const player=game.createPlayer('Old Pilot'),id=player.id;
     delete player.homeQuest.active;delete player.homeQuest.pending;delete player.homeQuest.introduction;
     delete player.profileStats;
-    game.close();game=new Game(file,{profile:'homeworld'});
+    game.close();game=new Game(file);
     const loaded=game.players.get(id),messages={};
     const net=new Net({on(){},emit(){}},game);
     net.sendConsortium=()=>{};net.sendEvents=()=>{};
@@ -78,7 +78,7 @@ test('PRD7: restart retains unconfirmed introductions, pending starts, names and
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'spacetrader-prd7-')),file=path.join(directory,'world.db');
   let game;
   try {
-    game=new Game(file,{profile:'homeworld',seed:42});
+    game=new Game(file,{seed:42});
     const p=game.createPlayer('Persistent'),home=game.world.entities.get(p.homeworld),ship=game.shipsOf(p.id)[0];
     ship.dockedAt=home.id;
     renamePlanet(game,p,home,'Neue Heimat',Date.now());
@@ -86,7 +86,7 @@ test('PRD7: restart retains unconfirmed introductions, pending starts, names and
     const profile=pilotProfile(game,p),renamedAt=home.market.homeworld.renamedAt;
     p.profileStats.revenue=123;p.profileStats.knownProfit=45;
     const journalLength=p.homeQuest.journal.length;
-    game.close();game=new Game(file,{profile:'homeworld'});
+    game.close();game=new Game(file);
     const loaded=game.players.get(p.id),world=game.world.entities.get(home.id);
     assert.equal(loaded.homeQuest.introduction,'H03');assert.deepEqual(loaded.homeQuest.pending,['H04']);
     assert.equal(loaded.homeQuest.journal.length,journalLength);assert.equal(loaded.homeQuest.salvage,undefined);
@@ -94,7 +94,7 @@ test('PRD7: restart retains unconfirmed introductions, pending starts, names and
     assert.match(renamePlanet(game,loaded,world,'Zu früh'),/24 Stunden/);
     assert.equal(pilotProfile(game,loaded).revenue,123);assert.equal(pilotProfile(game,loaded).profit,45);
     assert.equal(pilotProfile(game,loaded).since,profile.since);
-    runCommand(game,loaded,{cmd:'homeDialogRead',scene:'H03'});game.close();game=new Game(file,{profile:'homeworld'});
+    runCommand(game,loaded,{cmd:'homeDialogRead',scene:'H03'});game.close();game=new Game(file);
     const active=game.players.get(p.id);assert.equal(active.homeQuest.introduction,'H04');
     const count=active.homeQuest.journal.filter(e=>e.id==='H04').length;
     assert.equal(count,1);assert.ok(active.homeQuest.salvage.wreck);

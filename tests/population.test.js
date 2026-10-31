@@ -11,7 +11,7 @@ import {acceptQuest,abortQuest,questProgress,boardOf} from '../server/quests.js'
 import {cargoFits,freeFor} from '../shared/config.js';
 
 function fixture(file=':memory:'){
-  const game=new Game(file,{seed:42,profile:'homeworld'}),player=game.createPlayer('Personen'),home=game.world.entities.get(player.homeworld),ship=game.shipsOf(player.id)[0];
+  const game=new Game(file,{seed:42}),player=game.createPlayer('Personen'),home=game.world.entities.get(player.homeworld),ship=game.shipsOf(player.id)[0];
   home.market.homeworld.facilities.dock.status='ready';ship.modules=['cabin'];ship.queue=[];player.credits=100000;
   const source=[...game.world.entities.values()].find(e=>e.kind==='planet'&&e.type!=='ruins');
   ship.dockedAt=source.id;game.revealAround(player,source.x,source.y,1000);initializePopulation(source);initializePopulation(home);
@@ -76,7 +76,7 @@ test('Questabbruch löscht keine Touristen; Rückgabe benötigt den wirklichen H
 
 test('Neustart bewahrt Herkunft, Qualifikation, Reisegeld und Aufenthalt ohne erneute Bevölkerungserzeugung',()=>{
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'prd5-persons-')),file=path.join(directory,'world.db');let f=fixture(file);f.state.civil={budget:1000};passengerTrade(f.game,f.ship,f.source,'tourists',10,'buy');
-  const ids={p:f.player.id,s:f.ship.id,e:f.source.id},population=f.state.population;f.game.close();const game=new Game(file,{profile:'homeworld'}),ship=game.ships.get(ids.s),source=game.world.entities.get(ids.e);
+  const ids={p:f.player.id,s:f.ship.id,e:f.source.id},population=f.state.population;f.game.close();const game=new Game(file),ship=game.ships.get(ids.s),source=game.world.entities.get(ids.e);
   assert.equal(ship.passengers[0].origin,source.id);assert.equal(ship.passengers[0].wallet,280);assert.equal(source.market.economy.population,population);
   assert.equal(passengerTrade(game,ship,source,'tourists',10,'sell').n,10);assert.equal(source.market.economy.population,population+10);game.store.close();fs.rmSync(directory,{recursive:true,force:true});
 });

@@ -23,8 +23,8 @@ export function coverageAreas(game,player) {
   return areas;
 }
 
-export const pointCovered=(game,player,point)=>game.profile!=='homeworld'||coveredPoint(coverageAreas(game,player),point);
-export const segmentCovered=(game,player,from,to)=>game.profile!=='homeworld'||coveredSegment(coverageAreas(game,player),from,to);
+export const pointCovered=(game,player,point)=>coveredPoint(coverageAreas(game,player),point);
+export const segmentCovered=(game,player,from,to)=>coveredSegment(coverageAreas(game,player),from,to);
 
 export function coveredPath(game,player,from,to,speed=150) {
   const areas=coverageAreas(game,player);
@@ -51,13 +51,12 @@ export function controlAdmissionCapacity(game,player){
 }
 
 export function remoteManagementError(game,player,entity,planetary=true) {
-  if(planetary&&game.profile==='homeworld'&&entity?.type==='ruins')return planetAccess(player,game.ships,entity,coverageAreas(game,player)).manage?null:'Keine Verbindung zum Hauptschiff im eigenen Leitstellennetz und kein eigenes Schiff vor Ort.';
-  if(game.profile!=='homeworld'||pointCovered(game,player,entity)||game.ships.get(player.manualShip)?.dockedAt===entity.id)return null;
+  if(planetary&&entity?.type==='ruins')return planetAccess(player,game.ships,entity,coverageAreas(game,player)).manage?null:'Keine Verbindung zum Hauptschiff im eigenen Leitstellennetz und kein eigenes Schiff vor Ort.';
+  if(pointCovered(game,player,entity)||game.ships.get(player.manualShip)?.dockedAt===entity.id)return null;
   return 'Neue Fernänderungen brauchen eigene Leitstellenabdeckung oder dein manuelles Schiff vor Ort.';
 }
 
 export function manualActionError(game, player, ship, target = ship) {
-  if (game.profile !== 'homeworld') return null;
   if ((!pointCovered(game,player,ship)||!pointCovered(game,player,target)) && player.manualShip!==ship.id) {
     return 'Außerhalb deiner Leitstellenabdeckung erhält nur das aktiv manuell gesteuerte Schiff neue Direktbefehle.';
   }

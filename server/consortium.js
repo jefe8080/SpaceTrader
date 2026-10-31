@@ -203,7 +203,7 @@ export function levelUp(game, p) {
   c.credits -= next.cost;
   c.level = next.level;
   clog(game, c, p.id, 'level', next.cost, `Level ${next.level}`);
-  note(game, c, `${c.name} erreicht Level ${next.level}: ${next.maxProps} Besitztümer, Ausbau bis Stufe ${next.maxLevel}.`);
+  note(game, c, `${c.name} erreicht Level ${next.level}: ${next.maxProps} Besitztümer.`);
   changed(game, c);
   return undefined;
 }
@@ -243,7 +243,7 @@ export function consortiumView(game, p, online = new Set()) {
     return { id, name: q?.name || '?', rank: c.members[id].rank, level: pilotLevel(q?.xp), online: online.has(id) };
   }).sort((a, b) => (a.rank === b.rank ? a.name.localeCompare(b.name) : a.rank === 'master' ? -1 : 1));
   return {
-    id: c.id, name: c.name, color: c.color, level: c.level, pool: Math.floor(c.credits), maxProps: L.maxProps, maxLevel: L.maxLevel,
+    id: c.id, name: c.name, color: c.color, level: c.level, pool: Math.floor(c.credits), maxProps: L.maxProps,
     props: propCount(game, c), rank: c.members[p.id].rank, members, board: c.board, military: c.military !== false,
     propList: [...game.ownership.values()].filter((x) => x.player === consortiumOwner(c.id)).map((x) => {
       const e = game.world.entities.get(x.entity);

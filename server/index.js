@@ -11,17 +11,17 @@ import { GAME_PROTOCOL } from '../shared/protocol.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.env.PORT) || 3000;
-const { dbFile: DB_FILE, profile } = runtimeOptions(root);
+const { dbFile: DB_FILE } = runtimeOptions(root);
 
 const app = express();
-app.get('/api/status', (req, res) => res.json({ protocol: GAME_PROTOCOL, profile }));
+app.get('/api/status', (req, res) => res.json({ protocol: GAME_PROTOCOL }));
 app.use(express.static(path.join(root, 'client')));
 app.use('/shared', express.static(path.join(root, 'shared')));
-if (profile === 'homeworld'&&process.env.DEV_TOOLS==='1') app.use('/dev', express.static(path.join(root, 'tests', 'browser')));
+if (process.env.DEV_TOOLS === '1') app.use('/dev', express.static(path.join(root, 'tests', 'browser')));
 
 const server = http.createServer(app);
 const io = new Server(server);
-const game = new Game(DB_FILE, { verbose: true, profile });
+const game = new Game(DB_FILE, { verbose: true });
 const net = new Net(io, game);
 
 let last = Date.now();

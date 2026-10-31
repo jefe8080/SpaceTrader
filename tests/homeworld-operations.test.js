@@ -9,7 +9,7 @@ import { tickHomeworld } from '../server/homeworld.js';
 import { homeStorageUsage, homeStorageFree, HOME_BUILDINGS } from '../shared/homeworld.js';
 
 function fixture(file = ':memory:') {
-  const game = new Game(file, { profile: 'homeworld', seed: 42 });
+  const game = new Game(file, { seed: 42 });
   const player = game.createPlayer('Betrieb'), entity = game.world.entities.get(player.homeworld);
   const home = entity.market.homeworld, ship = game.shipsOf(player.id)[0];
   ship.dockedAt = entity.id; player.credits = 1e6;
@@ -168,7 +168,7 @@ test('Neustart erhält Baukosten und Ausbildungsrestzeit ohne Offlinefortschritt
     f=fixture(file);add(f,'school','school');add(f,'solar','solar');advance(f,1);
     command(f,'homeTrain',{qualification:'skilled'});command(f,'homeBuild',{kind:'housing'});advance(f,30);
     const id=f.player.id,homeId=f.entity.id,credits=f.player.credits,civilIncome=f.home.civil.taxes+f.home.civil.consumptionPayments;f.game.close();
-    const game=new Game(file,{profile:'homeworld'}),player=game.players.get(id),entity=game.world.entities.get(homeId);
+    const game=new Game(file),player=game.players.get(id),entity=game.world.entities.get(homeId);
     f={game,player,entity,home:entity.market.homeworld};
     assert.equal(f.home.projects.find(p=>p.kind==='training').remaining,90);assert.equal(player.credits,credits);
     advance(f,30);assert.equal(f.home.structures.find(s=>s.kind==='housing').status,'ready');assert.ok(Math.abs(player.credits-credits-(f.home.civil.taxes+f.home.civil.consumptionPayments-civilIncome))<1e-7);

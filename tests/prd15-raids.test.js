@@ -8,7 +8,7 @@ import { ensureFactionSectors, spawnFactionShip, recordActivity } from '../serve
 import { diplo } from '../server/war/diplomacy.js';
 import { productionFactor, raidError, tickRaids } from '../server/war/raids.js';
 import { freeFor } from '../shared/config.js';
-import { coverAll, reveal } from './world-helper.js';
+import { coverAll } from './world-helper.js';
 
 function withFaction() {
   for (let seed = 1; seed < 60; seed++) {

@@ -23,7 +23,7 @@ test('PRD14: side quest types have real targets and reject unavailable condition
  }finally{game.store.close();}
 });
 test('PRD14: own destination accepts dedicated handover without a goods slot and only pays once',()=>{
- const game=new Game(':memory:',{profile:'homeworld',seed:42});
+ const game=new Game(':memory:',{seed:42});
  try{
   const p=game.createPlayer('Eigenauftrag'),e=game.world.entities.get(p.homeworld),s=game.shipsOf(p.id)[0];s.dockedAt=e.id;e.market.homeworld.facilities.dock.status='ready';
   s.cargo={ore:10};delete e.market.goods.ore;

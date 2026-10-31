@@ -15,7 +15,7 @@ import {updateShip} from '../server/ships.js';
 import {GOODS,cellKey,cellOf} from '../shared/config.js';
 
 function fixture(file=':memory:'){
-  const game=new Game(file,{seed:42,profile:'homeworld'}),p=game.createPlayer('Expansion'),home=game.world.entities.get(p.homeworld),h=home.market.homeworld,ship=game.shipsOf(p.id)[0];
+  const game=new Game(file,{seed:42}),p=game.createPlayer('Expansion'),home=game.world.entities.get(p.homeworld),h=home.market.homeworld,ship=game.shipsOf(p.id)[0];
   p.homeQuest.completed=Object.fromEntries(Array.from({length:13},(_,i)=>[`H${String(i).padStart(2,'0')}`,{at:0}]));p.credits=1e7;p.pilot=5;
   h.facilities.dock.status='ready';h.facilities.control.status='ready';h.controlLevel=1;ship.dockedAt=home.id;ship.queue=[];
   for(const [q,r] of [[3,0],[4,0],[5,0]])game.world.ensureSector(q,r);
@@ -117,7 +117,7 @@ test('Anfliegender Frachter beendet den begonnenen Abschnitt und pausiert ohne V
 
 test('Neustart erhält Gründungs-/Warprestzeit, gebundene Kosten, Weltidentität und Sperrfrist ohne Offlinezeit',()=>{
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'prd5-warp-')),file=path.join(directory,'world.db'),f=fixture(file),q=prepareWarp(f);startWarp(f.game,f.p,f.home,q.id,true);f.game.time+=120;tickWarps(f.game,120);const credits=f.p.credits;f.game.close();
-  const game=new Game(file,{profile:'homeworld'}),home=game.world.entities.get(f.home.id),p=game.players.get(f.p.id);assert.equal(home.market.homeworld.warp.remaining,180);assert.equal(p.credits,credits);game.time+=180;tickWarps(game,180);assert.equal(home.system,f.system.id);assert.equal(home.market.homeworld.warp,null);assert.equal(home.market.homeworld.warpCooldownUntil,game.time+86400);assert.equal(p.credits,credits);game.store.close();fs.rmSync(directory,{recursive:true,force:true});
+  const game=new Game(file),home=game.world.entities.get(f.home.id),p=game.players.get(f.p.id);assert.equal(home.market.homeworld.warp.remaining,180);assert.equal(p.credits,credits);game.time+=180;tickWarps(game,180);assert.equal(home.system,f.system.id);assert.equal(home.market.homeworld.warp,null);assert.equal(home.market.homeworld.warpCooldownUntil,game.time+86400);assert.equal(p.credits,credits);game.store.close();fs.rmSync(directory,{recursive:true,force:true});
 });
 
 test('Unerschlossene, belegte und fremde Warpziele werden vor Kostenbindung abgewiesen',()=>{
@@ -135,7 +135,7 @@ test('Warpziel wird exklusiv reserviert und kann nicht durch einen zweiten Trans
 
 test('Neustart bewahrt eine bezahlte 300-s-Gründung samt Personen und Infrastrukturschiff ohne neues Startpaket',()=>{
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'prd5-colony-')),file=path.join(directory,'world.db'),f=fixture(file);expedition(f);command(f,'colonyFound',{target:f.site.id,ship:f.ship.id,confirmed:true});f.game.time+=100;tickColonies(f.game,100);const credits=f.p.credits;f.game.close();
-  const game=new Game(file,{profile:'homeworld'}),site=game.world.entities.get(f.site.id),p=game.players.get(f.p.id);assert.equal(site.colony.remaining,200);assert.equal(p.credits,credits);assert.equal(game.ships.has(f.ship.id),false);
+  const game=new Game(file),site=game.world.entities.get(f.site.id),p=game.players.get(f.p.id);assert.equal(site.colony.remaining,200);assert.equal(p.credits,credits);assert.equal(game.ships.has(f.ship.id),false);
   game.time+=200;tickColonies(game,200);assert.equal(site.market.homeworld.population,20);assert.deepEqual(site.market.homeworld.grants,[]);assert.equal(p.credits,credits);game.store.close();fs.rmSync(directory,{recursive:true,force:true});
 });
 

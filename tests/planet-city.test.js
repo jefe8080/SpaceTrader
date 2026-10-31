@@ -1,7 +1,14 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {CITY_TYPES, planCity, pickCity, storageFamily, citySprite, cityDevelopment} from '../client/js/planetCityLayout.js';
-import {PLANET_TYPES, GOODS, RECIPES, ENTERTAINMENT,recipeCat,extraOptions,factorySlots,RECIPE_CATS,PLANET_EXTRAS} from '../shared/config.js';
+import {PLANET_TYPES, GOODS, RECIPES, ENTERTAINMENT,recipeCat,factorySlots,RECIPE_CATS,PLANET_EXTRAS} from '../shared/config.js';
+
+/** Weitere Rohstoffe anderer Planetentypen: Belastungsprobe für die Stadtplanung mit vielen Produktionsstätten */
+function extraGoods(type) {
+  const own = new Set(Object.keys(PLANET_TYPES[type].produce)), pool = new Set();
+  for (const t of Object.values(PLANET_TYPES)) for (const g of Object.keys(t.produce)) if (!own.has(g) && GOODS[g].tier === 0 && GOODS[g].cls === 'normal') pool.add(g);
+  return [...pool].sort();
+}
 
 function itemsFor(type) {
   if(type==='ruins')return [{key:'questhouse',kind:'questhouse'},
@@ -75,9 +82,9 @@ test('agricultural factories replace their exact category plot in the painted wo
   assert.equal(factory.painted,false);
   for(const r of built.records){const old=first.records.find(p=>p.key===r.key);if(old)assert.deepEqual([r.x,r.y],[old.x,old.y]);}
 });
-test('agricultural layout accommodates maximum legacy extra production plus all level goods and factory slots',()=>{
+test('agricultural layout accommodates seven extra raw goods plus all level goods and factory slots',()=>{
   const entity={type:'agrar'},items=itemsFor('agrar');
-  for(const good of extraOptions(entity).slice(0,7))items.push({key:'produce:'+good,kind:'produce',good});
+  for(const good of extraGoods('agrar').slice(0,7))items.push({key:'produce:'+good,kind:'produce',good});
   for(const [good,kind] of [['preserves','produce'],['medicine','consume'],['textiles','produce']])items.push({key:kind+':'+good,kind,good});
   const plan=planCity(entity,items,undefined,recipeCat);
   assert.equal(plan.records.length,items.length);assert.equal(new Set(plan.assignments.values()).size,items.length);
@@ -88,7 +95,7 @@ test('all painted inhabited cities retain every service at maximum legal goods a
   const failures=[];
   for(const type of Object.keys(CITY_TYPES).filter(type=>type!=='ruins')){
     const entity={type},items=itemsFor(type);
-    for(const good of extraOptions(entity).slice(0,7))items.push({key:'produce:'+good,kind:'produce',good});
+    for(const good of extraGoods(type).slice(0,7))items.push({key:'produce:'+good,kind:'produce',good});
     for(const [i,good] of PLANET_EXTRAS[type].entries()){const kind=i===1?'consume':'produce';items.push({key:kind+':'+good,kind,good});}
     const unique=[...new Map(items.map(it=>[it.key,it])).values()],plan=planCity(entity,unique,undefined,recipeCat);
     assert.equal(plan.records.length,unique.length);assert.equal(plan.authored,true);assert.equal(plan.roads.length,0);

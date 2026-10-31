@@ -1,8 +1,6 @@
 import {recordInventoryTrade} from './pilot-profile.js';
-import {recordLocalSale} from '../shared/local-sales.js';
-import { RECIPES, PROP_UPGRADES, FIXED, SHIP_TYPES, buyPrice, sellPrice,
-  priceWindow, fixedPrice, fixedConsumptionPerHour, fixedRref } from '../shared/config.js';
-import { stat, applyLevel, ensureFactoryStorage } from './markets.js';
+import { RECIPES, PROP_UPGRADES, buyPrice } from '../shared/config.js';
+import { applyLevel, ensureFactoryStorage } from './markets.js';
 import { addToBuckets } from './stats.js';
 import { isConsortiumOwner } from '../shared/consortium.js';
 import { bookRevenue } from './consortium.js';
@@ -74,52 +72,9 @@ export function propBook(game, prop, field, n) {
   if (field === 'inc' && isConsortiumOwner(prop.player)) { const c = game.accountOf(prop.player); if (c) bookRevenue(game, c, prop.entity, n); }
 }
 
-/** Fixpreis-Verbrauch eigener Planeten: Verbrauch aus dem Lager, der Planet zahlt an den Besitzer */
-export function tickOwnedPlanet(game, e, prop, dt) {
-  const m = e.market;
-  const owner = game.accountOf(prop.player);
-  if (!owner) return;
-  for (const [g, s] of Object.entries(m.goods)) {
-    if (s.role !== 'consume') continue;
-    const baseRate = s.rate; // enthält Größe und Planetenlevel
-    const sv = prop.fixed[g] ?? FIXED.DEFAULT;
-    const { pmin, pmax } = priceWindow(g, s.mod || 1);
-    const perSec = fixedConsumptionPerHour(fixedRref(baseRate, pmin, pmax), sv, pmin, pmax) / 3600;
-    const n = Math.min(s.stock, perSec * dt);
-    if (n <= 0) continue;
-    s.stock -= n;
-    const money = n * fixedPrice(pmin, pmax, sv);
-    owner.credits += money;
-    propBook(game, prop, 'inc', money);
-    recordInventoryTrade(game,game.players.get(prop.player),g,'sell',n,money);
-    recordLocalSale(m,game.time,g,n,money);
-    stat(m, game.time, 'c', g, n);
-  }
-}
-
 /** Darf ein Fremder hier handeln? */
 export function strangerBlocked(prop) {
   return prop?.mode === 'private' ? 'Privater Handel: nur für den Besitzer.' : null;
-}
-
-/**
- * Lieferung eines NPC-Versorgers an einen Spielerbesitz: Der Besitzer zahlt den Marktpreis.
- * Bei leerem Konto oder aktivem Stop-Loss nimmt der Markt nichts an. Liefert die angenommene Menge.
- */
-export function payForDelivery(game, e, prop, good, n) {
-  const owner = game.accountOf(prop.player);
-  const slot = e.market.goods[good];
-  if (!owner || !slot) return 0;
-  const floor = owner.stopLoss || 0;
-  let k = 0, cost = 0;
-  while (k < n) {
-    const pr = sellPrice(good, slot);
-    if (owner.credits - pr < floor || owner.credits < pr) break;
-    owner.credits -= pr; cost += pr; slot.stock += 1; k++;
-  }
-  propBook(game, prop, 'exp', cost);
-  recordInventoryTrade(game,game.players.get(prop.player),good,'buy',k,cost);
-  return k;
 }
 
 /** NPC-Versorger holt Ware aus Spielerbesitz: Besitzer bekommt den Erlös */
@@ -132,12 +87,3 @@ export function sellToSupplier(game, e, prop, good, n) {
   propBook(game, prop, 'inc', money);
   recordInventoryTrade(game,game.players.get(prop.player),good,'sell',n,money);
 }
-
-/** Werftklassen eigener Werften: normale Werft S (+M mit Zusatzproduktion), große Werft bis L (+XL) */
-export function yardClasses(e, prop) {
-  const x = prop.upg?.extra || 0;
-  if (e.type === 'bigyard') return x > 0 ? ['S', 'M', 'L', 'XL'] : ['S', 'M', 'L'];
-  return x > 0 ? ['S', 'M'] : ['S'];
-}
-export const buildableTypes = (e, prop) => Object.entries(SHIP_TYPES).filter(([, d]) => !d.npc && !d.faction && yardClasses(e, prop).includes(d.cls)).map(([t]) => t);
-

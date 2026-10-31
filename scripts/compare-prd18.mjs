@@ -35,6 +35,7 @@ async function run(root, source, out, minutes = 30) {
   for (const ext of ['', '-wal', '-shm']) fs.rmSync(work + ext, { force: true });
   fs.copyFileSync(source, work);
   const { Game } = await import(pathToFileURL(path.join(path.resolve(root), 'server', 'game.js')).href);
+  // Die Referenz vor PRD 18 startet sonst im Legacy-Profil; neuer Code ignoriert die Option
   const game = new Game(work, { profile: 'homeworld' });
   const steps = Math.round(minutes * 60 / 0.5);
   for (let i = 0; i < steps; i++) {

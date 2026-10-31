@@ -20,24 +20,23 @@ const digest = (file) => createHash('sha256').update(fs.readFileSync(file)).dige
 test('PRD-5-Server nutzt getrennten Datenpfad; aktiver Pfad wird abgewiesen', () => {
   temporary((root) => {
     const active = runtimeOptions(root, {});
-    const dev = runtimeOptions(root, { WORLD_PROFILE: 'homeworld',DB_FILE:path.join(root,'data','prd5','spacetrader.db') });
-    assert.equal(active.profile, 'homeworld');assert.match(active.dbFile,/world-v5/);
+    const dev = runtimeOptions(root, { DB_FILE: path.join(root, 'data', 'prd5', 'spacetrader.db') });
+    assert.match(active.dbFile, /world-v5/);
     assert.notEqual(active.dbFile, dev.dbFile);
     assert.match(dev.dbFile, /prd5/);
-    assert.throws(() => runtimeOptions(root, { WORLD_PROFILE: 'homeworld', DB_FILE:path.join(root,'data','spacetrader.db') }), /aktiven Datenpfad/);
-    assert.throws(() => runtimeOptions(root, { WORLD_PROFILE: 'typo' }), /Unbekanntes Weltprofil/);
-    assert.equal(runtimeOptions(root, { WORLD_PROFILE: 'homeworld', DB_FILE: ':memory:' }).dbFile, ':memory:');
+    assert.throws(() => runtimeOptions(root, { DB_FILE: path.join(root, 'data', 'spacetrader.db') }), /aktiven Datenpfad/);
+    assert.equal(runtimeOptions(root, { DB_FILE: ':memory:' }).dbFile, ':memory:');
   });
 });
 
 test('Weltprofil und neue Version bleiben nach Neustart erhalten, Altwelt wird unverändert abgewiesen', () => {
   temporary((root) => {
     const file = path.join(root, 'home.db');
-    const first = new Game(file, { profile: 'homeworld', seed: 42 });
+    const first = new Game(file, { seed: 42 });
     const player = first.createPlayer('Dhoinen');
     first.time = 123;
     first.close();
-    const loaded = new Game(file, { profile: 'homeworld' });
+    const loaded = new Game(file);
     assert.equal(loaded.worldVersion, 5);
     assert.equal(loaded.time, 123);
     assert.equal(loaded.players.get(player.id).name, 'Dhoinen');
@@ -66,7 +65,7 @@ test('Veraltete Welt wird vor Migration und ohne Löschung geöffnet/abgewiesen'
     old.store.close();
     const before = digest(file);
     assert.throws(() => new Game(file), /Kein automatischer Reset/);
-    assert.throws(() => new Game(file, { profile: 'homeworld' }), /Kein automatischer Reset/);
+    assert.throws(() => new Game(file), /Kein automatischer Reset/);
     assert.equal(digest(file), before);
     // Read-only verification uses SQLite directly, without invoking migrations.
     const db = new Database(file, { readonly: true });

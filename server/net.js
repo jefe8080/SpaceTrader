@@ -384,7 +384,7 @@ function compactShip(s) {
 }
 
 function foreignInfo(s,game,p) {
-  const o = { interceptRange:interceptRange(game,s,p.id), owner: s.owner, type: s.type, name: s.name, main: !!s.main, battle: s.battle || null };
+  const o = { interceptRange:interceptRange(game,s,p.id), owner: s.owner, type: s.type, name: s.name, battle: s.battle || null };
   const c = s.queue[0];
   if (s.owner === NPC_OWNER && c?.t === 'supply') {
     const { stationId, sourceId, good, phase } = c;
@@ -402,14 +402,14 @@ function shipDetail(s, game) {
     queue: s.queue.map(({ waitStart, waitUntil, ...c }) => c), warn: s.warn || {},relocationHold:s.relocationHold||null,dmg:s.dmg||null,battle:s.battle||null,captive:s.captive||null,ransom:s.captive&&game?ransomQuote(game,s):null,repairHold:!!s.repairHold,needsRepair:needsRepair(s),repairQuote:s.dmg&&game?quoteFor([s]):null,autoRepair:game?autoRepairOn(game,s):true,repairHere:!!(game&&s.dockedAt&&!repairSiteError(game,s.owner,game.world.entities.get(s.dockedAt))),repairRun:!!s.repairRun,posture:s.posture||null,stack:s.stack||null,rendezvous:s.rendezvous||null,
     nav: s.nav ? s.nav.legs.slice(s.nav.i).map((l) => [Math.round(l.x), Math.round(l.y), l.wh ? 1 : 0]) : null,
     transit: s.transit ? s.transit.exit : null, zone: s.zone || null, marker: s.marker || null,
-    fuel: Math.round((s.fuel || 0) * 10) / 10, autoRefuel: s.autoRefuel ?? 0, upg: s.upg || {}, modules: s.modules || [], upgValue: s.upgValue || 0, main: !!s.main, relicSpeed: s.relicSpeed || 0, mined: s.mined || {}, bonus: s.bonus || 0, yardLvl: s.yardLvl || 0,
+    fuel: Math.round((s.fuel || 0) * 10) / 10, autoRefuel: s.autoRefuel ?? 0, upg: s.upg || {}, modules: s.modules || [], upgValue: s.upgValue || 0, relicSpeed: s.relicSpeed || 0, mined: s.mined || {}, bonus: s.bonus || 0, yardLvl: s.yardLvl || 0,
   };
 }
 
 function playerDetail(p) {
   return { guideRead: p.guideRead || [], stopLoss: p.stopLoss || 0, groups: p.groups || [], favorites: p.favorites || {}, pilot: p.pilot || 1, governor: p.governor || 0, faction: p.faction || null,
     homeworld: p.homeworld || null, homeQuest: p.homeQuest || null, manualShip: p.manualShip || null, relic: p.relic || null,moduleBlueprints:p.moduleBlueprints||[],
-    flagshipAt: p.flagshipAt ?? null, xp: Math.floor(p.xp || 0), level: pilotLevel(p.xp), quest: p.quest || null, quests:p.quests||[],questMinedUsed:p.questMinedUsed||{}, questLock: p.questLock || 0,
+    xp: Math.floor(p.xp || 0), level: pilotLevel(p.xp), quest: p.quest || null, quests:p.quests||[],questMinedUsed:p.questMinedUsed||{}, questLock: p.questLock || 0,
     rep: p.rep || {},zoneVisits:p.zoneVisits||[], questsDone: p.questsDone || 0, dogUntil: p.dogUntil || 0, mg: p.mg || null };
 }
 

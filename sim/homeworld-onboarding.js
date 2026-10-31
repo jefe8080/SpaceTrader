@@ -14,7 +14,7 @@ export function simulateOnboarding({ seed = 42, dbFile = ':memory:', name = 'Hei
   Math.random = rng(seed);
   let game;
   try {
-    game = new Game(dbFile, { profile: 'homeworld', seed });
+    game = new Game(dbFile, { seed });
     const player = game.createPlayer(name), home = game.world.entities.get(player.homeworld), ship = game.shipsOf(player.id)[0];
     const stages = [];let decisions=0;
     const command = (cmd, fields = {}) => {

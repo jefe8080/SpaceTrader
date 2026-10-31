@@ -11,7 +11,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 function fixture() {
-  const game=new Game(':memory:',{profile:'homeworld',seed:42}),player=game.createPlayer('PRD13');
+  const game=new Game(':memory:',{seed:42}),player=game.createPlayer('PRD13');
   const home=game.world.entities.get(player.homeworld),ship=game.shipsOf(player.id)[0];
   ship.dockedAt=home.id;player.credits=1e8;
   return {game,player,home,ship};
@@ -77,14 +77,14 @@ test('PRD13: saved school migration markers prevent grants after an actual datab
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'prd13-')),file=path.join(directory,'world.db');
   let game;
   try {
-    game=new Game(file,{profile:'homeworld',seed:42});
+    game=new Game(file,{seed:42});
     const player=game.createPlayer('Migration'),home=game.world.entities.get(player.homeworld),h=home.market.homeworld;
     const e=[...game.world.entities.values()].find(e=>e.kind==='planet'&&e.type==='mining'&&e.market.realEconomy),world=e.market.economy;
     h.structures=[{id:'old',kind:'school',status:'ready'}];
     world.infrastructure=[{id:'old',kind:'school'}];
     tickHomeworld(game,home,1);tickSpecialization(game,e,0);
     const expected=[h.population,h.workers.skilled,world.population,world.workers.skilled],ids=[home.id,e.id];
-    game.close();game=new Game(file,{profile:'homeworld'});
+    game.close();game=new Game(file);
     const restored=game.world.entities.get(ids[0]),ordinary=game.world.entities.get(ids[1]);
     tickHomeworld(game,restored,1);tickSpecialization(game,ordinary,0);
     assert.deepEqual([restored.market.homeworld.population,restored.market.homeworld.workers.skilled,ordinary.market.economy.population,ordinary.market.economy.workers.skilled],expected);

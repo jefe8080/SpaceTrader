@@ -1,4 +1,4 @@
-import { GOODS, FLAGSHIP } from '../../shared/config.js';
+import { GOODS } from '../../shared/config.js';
 import { V, CmdError } from './validate.js';
 import { tradeAction } from './route.js';
 import { pointCovered, manualActionError, coveredPath, controlAdmissionCapacity } from '../coverage.js';
@@ -9,7 +9,7 @@ const isDirect=(player,ship,cmd,append)=>player.manualShip===ship.id&&!append&&!
 
 export function batchOrderError(game,ships,cmd,append,routeOverride){
   for(const ship of ships){const error=orderError(game,ship,cmd,append,routeOverride);if(error)return error;}
-  if(game.profile!=='homeworld'||!ships.length)return null;
+  if(!ships.length)return null;
   const player=game.players.get(ships[0].owner),active=new Set(game.shipsOf(player.id).filter(s=>s.queue.some(c=>!c.manualDirect)).map(s=>s.id));
   const previous=active.size;
   for(const ship of ships){if(!isDirect(player,ship,cmd,append))active.add(ship.id);else if(!append)active.delete(ship.id);}
@@ -47,7 +47,7 @@ export function orderError(game, ship, cmd, append, routeOverride) {
   const player = game.players.get(ship.owner);
   if (ship.captive) return `${ship.name} ist in Gefangenschaft und nimmt keine Befehle an.`;
   if (ship.battle) return `${ship.name} kämpft; Befehle gibt es in der Schlachtansicht.`;
-  if (game.profile === 'homeworld') {
+  {
     if (player?.relic?.operation?.ship === ship.id) return 'Das Schiff ist für die laufende Reliktarbeit gesperrt.';
     if (ship.relicSpeed && (cmd.t === 'route' || cmd.t === 'harvest' || append || (cmd.t === 'dock' && cmd.actions?.length > 1))) return 'Der Reliktträger unterstützt keine Automatisierung oder Befehlsfolgen.';
     const target = cmd.t === 'attack' || cmd.t === 'join' ? game.ships.get(cmd.target) || ship : cmd.t === 'raid' ? game.world.entities.get(cmd.planet) || ship : cmd.target ? game.world.entities.get(cmd.target) : cmd.x !== undefined ? cmd : ship;
@@ -78,7 +78,6 @@ export function orderError(game, ship, cmd, append, routeOverride) {
       if(active>=controlAdmissionCapacity(game,player)&&!ship.queue.some(c=>!c.manualDirect))return 'Die gleichzeitige Auftragskapazität deiner Leitstellen ist ausgeschöpft; Versorgung kann neue Aufträge begrenzen.';
     }
   }
-  if (cmd.t === 'route' && ship.main) return `${ship.name} ist dein Hauptschiff und fährt keine Routen.`;
   if(append&&ship.queue.length>=MAX_QUEUE)return `Queue von ${ship.name} ist voll (max. ${MAX_QUEUE}).`;
 }
 
@@ -88,7 +87,7 @@ export function giveOrder(game, ship, cmd, append) {
   if (ship.stack && isFollower(game, ship)) detachShip(game, ship);
   // Neuer manueller Auftrag ersetzt eine gespeicherte Fortsetzung
   if (!append) delete ship.resume;
-  if(game.profile==='homeworld')cmd={...cmd,manualDirect:isDirect(game.players.get(ship.owner),ship,cmd,append)};
+  cmd={...cmd,manualDirect:isDirect(game.players.get(ship.owner),ship,cmd,append)};
   const c = { ...cmd, qid: ++ship.qid };
   if (!append) {
     delete ship.relocationHold;
@@ -164,29 +163,10 @@ export default {
       ship.name = name;
     },
   },
-  /** Hauptschiff ernennen (ship) oder abberufen (ship = null), 5 min Sperre nach jeder Änderung */
-  flagship: {
-    args: { ship: V.opt(V.ownShip(), null) },
-    run({ game, player }, { ship }) {
-      if (game.profile === 'homeworld') return 'Wähle das aktive manuelle Schiff; den Reliktantrieb wechselst du ausschließlich in einer eigenen Werkstatt.';
-      const wait = (player.flagshipAt ?? -Infinity) + FLAGSHIP.COOLDOWN - game.time;
-      if (wait > 0) return `Das Hauptschiff kannst du erst in ${Math.ceil(wait / 60)} min wieder wechseln.`;
-      const cur = game.shipsOf(player.id).find((s) => s.main);
-      if (cur === ship || (!cur && !ship)) return;
-      if (cur) { cur.main = false; cur.nav = null; game.shipLog(cur, 'Als Hauptschiff abberufen'); }
-      if (ship) {
-        ship.main = true;
-        ship.nav = null; // Weg mit neuer Geschwindigkeit planen
-        ship.queue = ship.queue.filter((c) => c.t !== 'route');
-        game.shipLog(ship, 'Zum Hauptschiff ernannt: Tempo ×4, Verbrauch ×4 pro Sekunde, keine Routen');
-      }
-      player.flagshipAt = game.time;
-    },
-  },
   jettison: {
     args: { ship: V.ownShip(), good: V.key(GOODS) },
     run({ game }, { ship, good }) {
-      if(game.profile==='homeworld'&&GOODS[good].cls==='passenger')return 'Personen können nicht abgeworfen werden. An einem bewohnten Standort aussteigen lassen.';
+      if(GOODS[good].cls==='passenger')return 'Personen können nicht abgeworfen werden. An einem bewohnten Standort aussteigen lassen.';
       if (!ship.cargo[good]) return;
       game.shipLog(ship, `${ship.cargo[good]} ${GOODS[good].name} abgeworfen`);
       delete ship.cargo[good];

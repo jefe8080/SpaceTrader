@@ -36,7 +36,7 @@ function approachPoint(ship, e) {
 
 export function flyTo(ship, tx, ty, dt, game) {
   const player=game.players.get(ship.owner);
-  if(game.profile==='homeworld'&&player&&!ship.queue[0]?.manualDirect){
+  if(player&&!ship.queue[0]?.manualDirect){
     const begun=ship.coverageLeg&&Math.hypot(ship.coverageLeg.x-tx,ship.coverageLeg.y-ty)<1e-5;
     if(!begun&&!segmentCovered(game,player,ship,{x:tx,y:ty})){
       setWarn(ship,'coverage','Fortsetzung pausiert: eigene Leitstellenabdeckung fehlt.');ship.state='waiting';
@@ -46,7 +46,7 @@ export function flyTo(ship, tx, ty, dt, game) {
     setWarn(ship,'coverage',null);
     if(dt>0&&!begun)ship.coverageLeg={x:tx,y:ty};
   }
-  if(game.profile==='homeworld'&&dt>0)ship.flightLeg={x:tx,y:ty};
+  if(dt>0)ship.flightLeg={x:tx,y:ty};
   const fx = zoneEffects(game.world.zonesNear(ship.x, ship.y), ship.x, ship.y, { void: hasAbility(ship, 'void') });
   ship.zone = fx.zones ? fx.zones.map((z) => z.type) : null;
   let speed = game.shipSpeed(ship) * fx.speed;
@@ -107,7 +107,7 @@ function startTransit(ship, whId, side, game) {
   const w = game.world.wormholes.get(whId);
   if (!w) return false;
   const player=game.players.get(ship.owner);
-  if(game.profile==='homeworld'&&player&&!ship.queue[0]?.manualDirect&&![w.a,w.b].every(id=>pointCovered(game,player,game.world.entities.get(id)))){
+  if(player&&!ship.queue[0]?.manualDirect&&![w.a,w.b].every(id=>pointCovered(game,player,game.world.entities.get(id)))){
     setWarn(ship,'coverage','Wurmlochtransit pausiert: beide Enden brauchen eigene Abdeckung.');ship.state='waiting';return false;
   }
   setWarn(ship,'coverage',null);
@@ -317,7 +317,7 @@ const EXEC = {
     const e = game.world.entities.get(c.target);
     if (!e) return true;
     if (!flyToEntity(ship, e, dt, game)) return false;
-    if(game.profile==='homeworld'&&!c.manualDirect&&!pointCovered(game,game.players.get(ship.owner),e)){setWarn(ship,'coverage','Dockaktionen pausiert: eigene Abdeckung fehlt.');ship.state='waiting';return false;}
+    if(!c.manualDirect&&!pointCovered(game,game.players.get(ship.owner),e)){setWarn(ship,'coverage','Dockaktionen pausiert: eigene Abdeckung fehlt.');ship.state='waiting';return false;}
     ship.state = 'docked';
     c.actionIdx ??= 0;
     return runActions(ship, e, c.actions || [], c, dt, game, { auto: false, manual: !!c.manualDirect });
@@ -326,7 +326,7 @@ const EXEC = {
     const e = game.world.entities.get(c.target);
     if (!e) return true;
     if (!flyToEntity(ship, e, dt, game)) return false;
-    if(game.profile==='homeworld'&&!c.manualDirect&&!pointCovered(game,game.players.get(ship.owner),e)){setWarn(ship,'coverage','Abbau pausiert: eigene Abdeckung fehlt.');ship.state='waiting';return false;}
+    if(!c.manualDirect&&!pointCovered(game,game.players.get(ship.owner),e)){setWarn(ship,'coverage','Abbau pausiert: eigene Abdeckung fehlt.');ship.state='waiting';return false;}
     if (mineStep(ship, e, dt)) {
       ship.state = 'docked';
       game.shipLog(ship, `Laderaum voll (${e.name})`);
@@ -418,7 +418,7 @@ function runRoute(ship, c, dt, game) {
   }
   if (c.phase === 'act') {
     const player=game.players.get(ship.owner);
-    if(game.profile==='homeworld'&&player&&!pointCovered(game,player,e)){
+    if(player&&!pointCovered(game,player,e)){
       setWarn(ship,'coverage','Routenaktionen pausiert: eigene Leitstellenabdeckung fehlt.');ship.state='waiting';return false;
     }
     setWarn(ship,'coverage',null);

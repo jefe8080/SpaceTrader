@@ -6,7 +6,7 @@ import {siteError,tickColonies,colonyCost} from '../server/colonies.js';
 import {passengerTrade} from '../server/population.js';
 import {tickHomeworld} from '../server/homeworld.js';
 const file=process.argv[2]||'data/prd5/qa-u15.db';if(fs.existsSync(file))throw new Error('QA-Datei existiert bereits. Neuen Pfad wählen.');
-const game=new Game(file,{seed:42,profile:'homeworld'}),p=game.createPlayer('U15 Expansion'),home=game.world.entities.get(p.homeworld),h=home.market.homeworld,expedition=game.shipsOf(p.id)[0];
+const game=new Game(file,{seed:42}),p=game.createPlayer('U15 Expansion'),home=game.world.entities.get(p.homeworld),h=home.market.homeworld,expedition=game.shipsOf(p.id)[0];
 p.homeQuest.completed=Object.fromEntries(Array.from({length:13},(_,i)=>[`H${String(i).padStart(2,'0')}`,{at:0}]));p.homeQuest.scenesSeen={H00:true};p.credits=3e6;p.pilot=5;
 h.facilities.dock.status='ready';h.facilities.control.status='ready';h.controlLevel=1;expedition.dockedAt=home.id;expedition.modules=['cabin'];passengerTrade(game,expedition,home,'workers',20,'buy');
 for(const [q,r] of [[3,0],[4,0]])game.world.ensureSector(q,r);

@@ -5,7 +5,7 @@ import {initializePopulation,passengerTrade,tickVisitors} from '../server/popula
 import {ensureCash,tickRealMarket} from '../server/real-economy.js';
 import {newProperty} from '../server/property.js';
 test('PRD14: own resorts and orbital hotels retain bounded visitors through stay and return',()=>{
- const game=new Game(':memory:',{profile:'homeworld',seed:42});
+ const game=new Game(':memory:',{seed:42});
  try{
   const p=game.createPlayer('Hotel'),home=game.world.entities.get(p.homeworld),ship=game.shipsOf(p.id)[0];
   ship.modules=['cabin'];home.market.homeworld.facilities.dock.status='ready';ship.dockedAt=home.id;

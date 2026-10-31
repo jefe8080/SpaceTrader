@@ -17,7 +17,7 @@ const tmp = () => { const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prd15-int
 
 test('PRD15 U11: Migration erhält Schiffe, Ruf und Überladung, beendet alte Fraktionsquests ohne Strafe genau einmal', () => {
   const { dir, file } = tmp();
-  let game = new Game(file, { profile: 'homeworld', seed: 21 });
+  let game = new Game(file, { seed: 21 });
   try {
     for (let q = -2; q <= 2; q++) for (let r = -2; r <= 2; r++) game.world.ensureSector(q, r);
     const p = game.createPlayer('Bestand');
@@ -35,7 +35,7 @@ test('PRD15 U11: Migration erhält Schiffe, Ruf und Überladung, beendet alte Fr
     const before = { ships: game.shipsOf(p.id).length, credits: p.credits };
     const pid = p.id, sid = ship.id;
     game.close();
-    game = new Game(file, { profile: 'homeworld' });
+    game = new Game(file);
     const p2 = game.players.get(pid);
     assert.equal(game.shipsOf(pid).length, before.ships, 'Umstellung vernichtet keine Einheiten');
     assert.equal(game.battles.size, 0, 'startet keine Kämpfe');
@@ -49,7 +49,7 @@ test('PRD15 U11: Migration erhält Schiffe, Ruf und Überladung, beendet alte Fr
     assert.ok([...game.world.entities.values()].some((e) => e.admin), 'Verwaltungsplaneten bestimmt');
     const notes = diplo(p2).migratedQuests.length;
     game.close();
-    game = new Game(file, { profile: 'homeworld' });
+    game = new Game(file);
     const p3 = game.players.get(pid);
     assert.equal(diplo(p3).migratedQuests.length, notes, 'wiederholbar ohne Doppelungen');
     assert.equal(game.shipsOf(pid).length, before.ships);
@@ -69,7 +69,7 @@ test('PRD15 U11: Mehrspieler und Neustart: Schlacht, Gefangene und Freikauf übe
     for (let i = 0; i < 50; i++) tickBattle(game, bt, 0.1);
     const t = game.battles.get(bt.id)?.t;
     game.close();
-    game = new Game(file, {});
+    game = new Game(file);
     const b2 = game.battles.get(bt.id);
     if (b2) assert.equal(b2.t, t, 'keine Simulation der ausgeschalteten Zeit');
     // Kampf zu Ende spielen
@@ -78,7 +78,7 @@ test('PRD15 U11: Mehrspieler und Neustart: Schlacht, Gefangene und Freikauf übe
     const lastesel = game.ships.get(v.id);
     if (lastesel?.captive) {
       game.close();
-      game = new Game(file, {});
+      game = new Game(file);
       const pb = game.players.get(b.id);
       const s = game.ships.get(v.id);
       assert.ok(s.captive, 'Gefangenschaft gespeichert');

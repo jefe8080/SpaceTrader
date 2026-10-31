@@ -29,7 +29,7 @@ test('PRD11: registered object types have illustrated guides without location sp
 });
 
 test('PRD11: quest cleanup keeps unlocked finds and pending archives, removes completed personal sites and references', () => {
-  const game=new Game(':memory:',{profile:'homeworld',seed:42});
+  const game=new Game(':memory:',{seed:42});
   const p=game.createPlayer('Sites A'), other=game.createPlayer('Sites B'), home=game.world.entities.get(p.homeworld);
   p.homeQuest.completed.H09={at:0};
   revealHomeSites(game,p,home);
@@ -53,7 +53,7 @@ test('PRD11: quest cleanup keeps unlocked finds and pending archives, removes co
 });
 
 test('PRD11: old unclaimed new hulls get fuel once, used and active ships retain fuel', () => {
-  const game = new Game(':memory:',{profile:'homeworld',seed:42});
+  const game = new Game(':memory:',{seed:42});
   const p = game.createPlayer('Fuel'), home = game.world.entities.get(p.homeworld);
   const active = game.shipsOf(p.id)[0]; active.fuel=1;
   const fresh = {id:'old:new',source:'materials',type:'spatz',fuel:0,upg:{tank:1}};
@@ -73,14 +73,14 @@ test('PRD11: old unclaimed new hulls get fuel once, used and active ships retain
 test('PRD11: guide acknowledgements are validated, idempotent, saved and player specific', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(),'prd11-'));
   const file = path.join(dir,'game.db');
-  const game = new Game(file,{profile:'homeworld',seed:42});
+  const game = new Game(file,{seed:42});
   const a = game.createPlayer('Guide A'), b = game.createPlayer('Guide B');
   for (let i=0;i<2;i++) assert.equal(runCommand(game,a,{cmd:'guideRead',key:'st:hub'}),undefined);
   assert.deepEqual(a.guideRead,['st:hub']);
   assert.equal(b.guideRead,undefined);
   assert.ok(runCommand(game,a,{cmd:'guideRead',key:'unknown'}));
   game.save();
-  const restored = new Game(file,{profile:'homeworld',seed:42});
+  const restored = new Game(file,{seed:42});
   assert.deepEqual(restored.players.get(a.id).guideRead,['st:hub']);
   assert.equal(restored.players.get(b.id).guideRead,undefined);
   restored.store?.close?.(); game.store?.close?.();
@@ -88,7 +88,7 @@ test('PRD11: guide acknowledgements are validated, idempotent, saved and player 
 
 test('PRD11: loading legacy inventory and completed sites migrates once and stays consistent on a second reload',()=>{
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'prd11-migration-')),file=path.join(dir,'game.db');
-  let game=new Game(file,{profile:'homeworld',seed:42});
+  let game=new Game(file,{seed:42});
   const p=game.createPlayer('Migration'),owner=p.id,home=game.world.entities.get(p.homeworld),ship=game.shipsOf(p.id)[0];
   const activeId=ship.id;ship.fuel=1;
   home.market.forSale=[{id:'new-stock',source:'materials',type:'spatz',fuel:0},{id:'used-stock',source:'player_sale',type:'spatz',fuel:2}];
@@ -96,7 +96,7 @@ test('PRD11: loading legacy inventory and completed sites migrates once and stay
   game.world.addEntity(site);p.homeQuest.sites={H09:site.id};p.homeQuest.completed.H09={at:0};
   ship.queue=[{t:'goto',target:site.id}];game.close();
   for(let i=0;i<2;i++){
-    game=new Game(file,{profile:'homeworld',seed:42});
+    game=new Game(file,{seed:42});
     const player=game.players.get(owner),e=game.world.entities.get(player.homeworld);
     assert.ok(!game.world.entities.has(site.id));assert.deepEqual(game.ships.get(activeId).queue,[]);
     assert.equal(game.ships.get(activeId).fuel,1);

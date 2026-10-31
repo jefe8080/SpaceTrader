@@ -11,7 +11,7 @@ import {levelUpBenefits} from '../shared/level-up.js';
 import {WORLD} from '../shared/config.js';
 import {passengerTrade,transferPassengers} from '../server/population.js';
 const setup=(file=':memory:')=>{
- const game=new Game(file,{profile:'homeworld',seed:42}),p=game.createPlayer('Parallel'),e=game.world.entities.get(p.homeworld),s=game.shipsOf(p.id)[0];
+ const game=new Game(file,{seed:42}),p=game.createPlayer('Parallel'),e=game.world.entities.get(p.homeworld),s=game.shipsOf(p.id)[0];
  s.dockedAt=e.id;e.market.homeworld.facilities.dock.status='ready';s.cargo.water=10;
  return {game,p,e,s};
 };
@@ -34,7 +34,7 @@ test('PRD14: old active quest and additional independent progress survive a data
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'prd14-parallel-')),file=path.join(dir,'world.db');let {game,p,e,s}=setup(file);
  try{
   p.xp=600;p.quest={...offer(e,'old'),accepted:1,progress:3,ship:s.id};const old=structuredClone(p.quest);p.quests=[{...offer(e,'extra','courier'),pickup:e.id,dest:'origin_hub',state:'pickup',ship:s.id}];
-  const pid=p.id,sid=s.id;game.close();game=new Game(file,{profile:'homeworld'});p=game.players.get(pid);s=game.ships.get(sid);
+  const pid=p.id,sid=s.id;game.close();game=new Game(file);p=game.players.get(pid);s=game.ships.get(sid);
   assert.deepEqual(p.quest,old);assert.equal(activeSideQuests(p).length,2);assert.equal(questProgress(game,p,s,false),true);assert.equal(p.quests[0].state,'deliver');assert.deepEqual(p.quest,old);
   const second=structuredClone(p.quests[0]);assert.equal(runCommand(game,p,{cmd:'questAbort',quest:'old'}),undefined);assert.deepEqual(activeSideQuests(p),[second]);
  }finally{if(game.store.db.open)game.store.close();fs.rmSync(dir,{recursive:true,force:true});}

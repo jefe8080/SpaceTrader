@@ -53,11 +53,9 @@ export default {
     },
     run({ game, player }, { id: route, name, stops, minBalance, onlyWithTargetSpace, assign, unassign = [] }) {
       if (!stops.length) return 'Eine Route braucht mindestens einen Stopp.';
-      if(game.profile==='homeworld'){
-        if(stops.some(stop=>game.world.entities.get(stop.targetId)?.market?.homeworld?.warp))return 'Eine Routenstation bereitet einen Warptransfer vor.';
-        for(const stop of stops){const error=remoteManagementError(game,player,game.world.entities.get(stop.targetId),false);if(error)return error;}
-        const error=batchOrderError(game,[...new Set([...assign,...(route?shipsOnRoute(game,route.id):[])])],{t:'route',route:route?.id},false,{stops});if(error)return error;
-      }
+      if(stops.some(stop=>game.world.entities.get(stop.targetId)?.market?.homeworld?.warp))return 'Eine Routenstation bereitet einen Warptransfer vor.';
+      for(const stop of stops){const error=remoteManagementError(game,player,game.world.entities.get(stop.targetId),false);if(error)return error;}
+      const error=batchOrderError(game,[...new Set([...assign,...(route?shipsOnRoute(game,route.id):[])])],{t:'route',route:route?.id},false,{stops});if(error)return error;
       if (!route) {
         if ([...game.routes.values()].filter((r) => r.owner === player.id).length >= MAX_ROUTES) return 'Zu viele Routen.';
         route = { id: 'r' + ++game.counters.route, owner: player.id, paused: false, created: Math.round(game.time) };
@@ -67,7 +65,7 @@ export default {
       for(const s of unassign) s.queue=s.queue.filter(c=>!(c.t==='route' && c.route===route.id));
       // Laufende Schiffe auf gültigen Stopp setzen
       for (const s of shipsOnRoute(game, route.id)) for (const c of s.queue) if (c.route === route.id && c.idx >= stops.length) { c.idx = 0; c.phase = 'travel'; }
-      for (const s of new Set(assign)) if (!s.main) {
+      for (const s of new Set(assign)) {
         const error = giveOrder(game, s, { t: 'route', route: route.id, rounds: 0 }, false);
         if (error) return error;
       }

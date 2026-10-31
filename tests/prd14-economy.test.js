@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 test('PRD14: demand and actual sales respond to price, preserve reserves and are fully paid without a consumer account',()=>{
-  const game=new Game(':memory:',{profile:'homeworld',seed:42});
+  const game=new Game(':memory:',{seed:42});
   try{
     const p=game.createPlayer('Absatz'),e=game.world.entities.get(p.homeworld),h=e.market.homeworld,prop=game.ownership.get(e.id),s=e.market.goods.water;
     game.shipsOf(p.id)[0].dockedAt=e.id;
@@ -27,11 +27,11 @@ test('PRD14: demand and actual sales respond to price, preserve reserves and are
 });
 
 test('PRD14: persisted local sales reload without another owner credit',()=>{
- const dir=fs.mkdtempSync(path.join(os.tmpdir(),'prd14-sales-')),file=path.join(dir,'world.db');let game=new Game(file,{profile:'homeworld',seed:42});
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'prd14-sales-')),file=path.join(dir,'world.db');let game=new Game(file,{seed:42});
  try{
   const p=game.createPlayer('Absatzneustart'),e=game.world.entities.get(p.homeworld),h=e.market.homeworld;
   h.civil={budget:1000,consumptionPayments:0};e.market.goods.water.stock=100;game.time=10;consumeCivilGood(game,e,'water',.01,100);
-  const credits=p.credits,sales=localSalesSummary(e.market,game.time),pid=p.id,eid=e.id;game.close();game=new Game(file,{profile:'homeworld'});
+  const credits=p.credits,sales=localSalesSummary(e.market,game.time),pid=p.id,eid=e.id;game.close();game=new Game(file);
   assert.equal(game.players.get(pid).credits,credits);assert.deepEqual(localSalesSummary(game.world.entities.get(eid).market,game.time),sales);
   game.statsFor(game.players.get(pid),eid);assert.equal(game.players.get(pid).credits,credits);
  }finally{if(game.store.db.open)game.store.close();fs.rmSync(dir,{recursive:true,force:true});}

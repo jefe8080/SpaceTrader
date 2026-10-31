@@ -11,7 +11,7 @@ import { updateShip } from '../server/ships.js';
 import { shipStats } from '../shared/ships.js';
 
 function fixture(file = ':memory:') {
-  const game = new Game(file, { profile: 'homeworld', seed: 42 }), player=game.createPlayer('Relikt');
+  const game = new Game(file, { seed: 42 }), player=game.createPlayer('Relikt');
   const home=game.world.entities.get(player.homeworld),ship=game.shipsOf(player.id)[0];
   ship.dockedAt=home.id;
   // Isolate the H04 branch; H00–H02 production is covered by homeworld.test.js.
@@ -84,7 +84,7 @@ test('Ein-/Ausbau: atomar, 15 s, ohne Remotewechsel, Rückerstattung oder gleich
   f.game.store.close();
 });
 
-test('Reliktträger fliegt auch mit leerem Tank ×4, verbraucht keinen Treibstoff und kann nicht frei zum Hauptschiff wechseln',()=>{
+test('Reliktträger fliegt auch mit leerem Tank ×4, verbraucht keinen Treibstoff',()=>{
   const f=fixture();unlock(f);work(f,'install');finish(f);
   const base=150;assert.equal(shipStats(f.ship).speed,base*4);assert.equal(shipStats(f.ship).burn,0);
   f.ship.fuel=0;f.ship.dockedAt=null;f.ship.x=f.home.x;f.ship.y=f.home.y;
@@ -92,7 +92,6 @@ test('Reliktträger fliegt auch mit leerem Tank ×4, verbraucht keinen Treibstof
   assert.equal(runCommand(f.game,f.player,{cmd:'order',ships:[f.ship.id],order:{t:'move',x:start+10000,y:f.ship.y}}),undefined);
   updateShip(f.ship,1,f.game);
   assert.ok(Math.abs(f.ship.x-start-base*4)<0.001);assert.equal(f.ship.fuel,0);
-  assert.match(runCommand(f.game,f.player,{cmd:'flagship',ship:f.ship.id}),/Werkstatt/);
   f.game.store.close();
 });
 
@@ -132,7 +131,7 @@ test('Neustart behält Werkstattarbeit und genau einen Standort; abgeschaltete Z
   let f;
   try{
     f=fixture(file);unlock(f);work(f,'install');f.game.time+=7;f.game.close();
-    const game=new Game(file,{profile:'homeworld'}),player=game.players.get(f.player.id);
+    const game=new Game(file),player=game.players.get(f.player.id);
     f={game,player,ship:game.ships.get(f.ship.id),home:game.world.entities.get(f.home.id)};
     assert.equal(player.relic.operation.until-game.time,8);
     game.time+=8;tickRelics(game);assert.equal(f.ship.relicSpeed,4);

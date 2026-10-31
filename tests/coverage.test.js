@@ -14,7 +14,7 @@ import {updateShip} from '../server/ships.js';
 import {tickHomeworld} from '../server/homeworld.js';
 
 function fixture(file=':memory:'){
-  const game=new Game(file,{seed:42,profile:'homeworld'}),player=game.createPlayer('Netz');
+  const game=new Game(file,{seed:42}),player=game.createPlayer('Netz');
   const home=game.world.entities.get(player.homeworld),state=home.market.homeworld;
   state.facilities.control.status='ready';state.facilities.dock.status='ready';state.controlLevel=2;
   const ship=game.spawnShip(player,'spatz',home);ship.x=home.x;ship.y=home.y;ship.dockedAt=null;
@@ -112,7 +112,7 @@ test('Neustart erhält Freigabe für begonnenen Abschnitt und laufenden Leitstel
   f.state.controlLevel=1;f.player.credits=22000;f.home.market.goods.plates.stock=10;f.home.market.goods.wires.stock=4;
   assert.equal(runCommand(f.game,f.player,{cmd:'homeControlUpgrade',target:f.home.id}),undefined);
   f.state.controlLevel=0;f.game.save();close(f);
-  const game=new Game(file,{profile:'homeworld'}),ship=game.ships.get(f.ship.id);
+  const game=new Game(file),ship=game.ships.get(f.ship.id);
   for(let i=0;i<20;i++)updateShip(ship,1,game);assert.equal(ship.queue.length,0);assert.equal(ship.x,f.ship.coverageLeg.x);
   const home=game.world.entities.get(f.home.id);assert.equal(home.market.homeworld.projects[0].until,60);
   game.time=60;tickHomeworld(game,home,60);assert.equal(home.market.homeworld.controlLevel,2);assert.ok(Math.abs(game.players.get(f.player.id).credits-home.market.homeworld.civil.taxes-home.market.homeworld.civil.consumptionPayments-2000)<1e-7);

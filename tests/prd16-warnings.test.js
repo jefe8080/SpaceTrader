@@ -1,7 +1,7 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import {Game} from '../server/game.js';import {startBattle,joinBattle} from '../server/war/battle.js';
 test('Only new attacks warn defenders, simultaneous battles remain separate, joining is silent',()=>{
- const game=new Game(':memory:',{seed:3,profile:'homeworld'});try{
+ const game=new Game(':memory:',{seed:3});try{
  const a=game.createPlayer('A'),d=game.createPlayer('D'),yard=game.world.entities.get('origin_yard');
  const ship=(p)=>{const s=game.spawnShip(p,'korvette',yard);s.dockedAt=null;s.state='idle';s.queue=[];return s;};
  const warnings=[];game.on('attackWarning',(p,w)=>warnings.push([p.id,w]));

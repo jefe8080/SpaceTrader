@@ -17,7 +17,7 @@ test('Erstkontakt wartet auf den Schiffsklick nach der Erklärung; gelesene Spie
 });
 
 test('Bilddialoge sind freischaltbar und nachlesbar, ohne Spielzustand oder Kosten zu gewähren',()=>{
-  const game=new Game(':memory:',{profile:'homeworld',seed:42}),p=game.createPlayer('Geschichte');
+  const game=new Game(':memory:',{seed:42}),p=game.createPlayer('Geschichte');
   try{
     const read=scene=>runCommand(game,p,{cmd:'homeDialogRead',scene});
     const credits=p.credits,ships=game.shipsOf(p.id).length;
@@ -35,7 +35,7 @@ test('Bilddialoge sind freischaltbar und nachlesbar, ohne Spielzustand oder Kost
 });
 
 test('Siedlungswahl verändert nur widerrufbare Betriebsprioritäten und keine Preise',()=>{
-  const game=new Game(':memory:',{profile:'homeworld',seed:42}),p=game.createPlayer('Priorität'),e=game.world.entities.get(p.homeworld),h=e.market.homeworld;
+  const game=new Game(':memory:',{seed:42}),p=game.createPlayer('Priorität'),e=game.world.entities.get(p.homeworld),h=e.market.homeworld;
   try{
     p.homeQuest.completed.H07={at:0};acknowledgeStories(game,p);game.shipsOf(p.id)[0].dockedAt=e.id;
     h.structures=[{id:'home',kind:'housing',priority:50}];

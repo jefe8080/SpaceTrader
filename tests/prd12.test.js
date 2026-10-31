@@ -30,7 +30,7 @@ test('PRD12: supply counts desired operation and project demand once against emp
 });
 
 test('PRD12: desired demand survives ingredient stall, excludes paused plants and construction',()=>{
-  const game=new Game(':memory:',{profile:'homeworld',seed:42});
+  const game=new Game(':memory:',{seed:42});
   try{
     const p=game.createPlayer('PRD12 supply'),e=game.world.entities.get(p.homeworld),h=e.market.homeworld;
     h.structures=[{id:'plant',kind:'plant',recipe:'smelter',status:'ready',enabled:true,plot:0}];

@@ -4,7 +4,7 @@ import {Game} from '../server/game.js';
 import {newProperty} from '../server/property.js';
 import {tickRealMarket} from '../server/real-economy.js';
 const file=process.argv[2]||'data/prd5/qa-u13.db';if(fs.existsSync(file))throw new Error('QA-Datei existiert bereits. Neuen Pfad wählen.');
-const game=new Game(file,{seed:42,profile:'homeworld'}),player=game.createPlayer('U13 Aufbau'),ship=game.shipsOf(player.id)[0];
+const game=new Game(file,{seed:42}),player=game.createPlayer('U13 Aufbau'),ship=game.shipsOf(player.id)[0];
 game.world.ensureSector(1,1);const e=[...game.world.entities.values()].find(e=>e.type==='mining'&&!e.noBuy);
 game.setOwner(e,player,newProperty(e.id,player.id,game.time));player.credits=1e6;player.governor=3;player.homeQuest.scenesSeen={H00:true};player.homeQuest.completed.H02={at:0};
 ship.modules=['cabin'];ship.dockedAt=e.id;ship.x=e.x+e.radius+100;ship.y=e.y;game.revealAround(player,e.x,e.y,3000);

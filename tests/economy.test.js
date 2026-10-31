@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GOODS, RECIPES, PLANET_TYPES, STATION_TYPES, ULTRA, distancePremium, canSellTo, LOCATION, SHIP_TYPES, ECON, SUPPLY, supplyLoad, targetOf } from '../shared/config.js';
+import { GOODS, RECIPES, PLANET_TYPES, STATION_TYPES, ULTRA, distancePremium, canSellTo, LOCATION, SHIP_TYPES } from '../shared/config.js';
 import { generateSector, applyLocationMods, rng } from '../server/worldgen.js';
-import { createMarket, tickMarket } from '../server/markets.js';
+import { createMarket } from '../server/markets.js';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
 
@@ -53,56 +53,6 @@ test('Standort-Modifier: Zufall, Glättung im System, Prämie nur für angekauft
   }
   const { entities } = generateSector(77, 3, 1);
   for (const e of entities.filter((x) => x.market)) for (const s of Object.values(e.market.goods)) assert.ok(s.mod >= lo - 1e-3 && s.mod <= hi * 2 + 1e-3);
-});
-
-test('Drift: Rückkehr zum Ziel-Füllstand mit 45 min Halbwertszeit, nicht bei Spielerbesitz', () => {
-  const m = createMarket('station', 'hotel', rng(1), 1, { traders: false });
-  const e = { market: m };
-  const s = m.goods.tourists;
-  assert.ok(s.target >= ECON.TARGET.consume[0] && s.target <= ECON.TARGET.consume[1], 'Verbraucher 30-40 %');
-  // leergehandelt: Hintergrundzufluss füllt in einer Halbwertszeit die halbe Lücke
-  s.stock = 0;
-  for (let t = 0; t < ECON.HALF_LIFE; t += 10) tickMarket(e, 10, t);
-  assert.ok(Math.abs(s.stock - s.target * s.cap / 2) < s.cap * 0.01, `halbe Lücke: ${s.stock}`);
-  // übervoll: Verbrauch über dem Ziel, höchstens mit der eigenen Rate
-  s.stock = s.cap;
-  tickMarket(e, 60, 0);
-  assert.ok(s.stock < s.cap && s.cap - s.stock <= s.rate * 60 + 1e-9);
-  // Spielerbesitz: keine Drift, keine Zuflüsse
-  m.owner = 'p1';
-  s.stock = 0;
-  tickMarket(e, 600, 600);
-  assert.equal(s.stock, 0);
-  // Produzent: 60-70 %, erholt sich von 0 innerhalb von 2 h auf über 70 % des Ziels
-  const pl = createMarket('planet', 'mining', rng(4), 1, { traders: false });
-  const ore = pl.goods.ore;
-  assert.ok(ore.target >= 0.6 && ore.target <= 0.7);
-  ore.stock = 0;
-  for (let t = 0; t < 7200; t += 10) tickMarket({ market: pl }, 10, t);
-  assert.ok(ore.stock > 0.7 * ore.target * ore.cap, `erholt: ${ore.stock}`);
-});
-
-test('Nachfrage-Schwankung: Planeten würfeln den Ziel-Füllstand alle 2-6 h neu', () => {
-  const pl = createMarket('planet', 'urban', rng(8), 1, { traders: false });
-  const e = { market: pl };
-  tickMarket(e, 1, 0);
-  const before = Object.fromEntries(Object.entries(pl.goods).map(([g, s]) => [g, s.swingAt]));
-  for (const s of Object.values(pl.goods)) assert.ok(s.swingAt >= ECON.SWING_EVERY[0] && s.swingAt <= ECON.SWING_EVERY[1]);
-  for (let t = 60; t <= 6.5 * 3600; t += 60) tickMarket(e, 60, t);
-  for (const [g, s] of Object.entries(pl.goods)) {
-    // A fresh random draw may legally equal the old rounded target. The
-    // rescheduled deadline proves the draw ran without a probabilistic failure.
-    assert.ok(s.swingAt > before[g] && s.swingAt > 6.5 * 3600);
-    assert.ok(s.target >= ECON.SWING[s.role][0] && s.target <= ECON.SWING[s.role][1]);
-  }
-});
-
-test('NPC-Ladung: 10 % des Ziellagers, 5 bis 40, nur was passt', () => {
-  assert.equal(supplyLoad({ cap: 300, stock: 0 }), 30);
-  assert.equal(supplyLoad({ cap: 1000, stock: 0 }), SUPPLY.LOAD_MAX);
-  assert.equal(supplyLoad({ cap: 30, stock: 0 }), SUPPLY.LOAD_MIN);
-  assert.equal(supplyLoad({ cap: 300, stock: 288 }), 12);
-  assert.equal(supplyLoad({ cap: 300, stock: 297 }), 0);
 });
 
 test('Händlerrolle: Planeten 5-10 Händler-Waren, Ultraselten nur am Hub', () => {

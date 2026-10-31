@@ -10,7 +10,7 @@ import {NPC_OWNER} from '../shared/config.js';
 
 test('Rathaus-Handelsmodus steuert NPC-Abholung, schützt Reserven und bleibt gespeichert',()=>{
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'townhall-trade-')),file=path.join(dir,'world.db');
-  let game=new Game(file,{seed:42,profile:'homeworld'});
+  let game=new Game(file,{seed:42});
   try{
     const owner=game.createPlayer('Besitzer'),other=game.createPlayer('Besucher');
     const home=game.world.entities.get(owner.homeworld),ship=game.shipsOf(owner.id)[0];
@@ -29,7 +29,7 @@ test('Rathaus-Handelsmodus steuert NPC-Abholung, schützt Reserven und bleibt ge
     assert.equal(home.market.mode,'open');
     target.market.supCd={};dispatchRealSupply(game,target);
     assert.equal(dispatched().length,1);assert.equal(dispatched()[0].queue[0].amount,5);
-    const id=home.id;game.close();game=new Game(file,{profile:'homeworld'});
+    const id=home.id;game.close();game=new Game(file);
     assert.equal(game.world.entities.get(id).market.mode,'open');
     const loadedOwner=game.players.get(owner.id);
     assert.equal(runCommand(game,loadedOwner,{cmd:'propMode',target:id,mode:'private'}),undefined);

@@ -11,7 +11,7 @@ import {homeStorageUsage} from '../shared/homeworld.js';
 import {MODULE_RECIPES} from '../shared/module-production.js';
 
 function fixture(file=':memory:'){
-  const game=new Game(file,{seed:42,profile:'homeworld'}),player=game.createPlayer('Module'),entity=game.world.entities.get(player.homeworld),home=entity.market.homeworld,ship=game.shipsOf(player.id)[0];
+  const game=new Game(file,{seed:42}),player=game.createPlayer('Module'),entity=game.world.entities.get(player.homeworld),home=entity.market.homeworld,ship=game.shipsOf(player.id)[0];
   ship.dockedAt=entity.id;home.facilities.dock.status='ready';home.controlLevel=1;home.facilities.control.status='ready';home.moduleBlueprints=['cabin','shielded'];
   home.structures=[{id:'bench',kind:'moduleBench',status:'ready',enabled:true,plot:0}];
   for(const [g,n] of Object.entries({plates:80,plastics:40,textiles:20,glass:40,hydraulicoil:20,water:100,food:100}))entity.market.goods[g].stock=n;
@@ -87,7 +87,7 @@ test('Reservierter Modulausgang konkurriert mit anderer Fracht um reale normale 
 test('Neustart erhält gebundene Fertigung, Ausgabereserve, verpackte und eingebaute Module',()=>{
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'prd5-modules-')),file=path.join(directory,'world.db');
   let f=fixture(file);command(f,'homeModuleCraft',{module:'cabin'});advance(f,20);f.ship.modules=['shielded'];f.ship.moduleCargo={sensor:1};f.game.close();
-  const game=new Game(file,{profile:'homeworld'});f={game,player:game.players.get(f.player.id),entity:game.world.entities.get(f.entity.id),ship:game.ships.get(f.ship.id)};f.home=f.entity.market.homeworld;
+  const game=new Game(file);f={game,player:game.players.get(f.player.id),entity:game.world.entities.get(f.entity.id),ship:game.ships.get(f.ship.id)};f.home=f.entity.market.homeworld;
   assert.equal(f.home.projects[0].remaining,40);assert.equal(f.home.moduleOutputReserved,30);assert.deepEqual(f.ship.modules,['shielded']);assert.equal(f.ship.moduleCargo.sensor,1);
   advance(f,40);assert.equal(f.entity.market.moduleInventory.cabin,1);assert.equal(f.home.moduleOutputReserved,0);close(f);fs.rmSync(directory,{recursive:true,force:true});
 });

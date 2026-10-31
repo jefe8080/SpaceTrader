@@ -12,7 +12,7 @@ import {availableHomeStock} from '../shared/homeworld.js';
 import {buyPrice} from '../shared/config.js';
 
 function fixture(file=':memory:'){
-  const game=new Game(file,{seed:42,profile:'homeworld'}),player=game.createPlayer('Disposition'),entity=game.world.entities.get(player.homeworld),home=entity.market.homeworld,ship=game.shipsOf(player.id)[0];
+  const game=new Game(file,{seed:42}),player=game.createPlayer('Disposition'),entity=game.world.entities.get(player.homeworld),home=entity.market.homeworld,ship=game.shipsOf(player.id)[0];
   home.facilities.dock.status='ready';home.facilities.control.status='ready';home.controlLevel=1;home.controlModules={dispatch:1,production:1,sales:1};home.workers={basic:100,skilled:40,specialist:10};
   home.structures=[{id:'solar',kind:'solar',status:'ready',plot:0}];player.credits=100000;
   ship.queue=[];ship.cargo={};ship.dockedAt=entity.id;ship.x=entity.x+entity.radius+100;ship.y=entity.y;
@@ -108,6 +108,6 @@ test('Neustart erhält Escrow, Flug und bezahlte Ware; keine zweite Zahlung oder
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'prd5-logistics-')),file=path.join(directory,'world.db');let f=fixture(file);order(f);tickLogistics(f.game,f.entity);
   for(let i=0;i<400&&!f.ship.cargo.ice;i++)step(f);
   const ids={player:f.player.id,entity:f.entity.id,ship:f.ship.id,source:f.source.id},spent=current(f).spent;f.game.close();
-  const game=new Game(file,{profile:'homeworld'});f={game,player:game.players.get(ids.player),entity:game.world.entities.get(ids.entity),ship:game.ships.get(ids.ship),source:game.world.entities.get(ids.source)};f.home=f.entity.market.homeworld;
+  const game=new Game(file);f={game,player:game.players.get(ids.player),entity:game.world.entities.get(ids.entity),ship:game.ships.get(ids.ship),source:game.world.entities.get(ids.source)};f.home=f.entity.market.homeworld;
   assert.equal(f.ship.cargo.ice,20);step(f,500);assert.equal(f.entity.market.goods.ice.stock,20);assert.equal(current(f).spent,spent);close(f);fs.rmSync(directory,{recursive:true,force:true});
 });

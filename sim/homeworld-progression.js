@@ -197,7 +197,7 @@ if((process.argv.includes('--quick')||resumeIndex>=0)&&fs.existsSync('data/prd5/
   // Debug reruns start from the unchanged real H06 checkpoint; only the full
   // uninterrupted run is accepted as a final progression timing result.
   fs.copyFileSync(resumeIndex>=0?process.argv[resumeIndex+1]:'data/prd5/progression-h06.db','data/prd5/progression-debug.db');
-  const game=new Game('data/prd5/progression-debug.db',{profile:'homeworld'}),player=[...game.players.values()][0];Math.random=rng(42);
+  const game=new Game('data/prd5/progression-debug.db'),player=[...game.players.values()][0];Math.random=rng(42);
   try{result={debugResume:true,advanced:progress({game,player,home:game.world.entities.get(player.homeworld),ship:game.shipsOf(player.id)[0]})};}finally{game.close();}
 }else result=simulateOnboarding({seed:42,decisionSeconds:30,continueWith:progress});
 if(!result.debugResume){

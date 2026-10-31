@@ -2,7 +2,7 @@
 // A ship occupies one service position for the current simulation second;
 // the warehouse has a separate total throughput budget per server minute.
 export function handlingAllowance(game,e,ship){
-  if(game.profile!=='homeworld'||!e.market||e.kind!=='planet')return Infinity;
+  if(!e.market||e.kind!=='planet')return Infinity;
   const h=e.market.homeworld||e.market.economy;if(!h)return Infinity;
   let docks=h.docks||2,throughput=h.throughput||500;
   for(const b of h.structures||[])if(b.kind==='spaceport'&&h.allocations?.some(a=>a.id===b.id&&a.state==='active')){docks+=2;throughput+=500;}

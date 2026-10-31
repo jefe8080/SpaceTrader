@@ -12,7 +12,7 @@ const errors=[];page.on('pageerror',error=>errors.push(String(error)));
 const output=new URL(process.env.PRD7_QA_DIR||'../docs/qa/prd7/',import.meta.url);await fs.mkdir(output,{recursive:true});
 try {
   await page.goto(process.env.PRD7_URL||'http://localhost:3007');
-  assert.deepEqual(await (await page.request.get(new URL('/api/status',page.url()).href)).json(),{protocol:7,profile:'homeworld'});
+  assert.deepEqual(await (await page.request.get(new URL('/api/status',page.url()).href)).json(),{protocol:7});
   await page.locator('#loginName').fill(pilotName);await page.locator('#loginForm button').click();
   await page.waitForSelector('#hud:not([hidden])',{state:'attached'});
   await page.waitForFunction(async()=>!!(await import('/js/state.js')).state.profile);

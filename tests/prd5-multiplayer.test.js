@@ -18,7 +18,7 @@ function begin(g,p){
 }
 
 test('Gleichzeitige und später beitretende Spieler erhalten unabhängigen Einstieg ohne gemeinsame Gratisbestände',()=>{
-  const g=new Game(':memory:',{profile:'homeworld',seed:42});
+  const g=new Game(':memory:',{seed:42});
   try{
     const a=g.createPlayer('Früh'),b=g.createPlayer('Parallel'),first=begin(g,a),second=begin(g,b);
     g.time+=86400;const late=g.createPlayer('Später'),third=begin(g,late);
@@ -36,7 +36,7 @@ test('Gleichzeitige und später beitretende Spieler erhalten unabhängigen Einst
 });
 
 test('Konsortium teilt weder persönliche Heimatverwaltung noch Leitstellennetze automatisch',()=>{
-  const g=new Game(':memory:',{profile:'homeworld',seed:42});
+  const g=new Game(':memory:',{seed:42});
   try{
     const a=g.createPlayer('Anna'),b=g.createPlayer('Bert'),aa=begin(g,a),bb=begin(g,b),hub=g.world.entities.get('origin_hub');
     // Qualification for consortium creation is this test's declared prerequisite.
@@ -53,7 +53,7 @@ test('Konsortium teilt weder persönliche Heimatverwaltung noch Leitstellennetze
 });
 
 test('Realer Rohstoffhandel zwischen Spielern hat Gegenkasse und erhält die gesamte Ware',()=>{
-  const g=new Game(':memory:',{profile:'homeworld',seed:42});
+  const g=new Game(':memory:',{seed:42});
   try{
     const a=g.createPlayer('Verkäufer'),b=g.createPlayer('Käufer'),aa=begin(g,a),bb=begin(g,b);
     const source=[...g.world.entities.values()].find(e=>e.market?.goods.ore?.role==='produce'&&!e.market.homeworld);

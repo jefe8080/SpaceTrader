@@ -10,7 +10,7 @@ import {canSellTo} from '../shared/config.js';
 import {priceCatalog,priceMarkdown} from '../scripts/generate-prd5-prices.js';
 
 function fixture(recipe){
-  const game=new Game(':memory:',{seed:42,profile:'homeworld'}),player=game.createPlayer('Veredelung'),entity=game.world.entities.get(player.homeworld),home=entity.market.homeworld;
+  const game=new Game(':memory:',{seed:42}),player=game.createPlayer('Veredelung'),entity=game.world.entities.get(player.homeworld),home=entity.market.homeworld;
   player.homeQuest.completed=Object.fromEntries(['H06','H07','H09','H12'].map(id=>[id,{at:0}]));
   home.population=1000;home.workers={basic:100,skilled:30,specialist:20};home.facilities.dock.status='ready';home.facilities.control.status='ready';home.controlLevel=1;
   home.structures=[{id:'solar1',kind:'solar',status:'ready',plot:0},{id:'solar2',kind:'solar',status:'ready',plot:1}];

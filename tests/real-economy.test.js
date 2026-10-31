@@ -11,7 +11,7 @@ import {questProgress} from '../server/quests.js';
 import {applyLevel} from '../server/markets.js';
 import {updateShip} from '../server/ships.js';
 
-const fixture=()=>{const game=new Game(':memory:',{seed:42,profile:'homeworld'}),player=game.createPlayer('Bilanz');return {game,player,home:game.world.entities.get(player.homeworld),ship:game.shipsOf(player.id)[0]};};
+const fixture=()=>{const game=new Game(':memory:',{seed:42}),player=game.createPlayer('Bilanz');return {game,player,home:game.world.entities.get(player.homeworld),ship:game.shipsOf(player.id)[0]};};
 const slot=(role,stock=0,rate=0,cap=100)=>({role,stock,rate,cap,mod:1});
 function market(f,id,goods,extra={}){
   const entity={id,kind:'planet',type:'mining',radius:50,sector:f.home.sector,system:f.home.system,x:f.home.x+1000,y:f.home.y,market:{strategy:'planet',realEconomy:true,goods,...extra}};
@@ -92,11 +92,11 @@ test('NPC-Abholung reserviert echte Kasse und bezahlt nur tatsächlich geladene 
 
 test('Voller Liefermarkt erhält bezahlte Restladung über Neustart, spätere Entladung dupliziert keine Auszahlung',()=>{
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'prd5-cargo-')),file=path.join(directory,'world.db');
-  let game=new Game(file,{seed:42,profile:'homeworld'}),player=game.createPlayer('Transport'),home=game.world.entities.get(player.homeworld);
+  let game=new Game(file,{seed:42}),player=game.createPlayer('Transport'),home=game.world.entities.get(player.homeworld);
   const destination=game.world.entities.get('origin_yard');destination.market.goods.ingots=slot('consume',100,0,100);ensureCash(destination).cash=100;
   const npc=game.spawnNpcShip(destination);npc.cargo={ingots:10};npc.queue=[{t:'supply',real:true,stationId:destination.id,sourceId:home.id,good:'ingots',cash:30,phase:'toStation'}];
   const id=npc.id;assert.equal(finishRealSupply(game,npc,destination),false);assert.equal(npc.cargo.ingots,10);assert.equal(destination.market.economy.cash,130);
-  game.close();game=new Game(file,{profile:'homeworld'});const loaded=game.ships.get(id),target=game.world.entities.get(destination.id);
+  game.close();game=new Game(file);const loaded=game.ships.get(id),target=game.world.entities.get(destination.id);
   assert.equal(loaded.cargo.ingots,10);assert.equal(loaded.queue[0].cash,0);target.market.goods.ingots.stock=95;
   assert.equal(finishRealSupply(game,loaded,target),false);assert.equal(loaded.cargo.ingots,5);target.market.goods.ingots.stock=90;
   assert(finishRealSupply(game,loaded,target));assert.equal(target.market.goods.ingots.stock,95);assert.equal(target.market.economy.cash,130);
@@ -165,9 +165,7 @@ test('NPC-Planeten kaufen nicht am Hub, aber weiterhin bei echten Produzenten',(
     f.game.world.sectorEntities=()=>[target,hub];
     dispatchRealSupply(f.game,target);
     assert.equal([...f.game.ships.values()].filter(s=>s.owner===NPC_OWNER).length,0);
-    assert.equal(f.game.findSource(target,'water'),null);
     target.market.supCd={};f.game.world.sectorEntities=()=>[target,hub,producer];
-    assert.equal(f.game.findSource(target,'water').id,producer.id);
     dispatchRealSupply(f.game,target);
     const transport=[...f.game.ships.values()].find(s=>s.owner===NPC_OWNER);
     assert.equal(transport.queue[0].sourceId,producer.id);
@@ -178,9 +176,8 @@ test('Gespeicherter Hub-Einkauf kehrt ohne Einkauf zurück und erstattet das res
   const f=fixture();try{
     const hub=f.game.world.entities.get('origin_hub');
     const target=market(f,'saved-hub-target',{water:slot('consume',0)});
-    const transport=f.game.spawnNpcShip(target,true);
+    const transport=f.game.spawnNpcShip(target);
     transport.queue=[{t:'supply',stationId:target.id,sourceId:hub.id,good:'water',amount:10,phase:'toSource',real:true,haul:true,cash:500}];
-    f.game.markNpc(transport,true);
     const money=ensureCash(target).cash,stock=hub.market.goods.water.stock;
     // Even a direct load call must enforce the restriction.
     loadRealSupply(f.game,transport,hub,transport.queue[0]);
@@ -195,6 +192,5 @@ test('Gespeicherter Hub-Einkauf kehrt ohne Einkauf zurück und erstattet das res
     assert.equal(f.game.ships.has(transport.id),false);
     assert.equal(ensureCash(target).cash,money+500);
     assert.equal(target.market.goods.water.stock,3);
-    assert.equal(f.game.npcBusy.has(target.id+':water'),false);
   }finally{close(f);}
 });

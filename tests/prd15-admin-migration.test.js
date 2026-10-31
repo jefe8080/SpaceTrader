@@ -13,7 +13,7 @@ import { applyLevel } from '../server/markets.js';
 import { questProgress } from '../server/quests.js';
 
 function fixture(file = ':memory:') {
-  const game = new Game(file, { seed: 21, profile: 'homeworld' });
+  const game = new Game(file, { seed: 21 });
   for (let q = -2; q <= 2; q++) for (let r = -2; r <= 2; r++) game.world.ensureSector(q, r);
   ensureFactionSectors(game);
   const faction = [...game.fsecs.values()][0];
@@ -42,7 +42,7 @@ test('Verwaltungsmarkt migriert Bestände einmalig, erhält Grundversorgung und 
       finegold: { role: 'consume', stock: 2, cap: 500, rate: 1 },
     };
     game.close();
-    game = new Game(file, { profile: 'homeworld' });
+    game = new Game(file);
     const migrated = game.world.entities.get(originalId), fs1 = game.fsecs.get(faction.key);
     const expected = 100 + 7 * GOODS.ore.base + 2 * F.GOLD_RATE;
     assert.equal(fs1.pool, expected);
@@ -55,7 +55,7 @@ test('Verwaltungsmarkt migriert Bestände einmalig, erhält Grundversorgung und 
     assert.equal(fs1.pool, expected);
     assert.equal(migrated.market.goods.water.stock, 420);
     game.close();
-    game = new Game(file, { profile: 'homeworld' });
+    game = new Game(file);
     assert.equal(game.world.entities.get(originalId).name, name);
     assert.equal(game.fsecs.get(faction.key).pool, expected);
     assert.deepEqual(game.fsecs.get(faction.key).supply, { water: 420, food: 25 });

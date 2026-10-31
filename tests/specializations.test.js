@@ -13,7 +13,7 @@ import {localDemandPerHour} from '../shared/local-demand.js';
 import {localSalesSummary} from '../shared/local-sales.js';
 
 function fixture(type='mining'){
-  const game=new Game(':memory:',{seed:42,profile:'homeworld'}),player=game.createPlayer('Ausbau');
+  const game=new Game(':memory:',{seed:42}),player=game.createPlayer('Ausbau');
   for(let q=-1;q<=1;q++)game.world.ensureSector(q,1);
   const e=[...game.world.entities.values()].find(e=>e.type===type&&e.kind==='planet'&&!e.noBuy),h=e.market.economy,s=game.shipsOf(player.id)[0];
   s.dockedAt=e.id;game.revealAround(player,e.x,e.y,1000);game.setOwner(e,player,newProperty(e.id,player.id,game.time));player.credits=1e7;player.homeQuest.completed.H12={at:0};player.homeQuest.completed.H02={at:0};
