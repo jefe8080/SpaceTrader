@@ -171,9 +171,13 @@ Fortschritt wird im selben Commit aktualisiert.
   `sim:progression` deshalb nur relativ zur Baseline geprüft werden (mindestens
   dieselbe letzte Quest, keine neue Fehlerursache). Dazu läuft zusätzlich der
   Referenzlauf auf Seed 42 als Baseline. Mit dem Nutzer zu klären.
-- [ ] **S2: Gemeinsame Planetenerzeugung.** Hilfsfunktion aus `populateSystem`
+- [x] **S2: Gemeinsame Planetenerzeugung.** Hilfsfunktion aus `populateSystem`
   auslagern, Weltgenerierung darauf umstellen. Verhaltensgleich: gleiche Welt
-  für gleichen Seed (per Test belegt).
+  für gleichen Seed (per Test belegt). `createPlanet` und `planetRadius` in
+  `server/worldgen.js`, auch von `populateFactionSystem` genutzt. Test in
+  `tests/world.test.js` vergleicht Prüfsummen über 25 Sektoren für Seed 42
+  und 7 mit dem Stand vor der Änderung. Dazu `romanNumeral` für Namen über
+  VIII hinaus.
 - [ ] **S3: Neuerzeugung.** `createHomeworld` erzeugt Rohstoffplaneten nach E2.
   Tests für Typ, `realEconomy`, Name, Gas/Helium-3-Deckung.
 - [ ] **S4: Migration.** `migrateHomeResources` nach E3 mit Tests für

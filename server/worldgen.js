@@ -295,6 +295,26 @@ function placer(sys, r, existing = []) {
   };
 }
 
+/** Zufälliger Radius eines Planetentyps */
+export const planetRadius = (type, r) => Math.round(PLANET_TYPES[type].radius[0] + r() * (PLANET_TYPES[type].radius[1] - PLANET_TYPES[type].radius[0]));
+/** Größenfaktor aus dem Radius: 0,7 am kleinsten, 1,3 am größten Radius des Typs */
+const planetScale = (type, radius) => 0.7 + ((radius - PLANET_TYPES[type].radius[0]) / (PLANET_TYPES[type].radius[1] - PLANET_TYPES[type].radius[0])) * 0.6;
+
+/**
+ * Planet mit Markt aus Typ und Radius. Id, Position, System und Name kommen über `fields`.
+ * Weltgenerierung, Rohstoffplaneten der Heimat und deren Migration nutzen denselben Weg.
+ */
+export function createPlanet(type, radius, r, fields, scale = planetScale(type, radius)) {
+  return { kind: 'planet', type, radius, size: Math.round(scale * 100) / 100, ...fields, market: createMarket('planet', type, r, scale) };
+}
+
+/** Römische Ziffer für die Orbit-Namenskette, auch über VIII hinaus */
+export function romanNumeral(n) {
+  let out = '';
+  for (const [value, digit] of [[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]) while (n >= value) { out += digit; n -= value; }
+  return out;
+}
+
 function populateSystem(sys, r, nextId) {
   const out = [];
   const place = placer(sys, r);
@@ -304,12 +324,10 @@ function populateSystem(sys, r, nextId) {
   const planets = [];
   for (let i = 0, n = between(r, 2, 6); i < n; i++) {
     const type = weightedTagged(r, PLANET_TYPES, 'planet', sys.tags);
-    const def = PLANET_TYPES[type];
-    const radius = Math.round(def.radius[0] + r() * (def.radius[1] - def.radius[0]));
+    const radius = planetRadius(type, r);
     const p = place(radius);
     if (!p) continue;
-    const scale = 0.7 + ((radius - def.radius[0]) / (def.radius[1] - def.radius[0])) * 0.6;
-    planets.push({ id: nextId(), kind: 'planet', type, x: p.x, y: p.y, radius, size: Math.round(scale * 100) / 100, ...base, market: createMarket('planet', type, r, scale) });
+    planets.push(createPlanet(type, radius, r, { id: nextId(), ...p, ...base }));
   }
   planets.sort((a, b) => Math.hypot(a.x - sys.x, a.y - sys.y) - Math.hypot(b.x - sys.x, b.y - sys.y));
   planets.forEach((p, i) => { p.name = `${sys.name} ${ROMAN[i]}`; });
@@ -355,12 +373,10 @@ function populateFactionSystem(sys, r, nextId, withYard) {
   const planets = [];
   for (let i = 0, n = between(r, 2, 5); i < n; i++) {
     const type = weightedTagged(r, PLANET_TYPES, 'planet', F.tags);
-    const def = PLANET_TYPES[type];
-    const radius = Math.round(def.radius[0] + r() * (def.radius[1] - def.radius[0]));
+    const radius = planetRadius(type, r);
     const p = place(radius);
     if (!p) continue;
-    const scale = 0.7 + ((radius - def.radius[0]) / (def.radius[1] - def.radius[0])) * 0.6;
-    planets.push({ id: nextId(), kind: 'planet', type, x: p.x, y: p.y, radius, size: Math.round(scale * 100) / 100, ...base, market: createMarket('planet', type, r, scale) });
+    planets.push(createPlanet(type, radius, r, { id: nextId(), ...p, ...base }));
   }
   planets.sort((a, b) => Math.hypot(a.x - sys.x, a.y - sys.y) - Math.hypot(b.x - sys.x, b.y - sys.y));
   planets.forEach((p, i) => { p.name = `${sys.name} ${ROMAN[i]}`; });

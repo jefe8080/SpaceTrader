@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { generateSector, layoutSector } from '../server/worldgen.js';
+import { createHash } from 'node:crypto';
+import { generateSector, layoutSector, romanNumeral } from '../server/worldgen.js';
 import { World } from '../server/world.js';
 import { Game } from '../server/game.js';
 import { runCommand } from '../server/handlers/index.js';
@@ -15,6 +16,19 @@ test('Sektorgenerierung ist deterministisch je Seed und Hex-Koordinate', () => {
   assert.notEqual(JSON.stringify(a.sector.systems), JSON.stringify(c.sector.systems));
   // Layout-Vorschau für Nachbarsektoren entspricht der späteren Generierung
   assert.deepEqual(layoutSector(1234, 2, -1).systems.map((s) => s.id), a.sector.systems.map((s) => s.id));
+});
+
+test('Gemeinsame Planetenerzeugung erzeugt dieselbe Welt wie vor PRD 19', () => {
+  // Prüfsummen über 25 Sektoren je Seed, gemessen vor dem Auslagern von createPlanet
+  const canon = (v) => Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])])) : v;
+  const digest = (seed) => {
+    const h = createHash('sha256');
+    for (let q = -2; q <= 2; q++) for (let r = -2; r <= 2; r++) h.update(JSON.stringify(canon(generateSector(seed, q, r))));
+    return h.digest('hex');
+  };
+  assert.equal(digest(42), '60cc228ad025114de853dd203a8ddc7ca005f157b08caf5f0ffc3b865652eeaf');
+  assert.equal(digest(7), '9673fe9eca7ddd909a121986e5d9925d137aed5146498ab907bd692924242ed9');
+  assert.deepEqual([1, 4, 6, 9, 11, 14].map(romanNumeral), ['I', 'IV', 'VI', 'IX', 'XI', 'XIV']);
 });
 
 test('Sektorinhalt hält die Regeln ein', () => {
