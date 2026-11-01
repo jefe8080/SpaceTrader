@@ -1,6 +1,7 @@
 // Optimistic single-player planner. Every purchase, flight, production cycle,
 // quest reward, passenger and hull uses the real server. No injected resources.
 import fs from 'node:fs';
+import path from 'node:path';
 import {simulateOnboarding} from './homeworld-onboarding.js';
 import {runCommand} from './story-command.js';
 import {HOME_BUILDINGS,industrySpec,availableHomeStock} from '../shared/homeworld.js';
@@ -13,12 +14,17 @@ import {rng} from '../server/worldgen.js';
 import {evaluateProgression} from './progression-report.js';
 
 const events=[];
+// --seed N runs another world; its snapshots and report stay apart from the seed-42 reference.
+const seedIndex=process.argv.indexOf('--seed'),SEED=seedIndex<0?42:Number(process.argv[seedIndex+1]);
+const SNAP=SEED===42?'data/prd5/progression-':`data/prd5/seed${SEED}/progression-`;
+const outIndex=process.argv.indexOf('--out'),OUT=outIndex<0?(SEED===42?'docs/qa/prd5-u17/progression.json':`data/prd5/seed${SEED}/progression.json`):process.argv[outIndex+1];
+fs.mkdirSync(SNAP.slice(0,SNAP.lastIndexOf('/')),{recursive:true});
 function progress({game,player:p,home:e,ship}){
-  if(!fs.existsSync('data/prd5/progression-h06.db')){game.save();game.store.db.prepare('VACUUM INTO ?').run('data/prd5/progression-h06.db');}
+  if(!fs.existsSync(SNAP+'h06.db')){game.save();game.store.db.prepare('VACUUM INTO ?').run(SNAP+'h06.db');}
   const h=e.market.homeworld,started=game.time;let current=ship,earned=0,quests=0,depth=0,funding=false,exports=0;
   const making=new Set();
   const dependsOnMaking=(g,seen=new Set())=>{if(making.has(g))return true;if(seen.has(g))return false;seen.add(g);const recipe=Object.values(RECIPES).find(r=>r.out[g]);return Object.keys(recipe?.in||{}).some(input=>dependsOnMaking(input,seen));};
-  const log=(action,extra={})=>{const row={seconds:game.time,action,credits:Math.round(p.credits),...extra};events.push(row);console.error(JSON.stringify(row));if(/^H\d\d$/.test(action)){game.save();const snapshot=`data/prd5/progression-${action}.db`;if(!fs.existsSync(snapshot))game.store.db.prepare('VACUUM INTO ?').run(snapshot);}};
+  const log=(action,extra={})=>{const row={seconds:game.time,action,credits:Math.round(p.credits),...extra};events.push(row);console.error(JSON.stringify(row));if(/^H\d\d$/.test(action)){game.save();const snapshot=`${SNAP}${action}.db`;if(!fs.existsSync(snapshot))game.store.db.prepare('VACUUM INTO ?').run(snapshot);}};
   const cmd=(name,args={})=>{if(!process.argv.includes('--quick'))game.tick(2);const error=runCommand(game,p,{cmd:name,target:e.id,...args});if(error)throw new Error(`${name}: ${error}`);};
   const tick=(seconds=5)=>{if(game.time>144000)throw new Error('Fortschritt überschreitet 40 Stunden.');game.tick(seconds);};
   const until=(condition,label,limit=14400)=>{const end=game.time+limit;while(!condition()&&game.time<end)tick();if(!condition())throw new Error(`Zeitlimit ${label}`);};
@@ -193,15 +199,15 @@ function progress({game,player:p,home:e,ship}){
 }
 let result;
 const resumeIndex=process.argv.indexOf('--resume');
-if((process.argv.includes('--quick')||resumeIndex>=0)&&fs.existsSync('data/prd5/progression-h06.db')){
+if((process.argv.includes('--quick')||resumeIndex>=0)&&fs.existsSync(SNAP+'h06.db')){
   // Debug reruns start from the unchanged real H06 checkpoint; only the full
   // uninterrupted run is accepted as a final progression timing result.
-  fs.copyFileSync(resumeIndex>=0?process.argv[resumeIndex+1]:'data/prd5/progression-h06.db','data/prd5/progression-debug.db');
-  const game=new Game('data/prd5/progression-debug.db'),player=[...game.players.values()][0];Math.random=rng(42);
+  fs.copyFileSync(resumeIndex>=0?process.argv[resumeIndex+1]:SNAP+'h06.db',SNAP+'debug.db');
+  const game=new Game(SNAP+'debug.db'),player=[...game.players.values()][0];Math.random=rng(SEED);
   try{result={debugResume:true,advanced:progress({game,player,home:game.world.entities.get(player.homeworld),ship:game.shipsOf(player.id)[0]})};}finally{game.close();}
-}else result=simulateOnboarding({seed:42,decisionSeconds:30,continueWith:progress});
+}else result=simulateOnboarding({seed:SEED,decisionSeconds:30,continueWith:progress});
 if(!result.debugResume){
   result.corridors=evaluateProgression(result);
 }
-fs.mkdirSync('docs/qa/prd5-u17',{recursive:true});fs.writeFileSync('docs/qa/prd5-u17/progression.json',JSON.stringify(result,null,2));
+fs.mkdirSync(path.dirname(OUT),{recursive:true});fs.writeFileSync(OUT,JSON.stringify(result,null,2));
 console.log(JSON.stringify(result.advanced,null,2));if(!result.advanced.completed||Object.values(result.corridors||{}).some(c=>!c.accepted))process.exitCode=1;

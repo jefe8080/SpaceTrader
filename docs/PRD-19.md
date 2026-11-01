@@ -150,8 +150,27 @@ Jeder Schritt endet mit grüner Testsuite und einem eigenen Commit. Der
 Fortschritt wird im selben Commit aktualisiert.
 
 - [x] **S0: PRD.** Planung abgestimmt und dieses Dokument angelegt.
-- [ ] **S1: Baseline.** `sim:homeworld` und `sim:progression` auf den Seeds aus
+- [x] **S1: Baseline.** `sim:homeworld` und `sim:progression` auf den Seeds aus
   E4 mit dem aktuellen Stand ausführen, `serverSeconds` bis H06 notieren.
+  `sim:progression` hat dafür die Optionen `--seed` und `--out` bekommen. Ohne
+  Option bleibt alles beim Referenzlauf mit Seed 42; andere Seeds legen
+  Zwischenstände unter `data/prd5/seed<N>/` ab.
+
+  Baseline (Stand `60d8b6d`, 01.11.2026):
+
+  | Seed | `sim:homeworld` bis H06 (s) | `sim:progression` |
+  |------|-----------------------------|-------------------|
+  | 1 | 2091 | läuft noch, wird nachgetragen |
+  | 2 | 2048 | Abbruch nach H09 (47844 s): „Keine reale Rohstoffquelle gold“ |
+  | 3 | 1986 | Abbruch nach H09 (37291 s): „Keine reale Rohstoffquelle gold“ |
+  | 4 | 2126 | Abbruch nach H09 (41235 s): „Keine reale Rohstoffquelle gold“ |
+  | 5 | 2047 | Abbruch nach H08 (30044 s): „homeBuild: Nicht genug Credits.“ |
+
+  Befund: Der Progressionsplaner ist auf Seed 42 abgestimmt und läuft schon vor
+  der Umstellung auf den Seeds 2 bis 5 nicht durch. Kriterium 7 kann für
+  `sim:progression` deshalb nur relativ zur Baseline geprüft werden (mindestens
+  dieselbe letzte Quest, keine neue Fehlerursache). Dazu läuft zusätzlich der
+  Referenzlauf auf Seed 42 als Baseline. Mit dem Nutzer zu klären.
 - [ ] **S2: Gemeinsame Planetenerzeugung.** Hilfsfunktion aus `populateSystem`
   auslagern, Weltgenerierung darauf umstellen. Verhaltensgleich: gleiche Welt
   für gleichen Seed (per Test belegt).
