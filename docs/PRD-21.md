@@ -23,7 +23,7 @@ Quelle: server/orbital.js und client/js/ui/homeworld.js. Gebrochener/nicht wiede
 - [x] Zusätzlicher Detailentwurf entfällt: Nutzer hat Fassung 2 freigegeben und direkte Umsetzung beauftragt.
 - [x] Bilder auf Perspektive, Fortschritt, Lesbarkeit und Vollständigkeit prüfen; Prompts und Ergebnisse unter docs/art/prd21 gesichert. Fassung 2 zeigt fünf Zustände, zwei Ringe bei Großausbau/Doppelwerft, größere Freiräume und lokalisierte Baudocks. Noch keine Spielintegration.
 - [x] Nutzerabnahme am 01.11.2026: zweite Fassung bestätigt; Umsetzung und anschließender Push ausdrücklich autorisiert.
-- [ ] A: fünf freigestellte Ringzustände ohne eingebrannten Planeten erstellen und reproduzierbar in deckungsgleiche Vorder-/Hintergrundteile verpacken.
+- [x] A: fünf Einzelquellen mit ImageGen erzeugt. scripts/pack-orbital-art.js extrahiert die zusammenhängende äußere Ringstruktur der großen Stufen; derselbe kleine Ring wird weiterverwendet. Zehn echte Alpha-Layer mit 1024×1024 Pixeln, gemeinsamem Zentrum, leerem Planetenbereich und 896-Pixel-Motivbreite verpackt. Source-/Alpha-/Zentrums-/Randprüfungen erfolgreich. Produktionsprompts und Dateien unter docs/art/prd21/production; Zuordnung in orbital-manifest.json.
 - [ ] B: zentrale Zustandsauswahl und gemalte Kartenzeichnung integrieren; alte geometrische Ringe vollständig ersetzen. Bodenentwicklung bleibt unabhängig, Planeten werden zwischen den Ringteilen gezeichnet.
 - [ ] C: Zustände, laufende Projekte, Zoom/Anschnitt und Serienzustand prüfen; gesamte Testsuite und Browserprüfung; Nachweise dokumentieren und pushen.
 

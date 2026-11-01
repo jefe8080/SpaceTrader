@@ -1,0 +1,132 @@
+[
+  {
+    "id": "orbital_broken_back",
+    "file": "orbital_broken_back.png",
+    "source": "docs/art/prd21/production/broken.png",
+    "anchor": [
+      512,
+      512
+    ],
+    "sourceSize": 1254,
+    "normalizedSize": 1024,
+    "side": 939,
+    "pad": 42
+  },
+  {
+    "id": "orbital_broken_front",
+    "file": "orbital_broken_front.png",
+    "source": "docs/art/prd21/production/broken.png",
+    "anchor": [
+      512,
+      512
+    ],
+    "sourceSize": 1254,
+    "normalizedSize": 1024,
+    "side": 939,
+    "pad": 42
+  },
+  {
+    "id": "orbital_small_back",
+    "file": "orbital_small_back.png",
+    "source": "docs/art/prd21/production/small.png",
+    "anchor": [
+      512,
+      512
+    ],
+    "sourceSize": 1254,
+    "normalizedSize": 1024,
+    "side": 935,
+    "pad": 44
+  },
+  {
+    "id": "orbital_small_front",
+    "file": "orbital_small_front.png",
+    "source": "docs/art/prd21/production/small.png",
+    "anchor": [
+      512,
+      512
+    ],
+    "sourceSize": 1254,
+    "normalizedSize": 1024,
+    "side": 935,
+    "pad": 44
+  },
+  {
+    "id": "orbital_partial_back",
+    "file": "orbital_partial_back.png",
+    "source": "docs/art/prd21/production/partial.png",
+    "anchor": [
+      512,
+      512
+    ],
+    "sourceSize": 1254,
+    "normalizedSize": 1024,
+    "side": 939,
+    "pad": 42
+  },
+  {
+    "id": "orbital_partial_front",
+    "file": "orbital_partial_front.png",
+    "source": "docs/art/prd21/production/partial.png",
+    "anchor": [
+      512,
+      512
+    ],
+    "sourceSize": 1254,
+    "normalizedSize": 1024,
+    "side": 939,
+    "pad": 42
+  },
+  {
+    "id": "orbital_large_back",
+    "file": "orbital_large_back.png",
+    "source": "docs/art/prd21/production/large.png",
+    "anchor": [
+      512,
+      512
+    ],
+    "sourceSize": 1254,
+    "normalizedSize": 1024,
+    "side": 919,
+    "pad": 52
+  },
+  {
+    "id": "orbital_large_front",
+    "file": "orbital_large_front.png",
+    "source": "docs/art/prd21/production/large.png",
+    "anchor": [
+      512,
+      512
+    ],
+    "sourceSize": 1254,
+    "normalizedSize": 1024,
+    "side": 919,
+    "pad": 52
+  },
+  {
+    "id": "orbital_double_back",
+    "file": "orbital_double_back.png",
+    "source": "docs/art/prd21/production/double.png",
+    "anchor": [
+      512,
+      512
+    ],
+    "sourceSize": 1254,
+    "normalizedSize": 1024,
+    "side": 928,
+    "pad": 48
+  },
+  {
+    "id": "orbital_double_front",
+    "file": "orbital_double_front.png",
+    "source": "docs/art/prd21/production/double.png",
+    "anchor": [
+      512,
+      512
+    ],
+    "sourceSize": 1254,
+    "normalizedSize": 1024,
+    "side": 928,
+    "pad": 48
+  }
+]
