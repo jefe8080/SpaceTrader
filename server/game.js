@@ -20,7 +20,7 @@ import { removeOffersOf } from './offers.js';
 import { tickEvents, sellToEvent } from './events.js';
 import { isConsortiumOwner, consortiumIdOf } from '../shared/consortium.js';
 import { checkWorldFile, WORLD_GEN, WORLD_KIND } from './world-profile.js';
-import { createHomeworld, tickHomeworld, tickHomeResource } from './homeworld.js';
+import { createHomeworld, tickHomeworld, tickHomeResource, migrateHomeResources } from './homeworld.js';
 import {passengerTrade} from './population.js';
 import {handlingAllowance,recordHandling} from './handling.js';
 import {tickColonies} from './colonies.js';
@@ -137,6 +137,8 @@ export class Game {
     migrateWar(this); // PRD 15: wiederholbar und idempotent
     migrateNewHullInventory(this);
     for (const player of this.players.values()) syncHomeQuests(this, player);
+    const resources = migrateHomeResources(this); // PRD 19: wiederholbar und idempotent
+    if (resources.length) console.log(`PRD 19: ${resources.length} Rohstoffplaneten auf echte Wirtschaft umgestellt: ${resources.join(', ')}`);
     migrateBuildingRecipes(this);
     syncRouteReservations(this);
     this.routeStats = groupRows(st.loadAll('route_stats'), 'route');

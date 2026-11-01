@@ -182,9 +182,23 @@ Fortschritt wird im selben Commit aktualisiert.
   Tests für Typ, `realEconomy`, Name, Gas/Helium-3-Deckung. Ortsmodifikatoren
   werden wie in `ensureSector` nur über die neuen Planeten berechnet, bestehende
   Märkte des Systems bleiben unberührt. RNG: `hashN(seed, Spieler, 502)`.
-- [ ] **S4: Migration.** `migrateHomeResources` nach E3 mit Tests für
+- [x] **S4: Migration.** `migrateHomeResources` nach E3 mit Tests für
   Idempotenz, Bestandsübernahme, Besitz, Routen. Prüflauf gegen Kopie des
-  Prod-Spielstands.
+  Prod-Spielstands. Umsetzung in `server/homeworld.js`, Aufruf in
+  `Game.load` nach Besitz, Krieg und Heimatquests. Tests in
+  `tests/prd19.test.js`. Präzisierungen:
+  - Neben `lvl` entfällt auch `qxp` (Questgeber-Fortschritt), damit Level und
+    Erfahrung nicht auseinanderlaufen. Questtafel (`board`) bleibt.
+  - Alte Gebäude in `planet_buildings` werden gelöscht, `prop.upg` und
+    `prop.extras` geleert. Bargeld und Bevölkerung entstehen neu aus Typ und
+    Größe.
+  - RNG: `hashN(seed, 503, Zeichencodes der id)`.
+
+  Prüflauf gegen Kopie des Prod-Spielstands (01.11.2026, Kopie nur im
+  Scratchpad): 21 von 21 Planeten migriert, Position, Name und Typ unverändert,
+  3 Besitzverhältnisse erhalten, 11 Routen mit Halt an diesen Planeten, 0
+  Routenhalte ohne Ziel, 0 Planeten danach weder `ruins` noch `realEconomy`.
+  Zweiter Start: keine weitere Migration.
 - [ ] **S5: `homeResource` entfernen.** Strategie, Tick, Konstanten und
   Test-Ausnahmen entfernen.
 - [ ] **S6: Legacy-Zweige für Planeten entfernen.** Nach E5 in Server, Shared

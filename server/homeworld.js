@@ -3,7 +3,7 @@ import { HOMEWORLD, HOME_QUESTS, availableHomeStock } from '../shared/homeworld.
 import { hexAt, hexKey } from '../shared/hex.js';
 import { rng, hashN, createPlanet, planetRadius, applyLocationMods, romanNumeral } from './worldgen.js';
 import { preparePublicEntity } from './real-economy.js';
-import { newProperty } from './property.js';
+import { newProperty, applyProperty } from './property.js';
 import { grantRelic } from './relic.js';
 import {stat} from './markets.js';
 import { tickHomeOperations, homeAccess, homeConstructionError } from './homeworld-operations.js';
@@ -119,6 +119,39 @@ export function createHomeworld(game, player) {
   game.world.sectors.get(entity.sector).firstVisit ||= player.id;
   syncHomeQuests(game, player);
   return entity;
+}
+
+/**
+ * PRD 19: Rohstoffplaneten mit der alten Strategie `homeResource` werden zu gewöhnlichen Planeten der echten Wirtschaft.
+ * Id, Name, Lage, Typ, Radius und Größe bleiben, der Markt entsteht neu wie bei der Weltgenerierung. Bestand der
+ * Förderwaren und der Nahrung wird übernommen (gedeckelt), die Marktstatistik bleibt. Besitz bleibt, Ausbau und
+ * Fabriken aus dem alten Besitzmodell entfallen. Idempotent: ohne `homeResource` ändert sich nichts.
+ */
+export function migrateHomeResources(game) {
+  const migrated = [];
+  for (const entity of game.world.entities.values()) {
+    const old = entity.market;
+    if (old?.strategy !== 'homeResource') continue;
+    const random = rng(hashN(game.world.seed, 503, ...[...entity.id].map((c) => c.charCodeAt(0))));
+    entity.market = createPlanet(entity.type, entity.radius, random, {}, entity.size || 1).market;
+    preparePublicEntity(entity);
+    applyLocationMods([entity], random);
+    const market = entity.market;
+    for (const [good, slot] of Object.entries(old.goods)) {
+      if (slot.role !== 'produce' && good !== 'food' || !market.goods[good] || !(slot.stock > 0)) continue;
+      const amount = Math.min(slot.stock, market.goods[good].cap);
+      market.goods[good].stock = amount;
+      market.provenance = market.provenance.filter((entry) => entry.good !== good);
+      market.provenance.push({ id: `${entity.id}:${good}:migration`, source: 'migration', good, amount });
+    }
+    market.stats = old.stats || [];
+    if (old.board) market.board = old.board;
+    game.buildings.delete(entity.id);
+    const prop = game.ownership.get(entity.id);
+    if (prop) { prop.upg = {}; prop.extras = []; applyProperty(game, entity, prop); }
+    migrated.push(entity.id);
+  }
+  return migrated;
 }
 
 export function ownHome(game, player, entity) {
