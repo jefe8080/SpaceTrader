@@ -6,6 +6,7 @@ import { planPath } from '/shared/nav.js';
 import { shipStats, holdUsage } from '/shared/ships.js';
 import { state, esc } from './state.js';
 import { spriteUrl } from './assets.js';
+import { spaceArtKey } from '/shared/space-art.js';
 
 export function typeName(e) {
   if (e.kind === 'planet') return PLANET_TYPES[e.type].name + (e.faction ? ' · ' + FACTIONS[e.faction].name : '');
@@ -15,10 +16,7 @@ export function typeName(e) {
 }
 
 export function entitySprite(e) {
-  if (e.kind === 'planet') return spriteUrl(PLANET_TYPES[e.type].sprite);
-  if (e.kind === 'station') return spriteUrl(STATION_TYPES[e.type].sprite, stationAccent(e));
-  if (e.kind === 'wormhole') return '/assets/wormhole.svg';
-  return spriteUrl(BELT_TYPES[e.type].sprite);
+  return spriteUrl(spaceArtKey(e));
 }
 
 export const systemName = (e) => state.systems.get(e?.system)?.name || (e?.type === 'hub' ? 'Schwarzes Loch' : '–');

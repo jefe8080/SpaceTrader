@@ -43,6 +43,7 @@ test('Kleine Schiffe bleiben bis zum Ende der Systemansicht lesbar, große behal
 test('Assetloader lädt PNG einmal pro Typ und erhält SVG-Rückfall sowie Besitzerfarben',async()=>{
   let source=await readFile(new URL('../client/js/assets.js',import.meta.url),'utf8');
   source=source.replace(/import .* from '\/shared\/config.js';/,"const PLANET_TYPES={}, STATION_TYPES={hub:{sprite:'station_hub'}}, BELT_TYPES={}, SHIP_TYPES={spatz:{sprite:'ship_spatz'},wal:{sprite:'ship_wal'}};")
+    .replace("'/shared/space-art.js'",JSON.stringify(new URL('../shared/space-art.js',import.meta.url).href))
     .replace("'./shipArt.js'",JSON.stringify(new URL('../client/js/shipArt.js',import.meta.url).href));
   const OriginalImage=globalThis.Image,originalFetch=globalThis.fetch,requests=[];
   globalThis.Image=class{

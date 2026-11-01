@@ -1,3 +1,4 @@
+import {spaceArtUrl} from './space-art.js';
 import { STATION_TYPES, PLANET_TYPES, BELT_TYPES, GOODS, RECIPES } from './goods.js';
 import { HOME_BUILDINGS, industrySpec } from './homeworld.js';
 import { ENTERTAINMENT } from './planetside.js';
@@ -19,10 +20,10 @@ for (const [id, d] of Object.entries(STATION_TYPES)) {
   if (id === 'hotel') { intro = 'Das Orbitalhotel versorgt Gäste im Weltraum.'; points.push('Benötigt: ' + names(d.consume) + '.', 'Passagiertransport benötigt geeignete Kabinen.'); }
   if (id === 'outpost') { intro = 'Ein Außenposten ist eine Anlaufstelle seiner Fraktion.'; points.push('Hier werden Module angeboten und Fraktionswaren nachgefragt.', 'Angebote und Freischaltungen hängen vom Fraktionsrang ab.'); }
   if (id === 'wreck') { intro = 'Eine persönliche Fundstelle kann geborgen oder untersucht werden.'; points = ['Aufgaben geben die Voraussetzungen für die Bergung vor.', 'Für persönliche Funde ist das aktive manuelle Schiff erforderlich.', 'Fundorte und Belohnungen werden erst bei ihrer Entdeckung bekannt.']; }
-  add('st:' + id, d.name, '/assets/' + d.sprite + '.svg', intro, points, 'Stationen');
+  add('st:' + id, d.name, spaceArtUrl('space_station_' + id), intro, points, 'Stationen');
 }
-for (const [id, d] of Object.entries(PLANET_TYPES)) add('pl:' + id, d.name, '/assets/' + d.sprite + '.svg', 'Ein Planet mit eigenen Rohstoffen, Bewohnern und Einrichtungen.', ['Mit einem angedockten Schiff kannst du die Oberfläche betreten.', 'Gebäude bieten Produktion, Lagerung und lokale Dienste.', 'Rohstoffquellen werden beim Erkunden bekannt; Produktionsrezepte schaltet die Fertigstellung eigener Gebäude frei.'], 'Planeten');
-for (const [id, d] of Object.entries(BELT_TYPES)) add('bt:' + id, d.name, '/assets/' + d.sprite + '.svg', 'Ein Ressourcenfeld für den Abbau von ' + GOODS[d.good].name + '.', ['Zum Abbau benötigst du ein geeignetes Bergbaumodul (' + (GOODS[d.good].mine || 'std') + ').', 'Freier Laderaum und bei Gefahrgut ein geschirmter Frachtraum sind erforderlich.'], 'Ressourcenfelder');
+for (const [id, d] of Object.entries(PLANET_TYPES)) add('pl:' + id, d.name, spaceArtUrl(id === 'ruins' ? 'space_ruins_0' : 'space_planet_' + id), 'Ein Planet mit eigenen Rohstoffen, Bewohnern und Einrichtungen.', ['Mit einem angedockten Schiff kannst du die Oberfläche betreten.', 'Gebäude bieten Produktion, Lagerung und lokale Dienste.', 'Rohstoffquellen werden beim Erkunden bekannt; Produktionsrezepte schaltet die Fertigstellung eigener Gebäude frei.'], 'Planeten');
+for (const [id, d] of Object.entries(BELT_TYPES)) add('bt:' + id, d.name, spaceArtUrl('space_resource_' + id), 'Ein Ressourcenfeld für den Abbau von ' + GOODS[d.good].name + '.', ['Zum Abbau benötigst du ein geeignetes Bergbaumodul (' + (GOODS[d.good].mine || 'std') + ').', 'Freier Laderaum und bei Gefahrgut ein geschirmter Frachtraum sind erforderlich.'], 'Ressourcenfelder');
 const buildings = {
   questhouse: ['Rathaus und Questhaus', 'Hier erhältst du Aufgaben und holst abgeschlossene Belohnungen ab.'],
   produce: ['Produktionsgebäude', 'Gewinnt oder produziert die angezeigte Ware.'],
@@ -43,7 +44,7 @@ for (const [id,d] of Object.entries(HOME_BUILDINGS)) buildings['home-building:' 
 for (const [id,d] of Object.entries(ENTERTAINMENT)) buildings['fun:' + id] = [d.name, 'Hier kannst du ein lokales Spiel gegen einen Einsatz spielen.'];
 for (const [id,[name,intro]] of Object.entries(buildings)) add('building:' + id,name,'/assets/art/homeworld/buildings.png',intro,['Verfügbare Aktionen und Voraussetzungen stehen in der Gebäudeansicht.', 'Baumaßnahmen benötigen Materialien, Versorgung und die passenden Verwaltungsrechte.']);
 add('ship:versorger','Versorger','/assets/ship_versorger.svg','Ein mobiles Versorgungsschiff mit eigenen Aufgaben.',['Wähle das Schiff, um seinen aktuellen Auftrag und seine Interaktionen zu sehen.'],'Schiffe');
-add('wormhole:wormhole','Wurmloch','/assets/wormhole.svg','Eine Verbindung zwischen entfernten Orten im Weltraum.',['Mit einem Schiff hineinfliegen, um die Gegenseite zu entdecken.','Bekannte Verbindungen werden von der Navigation genutzt.','Der Durchflug benötigt fünf Sekunden und keinen Treibstoff.'],'Weltobjekte');
+add('wormhole:wormhole','Wurmloch',spaceArtUrl('space_wormhole'),'Eine Verbindung zwischen entfernten Orten im Weltraum.',['Mit einem Schiff hineinfliegen, um die Gegenseite zu entdecken.','Bekannte Verbindungen werden von der Navigation genutzt.','Der Durchflug benötigt fünf Sekunden und keinen Treibstoff.'],'Weltobjekte');
 
 export function entityGuideKey(e) {
   if (!e) return null;
@@ -70,7 +71,7 @@ for (const [id,name,intro,points] of [
   ['archive','Persönliche Archivstelle','Eine persönliche Expedition untersucht menschliche Aufzeichnungen.',['Mit dem aktiven manuellen Schiff persönlich anfliegen und den Besuch aufzeichnen.','Die Stelle bleibt bis zur vollständigen Questabgabe erhalten.']],
   ['study','Studienfundstelle','Eine einmalige Studienvorlage kann hier geborgen werden.',['Das aktive manuelle Schiff benötigt 30 freie normale Frachteinheiten.','Nach vollständiger Bergung verschwindet die Stelle; die Vorlage bleibt als Fracht erhalten.']],
   ['relic','Reliktwrack','Ein persönliches Wrack mit einem versiegelten Fund.',['Mit dem aktiven manuellen Schiff persönlich bergen.','Den versiegelten Fund mit dem Bergungsschiff zur Heimatwerkstatt bringen.','Die Fundstelle verschwindet nach Abschluss der zugehörigen Aufgabe.']],
-]) add('quest:'+id,name,'/assets/art/homeworld/'+(id==='relic'?'relic':'archive')+'.png',intro,points,'Fundstellen');
+]) add('quest:'+id,name,spaceArtUrl('space_quest_' + id),intro,points,'Fundstellen');
 
 for(const size of ['small','large'])OBJECT_GUIDE['building:orbital-'+size].image='/assets/art/cities/orbital-elevator-'+size+'.png';
 for(const [id,d] of Object.entries(HOME_BUILDINGS)){
@@ -119,8 +120,7 @@ for(const [id,r] of Object.entries(RECIPES)){
  const entry=OBJECT_GUIDE[key];entry.intro=r.name+' verarbeitet '+quantities(r.in)+' zu '+quantities(r.out)+'.';
  entry.points=['Zutaten je Zyklus: '+quantities(r.in)+'.','Ergebnis je Zyklus: '+quantities(r.out)+'.','Ein vollständiger Zyklus dauert '+r.time+' Sekunden. Zutaten werden erst bei einem vollständigen Zyklus verbraucht.','Fertigstellung eines eigenen Gebäudes schaltet seine Rezepte dauerhaft frei. Abriss entfernt die Freischaltung nicht. Die Erklärung ist schon vor dem Bau vollständig lesbar.','Produktion benötigt eine fertige, eingeschaltete Anlage, Zutaten und freien Lagerraum.'];
  if(spec)entry.points.push('Bau: '+spec.credits+' Cr, '+quantities(spec.goods)+'; '+spec.seconds+' s. Voraussetzung: '+spec.quest+'.','Betrieb: '+spec.power+' Energie; '+Object.entries(spec.workers).map(([q,n])=>n+' '+({basic:'einfache Kräfte',skilled:'Fachkräfte',specialist:'Spezialisten'}[q])).join(', ')+'.');
- const cell=({waterworks:0,foodplant:12,fueldepot:0,refinery:5,smelter:3})[id]??16;
- entry.image='/assets/art/cities/sprites.png';entry.frame=[cell%5*1536/5+15,Math.floor(cell/5)*1024/5+5,1536/5-30,1024/5-10];
+ entry.image=spaceArtUrl('space_station_'+id);
 }
 for(const [id,d] of Object.entries(HOME_BUILDINGS)){
  const entry=OBJECT_GUIDE['building:home-building:'+id];

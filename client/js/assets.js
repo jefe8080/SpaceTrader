@@ -1,8 +1,9 @@
 // Lädt Schiffs-PNGs und SVGs; SVG-Akzente werden weiter in Canvas-Caches eingefärbt.
 import { PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES } from '/shared/config.js';
 import { shipArtUrl } from './shipArt.js';
+import { SPACE_ART, spaceArtUrl } from '/shared/space-art.js';
 
-const SPRITES = [...new Set([PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES].flatMap((t) => Object.values(t).map((d) => d.sprite)))];
+const SPRITES = [...new Set([...Object.keys(SPACE_ART), ...[PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES].flatMap((t) => Object.values(t).map((d) => d.sprite))])];
 const PLACEHOLDER = /#ff00ff/gi;
 
 const sources = new Map(); // name -> SVG-Text
@@ -12,7 +13,7 @@ const painted = new Map(); // name -> geladenes, transparentes PNG
 
 export async function loadAssets() {
   await Promise.all(SPRITES.map(async (n) => {
-    const art = shipArtUrl(n);
+    const art = spaceArtUrl(n) || shipArtUrl(n);
     if (art) {
       try {
         const img = new Image();
@@ -23,7 +24,10 @@ export async function loadAssets() {
         });
         painted.set(n, img);
         return;
-      } catch { /* Bei fehlendem PNG bleibt das bewährte SVG verfügbar. */ }
+      } catch (error) {
+        if (spaceArtUrl(n)) throw new Error('Weltraumgrafik fehlt: ' + art, {cause: error});
+        // Ships retain their SVG fallback.
+      }
     }
     const res = await fetch(`/assets/${n}.svg`);
     sources.set(n, await res.text());
@@ -59,7 +63,7 @@ export function getSprite(name, color = null, px = 256) {
 
 /** Data-URL zur Verwendung in <img> im HTML-UI */
 export function spriteUrl(name, color = null) {
-  if (painted.has(name)) return shipArtUrl(name);
+  if (painted.has(name)) return spaceArtUrl(name) || shipArtUrl(name);
   const key = `${name}|${color}`;
   if (!urlCache.has(key)) {
     const svg = svgFor(name, color);

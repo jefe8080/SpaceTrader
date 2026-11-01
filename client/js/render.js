@@ -1,5 +1,6 @@
 import { drawBattleSymbols, pickBattle } from './ui/battle.js';
-import {drawPlanetExterior} from './planetExterior.js';
+import {drawOrbitalRings} from './orbitalRings.js';
+import {spaceArtKey, sunArtKey} from '/shared/space-art.js';
 import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, ZONE_TYPES, GOODS, cellKey } from '/shared/config.js';
 import { hexAt, hexCorners, hexCenter, hexKey } from '/shared/hex.js';
 import { getSprite } from './assets.js';
@@ -61,15 +62,6 @@ function drawCoverage(){
   ctx.restore();
 }
 
-function srand(seed) {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 function ihash(...nums) {
   let h = 2166136261;
   for (const v of nums) h = Math.imul(h ^ (v | 0), 16777619);
@@ -90,58 +82,19 @@ export function shipColor(s) {
 }
 
 // ---------------- Hintergrund ----------------
-const STAR_LAYERS = [
-  { p: 0.04, tile: 200, n: 7, size: [0.5, 1.1], alpha: [0.2, 0.55] },
-  { p: 0.1, tile: 260, n: 5, size: [0.8, 1.5], alpha: [0.35, 0.8] },
-  { p: 0.22, tile: 340, n: 3, size: [1.1, 2.2], alpha: [0.5, 1] },
-];
-const NEBULA_COLORS = ['#5e35b1', '#00838f', '#1565c0', '#ad1457', '#2e7d32'];
-
-function drawBackground(now) {
-  ctx.fillStyle = '#04050d';
-  ctx.fillRect(0, 0, W, H);
-  // Parallaxe gedämpft, damit auch bei großen Koordinaten und kleinem Zoom ruhig
-  const z = Math.max(cam.zoom, 0.02);
-  ctx.globalCompositeOperation = 'lighter';
-  {
-    const p = 0.025, T = 1100;
-    const ox = cam.x * z * p * 4, oy = cam.y * z * p * 4;
-    for (let tx = Math.floor((ox - W / 2) / T) - 1; tx <= Math.floor((ox + W / 2) / T) + 1; tx++) {
-      for (let ty = Math.floor((oy - H / 2) / T) - 1; ty <= Math.floor((oy + H / 2) / T) + 1; ty++) {
-        const r = srand(ihash(tx, ty, 99));
-        if (r() > 0.45) continue;
-        const x = tx * T + r() * T - ox + W / 2, y = ty * T + r() * T - oy + H / 2;
-        const rad = 350 + r() * 450;
-        const col = NEBULA_COLORS[Math.floor(r() * NEBULA_COLORS.length)];
-        const g = ctx.createRadialGradient(x, y, 0, x, y, rad);
-        const a = Math.round((0.05 + r() * 0.07) * 255).toString(16).padStart(2, '0');
-        g.addColorStop(0, col + a);
-        g.addColorStop(1, col + '00');
-        ctx.fillStyle = g;
-        ctx.fillRect(x - rad, y - rad, rad * 2, rad * 2);
-      }
-    }
+function drawBackground() {
+  ctx.fillStyle = '#04050d'; ctx.fillRect(0, 0, W, H);
+  const blend = .35 + .3 * Math.sin(cam.x / 240000 + cam.y / 480000);
+  for (const [key, alpha] of [['space_background_teal', 1], ['space_background_violet', blend]]) {
+    const image = getSprite(key);
+    if (!image) continue;
+    const scale = Math.max(W / image.width, H / image.height) * 1.08;
+    const w = image.width * scale, h = image.height * scale;
+    const x = (W-w)/2 + (w-W)*.4*Math.sin(cam.x/240000);
+    const y = (H-h)/2 + (h-H)*.4*Math.sin(cam.y/240000);
+    ctx.globalAlpha = alpha; ctx.drawImage(image, x, y, w, h);
   }
-  ctx.globalCompositeOperation = 'source-over';
-  for (let li = 0; li < STAR_LAYERS.length; li++) {
-    const L = STAR_LAYERS[li];
-    const ox = cam.x * z * L.p * 4, oy = cam.y * z * L.p * 4;
-    for (let tx = Math.floor((ox - W / 2) / L.tile); tx <= Math.floor((ox + W / 2) / L.tile); tx++) {
-      for (let ty = Math.floor((oy - H / 2) / L.tile); ty <= Math.floor((oy + H / 2) / L.tile); ty++) {
-        const r = srand(ihash(tx, ty, li));
-        for (let i = 0; i < L.n; i++) {
-          const x = tx * L.tile + r() * L.tile - ox + W / 2;
-          const y = ty * L.tile + r() * L.tile - oy + H / 2;
-          const s = L.size[0] + r() * (L.size[1] - L.size[0]);
-          const tw = 0.75 + 0.25 * Math.sin(now / 600 + r() * 50);
-          const a = (L.alpha[0] + r() * (L.alpha[1] - L.alpha[0])) * tw;
-          const hue = r();
-          ctx.fillStyle = hue < 0.15 ? `rgba(255,210,170,${a})` : hue < 0.3 ? `rgba(170,200,255,${a})` : `rgba(255,255,255,${a})`;
-          ctx.fillRect(x, y, s, s);
-        }
-      }
-    }
-  }
+  ctx.globalAlpha = 1;
 }
 
 // ---------------- Hilfen ----------------
@@ -170,173 +123,65 @@ function ring(x, y, r, color, now, dashed = true) {
 function drawZones(now) {
   for (const z of state.zones.values()) {
     if (!inView(z.x, z.y, Math.max(z.rx, z.ry))) continue;
-    const def = ZONE_TYPES[z.type];
-    ctx.save();
-    ctx.translate(z.x, z.y);
-    ctx.rotate(z.rot || 0);
-    ctx.scale(1, z.ry / z.rx);
-    const g = ctx.createRadialGradient(0, 0, z.rx * 0.2, 0, 0, z.rx);
-    g.addColorStop(0, def.color + '30');
-    g.addColorStop(0.85, def.color + '1c');
-    g.addColorStop(1, def.color + '00');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(0, 0, z.rx, 0, TAU);
-    ctx.fill();
-    ctx.strokeStyle = def.color + '66';
-    ctx.lineWidth = px(1.5) * (z.rx / z.ry > 1 ? 1 : 1);
-    ctx.setLineDash([px(10), px(10)]);
-    ctx.lineDashOffset = -now / 80 / cam.zoom;
-    ctx.beginPath();
-    ctx.arc(0, 0, z.rx, 0, TAU);
-    ctx.stroke();
-    ctx.restore();
+    const image=getSprite('space_zone_'+z.type), def=ZONE_TYPES[z.type];
+    if(!image || !def)continue;
+    ctx.save();ctx.translate(z.x,z.y);ctx.rotate(z.rot||0);ctx.scale(1,z.ry/z.rx);
+    ctx.globalAlpha=.3;const size=z.rx*2.3;ctx.drawImage(image,-size/2,-size/2,size,size);
+    ctx.globalAlpha=1;ctx.strokeStyle=def.color+'66';ctx.lineWidth=px(1.5);
+    ctx.setLineDash([px(10),px(10)]);ctx.lineDashOffset=-now/80/cam.zoom;
+    ctx.beginPath();ctx.arc(0,0,z.rx,0,TAU);ctx.stroke();ctx.restore();
   }
 }
 
-function drawBlackHoles(now) {
-  for (const s of state.sectors.values()) {
-    const R = 900;
-    if (!inView(s.bh.x, s.bh.y, R * 6)) continue;
-    const r = Math.max(R, px(6));
-    const t = now / 1000;
-    ctx.save();
-    ctx.translate(s.bh.x, s.bh.y);
-    // Akkretionsscheibe
-    ctx.save();
-    ctx.scale(1, 0.38);
-    ctx.rotate(t * 0.05);
-    const g = ctx.createRadialGradient(0, 0, r * 1.1, 0, 0, r * 5.5);
-    g.addColorStop(0, 'rgba(255,214,140,0.95)');
-    g.addColorStop(0.25, 'rgba(255,120,60,0.55)');
-    g.addColorStop(0.6, 'rgba(160,60,200,0.18)');
-    g.addColorStop(1, 'rgba(60,20,120,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(0, 0, r * 5.5, 0, TAU);
-    ctx.fill();
-    ctx.restore();
-    // Linsenring und Ereignishorizont
-    const halo = ctx.createRadialGradient(0, 0, r * 0.9, 0, 0, r * 1.8);
-    halo.addColorStop(0, 'rgba(255,230,180,0.9)');
-    halo.addColorStop(0.3, 'rgba(255,170,90,0.35)');
-    halo.addColorStop(1, 'rgba(255,120,60,0)');
-    ctx.fillStyle = halo;
-    ctx.beginPath(); ctx.arc(0, 0, r * 1.8, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.fill();
-    ctx.restore();
+function drawBlackHoles() {
+  for(const sector of state.sectors.values()) {
+    if(!inView(sector.bh.x,sector.bh.y,5400))continue;
+    const variant=strHash(String(sector.id||sector.name||sector.bh.x))%2;
+    const image=getSprite('space_blackhole_'+variant);
+    if(!image)continue;
+    const size=Math.max(900,px(6))*7;
+    ctx.drawImage(image,sector.bh.x-size/2,sector.bh.y-size/2,size,size);
   }
 }
 
 function drawStars() {
-  for (const sy of state.systems.values()) {
-    const R = 170 * (sy.star?.size || 1);
-    if (!inView(sy.x, sy.y, R * 8)) continue;
-    const r = Math.max(R, px(3));
-    const col = sy.star?.color || '#fff3c4';
-    const g = ctx.createRadialGradient(sy.x, sy.y, r * 0.2, sy.x, sy.y, r * 6);
-    g.addColorStop(0, col + 'cc');
-    g.addColorStop(0.15, col + '55');
-    g.addColorStop(1, col + '00');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(sy.x, sy.y, r * 6, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(sy.x, sy.y, r, 0, TAU); ctx.fill();
-    ctx.fillStyle = col;
-    ctx.globalAlpha = 0.6;
-    ctx.beginPath(); ctx.arc(sy.x, sy.y, r * 1.15, 0, TAU); ctx.fill();
-    ctx.globalAlpha = 1;
+  for(const sy of state.systems.values()) {
+    const radius=170*(sy.star?.size||1);
+    if(!inView(sy.x,sy.y,radius*3))continue;
+    const size=Math.max(radius,px(3))*3;
+    const image=getSprite(sunArtKey(sy.star?.color));
+    if(image)ctx.drawImage(image,sy.x-size/2,sy.y-size/2,size,size);
   }
-}
-
-const beltCache = new Map();
-function beltRocks(e) {
-  let rocks = beltCache.get(e.id);
-  if (rocks) return rocks;
-  const r = srand(strHash(e.id));
-  rocks = [];
-  const n = Math.round(e.radius / 6);
-  for (let i = 0; i < n; i++) {
-    rocks.push({ a: r() * TAU, d: e.radius * (0.2 + 0.8 * Math.sqrt(r())), size: 9 + r() * r() * 34, rot: r() * TAU, spin: (r() - 0.5) * 0.8 });
-  }
-  beltCache.set(e.id, rocks);
-  return rocks;
 }
 
 function drawBelt(e, t) {
-  const def = BELT_TYPES[e.type];
-  const g = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.radius * 1.15);
-  g.addColorStop(0, def.dust + '30');
-  g.addColorStop(1, def.dust + '00');
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(e.x, e.y, e.radius * 1.15, 0, TAU);
-  ctx.fill();
-  if (cam.zoom < 0.08) return; // bei kleinem Zoom nur der Staub
-  const spr = getSprite(def.sprite, null, 96);
-  for (const k of beltRocks(e)) {
-    const a = k.a + t * (4 / k.d);
-    const x = e.x + Math.cos(a) * k.d, y = e.y + Math.sin(a) * k.d;
-    const s = Math.max(k.size, px(3));
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(k.rot + t * k.spin);
-    if (spr) ctx.drawImage(spr, -s / 2, -s / 2, s, s);
-    else { ctx.fillStyle = def.dust; ctx.fillRect(-s / 3, -s / 3, s / 1.5, s / 1.5); }
-    ctx.restore();
-  }
+  const image=getSprite(spaceArtKey(e));
+  if(!image)return;
+  const size=Math.max(e.radius,px(5))*2.3;
+  ctx.save();ctx.translate(e.x,e.y);ctx.rotate(Math.sin(t*.02)*.025);
+  ctx.drawImage(image,-size/2,-size/2,size,size);ctx.restore();
 }
 
 function drawPlanet(e) {
-  const def = PLANET_TYPES[e.type];
-  const r = Math.max(e.radius, px(7));
-  const s = r * 2.56;
-  const spr = getSprite(def.sprite, null, 512);
-  drawPlanetExterior(ctx, e, r, () => {
-    if (spr) ctx.drawImage(spr, e.x - s / 2, e.y - s / 2, s, s);
-    else { ctx.fillStyle = '#556'; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, TAU); ctx.fill(); }
-  });
+  const radius=Math.max(e.radius,px(7)), size=radius*2.286;
+  const image=getSprite(spaceArtKey(e));
+  drawOrbitalRings(ctx,e,radius,false);
+  if(image)ctx.drawImage(image,e.x-size/2,e.y-size/2,size,size);
+  drawOrbitalRings(ctx,e,radius,true);
 }
 
-function drawStation(e, t) {
-  const def = STATION_TYPES[e.type];
-  const r = Math.max(e.radius, px(7));
-  const s = r * 2.56;
-  const spr = getSprite(def.sprite, stationAccent(e), 384);
-  const h = strHash(e.id);
-  ctx.save();
-  ctx.translate(e.x, e.y);
-  ctx.rotate((h % 628) / 100 + t * 0.06 * (h % 2 ? 1 : -1) * (e.type === 'hub' ? 0.3 : 1));
-  if (spr) ctx.drawImage(spr, -s / 2, -s / 2, s, s);
-  else { ctx.fillStyle = def.accent; ctx.fillRect(-r / 2, -r / 2, r, r); }
-  ctx.restore();
+function drawStation(e) {
+  const radius=Math.max(e.radius,px(7)),size=radius*2.56;
+  const image=getSprite(spaceArtKey(e));
+  if(image)ctx.drawImage(image,e.x-size/2,e.y-size/2,size,size);
 }
 
 function drawWormhole(e, t) {
-  const r = Math.max(e.radius, px(8));
-  ctx.save();
-  ctx.translate(e.x, e.y);
-  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2.4);
-  g.addColorStop(0, 'rgba(10,0,30,1)');
-  g.addColorStop(0.35, 'rgba(120,60,220,0.85)');
-  g.addColorStop(0.6, 'rgba(80,200,255,0.35)');
-  g.addColorStop(1, 'rgba(80,120,255,0)');
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(0, 0, r * 2.4, 0, TAU); ctx.fill();
-  ctx.lineWidth = px(1.6);
-  for (let i = 0; i < 4; i++) {
-    ctx.rotate(t * 0.8 + i * (TAU / 4));
-    ctx.strokeStyle = `rgba(190,160,255,${0.7 - i * 0.12})`;
-    ctx.beginPath();
-    for (let k = 0; k <= 30; k++) {
-      const a = (k / 30) * TAU * 0.6, d = r * (0.25 + (k / 30) * 1.6);
-      const x = Math.cos(a) * d, y = Math.sin(a) * d;
-      k ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-    }
-    ctx.stroke();
-  }
-  ctx.restore();
+  const image=getSprite(spaceArtKey(e));
+  if(!image)return;
+  const size=Math.max(e.radius,px(8))*4;
+  ctx.save();ctx.translate(e.x,e.y);ctx.rotate(t*.06);
+  ctx.drawImage(image,-size/2,-size/2,size,size);ctx.restore();
 }
 
 // ---------------- Schiffe ----------------
@@ -637,13 +482,8 @@ function drawSectorView(now) {
   // Systeme
   for (const sy of state.systems.values()) {
     if (!inView(sy.x, sy.y, WORLD.SYSTEM_RADIUS)) continue;
-    const col = sy.star?.color || '#fff3c4';
-    const g = ctx.createRadialGradient(sy.x, sy.y, 0, sy.x, sy.y, px(14));
-    g.addColorStop(0, col);
-    g.addColorStop(0.3, col + '88');
-    g.addColorStop(1, col + '00');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(sy.x, sy.y, px(14), 0, TAU); ctx.fill();
+    const sun=getSprite(sunArtKey(sy.star?.color)),size=px(30);
+    if(sun)ctx.drawImage(sun,sy.x-size/2,sy.y-size/2,size,size);
     ctx.strokeStyle = sy.faction ? FACTIONS[sy.faction].color + 'cc' : 'rgba(255,255,255,0.12)';
     ctx.lineWidth = px(sy.faction ? 2.5 : 1);
     ctx.beginPath(); ctx.arc(sy.x, sy.y, WORLD.SYSTEM_RADIUS, 0, TAU); ctx.stroke();

@@ -10,31 +10,7 @@ const browser=await chromium.launch({channel:'msedge',headless:true});
 const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];
 page.on('pageerror',e=>errors.push(String(e)));
 try{
- await page.goto(base+'/api/status');
- await page.setContent('<body style="margin:0;background:#080e19"><canvas id="gallery" width="1440" height="1080"></canvas></body>');
- await page.evaluate(async()=>{
-  const {loadAssets,getSprite}=await import('/js/assets.js');await loadAssets();
-  const {drawPlanetExterior}=await import('/js/planetExterior.js');
-  const {PLANET_TYPES}=await import('/shared/config.js');
-  const c=document.getElementById('gallery'),ctx=c.getContext('2d');
-  ctx.fillStyle='#0b1220';ctx.fillRect(0,0,c.width,c.height);
-  ctx.font='26px sans-serif';ctx.fillStyle='#ecf2f9';ctx.fillText('PRD 10 · Äußere Planetenentwicklung',32,42);
-  const cards=[
-   ['Ruinenwelt',0,0,false,false,'ruins'],['Wiederaufbau · 4 Gebäude',4,1,false,false,'ruins'],['Entwickelt · 12 Gebäude',12,2,false,false,'ruins'],['Metropole · 24 Gebäude',24,3,false,false,'ruins'],
-   ['Kleiner Ring · fertig',4,1,true,false,'ruins'],['Großer Ring · fertig',24,3,true,true,'ruins'],['Agrar · Grundzustand',0,0,false,false,'agrar'],['Agrar · 4 Gebäude',4,0,false,false,'agrar'],
-   ['Agrar · 12 Gebäude',12,0,false,false,'agrar'],['Ozean · 12 Gebäude',12,0,false,false,'ocean'],['Wüste · 12 Gebäude',12,0,false,false,'desert'],['Industrie · 12 Gebäude',12,0,false,false,'industrial']];
-  const sprites=new Map();
-  for(const type of new Set(cards.map(c=>c[5]))){let spr;for(let i=0;i<30;i++){spr=getSprite(PLANET_TYPES[type].sprite,null,512);if(spr)break;await new Promise(r=>setTimeout(r,30));}sprites.set(type,spr);}
-  cards.forEach(([label,n,level,small,large,type],i)=>{
-   const x=180+(i%4)*360,y=220+Math.floor(i/4)*330,r=65;
-   const e={id:'qa-'+type,kind:'planet',type,x,y,market:{goods:{}}};
-   if(type==='ruins')e.market.homeworld={controlLevel:level,facilities:level?{control:{status:'ready'}}:{},structures:Array.from({length:Math.max(0,n-(level?1:0))},()=>({kind:'housing',status:'ready'})),orbital:{small,large}};
-   else e.market.economy={infrastructure:Array.from({length:n},()=>({kind:'solar'}))};
-   drawPlanetExterior(ctx,e,r,()=>{const spr=sprites.get(type);ctx.drawImage(spr,x-r*1.28,y-r*1.28,r*2.56,r*2.56);});
-   ctx.fillStyle='#d8e4f1';ctx.font='17px sans-serif';ctx.textAlign='center';ctx.fillText(label,x,y+126);ctx.textAlign='left';
-  });
- });
- await page.locator('#gallery').screenshot({path:new URL('exterior-stages.png',out).pathname.replace(/^\/([A-Z]:)/,'$1')});
+ // Exterior QA is superseded by verify-space-art.mjs (six painted ruins stages).
  await page.goto(base);
  await page.locator('#loginName').fill('PRD10-'+Date.now().toString(36));await page.locator('#loginForm button').click();
  await page.waitForSelector('#hud:not([hidden])',{state:'attached'});await page.locator('#btnHelpClose').click();
@@ -94,6 +70,6 @@ try{
  await page.locator('#routeCard').screenshot({path:new URL('route-option.png',out).pathname.replace(/^\/([A-Z]:)/,'$1')});
  await page.locator('#routeCard [data-a="save"]').click();
  assert((await page.evaluate(()=>window.qaCommands)).some(c=>c.cmd==='routeSave'&&c.onlyWithTargetSpace===true));
- await fs.writeFile(new URL('results.json',out),JSON.stringify({exterior:'12 Zustände gerendert und visuell geprüft',storage:'Zahlenfeld, Fokus-Schutz, Sammelvorschau, Entwurfserhalt bei Live-Update, Überlaufprüfung bei 1440 und 800 Pixeln',demolition:'Lagerkapazitätsverlust im Bestätigungsdialog geprüft',routes:'Checkbox bis zum routeSave-Payload geprüft',errors},null,2));
+ await fs.writeFile(new URL('results.json',out),JSON.stringify({storage:'Zahlenfeld, Fokus-Schutz, Sammelvorschau, Entwurfserhalt bei Live-Update, Überlaufprüfung bei 1440 und 800 Pixeln',demolition:'Lagerkapazitätsverlust im Bestätigungsdialog geprüft',routes:'Checkbox bis zum routeSave-Payload geprüft',errors},null,2));
  assert.deepEqual(errors,[]);
 }finally{await browser.close();}
