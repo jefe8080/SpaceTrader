@@ -1,0 +1,345 @@
+{
+  "results": [
+    {
+      "zoom": 1,
+      "mode": "system",
+      "drawn": [
+        "orbital_broken_back.png",
+        "ruins_3.png",
+        "orbital_broken_front.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_partial_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_partial_front.png",
+        "orbital_large_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_large_front.png",
+        "orbital_double_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_double_front.png"
+      ],
+      "picked": null,
+      "keys": [
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png"
+      ],
+      "orbitalStages": [
+        "broken",
+        "small",
+        "partial",
+        "large",
+        "double"
+      ]
+    },
+    {
+      "zoom": 0.5,
+      "mode": "system",
+      "drawn": [
+        "orbital_broken_back.png",
+        "ruins_3.png",
+        "orbital_broken_front.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_partial_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_partial_front.png",
+        "orbital_large_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_large_front.png",
+        "orbital_double_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_double_front.png"
+      ],
+      "picked": null,
+      "keys": [
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png"
+      ],
+      "orbitalStages": [
+        "broken",
+        "small",
+        "partial",
+        "large",
+        "double"
+      ]
+    },
+    {
+      "zoom": 0.32,
+      "mode": "system",
+      "drawn": [
+        "orbital_broken_back.png",
+        "ruins_3.png",
+        "orbital_broken_front.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_partial_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_partial_front.png",
+        "orbital_large_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_large_front.png",
+        "orbital_double_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_double_front.png"
+      ],
+      "picked": null,
+      "keys": [
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png"
+      ],
+      "orbitalStages": [
+        "broken",
+        "small",
+        "partial",
+        "large",
+        "double"
+      ]
+    },
+    {
+      "zoom": 0.1,
+      "mode": "system",
+      "drawn": [
+        "orbital_broken_back.png",
+        "ruins_3.png",
+        "orbital_broken_front.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_partial_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_partial_front.png",
+        "orbital_large_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_large_front.png",
+        "orbital_double_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_double_front.png"
+      ],
+      "picked": null,
+      "keys": [
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png"
+      ],
+      "orbitalStages": [
+        "broken",
+        "small",
+        "partial",
+        "large",
+        "double"
+      ]
+    },
+    {
+      "zoom": 0.035,
+      "mode": "system",
+      "drawn": [
+        "orbital_broken_back.png",
+        "ruins_3.png",
+        "orbital_broken_front.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_partial_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_partial_front.png",
+        "orbital_large_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_large_front.png",
+        "orbital_double_back.png",
+        "orbital_small_back.png",
+        "ruins_3.png",
+        "orbital_small_front.png",
+        "orbital_double_front.png"
+      ],
+      "picked": null,
+      "keys": [
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3",
+        "space_ruins_3"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_3.png"
+      ],
+      "orbitalStages": [
+        "broken",
+        "small",
+        "partial",
+        "large",
+        "double"
+      ]
+    }
+  ],
+  "picking": {
+    "outer": {
+      "kind": "entity",
+      "id": "ring-pick"
+    },
+    "gap": null,
+    "planet": {
+      "kind": "entity",
+      "id": "ring-pick"
+    },
+    "partialCrane": {
+      "kind": "entity",
+      "id": "ring-pick"
+    },
+    "absentHalf": null
+  },
+  "layerCheck": [
+    {
+      "stage": "broken",
+      "sides": [
+        {
+          "side": "back",
+          "wrong": 0,
+          "center": 0
+        },
+        {
+          "side": "front",
+          "wrong": 0,
+          "center": 0
+        }
+      ]
+    },
+    {
+      "stage": "small",
+      "sides": [
+        {
+          "side": "back",
+          "wrong": 0,
+          "center": 0
+        },
+        {
+          "side": "front",
+          "wrong": 0,
+          "center": 0
+        }
+      ]
+    },
+    {
+      "stage": "partial",
+      "sides": [
+        {
+          "side": "back",
+          "wrong": 0,
+          "center": 0
+        },
+        {
+          "side": "front",
+          "wrong": 0,
+          "center": 0
+        }
+      ]
+    },
+    {
+      "stage": "large",
+      "sides": [
+        {
+          "side": "back",
+          "wrong": 0,
+          "center": 0
+        },
+        {
+          "side": "front",
+          "wrong": 0,
+          "center": 0
+        }
+      ]
+    },
+    {
+      "stage": "double",
+      "sides": [
+        {
+          "side": "back",
+          "wrong": 0,
+          "center": 0
+        },
+        {
+          "side": "front",
+          "wrong": 0,
+          "center": 0
+        }
+      ]
+    }
+  ],
+  "alphaChecked": 111,
+  "errors": [],
+  "failed": []
+}

@@ -6,6 +6,7 @@
 import {PLANET_TYPES,STATION_TYPES,BELT_TYPES,cellKey} from '/shared/config.js';
 import {SPACE_ART,spaceArtKey,SUN_COLORS} from '/shared/space-art.js';
 import {ruinsDevelopment} from '/shared/ruins-development.js';
+import {orbitalArtStage} from '/shared/orbital-art.js';
 import {state} from '/js/state.js';
 import {loadAssets,getSprite} from '/js/assets.js';
 import {entitySprite} from '/js/util.js';
@@ -30,6 +31,26 @@ window.showObjects=(kind,page=0)=>{
  document.querySelector('#title').textContent=kind+' · Seite '+(page+1);
  Object.entries(defs).slice(page*12,page*12+12).forEach(([type,d],i)=>{const e=place({kind,type,name:d.name,market:{goods:{}}},i);state.entities.set(e.id,e);});return report();
 };
+window.showOrbitalStages=(zoom=1,surface=16)=>{
+ reset(zoom);document.querySelector('#title').textContent='Gemalte Orbitalringe · fünf Ausbaustufen · Zoom '+zoom;
+ const stages=[{}, {small:true}, {small:true,largeStage:1}, {small:true,large:true,largeStage:2}, {small:true,large:true,doubleYard:true}];
+ const names=['Gebrochener Ring','Kleiner Werftring','Großring – Abschnitt 1','Großer Werftring','Doppelwerft'];
+ stages.forEach((orbital,i)=>{
+  const x=280+i%3*520,y=280+Math.floor(i/3)*460;
+  const e={id:'orbital-'+i,kind:'planet',type:'ruins',name:names[i],x:(x-innerWidth/2)/zoom,y:(y-innerHeight/2)/zoom,radius:70,market:home(surface,orbital)};
+  state.entities.set(e.id,e);
+ });
+ const result=report();return {...result,orbitalStages:[...state.entities.values()].map(orbitalArtStage)};
+};
+window.checkOrbitalPicking=()=>{
+ reset();const e={id:'ring-pick',kind:'planet',type:'ruins',name:'Ringauswahl',radius:100,x:0,y:0,market:home(16,{small:true,large:true})};state.entities.set(e.id,e);report();
+ const result={outer:pickAt(innerWidth/2+280,innerHeight/2),gap:pickAt(innerWidth/2+230,innerHeight/2),planet:pickAt(innerWidth/2,innerHeight/2)};
+ e.market.homeworld.orbital={small:true,largeStage:1};report();
+ return {...result,partialCrane:pickAt(innerWidth/2+240,innerHeight/2+80),absentHalf:pickAt(innerWidth/2,innerHeight/2+280*.58)};
+};
+window.checkOrbitalEdge=()=>{
+ reset();state.entities.set('edge',{id:'edge',kind:'planet',type:'ruins',name:'Randprüfung',radius:80,x:-210-innerWidth/2,y:0,market:home(16,{small:true,large:true})});return report();
+};
 window.showSites=()=>{
  reset();document.querySelector('#title').textContent='Archiv · Studie · Relikt · Wurmloch';
  [{kind:'station',type:'wreck',archiveKey:'H09',name:'Archivstelle'},{kind:'station',type:'wreck',archiveKey:'sensor',name:'Studienfundstelle'},{kind:'station',type:'wreck',salvageOwner:'qa',name:'Reliktwrack'},{kind:'wormhole',type:'wormhole',name:'Wurmloch'}].forEach((v,i)=>{const e=place({...v,market:{goods:{}}},i);state.entities.set(e.id,e);});return report();
@@ -48,7 +69,7 @@ window.verifyAlpha=()=>{
  const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d',{willReadFrequently:true});
  const results=[];
  for(const key of Object.keys(SPACE_ART).filter(k=>!k.includes('background'))) {
-  x.clearRect(0,0,512,512);x.drawImage(getSprite(key),0,0);const pixels=x.getImageData(0,0,512,512).data;
+  x.clearRect(0,0,512,512);x.drawImage(getSprite(key),0,0,512,512);const pixels=x.getImageData(0,0,512,512).data;
   const corners=[0,511,511*512,512*512-1].map(p=>pixels[p*4+3]);
   const solid=Array.from({length:512*512},(_,i)=>pixels[i*4+3]).filter(a=>a>200).length;
   results.push({key,corners,solid});

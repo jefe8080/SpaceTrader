@@ -4,11 +4,13 @@ import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import express from 'express';
 import {fileURLToPath} from 'node:url';
+import {SPACE_ART} from '../shared/space-art.js';
+const imageCount=Object.keys(SPACE_ART).length;
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const app=express();app.use('/shared',express.static('shared'));app.use('/qa',express.static('tests/browser'));app.use(express.static('client'));
 const server=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s));});
-const base='http://127.0.0.1:'+server.address().port,out=new URL('../docs/qa/space-art/',import.meta.url);
+const base='http://127.0.0.1:'+server.address().port,out=new URL(process.env.SPACE_ART_QA_DIR||'../docs/qa/space-art/',import.meta.url);
 await fs.mkdir(out,{recursive:true});
 let browser;const errors=[],failed=[],results=[];
 try {
@@ -17,7 +19,7 @@ try {
  page.on('pageerror',e=>errors.push(String(e)));page.on('response',r=>{if(r.status()>=400)failed.push(r.url());});
  await page.goto(base+'/qa/space-art.html');await page.waitForFunction(()=>window.qaReady,null,{timeout:30000});
  await page.waitForFunction(()=>[...document.querySelectorAll('#images img')].every(i=>i.complete&&i.naturalWidth));
- assert.equal(await page.locator('#images img').count(),103);
+ assert.equal(await page.locator('#images img').count(),imageCount);
  const alpha=await page.evaluate(()=>window.verifyAlpha());
  for(const image of alpha){assert.ok(image.corners.every(a=>a===0),image.key);assert.ok(image.solid>200,image.key);}
  for(const zoom of [1,.32,.1,.035,.034,.007,.0034]){
@@ -45,7 +47,7 @@ try {
  const small=await page.evaluate(()=>window.showRuins(.32));assert.ok(small.drawn.some(f=>f.startsWith('ruins_')));
  await page.screenshot({path:fileURLToPath(new URL('small-viewport.png',out))});
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
- await fs.writeFile(new URL('results.json',out),JSON.stringify({images:103,alphaChecked:alpha.length,results,errors,failed},null,2)+'\n');
- console.log('Browser QA passed: 103 images, 101 alpha sprites, six stages, all object types, zoom/picking, orbitals, cosmos and zones.');
+ await fs.writeFile(new URL('results.json',out),JSON.stringify({images:imageCount,alphaChecked:alpha.length,results,errors,failed},null,2)+'\n');
+ console.log(`Browser QA passed: ${imageCount} images, ${alpha.length} alpha sprites, six stages, all object types, zoom/picking, orbitals, cosmos and zones.`);
 } catch(error) {console.error({errors,failed});throw error;}
 finally {if(browser)await browser.close();await new Promise(resolve=>server.close(resolve));}
