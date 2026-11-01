@@ -62,6 +62,15 @@ function drawCoverage(){
   ctx.restore();
 }
 
+function srand(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 function ihash(...nums) {
   let h = 2166136261;
   for (const v of nums) h = Math.imul(h ^ (v | 0), 16777619);
@@ -82,19 +91,58 @@ export function shipColor(s) {
 }
 
 // ---------------- Hintergrund ----------------
-function drawBackground() {
-  ctx.fillStyle = '#04050d'; ctx.fillRect(0, 0, W, H);
-  const blend = .35 + .3 * Math.sin(cam.x / 240000 + cam.y / 480000);
-  for (const [key, alpha] of [['space_background_teal', 1], ['space_background_violet', blend]]) {
-    const image = getSprite(key);
-    if (!image) continue;
-    const scale = Math.max(W / image.width, H / image.height) * 1.08;
-    const w = image.width * scale, h = image.height * scale;
-    const x = (W-w)/2 + (w-W)*.4*Math.sin(cam.x/240000);
-    const y = (H-h)/2 + (h-H)*.4*Math.sin(cam.y/240000);
-    ctx.globalAlpha = alpha; ctx.drawImage(image, x, y, w, h);
+const STAR_LAYERS = [
+  { p: 0.04, tile: 200, n: 7, size: [0.5, 1.1], alpha: [0.2, 0.55] },
+  { p: 0.1, tile: 260, n: 5, size: [0.8, 1.5], alpha: [0.35, 0.8] },
+  { p: 0.22, tile: 340, n: 3, size: [1.1, 2.2], alpha: [0.5, 1] },
+];
+const NEBULA_COLORS = ['#5e35b1', '#00838f', '#1565c0', '#ad1457', '#2e7d32'];
+
+function drawBackground(now) {
+  ctx.fillStyle = '#04050d';
+  ctx.fillRect(0, 0, W, H);
+  // Parallaxe gedämpft, damit auch bei großen Koordinaten und kleinem Zoom ruhig
+  const z = Math.max(cam.zoom, 0.02);
+  ctx.globalCompositeOperation = 'lighter';
+  {
+    const p = 0.025, T = 1100;
+    const ox = cam.x * z * p * 4, oy = cam.y * z * p * 4;
+    for (let tx = Math.floor((ox - W / 2) / T) - 1; tx <= Math.floor((ox + W / 2) / T) + 1; tx++) {
+      for (let ty = Math.floor((oy - H / 2) / T) - 1; ty <= Math.floor((oy + H / 2) / T) + 1; ty++) {
+        const r = srand(ihash(tx, ty, 99));
+        if (r() > 0.45) continue;
+        const x = tx * T + r() * T - ox + W / 2, y = ty * T + r() * T - oy + H / 2;
+        const rad = 350 + r() * 450;
+        const col = NEBULA_COLORS[Math.floor(r() * NEBULA_COLORS.length)];
+        const g = ctx.createRadialGradient(x, y, 0, x, y, rad);
+        const a = Math.round((0.05 + r() * 0.07) * 255).toString(16).padStart(2, '0');
+        g.addColorStop(0, col + a);
+        g.addColorStop(1, col + '00');
+        ctx.fillStyle = g;
+        ctx.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+      }
+    }
   }
-  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  for (let li = 0; li < STAR_LAYERS.length; li++) {
+    const L = STAR_LAYERS[li];
+    const ox = cam.x * z * L.p * 4, oy = cam.y * z * L.p * 4;
+    for (let tx = Math.floor((ox - W / 2) / L.tile); tx <= Math.floor((ox + W / 2) / L.tile); tx++) {
+      for (let ty = Math.floor((oy - H / 2) / L.tile); ty <= Math.floor((oy + H / 2) / L.tile); ty++) {
+        const r = srand(ihash(tx, ty, li));
+        for (let i = 0; i < L.n; i++) {
+          const x = tx * L.tile + r() * L.tile - ox + W / 2;
+          const y = ty * L.tile + r() * L.tile - oy + H / 2;
+          const s = L.size[0] + r() * (L.size[1] - L.size[0]);
+          const tw = 0.75 + 0.25 * Math.sin(now / 600 + r() * 50);
+          const a = (L.alpha[0] + r() * (L.alpha[1] - L.alpha[0])) * tw;
+          const hue = r();
+          ctx.fillStyle = hue < 0.15 ? `rgba(255,210,170,${a})` : hue < 0.3 ? `rgba(170,200,255,${a})` : `rgba(255,255,255,${a})`;
+          ctx.fillRect(x, y, s, s);
+        }
+      }
+    }
+  }
 }
 
 // ---------------- Hilfen ----------------
