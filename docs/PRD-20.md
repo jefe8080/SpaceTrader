@@ -21,8 +21,17 @@ Referenzen: `client/assets/art/ships/ship_spatz.png` und `client/assets/art/citi
 - [x] Entwurfstafeln und Hintergründe mit eingebautem ImageGen erzeugen; Prompts und Zuordnung dokumentieren (15 PNGs unter docs/art/prd20).
 - [x] Bilder auf Vollständigkeit, erkennbare Silhouetten, Stil und Beschnitt prüfen; lokale Abnahmegalerie index.html erstellen. Alle 13 Planeten, 56 Stationen, drei Fundstellen und zehn Ressourcenfeldtypen sind vertreten; zusätzlich sechs Ruinenwelt-Stufen, sechs Sonnenfarben, zwei Schwarze-Loch-Varianten, Wurmloch, fünf Zonen und zwei Hintergründe. Planetentafeln nach Nutzerkorrektur ohne blauen Leuchtring neu erzeugt.
 - [x] Alle Vorschauen dem Nutzer vorlegen (inline und lokale Galerie).
-- [ ] Nutzerabnahme (ausstehend).
-- [ ] Nach gesonderter Freigabe: transparente Einzelgrafiken in geeigneter Auflösung ausarbeiten, integrieren und im Spiel prüfen.
+- [x] Nutzerabnahme am 01.11.2026: alle Entwürfe freigegeben, Planeten ausschließlich zweite Fassung ohne blauen Rand. Umsetzung ausdrücklich beauftragt.
+- [ ] Umsetzung A: freigegebene Motive mit ImageGen freistellen und als Einzelgrafiken verpacken; Zuordnung und Alpha prüfen.
+- [ ] Umsetzung B: zentralen Grafikresolver und Laden für Karte, Vorschaubilder und Objektführer integrieren; Hintergründe, Sonnen, schwarze Löcher, Wurmloch und Zonen ersetzen.
+- [ ] Umsetzung C: alte Vier-Stufen-Entwicklung und generierte Gebäudemarker vollständig entfernen; neue sechs Ruinenwelt-Bilder implementieren und gezielt testen.
+- [ ] Umsetzung D: gesamte Testsuite und Browserprüfung einschließlich Bildladen, Entwicklungsstufen und Zoom; Fortschritt und Ergebnisse dokumentieren.
+
+## Umsetzung nach Freigabe
+
+Sechs Stufen (Index 0–5): Ankunft, Siedlung, Gemeinde, Stadt, Großstadt, wiederaufgebaute Welt. Schwellen: 0/4/8/16/24/36 Ausbaupunkte. Jeder fertige Eintrag in homeworld.structures oder homeworld.facilities zählt eins; abgeschlossene Gebäudeerweiterungen und zusätzliche Wohn-/Lagerstufen zählen zusätzlich. Nur fertige Bausubstanz zählt, keine laufenden Bauaufträge, Versorgung oder Leitstellenpflicht. Die Stufe wird aus öffentlichen vorhandenen Baudaten abgeleitet; kein gespeicherter Legacy-Zustand und keine Datenmigration. Abriss kann die Stufe entsprechend senken. Die bestehenden Module planet-development.js und planetExterior.js mit Vier-Stufen-Logik und Gebäuderechtecken werden entfernt. Tatsächlich gebaute Orbitalringe bleiben getrennte Bauwerke, ohne blauen Planetenleuchtsaum.
+
+Freigestellte Tafeln dienen nur als Produktionsquellen. Ein reproduzierbarer Verpackungsschritt erzeugt transparente Einzel-PNGs; alle Motive erhalten eindeutige IDs (keine gemeinsame Fabrik- oder Archiv-Ersatzgrafik). Vorhandene Spieler-/Fraktionskennzeichnung bleibt über Kartenmarkierungen erhalten. PNG-Grafiken werden nicht verzerrt oder willkürlich gedreht. Beide Hintergründe und beide Schwarze-Loch-Varianten werden deterministisch verwendet.
 
 ## Abnahmekriterien
 Jeder vorhandene stationäre Objekt-/Ressourcentyp ist auf einer beschrifteten oder eindeutig zugeordneten Vorschau vertreten. Die Entwurfstafeln sind Vorschauen, keine fertigen Sprite-Atlanten. Hintergründe halten ausreichend dunkle Flächen für die Lesbarkeit frei. Kein bestehendes Spielasset und kein Renderer wird vor Abnahme geändert. Prompts und Dateien bleiben unter docs/art/prd20 nachvollziehbar. Für diesen reinen Bildschritt werden Dateien und Zuordnung geprüft; Spieltests sind erst bei Integration erforderlich.
