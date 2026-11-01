@@ -221,9 +221,41 @@ Fortschritt wird im selben Commit aktualisiert.
     `tests/prd19.test.js`. Prod-Kopie: keine Meldung.
   - Nicht entfernt: Fabriken auf Bauplätzen (`bld`, `facBuild`), weil sie für
     eigene Planeten der echten Wirtschaft noch erreichbar sind.
-- [ ] **S7: Abnahme.** Sims nach E4, Browser-Test in der lokalen Vorschau
+- [x] **S7: Abnahme.** Sims nach E4, Browser-Test in der lokalen Vorschau
   (Planetenansicht eines migrierten Planeten, Besitzansicht), Ergebnisse
   notieren.
+
+  Ergebnisse (01.11.2026, Stand nach S6):
+
+  | Seed | H06 vorher (s) | H06 nachher (s) | Abweichung | `sim:progression` vorher | nachher |
+  |------|----------------|-----------------|------------|--------------------------|---------|
+  | 1 | 2091 | 2091 | 0,0 % | H10 bei 39846 s, dann „Zeitlimit Produktion water“ | H10 bei 39894 s, gleicher Abbruch |
+  | 2 | 2048 | 2057 | +0,4 % | H09 bei 47844 s, dann „gold“ | H09 bei 44082 s, gleicher Abbruch |
+  | 3 | 1986 | 1982 | -0,2 % | H09 bei 37291 s, dann „gold“ | H09 bei 34891 s, gleicher Abbruch |
+  | 4 | 2126 | 2126 | 0,0 % | H09 bei 41235 s, dann „gold“ | H09 bei 37401 s, gleicher Abbruch |
+  | 5 | 2047 | 2085 | +1,9 % | H08 bei 30044 s, dann „Nicht genug Credits“ | H10 bei 44774 s, dann „Zeitlimit Produktion water“ |
+  | 42 | – | – | – | H10 bei 38981 s, dann „Zeitlimit Produktion water“ | H10 bei 36227 s, gleicher Abbruch |
+
+  - `sim:homeworld`: H00 bis H06 auf allen Seeds, höchstens +1,9 % gegenüber
+    der Baseline (Grenze +25 %). Erfüllt.
+  - `sim:progression`: läuft auch vor der Umstellung auf keinem Seed bis H13
+    durch, auch nicht auf dem Referenz-Seed 42. Relativ zur Baseline gibt es
+    keine Verschlechterung: Jeder Seed erreicht mindestens dieselbe letzte
+    Quest, meist früher, ohne neue Fehlerursache. Das Durchlaufen bis H13 ist
+    ein bestehendes Problem außerhalb von PRD 19 und bleibt offen.
+  - Browser-Test (lokaler Server, eigener Testspielstand mit einem alten
+    `homeResource`-Planeten in Spielerbesitz): Start migriert den Planeten und
+    loggt das. Karte, Detailansicht, Besitzansicht (Fixpreise, Spezialisierung),
+    Planetenoberfläche, Fördergebäude und Rathaus zeigen den Planeten als Planet
+    der echten Wirtschaft mit übernommenem Erzbestand. Kein Konsolen- oder
+    Serverfehler. Ein neu erzeugter Rohstoffplanet (`Ezvek V`) liegt daneben.
+  - Arbeitskopien des Prod-Spielstands, Vorschau-Spielstand und Sim-Zwischenstände
+    sind gelöscht; nichts davon liegt im Repo.
+
+## Offene Punkte
+
+- `sim:progression` erreicht H13 auf keinem Seed (bestand schon vor PRD 19).
+- Fabriken auf Bauplätzen (`bld`) bleiben als eigenes Thema bestehen.
 
 ## Abnahmekriterien
 
