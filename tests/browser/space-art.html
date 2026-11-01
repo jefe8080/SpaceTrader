@@ -1,0 +1,60 @@
+<!doctype html><html lang="de"><meta charset="utf-8"><title>SpaceTrader · Weltraumgrafiken QA</title>
+<style>body{margin:0;background:#04050d;color:#eee;font:15px system-ui}canvas{position:fixed;inset:0}header{position:fixed;left:24px;top:12px;z-index:1;padding:8px 14px;background:#080e18dd;border-radius:6px}#images{display:none}</style>
+<canvas id="map"></canvas><header id="title"></header><div id="images"></div>
+<script>window.io=()=>({on(){},emit(){}});</script>
+<script type="module">
+import {PLANET_TYPES,STATION_TYPES,BELT_TYPES,cellKey} from '/shared/config.js';
+import {SPACE_ART,spaceArtKey,SUN_COLORS} from '/shared/space-art.js';
+import {ruinsDevelopment} from '/shared/ruins-development.js';
+import {state} from '/js/state.js';
+import {loadAssets,getSprite} from '/js/assets.js';
+import {entitySprite} from '/js/util.js';
+import {initRenderer,render,viewMode,pickAt} from '/js/render.js';
+await loadAssets();
+state.me={id:'qa',name:'QA',color:'#56caff'};state.players=[state.me];
+for(let x=-100;x<=100;x++)for(let y=-100;y<=100;y++)state.cells.add(cellKey(x,y));
+const canvas=document.querySelector('canvas');initRenderer(canvas);
+const ctx=canvas.getContext('2d'),draw=ctx.drawImage.bind(ctx);let drawn=[];
+ctx.drawImage=(image,...args)=>{if(image instanceof HTMLImageElement&&image.src.includes('/art/space/'))drawn.push(image.src.split('/').pop());draw(image,...args);};
+const home=(n,orbital={})=>({goods:{},homeworld:{facilities:{},structures:Array.from({length:n},()=>({kind:'housing',status:'ready'})),orbital}});
+function reset(zoom=1){state.entities.clear();state.systems.clear();state.sectors.clear();state.zones.clear();state.selected=null;state.camera.x=state.camera.y=0;state.camera.zoom=zoom;drawn=[];}
+function place(entity,i,zoom=1){const x=200+(i%4)*390,y=160+Math.floor(i/4)*290;return {...entity,id:entity.id||'entity-'+i,x:(x-innerWidth/2)/zoom,y:(y-innerHeight/2)/zoom,radius:entity.radius||80,sector:'qa',system:null};}
+function report(){render(1000,0);return {mode:viewMode(),drawn,picked:pickAt(200,160),keys:[...state.entities.values()].map(spaceArtKey),thumbnails:[...state.entities.values()].map(entitySprite)};}
+window.showRuins=(zoom=1,rings=false)=>{
+ reset(zoom);document.querySelector('#title').textContent='Ruinenwelt · sechs gemalte Ausbaustufen · Zoom '+zoom;
+ [0,4,8,16,24,36].forEach((n,i)=>{const e=place({id:'ruins-'+i,kind:'planet',type:'ruins',name:ruinsDevelopment({kind:'planet',type:'ruins',market:home(n)}).name,market:home(n,rings?{small:true,large:i>=3}:{})},i,zoom);state.entities.set(e.id,e);});
+ return report();
+};
+window.showObjects=(kind,page=0)=>{
+ reset();const defs={planet:PLANET_TYPES,station:STATION_TYPES,belt:BELT_TYPES}[kind];
+ document.querySelector('#title').textContent=kind+' · Seite '+(page+1);
+ Object.entries(defs).slice(page*12,page*12+12).forEach(([type,d],i)=>{const e=place({kind,type,name:d.name,market:{goods:{}}},i);state.entities.set(e.id,e);});return report();
+};
+window.showSites=()=>{
+ reset();document.querySelector('#title').textContent='Archiv · Studie · Relikt · Wurmloch';
+ [{kind:'station',type:'wreck',archiveKey:'H09',name:'Archivstelle'},{kind:'station',type:'wreck',archiveKey:'sensor',name:'Studienfundstelle'},{kind:'station',type:'wreck',salvageOwner:'qa',name:'Reliktwrack'},{kind:'wormhole',type:'wormhole',name:'Wurmloch'}].forEach((v,i)=>{const e=place({...v,market:{goods:{}}},i);state.entities.set(e.id,e);});return report();
+};
+window.showCosmos=()=>{
+ reset(.06);document.querySelector('#title').textContent='Sechs Sonnen · zwei schwarze Löcher';
+ SUN_COLORS.forEach((color,i)=>state.systems.set('sun-'+i,{id:'sun-'+i,name:'Sonne '+(i+1),x:(150+i*255-innerWidth/2)/.06,y:(180-innerHeight/2)/.06,star:{color,size:4}}));
+ for(const [i,id] of ['a','b'].entries())state.sectors.set(id,{id,name:'Loch '+(i+1),bh:{x:(450+i*700-innerWidth/2)/.06,y:(650-innerHeight/2)/.06}});
+ return report();
+};
+window.showZones=()=>{
+ reset(.1);document.querySelector('#title').textContent='Gravitation · Ionensturm · Nebel · Sonnenwind · Plasma';
+ ['gravity','ionstorm','nebula','solarwind','plasma'].forEach((type,i)=>state.zones.set(type,{type,x:((i%3)*510+280-innerWidth/2)/.1,y:(250+Math.floor(i/3)*440-innerHeight/2)/.1,rx:1900,ry:1400}));return report();
+};
+window.verifyAlpha=()=>{
+ const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d',{willReadFrequently:true});
+ const results=[];
+ for(const key of Object.keys(SPACE_ART).filter(k=>!k.includes('background'))) {
+  x.clearRect(0,0,512,512);x.drawImage(getSprite(key),0,0);const pixels=x.getImageData(0,0,512,512).data;
+  const corners=[0,511,511*512,512*512-1].map(p=>pixels[p*4+3]);
+  const solid=Array.from({length:512*512},(_,i)=>pixels[i*4+3]).filter(a=>a>200).length;
+  results.push({key,corners,solid});
+ }
+ return results;
+};
+document.querySelector('#images').innerHTML=Object.entries(SPACE_ART).map(([id,url])=>`<img alt="${id}" src="${url}">`).join('');
+window.showRuins();window.qaReady=true;
+</script></html>

@@ -1,0 +1,662 @@
+{
+  "images": 103,
+  "alphaChecked": 101,
+  "results": [
+    {
+      "scene": "ruins",
+      "zoom": 1,
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "ruins_0.png",
+        "ruins_1.png",
+        "ruins_2.png",
+        "ruins_3.png",
+        "ruins_4.png",
+        "ruins_5.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "ruins-0"
+      },
+      "keys": [
+        "space_ruins_0",
+        "space_ruins_1",
+        "space_ruins_2",
+        "space_ruins_3",
+        "space_ruins_4",
+        "space_ruins_5"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_0.png",
+        "/assets/art/space/ruins_1.png",
+        "/assets/art/space/ruins_2.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_4.png",
+        "/assets/art/space/ruins_5.png"
+      ]
+    },
+    {
+      "scene": "ruins",
+      "zoom": 0.32,
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "ruins_0.png",
+        "ruins_1.png",
+        "ruins_2.png",
+        "ruins_3.png",
+        "ruins_4.png",
+        "ruins_5.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "ruins-0"
+      },
+      "keys": [
+        "space_ruins_0",
+        "space_ruins_1",
+        "space_ruins_2",
+        "space_ruins_3",
+        "space_ruins_4",
+        "space_ruins_5"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_0.png",
+        "/assets/art/space/ruins_1.png",
+        "/assets/art/space/ruins_2.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_4.png",
+        "/assets/art/space/ruins_5.png"
+      ]
+    },
+    {
+      "scene": "ruins",
+      "zoom": 0.1,
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "ruins_0.png",
+        "ruins_1.png",
+        "ruins_2.png",
+        "ruins_3.png",
+        "ruins_4.png",
+        "ruins_5.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "ruins-0"
+      },
+      "keys": [
+        "space_ruins_0",
+        "space_ruins_1",
+        "space_ruins_2",
+        "space_ruins_3",
+        "space_ruins_4",
+        "space_ruins_5"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_0.png",
+        "/assets/art/space/ruins_1.png",
+        "/assets/art/space/ruins_2.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_4.png",
+        "/assets/art/space/ruins_5.png"
+      ]
+    },
+    {
+      "scene": "ruins",
+      "zoom": 0.035,
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "ruins_0.png",
+        "ruins_1.png",
+        "ruins_2.png",
+        "ruins_3.png",
+        "ruins_4.png",
+        "ruins_5.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "ruins-0"
+      },
+      "keys": [
+        "space_ruins_0",
+        "space_ruins_1",
+        "space_ruins_2",
+        "space_ruins_3",
+        "space_ruins_4",
+        "space_ruins_5"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_0.png",
+        "/assets/art/space/ruins_1.png",
+        "/assets/art/space/ruins_2.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_4.png",
+        "/assets/art/space/ruins_5.png"
+      ]
+    },
+    {
+      "scene": "ruins",
+      "zoom": 0.034,
+      "mode": "sector",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png"
+      ],
+      "picked": null,
+      "keys": [
+        "space_ruins_0",
+        "space_ruins_1",
+        "space_ruins_2",
+        "space_ruins_3",
+        "space_ruins_4",
+        "space_ruins_5"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_0.png",
+        "/assets/art/space/ruins_1.png",
+        "/assets/art/space/ruins_2.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_4.png",
+        "/assets/art/space/ruins_5.png"
+      ]
+    },
+    {
+      "scene": "ruins",
+      "zoom": 0.007,
+      "mode": "sector",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png"
+      ],
+      "picked": null,
+      "keys": [
+        "space_ruins_0",
+        "space_ruins_1",
+        "space_ruins_2",
+        "space_ruins_3",
+        "space_ruins_4",
+        "space_ruins_5"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_0.png",
+        "/assets/art/space/ruins_1.png",
+        "/assets/art/space/ruins_2.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_4.png",
+        "/assets/art/space/ruins_5.png"
+      ]
+    },
+    {
+      "scene": "ruins",
+      "zoom": 0.0034,
+      "mode": "galaxy",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png"
+      ],
+      "picked": null,
+      "keys": [
+        "space_ruins_0",
+        "space_ruins_1",
+        "space_ruins_2",
+        "space_ruins_3",
+        "space_ruins_4",
+        "space_ruins_5"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_0.png",
+        "/assets/art/space/ruins_1.png",
+        "/assets/art/space/ruins_2.png",
+        "/assets/art/space/ruins_3.png",
+        "/assets/art/space/ruins_4.png",
+        "/assets/art/space/ruins_5.png"
+      ]
+    },
+    {
+      "scene": "planet",
+      "page": 0,
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "ruins_0.png",
+        "planet_agrar.png",
+        "planet_ocean.png",
+        "planet_desert.png",
+        "planet_mining.png",
+        "planet_ice.png",
+        "planet_urban.png",
+        "planet_resort.png",
+        "planet_gasgiant.png",
+        "planet_jungle.png",
+        "planet_volcanic.png",
+        "planet_colony.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "entity-0"
+      },
+      "keys": [
+        "space_ruins_0",
+        "space_planet_agrar",
+        "space_planet_ocean",
+        "space_planet_desert",
+        "space_planet_mining",
+        "space_planet_ice",
+        "space_planet_urban",
+        "space_planet_resort",
+        "space_planet_gasgiant",
+        "space_planet_jungle",
+        "space_planet_volcanic",
+        "space_planet_colony"
+      ],
+      "thumbnails": [
+        "/assets/art/space/ruins_0.png",
+        "/assets/art/space/planet_agrar.png",
+        "/assets/art/space/planet_ocean.png",
+        "/assets/art/space/planet_desert.png",
+        "/assets/art/space/planet_mining.png",
+        "/assets/art/space/planet_ice.png",
+        "/assets/art/space/planet_urban.png",
+        "/assets/art/space/planet_resort.png",
+        "/assets/art/space/planet_gasgiant.png",
+        "/assets/art/space/planet_jungle.png",
+        "/assets/art/space/planet_volcanic.png",
+        "/assets/art/space/planet_colony.png"
+      ]
+    },
+    {
+      "scene": "planet",
+      "page": 1,
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "planet_industrial.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "entity-0"
+      },
+      "keys": [
+        "space_planet_industrial"
+      ],
+      "thumbnails": [
+        "/assets/art/space/planet_industrial.png"
+      ]
+    },
+    {
+      "scene": "station",
+      "page": 0,
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "station_wreck.png",
+        "station_waterworks.png",
+        "station_foodplant.png",
+        "station_fueldepot.png",
+        "station_refinery.png",
+        "station_smelter.png",
+        "station_oilworks.png",
+        "station_chemworks.png",
+        "station_glassworks.png",
+        "station_chemplant.png",
+        "station_siliconworks.png",
+        "station_weavery.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "entity-0"
+      },
+      "keys": [
+        "space_station_wreck",
+        "space_station_waterworks",
+        "space_station_foodplant",
+        "space_station_fueldepot",
+        "space_station_refinery",
+        "space_station_smelter",
+        "space_station_oilworks",
+        "space_station_chemworks",
+        "space_station_glassworks",
+        "space_station_chemplant",
+        "space_station_siliconworks",
+        "space_station_weavery"
+      ],
+      "thumbnails": [
+        "/assets/art/space/station_wreck.png",
+        "/assets/art/space/station_waterworks.png",
+        "/assets/art/space/station_foodplant.png",
+        "/assets/art/space/station_fueldepot.png",
+        "/assets/art/space/station_refinery.png",
+        "/assets/art/space/station_smelter.png",
+        "/assets/art/space/station_oilworks.png",
+        "/assets/art/space/station_chemworks.png",
+        "/assets/art/space/station_glassworks.png",
+        "/assets/art/space/station_chemplant.png",
+        "/assets/art/space/station_siliconworks.png",
+        "/assets/art/space/station_weavery.png"
+      ]
+    },
+    {
+      "scene": "station",
+      "page": 1,
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "station_fertilizerplant.png",
+        "station_refinery2.png",
+        "station_rollingmill.png",
+        "station_toolworks.png",
+        "station_cableworks.png",
+        "station_chipfab.png",
+        "station_alloyworks.png",
+        "station_pharma.png",
+        "station_coolantworks.png",
+        "station_tailor.png",
+        "station_cannery.png",
+        "station_opticsworks.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "entity-0"
+      },
+      "keys": [
+        "space_station_fertilizerplant",
+        "space_station_refinery2",
+        "space_station_rollingmill",
+        "space_station_toolworks",
+        "space_station_cableworks",
+        "space_station_chipfab",
+        "space_station_alloyworks",
+        "space_station_pharma",
+        "space_station_coolantworks",
+        "space_station_tailor",
+        "space_station_cannery",
+        "space_station_opticsworks"
+      ],
+      "thumbnails": [
+        "/assets/art/space/station_fertilizerplant.png",
+        "/assets/art/space/station_refinery2.png",
+        "/assets/art/space/station_rollingmill.png",
+        "/assets/art/space/station_toolworks.png",
+        "/assets/art/space/station_cableworks.png",
+        "/assets/art/space/station_chipfab.png",
+        "/assets/art/space/station_alloyworks.png",
+        "/assets/art/space/station_pharma.png",
+        "/assets/art/space/station_coolantworks.png",
+        "/assets/art/space/station_tailor.png",
+        "/assets/art/space/station_cannery.png",
+        "/assets/art/space/station_opticsworks.png"
+      ]
+    },
+    {
+      "scene": "station",
+      "page": 2,
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "station_batteryplant.png",
+        "station_gearworks.png",
+        "station_electronicsworks.png",
+        "station_hullworks.png",
+        "station_sensorworks.png",
+        "station_jeweler.png",
+        "station_reactorworks.png",
+        "station_cellworks.png",
+        "station_robotics.png",
+        "station_machineworks.png",
+        "station_engineworks.png",
+        "station_shippartsworks.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "entity-0"
+      },
+      "keys": [
+        "space_station_batteryplant",
+        "space_station_gearworks",
+        "space_station_electronicsworks",
+        "space_station_hullworks",
+        "space_station_sensorworks",
+        "space_station_jeweler",
+        "space_station_reactorworks",
+        "space_station_cellworks",
+        "space_station_robotics",
+        "space_station_machineworks",
+        "space_station_engineworks",
+        "space_station_shippartsworks"
+      ],
+      "thumbnails": [
+        "/assets/art/space/station_batteryplant.png",
+        "/assets/art/space/station_gearworks.png",
+        "/assets/art/space/station_electronicsworks.png",
+        "/assets/art/space/station_hullworks.png",
+        "/assets/art/space/station_sensorworks.png",
+        "/assets/art/space/station_jeweler.png",
+        "/assets/art/space/station_reactorworks.png",
+        "/assets/art/space/station_cellworks.png",
+        "/assets/art/space/station_robotics.png",
+        "/assets/art/space/station_machineworks.png",
+        "/assets/art/space/station_engineworks.png",
+        "/assets/art/space/station_shippartsworks.png"
+      ]
+    },
+    {
+      "scene": "station",
+      "page": 3,
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "station_consumerworks.png",
+        "station_medtechworks.png",
+        "station_computerworks.png",
+        "station_aiforge.png",
+        "station_habitatworks.png",
+        "station_goldpurifier.png",
+        "station_diamondcutter.png",
+        "station_uraniumrefiner.png",
+        "station_antimatterstabilizer.png",
+        "station_exocrystalrefiner.png",
+        "station_nebulagasrefiner.png",
+        "station_hotel.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "entity-0"
+      },
+      "keys": [
+        "space_station_consumerworks",
+        "space_station_medtechworks",
+        "space_station_computerworks",
+        "space_station_aiforge",
+        "space_station_habitatworks",
+        "space_station_goldpurifier",
+        "space_station_diamondcutter",
+        "space_station_uraniumrefiner",
+        "space_station_antimatterstabilizer",
+        "space_station_exocrystalrefiner",
+        "space_station_nebulagasrefiner",
+        "space_station_hotel"
+      ],
+      "thumbnails": [
+        "/assets/art/space/station_consumerworks.png",
+        "/assets/art/space/station_medtechworks.png",
+        "/assets/art/space/station_computerworks.png",
+        "/assets/art/space/station_aiforge.png",
+        "/assets/art/space/station_habitatworks.png",
+        "/assets/art/space/station_goldpurifier.png",
+        "/assets/art/space/station_diamondcutter.png",
+        "/assets/art/space/station_uraniumrefiner.png",
+        "/assets/art/space/station_antimatterstabilizer.png",
+        "/assets/art/space/station_exocrystalrefiner.png",
+        "/assets/art/space/station_nebulagasrefiner.png",
+        "/assets/art/space/station_hotel.png"
+      ]
+    },
+    {
+      "scene": "station",
+      "page": 4,
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "station_shipyard.png",
+        "station_bigyard.png",
+        "station_hub.png",
+        "station_outpost.png",
+        "station_factionyard.png",
+        "station_deepmine.png",
+        "station_antimatterlab.png",
+        "station_gasharvester.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "entity-0"
+      },
+      "keys": [
+        "space_station_shipyard",
+        "space_station_bigyard",
+        "space_station_hub",
+        "space_station_outpost",
+        "space_station_factionyard",
+        "space_station_deepmine",
+        "space_station_antimatterlab",
+        "space_station_gasharvester"
+      ],
+      "thumbnails": [
+        "/assets/art/space/station_shipyard.png",
+        "/assets/art/space/station_bigyard.png",
+        "/assets/art/space/station_hub.png",
+        "/assets/art/space/station_outpost.png",
+        "/assets/art/space/station_factionyard.png",
+        "/assets/art/space/station_deepmine.png",
+        "/assets/art/space/station_antimatterlab.png",
+        "/assets/art/space/station_gasharvester.png"
+      ]
+    },
+    {
+      "scene": "belt",
+      "page": 0,
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "resource_ore.png",
+        "resource_ice.png",
+        "resource_crystals.png",
+        "resource_rareearth.png",
+        "resource_acid.png",
+        "resource_gold.png",
+        "resource_diamond.png",
+        "resource_uranium.png",
+        "resource_exotic.png",
+        "resource_debris.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "entity-0"
+      },
+      "keys": [
+        "space_resource_ore",
+        "space_resource_ice",
+        "space_resource_crystals",
+        "space_resource_rareearth",
+        "space_resource_acid",
+        "space_resource_gold",
+        "space_resource_diamond",
+        "space_resource_uranium",
+        "space_resource_exotic",
+        "space_resource_debris"
+      ],
+      "thumbnails": [
+        "/assets/art/space/resource_ore.png",
+        "/assets/art/space/resource_ice.png",
+        "/assets/art/space/resource_crystals.png",
+        "/assets/art/space/resource_rareearth.png",
+        "/assets/art/space/resource_acid.png",
+        "/assets/art/space/resource_gold.png",
+        "/assets/art/space/resource_diamond.png",
+        "/assets/art/space/resource_uranium.png",
+        "/assets/art/space/resource_exotic.png",
+        "/assets/art/space/resource_debris.png"
+      ]
+    },
+    {
+      "scene": "sites",
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "wormhole.png",
+        "quest_archive.png",
+        "quest_study.png",
+        "quest_relic.png"
+      ],
+      "picked": {
+        "kind": "entity",
+        "id": "entity-0"
+      },
+      "keys": [
+        "space_quest_archive",
+        "space_quest_study",
+        "space_quest_relic",
+        "space_wormhole"
+      ],
+      "thumbnails": [
+        "/assets/art/space/quest_archive.png",
+        "/assets/art/space/quest_study.png",
+        "/assets/art/space/quest_relic.png",
+        "/assets/art/space/wormhole.png"
+      ]
+    },
+    {
+      "scene": "cosmos",
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "blackhole_0.png",
+        "blackhole_1.png",
+        "sun_0.png",
+        "sun_1.png",
+        "sun_2.png",
+        "sun_3.png",
+        "sun_4.png",
+        "sun_5.png"
+      ],
+      "picked": null,
+      "keys": [],
+      "thumbnails": []
+    },
+    {
+      "scene": "zones",
+      "mode": "system",
+      "drawn": [
+        "background_teal.png",
+        "background_violet.png",
+        "zone_gravity.png",
+        "zone_ionstorm.png",
+        "zone_nebula.png",
+        "zone_solarwind.png",
+        "zone_plasma.png"
+      ],
+      "picked": null,
+      "keys": [],
+      "thumbnails": []
+    }
+  ],
+  "errors": [],
+  "failed": []
+}

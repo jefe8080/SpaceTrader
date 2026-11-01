@@ -14,8 +14,14 @@
 
 `inventory.json` ordnet die bestehenden Typen den Tafeln zu und dokumentiert die tatsächlichen Bildgrößen. Die Galerie lädt jede Originaldatei und öffnet sie bei Klick einzeln.
 
-## Prüfung und Freigabe
+## Prüfung der Entwürfe
 
 Alle erzeugten Bilder visuell auf Motivanzahl, erkennbare Funktion, Stil, wesentlichen Beschnitt und den entfernten Planetenleuchtring geprüft. 15 PNG-Signaturen, Abmessungen, Existenz und Galerieverweise geprüft; Bestand mit 13 Planeten, 56 Stationen (davon 46 mit Rezept) und zehn Ressourcenfeldern abgeglichen. `git diff --check` erfolgreich. Keine Spieltests nötig oder ausgeführt, da ausschließlich Vorschauen/Dokumentation geändert wurden.
 
-Abnahme ausstehend. Die Tafeln enthalten Hintergrund und Beschriftungen und sind keine fertigen transparenten Sprites. Vor Integration müssen freigegebene Objekte als ausreichend große Einzelgrafiken mit echtem Alpha ausgearbeitet werden. Darstellung bei Spielgröße und die sechs Entwicklungsschwellen sind anschließend im Spiel zu prüfen. Kein Renderer und kein bestehendes Spielasset wurde verändert.
+## Freigabe und fertige Umsetzung
+
+Am 01.11.2026 vom Nutzer freigegeben und vollständig integriert. Produktionsgrafiken: client/assets/art/space/ (103 PNGs). Produktionsquellen und Prompts: production/. Der reproduzierbare Verpackungsschritt scripts/pack-space-art.js verwendet Sharp über SHARP_MODULE und trennt die tatsächlichen Alpha-Abstände der Tafeln. Die ursprünglichen Entwurfstafeln bleiben unverändert als Referenz erhalten.
+
+Die Karte, Vorschaubilder und der Objektführer verwenden die neuen Bilder. Die alten Module planet-development.js und planetExterior.js sind gelöscht. Sechs neue Ruinenwelt-Stufen hängen ausschließlich von fertiggestellter Bausubstanz ab. Physische Orbitale sind unabhängig davon. Keine Spielstandsänderung nötig.
+
+386 Tests und die Browserprüfung bestanden. [Browsergalerie und Nachweise](../../qa/space-art/index.html). Details und Schwellen stehen im [PRD 20](../../PRD-20.md).
