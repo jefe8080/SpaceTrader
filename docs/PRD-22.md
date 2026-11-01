@@ -12,9 +12,9 @@ Vorhandene Altberichte bleiben als unvollständig gekennzeichnet und zählen nic
 Historienbereich und einzelne Berichte sind beim Öffnen eingeklappt. Neueste Berichte zuerst, 25 pro Seite, Suche nach Teilnehmer/Schiff/Ort und Ergebnisfilter. Keine taktische Wiederholung oder Kartenaktion.
 
 ## Umsetzung und Abnahme
-- [ ] U1: Abschluss-Snapshots, persistente 500-Berichte-Grenze und dauerhafte Summen implementieren. Daten vor Zerstörung/Besitzwechsel sichern; Altberichte unverändert erhalten. Automatisierte Tests für Ergebnisse, Verluste, Unterstützung, Limit, Altbestand und Persistenz.
+- [x] U1: Abschluss-Snapshots, persistente 500-Berichte-Grenze und dauerhafte Summen implementieren. Daten vor Zerstörung/Besitzwechsel sichern; Altberichte unverändert erhalten. Automatisierte Tests für Ergebnisse, Verluste, Unterstützung, Limit, Altbestand und Persistenz.
 - [ ] U2: Persönliche Daten an Client übertragen; Profilzähler anbinden; zugängliches Fenster mit Statistik, eingeklappter Historie, Suche, Filter und Pagination erstellen. Leere und unvollständige Daten verständlich anzeigen.
 - [ ] U3: Gesamttests und Oberflächenprüfung, Fehler korrigieren und Ergebnis dokumentieren.
 
 ## Prüfprotokoll
-Planung durch Grilling abgeschlossen und vom Nutzer bestätigt. Noch keine Umsetzung.
+Planung durch Grilling abgeschlossen und vom Nutzer bestätigt. U1 abgeschlossen: neun gezielte Tests erfolgreich (PRD 15 Kampfregression und neue Historientests), einschließlich Datenbank-Neustart, unveränderlicher Identität, Verbündeten, Ergebniszählern und 500er-Limit.

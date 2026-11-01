@@ -1,3 +1,4 @@
+import { combatIdentity } from './history.js';
 import {warnDefenders} from './warnings.js';
 // PRD 15 U04: serverseitige Schlachtinstanzen. Eigenständige taktische 2D-Karte, genau zwei Seiten, Beitritt nur durch Anflug.
 // Der Server entscheidet über Bewegung, Treffer, Schaden und Rückzug; Zuschauer und Spielerwechsel ändern nichts.
@@ -49,7 +50,7 @@ function makeUnit(game, b, ship, side, x, y, a) {
   const tac = { ...defaultTactic(ship.type), ...(ship.tactic || {}) };
   if (bp.squad) d.craft = Math.max(0, d.craft);
   return {
-    ship: ship.id, side, owner: ship.owner, type: ship.type, x, y, a, v: 0,
+    history: combatIdentity(game, ship), ship: ship.id, side, owner: ship.owner, type: ship.type, x, y, a, v: 0,
     state: 'fight', ai: true, order: null, prio: null, stance: tac.stance, retreat: { ...tac.retreat },
     shields: bp.shields.map((s) => s.max), shieldDelay: bp.shields.map(() => 0),
     cd: bp.weapons.map(() => rnd() * 1.5), ion: {}, jam: {}, fires: [], prep: 0, beam: {},

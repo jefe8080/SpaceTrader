@@ -1,3 +1,4 @@
+import { combatStats } from './war/history.js';
 import { GOODS } from '../shared/goods.js';
 
 // Personal moving-average inventory across own ships and warehouses. Free transfers
@@ -54,6 +55,6 @@ export function pilotProfile(game, player) {
     profit:stats.unknownUnits>1e-7?null:stats.knownProfit,
     systems:player.known.system.size,planets:stats.discoveredPlanets.length,
     missions:(player.questsDone||0)+Object.keys(player.homeQuest?.completed||{}).length,
-    battlesWon:null,ships:game.shipsOf(player.id).length,
+    battlesWon:combatStats(player).win,ships:game.shipsOf(player.id).length,
     worlds:[...game.world.entities.values()].filter(e=>e.kind==='planet'&&(e.market?.homeworld?.owner===player.id||game.ownership.get(e.id)?.player===player.id)).map(e=>({id:e.id,name:e.name}))};
 }

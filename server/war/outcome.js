@@ -1,10 +1,11 @@
+import { battleSnapshot, storeCombatReport } from './history.js';
 // PRD 15 U06: Schlachtende. Kapitulation, Sieg/Unentschieden, Besitzwechsel, Gefangene, Freikauf, Trümmer und Berichte.
 import { SHIP_TYPES, GOODS, freeFor, WORLD } from '../../shared/config.js';
 import { COMBAT, navalClass, maxHull, needsRepair } from '../../shared/combat.js';
 import { drivesDestroyed } from './battle.js';
 import { hooks } from './hooks.js';
 import { removeFromStacks } from './stacks.js';
-import { ownerName, isFactionOwner, diplo } from './diplomacy.js';
+import { ownerName, isFactionOwner } from './diplomacy.js';
 
 const unitsOf = (b) => Object.values(b.units);
 /** Kampfunfähig: weder beweglich noch bewaffnet (zählt nicht als weiterkämpfend) */
@@ -16,9 +17,7 @@ function report(game, owner, rep) {
   const p = game.players.get(owner);
   if (!p) return;
   const w = diplo(p);
-  w.reports ||= [];
-  w.reports.unshift(rep);
-  if (w.reports.length > 10) w.reports.length = 10;
+  storeCombatReport(p, rep);
   game.emit('notice', p, `Schlacht beendet: ${rep.result === 'win' ? 'Sieg' : rep.result === 'loss' ? 'Niederlage' : 'Unentschieden'} (${rep.lost.length} Verluste, ${rep.prisoners.length} Gefangene)`);
 }
 
@@ -144,6 +143,7 @@ hooks.resolve = function resolve(game, b, winner, why) {
   const loserSide = winner ? (winner === 'A' ? 'B' : 'A') : null;
   const winOwner = winner ? b.sides[winner].owners[0] : null;
   const goods = {};
+  const snapshot = battleSnapshot(game, b, winner, loserSide, immobile);
   const rep = Object.fromEntries([...b.sides.A.owners, ...b.sides.B.owners].map((o) => [o, { lost: [], prisoners: [], captured: [], retreated: [] }]));
   const survivorsWin = [];
   const byShip = new Map();
@@ -195,8 +195,8 @@ hooks.resolve = function resolve(game, b, winner, why) {
   const loot = winOwner ? transferLoot(game, b, goods, winOwner, survivorsWin) : {};
   for (const [owner, r] of Object.entries(rep)) {
     const side = b.sides.A.owners.includes(owner) ? 'A' : 'B';
-    report(game, owner, { battle: b.id, t: Math.round(game.time), result: !winner ? 'draw' : side === winner ? 'win' : 'loss', why: why || null,
-      enemies: b.sides[side === 'A' ? 'B' : 'A'].owners.map((o) => ownerName(game, o)), ...r, loot: side === winner ? loot : {} });
+    report(game, owner, { ...snapshot, side, battle: b.id, t: Math.round(game.time), result: !winner ? 'draw' : side === winner ? 'win' : 'loss', why: why || null,
+      enemies: b.sides[side === 'A' ? 'B' : 'A'].owners.map((o) => ownerName(game, o)), ...r, loot: owner === winOwner ? loot : {} });
   }
   for (const fn of hooks.afterBattle) fn(game, b, winner, byShip);
 };
