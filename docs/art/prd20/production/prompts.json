@@ -1,0 +1,71 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "mode": "background-extraction",
+  "sources": [
+    {
+      "id": "01-planeten-lebendig-v2",
+      "input": "../01-planeten-lebendig-v2.png",
+      "prompt": "EDIT TARGET: the supplied approved planet concept sheet. Production background-extraction only. Preserve the EXACT eight painted planet designs, their colors, surface architecture, details, silhouettes and 4 columns by 2 rows order. Remove ALL navy background AND ALL caption lettering completely and replace with genuine alpha transparency. No text anywhere. Eight whole isolated globes on transparent canvas, equal cells with at least 5% margin, no overlap. Crisp natural planet edges, absolutely NO blue ring, NO atmospheric halo. Do not invent new planet designs, do not flatten into vector. Increase native detail/resolution if possible, preferably 3072x2048. Preserve the approved hand-painted artwork. Output RGBA transparent sprite atlas."
+    },
+    {
+      "id": "02-planeten-heimat-v2",
+      "input": "../02-planeten-heimat-v2.png",
+      "prompt": "Edit the supplied APPROVED five-planet concept sheet, background-extraction ONLY. Keep the exact five complete painted globes and all their surface designs, colors, ink outlines, proportions and details. Remove ALL navy backdrop and ALL text captions; replace every outside pixel with real alpha transparency. Absolutely no blue ring, no atmospheric glow, no cyan border. Rearrange as clean transparent atlas of THREE columns TWO rows, first row jungle/volcanic/colony, second row industrial at left and ruins in middle, last cell empty. Each globe fully within its own equal cell with 8% margin, no overlap, no labels. Preserve approved subjects, no redesign. RGBA transparent output, preferably 3072x2048."
+    },
+    {
+      "id": "03-stationen-haefen",
+      "input": "../03-stationen-haefen.png",
+      "prompt": "Use case: background-extraction. EDIT TARGET: supplied approved SpaceTrader concept sheet. Preserve exact painted subjects, silhouettes, details, palette and comic drawing style; NO redesign. Remove ALL captions, lines, ornamental separators and ALL dark navy background, replacing space outside subjects with GENUINE ALPHA TRANSPARENCY. No text, no labels, no ground, no backdrop, no shadows filling gaps. Do not paint a checkerboard. Production transparent sprite atlas with clear separation and 6 percent transparent margin inside each cell. SIX subjects, 3 columns x 2 rows. First row: small shipyard, large shipyard, faction shipyard. Second row: trade hub, orbital hotel, outpost. Prefer high native resolution 3072x2048 or appropriate landscape equivalent. Output RGBA."
+    },
+    {
+      "id": "04-stationen-fundstellen",
+      "input": "../04-stationen-fundstellen.png",
+      "prompt": "Use case: background-extraction. EDIT TARGET: supplied approved SpaceTrader concept sheet. Preserve exact painted subjects, silhouettes, details, palette and comic drawing style; NO redesign. Remove ALL captions, lines, ornamental separators and ALL dark navy background, replacing space outside subjects with GENUINE ALPHA TRANSPARENCY. No text, no labels, no ground, no backdrop, no shadows filling gaps. Do not paint a checkerboard. Production transparent sprite atlas with clear separation and 6 percent transparent margin inside each cell. SEVEN subjects in FOUR columns x TWO rows. Top row: deep mine, antimatter lab, gas collector, salvage wreck. Bottom row: archive vault, research site, ancient relic wreck, last cell EMPTY. Keep each subject in its own equal cell. Prefer high native resolution 3072x2048 or appropriate landscape equivalent. Output RGBA."
+    },
+    {
+      "id": "05-ruinenwelt-progression",
+      "input": "../05-ruinenwelt-progression.png",
+      "prompt": "Use case: background-extraction. EDIT TARGET: supplied approved SpaceTrader concept sheet. Preserve exact painted subjects, silhouettes, details, palette and comic drawing style; NO redesign. Remove ALL captions, lines, ornamental separators and ALL dark navy background, replacing space outside subjects with GENUINE ALPHA TRANSPARENCY. No text, no labels, no ground, no backdrop, no shadows filling gaps. Do not paint a checkerboard. Production transparent sprite atlas with clear separation and 6 percent transparent margin inside each cell. SIX planet evolution stages, THREE columns x TWO rows, reading order exactly 1 to 6. SAME globe geography, ancient aqueducts and towers at every stage, progressively more houses/industry. No blue rings or atmosphere glow. Keep exact same camera and globe size for all six stages. Prefer high native resolution 3072x2048 or appropriate landscape equivalent. Output RGBA."
+    },
+    {
+      "id": "06-produktion-grundstoffe",
+      "input": "../06-produktion-grundstoffe.png",
+      "prompt": "Use case: background-extraction. EDIT TARGET: supplied approved SpaceTrader concept sheet. Preserve exact painted subjects, silhouettes, details, palette and comic drawing style; NO redesign. Remove ALL captions, lines, ornamental separators and ALL dark navy background, replacing space outside subjects with GENUINE ALPHA TRANSPARENCY. No text, no labels, no ground, no backdrop, no shadows filling gaps. Do not paint a checkerboard. Production transparent sprite atlas with clear separation and 6 percent transparent margin inside each cell. TWELVE subjects, FOUR columns x THREE rows. Exact same reading order as input. Every whole station in its own cell. Prefer high native resolution 3072x2048 or appropriate landscape equivalent. Output RGBA."
+    },
+    {
+      "id": "07-produktion-materialien",
+      "input": "../07-produktion-materialien.png",
+      "prompt": "Use case: background-extraction. EDIT TARGET: supplied approved SpaceTrader concept sheet. Preserve exact painted subjects, silhouettes, details, palette and comic drawing style; NO redesign. Remove ALL captions, lines, ornamental separators and ALL dark navy background, replacing space outside subjects with GENUINE ALPHA TRANSPARENCY. No text, no labels, no ground, no backdrop, no shadows filling gaps. Do not paint a checkerboard. Production transparent sprite atlas with clear separation and 6 percent transparent margin inside each cell. TWELVE subjects, FOUR columns x THREE rows. Exact same reading order as input. Every whole station in its own cell. Prefer high native resolution 3072x2048 or appropriate landscape equivalent. Output RGBA."
+    },
+    {
+      "id": "08-produktion-technik",
+      "input": "../08-produktion-technik.png",
+      "prompt": "Use case: background-extraction. EDIT TARGET: supplied approved SpaceTrader concept sheet. Preserve exact painted subjects, silhouettes, details, palette and comic drawing style; NO redesign. Remove ALL captions, lines, ornamental separators and ALL dark navy background, replacing space outside subjects with GENUINE ALPHA TRANSPARENCY. No text, no labels, no ground, no backdrop, no shadows filling gaps. Do not paint a checkerboard. Production transparent sprite atlas with clear separation and 6 percent transparent margin inside each cell. TWELVE subjects, FOUR columns x THREE rows. Exact same reading order as input. Every whole station in its own cell. Prefer high native resolution 3072x2048 or appropriate landscape equivalent. Output RGBA."
+    },
+    {
+      "id": "09-produktion-hochtechnologie",
+      "input": "../09-produktion-hochtechnologie.png",
+      "prompt": "Use case: background-extraction. EDIT TARGET: supplied approved SpaceTrader concept sheet. Preserve exact painted subjects, silhouettes, details, palette and comic drawing style; NO redesign. Remove ALL captions, lines, ornamental separators and ALL dark navy background, replacing space outside subjects with GENUINE ALPHA TRANSPARENCY. No text, no labels, no ground, no backdrop, no shadows filling gaps. Do not paint a checkerboard. Production transparent sprite atlas with clear separation and 6 percent transparent margin inside each cell. TEN subjects, FOUR columns x THREE rows. First two rows contain four each; last row: resonator factory in LEFT cell, gas fractionator in SECOND cell, last two cells EMPTY. Preserve all ten subjects. Prefer high native resolution 3072x2048 or appropriate landscape equivalent. Output RGBA."
+    },
+    {
+      "id": "10-ressourcenfelder",
+      "input": "../10-ressourcenfelder.png",
+      "prompt": "Use case: background-extraction. EDIT TARGET: supplied approved SpaceTrader concept sheet. Preserve exact painted subjects, silhouettes, details, palette and comic drawing style; NO redesign. Remove ALL captions, lines, ornamental separators and ALL dark navy background, replacing space outside subjects with GENUINE ALPHA TRANSPARENCY. No text, no labels, no ground, no backdrop, no shadows filling gaps. Do not paint a checkerboard. Production transparent sprite atlas with clear separation and 6 percent transparent margin inside each cell. TEN resource clusters, FOUR columns x THREE rows. First row ore, ice, purple crystal, rare-earth. Second row acid, gold, diamond, uranium. Last row cyan exotic crystals LEFT cell, hull debris SECOND cell, last two cells EMPTY. Keep complete scattered fragments with each cluster. Prefer high native resolution 3072x2048 or appropriate landscape equivalent. Output RGBA."
+    },
+    {
+      "id": "11-sonnen",
+      "input": "../11-sonnen.png",
+      "prompt": "Use case: background-extraction. EDIT TARGET: supplied approved SpaceTrader concept sheet. Preserve exact painted subjects, silhouettes, details, palette and comic drawing style; NO redesign. Remove ALL captions, lines, ornamental separators and ALL dark navy background, replacing space outside subjects with GENUINE ALPHA TRANSPARENCY. No text, no labels, no ground, no backdrop, no shadows filling gaps. Do not paint a checkerboard. Production transparent sprite atlas with clear separation and 6 percent transparent margin inside each cell. SIX suns, THREE columns x TWO rows. Exact reading order: cream, gold, peach, red, blue-white, white. Preserve all six whole stars including corona and prominences. Prefer high native resolution 3072x2048 or appropriate landscape equivalent. Output RGBA."
+    },
+    {
+      "id": "12-schwarze-loecher-wurmloch",
+      "input": "../12-schwarze-loecher-wurmloch.png",
+      "prompt": "Use case: background-extraction. EDIT TARGET: supplied approved SpaceTrader concept sheet. Preserve exact painted subjects, silhouettes, details, palette and comic drawing style; NO redesign. Remove ALL captions, lines, ornamental separators and ALL dark navy background, replacing space outside subjects with GENUINE ALPHA TRANSPARENCY. No text, no labels, no ground, no backdrop, no shadows filling gaps. Do not paint a checkerboard. Production transparent sprite atlas with clear separation and 6 percent transparent margin inside each cell. THREE subjects in ONE horizontal row of THREE equal cells: golden black hole, violet black hole, luminous wormhole. Preserve black hole centers as OPAQUE PURE BLACK, not transparent! Only outside disk/corona is transparent. Whole bright effects contained, no clipping. Prefer high native resolution 3072x2048 or appropriate landscape equivalent. Output RGBA."
+    },
+    {
+      "id": "13-weltraumzonen",
+      "input": "../13-weltraumzonen.png",
+      "prompt": "Use case: background-extraction. EDIT TARGET: supplied approved SpaceTrader concept sheet. Preserve exact painted subjects, silhouettes, details, palette and comic drawing style; NO redesign. Remove ALL captions, lines, ornamental separators and ALL dark navy background, replacing space outside subjects with GENUINE ALPHA TRANSPARENCY. No text, no labels, no ground, no backdrop, no shadows filling gaps. Do not paint a checkerboard. Production transparent sprite atlas with clear separation and 6 percent transparent margin inside each cell. FIVE cosmic zone effects, THREE columns x TWO rows: gravity distortion, ion storm, dense fog; solar wind LEFT bottom, plasma cloud SECOND bottom, last bottom cell EMPTY. Keep soft translucent wisps and every storm/filament. Prefer high native resolution 3072x2048 or appropriate landscape equivalent. Output RGBA."
+    }
+  ]
+}

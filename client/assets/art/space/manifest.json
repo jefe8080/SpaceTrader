@@ -1,0 +1,1628 @@
+[
+  {
+    "id": "planet_agrar",
+    "file": "planet_agrar.png",
+    "source": "01-planeten-lebendig-v2.png",
+    "cell": 0,
+    "box": [
+      14,
+      74,
+      374,
+      376
+    ],
+    "native": [
+      374,
+      376
+    ]
+  },
+  {
+    "id": "planet_ocean",
+    "file": "planet_ocean.png",
+    "source": "01-planeten-lebendig-v2.png",
+    "cell": 1,
+    "box": [
+      388,
+      71,
+      381,
+      378
+    ],
+    "native": [
+      381,
+      378
+    ]
+  },
+  {
+    "id": "planet_desert",
+    "file": "planet_desert.png",
+    "source": "01-planeten-lebendig-v2.png",
+    "cell": 2,
+    "box": [
+      769,
+      72,
+      376,
+      377
+    ],
+    "native": [
+      376,
+      377
+    ]
+  },
+  {
+    "id": "planet_mining",
+    "file": "planet_mining.png",
+    "source": "01-planeten-lebendig-v2.png",
+    "cell": 3,
+    "box": [
+      1146,
+      71,
+      378,
+      377
+    ],
+    "native": [
+      378,
+      377
+    ]
+  },
+  {
+    "id": "planet_ice",
+    "file": "planet_ice.png",
+    "source": "01-planeten-lebendig-v2.png",
+    "cell": 4,
+    "box": [
+      17,
+      507,
+      372,
+      380
+    ],
+    "native": [
+      372,
+      380
+    ]
+  },
+  {
+    "id": "planet_urban",
+    "file": "planet_urban.png",
+    "source": "01-planeten-lebendig-v2.png",
+    "cell": 5,
+    "box": [
+      390,
+      505,
+      378,
+      386
+    ],
+    "native": [
+      378,
+      386
+    ]
+  },
+  {
+    "id": "planet_resort",
+    "file": "planet_resort.png",
+    "source": "01-planeten-lebendig-v2.png",
+    "cell": 6,
+    "box": [
+      768,
+      504,
+      382,
+      390
+    ],
+    "native": [
+      382,
+      390
+    ]
+  },
+  {
+    "id": "planet_gasgiant",
+    "file": "planet_gasgiant.png",
+    "source": "01-planeten-lebendig-v2.png",
+    "cell": 7,
+    "box": [
+      1150,
+      504,
+      375,
+      387
+    ],
+    "native": [
+      375,
+      387
+    ]
+  },
+  {
+    "id": "planet_jungle",
+    "file": "planet_jungle.png",
+    "source": "02-planeten-heimat-v2.png",
+    "cell": 0,
+    "box": [
+      47,
+      27,
+      470,
+      461
+    ],
+    "native": [
+      470,
+      461
+    ]
+  },
+  {
+    "id": "planet_volcanic",
+    "file": "planet_volcanic.png",
+    "source": "02-planeten-heimat-v2.png",
+    "cell": 1,
+    "box": [
+      541,
+      27,
+      460,
+      456
+    ],
+    "native": [
+      460,
+      456
+    ]
+  },
+  {
+    "id": "planet_colony",
+    "file": "planet_colony.png",
+    "source": "02-planeten-heimat-v2.png",
+    "cell": 2,
+    "box": [
+      1022,
+      28,
+      465,
+      460
+    ],
+    "native": [
+      465,
+      460
+    ]
+  },
+  {
+    "id": "planet_industrial",
+    "file": "planet_industrial.png",
+    "source": "02-planeten-heimat-v2.png",
+    "cell": 3,
+    "box": [
+      43,
+      506,
+      474,
+      469
+    ],
+    "native": [
+      474,
+      469
+    ]
+  },
+  {
+    "id": "station_shipyard",
+    "file": "station_shipyard.png",
+    "source": "03-stationen-haefen.png",
+    "cell": 0,
+    "box": [
+      13,
+      60,
+      486,
+      403
+    ],
+    "native": [
+      486,
+      403
+    ]
+  },
+  {
+    "id": "station_bigyard",
+    "file": "station_bigyard.png",
+    "source": "03-stationen-haefen.png",
+    "cell": 1,
+    "box": [
+      499,
+      16,
+      539,
+      414
+    ],
+    "native": [
+      539,
+      414
+    ]
+  },
+  {
+    "id": "station_factionyard",
+    "file": "station_factionyard.png",
+    "source": "03-stationen-haefen.png",
+    "cell": 2,
+    "box": [
+      1038,
+      13,
+      488,
+      418
+    ],
+    "native": [
+      488,
+      418
+    ]
+  },
+  {
+    "id": "station_hub",
+    "file": "station_hub.png",
+    "source": "03-stationen-haefen.png",
+    "cell": 3,
+    "box": [
+      13,
+      463,
+      529,
+      478
+    ],
+    "native": [
+      529,
+      478
+    ]
+  },
+  {
+    "id": "station_hotel",
+    "file": "station_hotel.png",
+    "source": "03-stationen-haefen.png",
+    "cell": 4,
+    "box": [
+      542,
+      476,
+      500,
+      448
+    ],
+    "native": [
+      500,
+      448
+    ]
+  },
+  {
+    "id": "station_outpost",
+    "file": "station_outpost.png",
+    "source": "03-stationen-haefen.png",
+    "cell": 5,
+    "box": [
+      1058,
+      467,
+      462,
+      462
+    ],
+    "native": [
+      462,
+      462
+    ]
+  },
+  {
+    "id": "station_deepmine",
+    "file": "station_deepmine.png",
+    "source": "04-stationen-fundstellen.png",
+    "cell": 0,
+    "box": [
+      9,
+      38,
+      408,
+      429
+    ],
+    "native": [
+      408,
+      429
+    ]
+  },
+  {
+    "id": "station_antimatterlab",
+    "file": "station_antimatterlab.png",
+    "source": "04-stationen-fundstellen.png",
+    "cell": 1,
+    "box": [
+      431,
+      29,
+      368,
+      434
+    ],
+    "native": [
+      368,
+      434
+    ]
+  },
+  {
+    "id": "station_gasharvester",
+    "file": "station_gasharvester.png",
+    "source": "04-stationen-fundstellen.png",
+    "cell": 2,
+    "box": [
+      799,
+      38,
+      382,
+      431
+    ],
+    "native": [
+      382,
+      431
+    ]
+  },
+  {
+    "id": "station_wreck",
+    "file": "station_wreck.png",
+    "source": "04-stationen-fundstellen.png",
+    "cell": 3,
+    "box": [
+      1181,
+      70,
+      350,
+      394
+    ],
+    "native": [
+      350,
+      394
+    ]
+  },
+  {
+    "id": "quest_archive",
+    "file": "quest_archive.png",
+    "source": "04-stationen-fundstellen.png",
+    "cell": 4,
+    "box": [
+      9,
+      529,
+      511,
+      426
+    ],
+    "native": [
+      511,
+      426
+    ]
+  },
+  {
+    "id": "quest_study",
+    "file": "quest_study.png",
+    "source": "04-stationen-fundstellen.png",
+    "cell": 5,
+    "box": [
+      520,
+      563,
+      364,
+      387
+    ],
+    "native": [
+      364,
+      387
+    ]
+  },
+  {
+    "id": "quest_relic",
+    "file": "quest_relic.png",
+    "source": "04-stationen-fundstellen.png",
+    "cell": 6,
+    "box": [
+      884,
+      565,
+      376,
+      381
+    ],
+    "native": [
+      376,
+      381
+    ]
+  },
+  {
+    "id": "ruins_0",
+    "file": "ruins_0.png",
+    "source": "05-ruinenwelt-progression.png",
+    "cell": 0,
+    "box": [
+      21,
+      21,
+      493,
+      463
+    ],
+    "native": [
+      493,
+      463
+    ]
+  },
+  {
+    "id": "ruins_1",
+    "file": "ruins_1.png",
+    "source": "05-ruinenwelt-progression.png",
+    "cell": 1,
+    "box": [
+      528,
+      21,
+      493,
+      463
+    ],
+    "native": [
+      493,
+      463
+    ]
+  },
+  {
+    "id": "ruins_2",
+    "file": "ruins_2.png",
+    "source": "05-ruinenwelt-progression.png",
+    "cell": 2,
+    "box": [
+      1036,
+      20,
+      493,
+      463
+    ],
+    "native": [
+      493,
+      463
+    ]
+  },
+  {
+    "id": "ruins_3",
+    "file": "ruins_3.png",
+    "source": "05-ruinenwelt-progression.png",
+    "cell": 3,
+    "box": [
+      21,
+      499,
+      493,
+      463
+    ],
+    "native": [
+      493,
+      463
+    ]
+  },
+  {
+    "id": "ruins_4",
+    "file": "ruins_4.png",
+    "source": "05-ruinenwelt-progression.png",
+    "cell": 4,
+    "box": [
+      528,
+      498,
+      494,
+      464
+    ],
+    "native": [
+      494,
+      464
+    ]
+  },
+  {
+    "id": "ruins_5",
+    "file": "ruins_5.png",
+    "source": "05-ruinenwelt-progression.png",
+    "cell": 5,
+    "box": [
+      1037,
+      498,
+      495,
+      463
+    ],
+    "native": [
+      495,
+      463
+    ]
+  },
+  {
+    "id": "station_waterworks",
+    "file": "station_waterworks.png",
+    "source": "06-produktion-grundstoffe.png",
+    "cell": 0,
+    "box": [
+      30,
+      11,
+      347,
+      271
+    ],
+    "native": [
+      347,
+      271
+    ]
+  },
+  {
+    "id": "station_foodplant",
+    "file": "station_foodplant.png",
+    "source": "06-produktion-grundstoffe.png",
+    "cell": 1,
+    "box": [
+      399,
+      29,
+      374,
+      251
+    ],
+    "native": [
+      374,
+      251
+    ]
+  },
+  {
+    "id": "station_fueldepot",
+    "file": "station_fueldepot.png",
+    "source": "06-produktion-grundstoffe.png",
+    "cell": 2,
+    "box": [
+      778,
+      13,
+      380,
+      275
+    ],
+    "native": [
+      380,
+      275
+    ]
+  },
+  {
+    "id": "station_refinery",
+    "file": "station_refinery.png",
+    "source": "06-produktion-grundstoffe.png",
+    "cell": 3,
+    "box": [
+      1158,
+      19,
+      364,
+      278
+    ],
+    "native": [
+      364,
+      278
+    ]
+  },
+  {
+    "id": "station_smelter",
+    "file": "station_smelter.png",
+    "source": "06-produktion-grundstoffe.png",
+    "cell": 4,
+    "box": [
+      14,
+      335,
+      370,
+      269
+    ],
+    "native": [
+      370,
+      269
+    ]
+  },
+  {
+    "id": "station_oilworks",
+    "file": "station_oilworks.png",
+    "source": "06-produktion-grundstoffe.png",
+    "cell": 5,
+    "box": [
+      397,
+      327,
+      367,
+      274
+    ],
+    "native": [
+      367,
+      274
+    ]
+  },
+  {
+    "id": "station_chemworks",
+    "file": "station_chemworks.png",
+    "source": "06-produktion-grundstoffe.png",
+    "cell": 6,
+    "box": [
+      780,
+      342,
+      374,
+      270
+    ],
+    "native": [
+      374,
+      270
+    ]
+  },
+  {
+    "id": "station_glassworks",
+    "file": "station_glassworks.png",
+    "source": "06-produktion-grundstoffe.png",
+    "cell": 7,
+    "box": [
+      1155,
+      322,
+      372,
+      285
+    ],
+    "native": [
+      372,
+      285
+    ]
+  },
+  {
+    "id": "station_chemplant",
+    "file": "station_chemplant.png",
+    "source": "06-produktion-grundstoffe.png",
+    "cell": 8,
+    "box": [
+      3,
+      636,
+      373,
+      302
+    ],
+    "native": [
+      373,
+      302
+    ]
+  },
+  {
+    "id": "station_siliconworks",
+    "file": "station_siliconworks.png",
+    "source": "06-produktion-grundstoffe.png",
+    "cell": 9,
+    "box": [
+      386,
+      651,
+      379,
+      292
+    ],
+    "native": [
+      379,
+      292
+    ]
+  },
+  {
+    "id": "station_weavery",
+    "file": "station_weavery.png",
+    "source": "06-produktion-grundstoffe.png",
+    "cell": 10,
+    "box": [
+      766,
+      653,
+      391,
+      294
+    ],
+    "native": [
+      391,
+      294
+    ]
+  },
+  {
+    "id": "station_fertilizerplant",
+    "file": "station_fertilizerplant.png",
+    "source": "06-produktion-grundstoffe.png",
+    "cell": 11,
+    "box": [
+      1159,
+      645,
+      369,
+      309
+    ],
+    "native": [
+      369,
+      309
+    ]
+  },
+  {
+    "id": "station_refinery2",
+    "file": "station_refinery2.png",
+    "source": "07-produktion-materialien.png",
+    "cell": 0,
+    "box": [
+      11,
+      26,
+      378,
+      265
+    ],
+    "native": [
+      378,
+      265
+    ]
+  },
+  {
+    "id": "station_rollingmill",
+    "file": "station_rollingmill.png",
+    "source": "07-produktion-materialien.png",
+    "cell": 1,
+    "box": [
+      390,
+      22,
+      375,
+      270
+    ],
+    "native": [
+      375,
+      270
+    ]
+  },
+  {
+    "id": "station_toolworks",
+    "file": "station_toolworks.png",
+    "source": "07-produktion-materialien.png",
+    "cell": 2,
+    "box": [
+      774,
+      23,
+      372,
+      268
+    ],
+    "native": [
+      372,
+      268
+    ]
+  },
+  {
+    "id": "station_cableworks",
+    "file": "station_cableworks.png",
+    "source": "07-produktion-materialien.png",
+    "cell": 3,
+    "box": [
+      1159,
+      39,
+      367,
+      283
+    ],
+    "native": [
+      367,
+      283
+    ]
+  },
+  {
+    "id": "station_chipfab",
+    "file": "station_chipfab.png",
+    "source": "07-produktion-materialien.png",
+    "cell": 4,
+    "box": [
+      10,
+      326,
+      379,
+      288
+    ],
+    "native": [
+      379,
+      288
+    ]
+  },
+  {
+    "id": "station_alloyworks",
+    "file": "station_alloyworks.png",
+    "source": "07-produktion-materialien.png",
+    "cell": 5,
+    "box": [
+      390,
+      336,
+      381,
+      278
+    ],
+    "native": [
+      381,
+      278
+    ]
+  },
+  {
+    "id": "station_pharma",
+    "file": "station_pharma.png",
+    "source": "07-produktion-materialien.png",
+    "cell": 6,
+    "box": [
+      779,
+      324,
+      371,
+      283
+    ],
+    "native": [
+      371,
+      283
+    ]
+  },
+  {
+    "id": "station_coolantworks",
+    "file": "station_coolantworks.png",
+    "source": "07-produktion-materialien.png",
+    "cell": 7,
+    "box": [
+      1163,
+      322,
+      364,
+      289
+    ],
+    "native": [
+      364,
+      289
+    ]
+  },
+  {
+    "id": "station_tailor",
+    "file": "station_tailor.png",
+    "source": "07-produktion-materialien.png",
+    "cell": 8,
+    "box": [
+      9,
+      638,
+      374,
+      305
+    ],
+    "native": [
+      374,
+      305
+    ]
+  },
+  {
+    "id": "station_cannery",
+    "file": "station_cannery.png",
+    "source": "07-produktion-materialien.png",
+    "cell": 9,
+    "box": [
+      386,
+      636,
+      381,
+      301
+    ],
+    "native": [
+      381,
+      301
+    ]
+  },
+  {
+    "id": "station_opticsworks",
+    "file": "station_opticsworks.png",
+    "source": "07-produktion-materialien.png",
+    "cell": 10,
+    "box": [
+      779,
+      636,
+      379,
+      309
+    ],
+    "native": [
+      379,
+      309
+    ]
+  },
+  {
+    "id": "station_batteryplant",
+    "file": "station_batteryplant.png",
+    "source": "07-produktion-materialien.png",
+    "cell": 11,
+    "box": [
+      1168,
+      654,
+      356,
+      280
+    ],
+    "native": [
+      356,
+      280
+    ]
+  },
+  {
+    "id": "station_gearworks",
+    "file": "station_gearworks.png",
+    "source": "08-produktion-technik.png",
+    "cell": 0,
+    "box": [
+      10,
+      11,
+      367,
+      275
+    ],
+    "native": [
+      367,
+      275
+    ]
+  },
+  {
+    "id": "station_electronicsworks",
+    "file": "station_electronicsworks.png",
+    "source": "08-produktion-technik.png",
+    "cell": 1,
+    "box": [
+      389,
+      8,
+      370,
+      275
+    ],
+    "native": [
+      370,
+      275
+    ]
+  },
+  {
+    "id": "station_hullworks",
+    "file": "station_hullworks.png",
+    "source": "08-produktion-technik.png",
+    "cell": 2,
+    "box": [
+      771,
+      12,
+      378,
+      276
+    ],
+    "native": [
+      378,
+      276
+    ]
+  },
+  {
+    "id": "station_sensorworks",
+    "file": "station_sensorworks.png",
+    "source": "08-produktion-technik.png",
+    "cell": 3,
+    "box": [
+      1157,
+      9,
+      368,
+      278
+    ],
+    "native": [
+      368,
+      278
+    ]
+  },
+  {
+    "id": "station_jeweler",
+    "file": "station_jeweler.png",
+    "source": "08-produktion-technik.png",
+    "cell": 4,
+    "box": [
+      9,
+      323,
+      373,
+      280
+    ],
+    "native": [
+      373,
+      280
+    ]
+  },
+  {
+    "id": "station_reactorworks",
+    "file": "station_reactorworks.png",
+    "source": "08-produktion-technik.png",
+    "cell": 5,
+    "box": [
+      394,
+      326,
+      373,
+      280
+    ],
+    "native": [
+      373,
+      280
+    ]
+  },
+  {
+    "id": "station_cellworks",
+    "file": "station_cellworks.png",
+    "source": "08-produktion-technik.png",
+    "cell": 6,
+    "box": [
+      768,
+      322,
+      376,
+      281
+    ],
+    "native": [
+      376,
+      281
+    ]
+  },
+  {
+    "id": "station_robotics",
+    "file": "station_robotics.png",
+    "source": "08-produktion-technik.png",
+    "cell": 7,
+    "box": [
+      1159,
+      335,
+      366,
+      271
+    ],
+    "native": [
+      366,
+      271
+    ]
+  },
+  {
+    "id": "station_machineworks",
+    "file": "station_machineworks.png",
+    "source": "08-produktion-technik.png",
+    "cell": 8,
+    "box": [
+      7,
+      653,
+      374,
+      304
+    ],
+    "native": [
+      374,
+      304
+    ]
+  },
+  {
+    "id": "station_engineworks",
+    "file": "station_engineworks.png",
+    "source": "08-produktion-technik.png",
+    "cell": 9,
+    "box": [
+      393,
+      651,
+      363,
+      309
+    ],
+    "native": [
+      363,
+      309
+    ]
+  },
+  {
+    "id": "station_shippartsworks",
+    "file": "station_shippartsworks.png",
+    "source": "08-produktion-technik.png",
+    "cell": 10,
+    "box": [
+      771,
+      640,
+      375,
+      315
+    ],
+    "native": [
+      375,
+      315
+    ]
+  },
+  {
+    "id": "station_consumerworks",
+    "file": "station_consumerworks.png",
+    "source": "08-produktion-technik.png",
+    "cell": 11,
+    "box": [
+      1154,
+      649,
+      376,
+      309
+    ],
+    "native": [
+      376,
+      309
+    ]
+  },
+  {
+    "id": "station_medtechworks",
+    "file": "station_medtechworks.png",
+    "source": "09-produktion-hochtechnologie.png",
+    "cell": 0,
+    "box": [
+      24,
+      9,
+      367,
+      290
+    ],
+    "native": [
+      367,
+      290
+    ]
+  },
+  {
+    "id": "station_computerworks",
+    "file": "station_computerworks.png",
+    "source": "09-produktion-hochtechnologie.png",
+    "cell": 1,
+    "box": [
+      391,
+      22,
+      380,
+      286
+    ],
+    "native": [
+      380,
+      286
+    ]
+  },
+  {
+    "id": "station_aiforge",
+    "file": "station_aiforge.png",
+    "source": "09-produktion-hochtechnologie.png",
+    "cell": 2,
+    "box": [
+      780,
+      12,
+      365,
+      307
+    ],
+    "native": [
+      365,
+      307
+    ]
+  },
+  {
+    "id": "station_habitatworks",
+    "file": "station_habitatworks.png",
+    "source": "09-produktion-hochtechnologie.png",
+    "cell": 3,
+    "box": [
+      1160,
+      11,
+      359,
+      299
+    ],
+    "native": [
+      359,
+      299
+    ]
+  },
+  {
+    "id": "station_goldpurifier",
+    "file": "station_goldpurifier.png",
+    "source": "09-produktion-hochtechnologie.png",
+    "cell": 4,
+    "box": [
+      8,
+      351,
+      376,
+      310
+    ],
+    "native": [
+      376,
+      310
+    ]
+  },
+  {
+    "id": "station_diamondcutter",
+    "file": "station_diamondcutter.png",
+    "source": "09-produktion-hochtechnologie.png",
+    "cell": 5,
+    "box": [
+      389,
+      359,
+      380,
+      295
+    ],
+    "native": [
+      380,
+      295
+    ]
+  },
+  {
+    "id": "station_uraniumrefiner",
+    "file": "station_uraniumrefiner.png",
+    "source": "09-produktion-hochtechnologie.png",
+    "cell": 6,
+    "box": [
+      769,
+      359,
+      386,
+      295
+    ],
+    "native": [
+      386,
+      295
+    ]
+  },
+  {
+    "id": "station_antimatterstabilizer",
+    "file": "station_antimatterstabilizer.png",
+    "source": "09-produktion-hochtechnologie.png",
+    "cell": 7,
+    "box": [
+      1167,
+      350,
+      345,
+      315
+    ],
+    "native": [
+      345,
+      315
+    ]
+  },
+  {
+    "id": "station_exocrystalrefiner",
+    "file": "station_exocrystalrefiner.png",
+    "source": "09-produktion-hochtechnologie.png",
+    "cell": 8,
+    "box": [
+      3,
+      681,
+      434,
+      321
+    ],
+    "native": [
+      434,
+      321
+    ]
+  },
+  {
+    "id": "station_nebulagasrefiner",
+    "file": "station_nebulagasrefiner.png",
+    "source": "09-produktion-hochtechnologie.png",
+    "cell": 9,
+    "box": [
+      437,
+      682,
+      461,
+      313
+    ],
+    "native": [
+      461,
+      313
+    ]
+  },
+  {
+    "id": "resource_ore",
+    "file": "resource_ore.png",
+    "source": "10-ressourcenfelder.png",
+    "cell": 0,
+    "box": [
+      26,
+      25,
+      347,
+      257
+    ],
+    "native": [
+      347,
+      257
+    ]
+  },
+  {
+    "id": "resource_ice",
+    "file": "resource_ice.png",
+    "source": "10-ressourcenfelder.png",
+    "cell": 1,
+    "box": [
+      407,
+      23,
+      340,
+      261
+    ],
+    "native": [
+      340,
+      261
+    ]
+  },
+  {
+    "id": "resource_crystals",
+    "file": "resource_crystals.png",
+    "source": "10-ressourcenfelder.png",
+    "cell": 2,
+    "box": [
+      785,
+      25,
+      348,
+      256
+    ],
+    "native": [
+      348,
+      256
+    ]
+  },
+  {
+    "id": "resource_rareearth",
+    "file": "resource_rareearth.png",
+    "source": "10-ressourcenfelder.png",
+    "cell": 3,
+    "box": [
+      1165,
+      24,
+      346,
+      256
+    ],
+    "native": [
+      346,
+      256
+    ]
+  },
+  {
+    "id": "resource_acid",
+    "file": "resource_acid.png",
+    "source": "10-ressourcenfelder.png",
+    "cell": 4,
+    "box": [
+      24,
+      337,
+      349,
+      264
+    ],
+    "native": [
+      349,
+      264
+    ]
+  },
+  {
+    "id": "resource_gold",
+    "file": "resource_gold.png",
+    "source": "10-ressourcenfelder.png",
+    "cell": 5,
+    "box": [
+      402,
+      343,
+      351,
+      255
+    ],
+    "native": [
+      351,
+      255
+    ]
+  },
+  {
+    "id": "resource_diamond",
+    "file": "resource_diamond.png",
+    "source": "10-ressourcenfelder.png",
+    "cell": 6,
+    "box": [
+      786,
+      333,
+      350,
+      264
+    ],
+    "native": [
+      350,
+      264
+    ]
+  },
+  {
+    "id": "resource_uranium",
+    "file": "resource_uranium.png",
+    "source": "10-ressourcenfelder.png",
+    "cell": 7,
+    "box": [
+      1163,
+      340,
+      352,
+      258
+    ],
+    "native": [
+      352,
+      258
+    ]
+  },
+  {
+    "id": "resource_exotic",
+    "file": "resource_exotic.png",
+    "source": "10-ressourcenfelder.png",
+    "cell": 8,
+    "box": [
+      21,
+      643,
+      476,
+      312
+    ],
+    "native": [
+      476,
+      312
+    ]
+  },
+  {
+    "id": "resource_debris",
+    "file": "resource_debris.png",
+    "source": "10-ressourcenfelder.png",
+    "cell": 9,
+    "box": [
+      498,
+      653,
+      505,
+      308
+    ],
+    "native": [
+      505,
+      308
+    ]
+  },
+  {
+    "id": "sun_0",
+    "file": "sun_0.png",
+    "source": "11-sonnen.png",
+    "cell": 0,
+    "box": [
+      8,
+      12,
+      488,
+      454
+    ],
+    "native": [
+      488,
+      454
+    ]
+  },
+  {
+    "id": "sun_1",
+    "file": "sun_1.png",
+    "source": "11-sonnen.png",
+    "cell": 1,
+    "box": [
+      529,
+      9,
+      502,
+      462
+    ],
+    "native": [
+      502,
+      462
+    ]
+  },
+  {
+    "id": "sun_2",
+    "file": "sun_2.png",
+    "source": "11-sonnen.png",
+    "cell": 2,
+    "box": [
+      1031,
+      11,
+      504,
+      453
+    ],
+    "native": [
+      504,
+      453
+    ]
+  },
+  {
+    "id": "sun_3",
+    "file": "sun_3.png",
+    "source": "11-sonnen.png",
+    "cell": 3,
+    "box": [
+      8,
+      490,
+      515,
+      466
+    ],
+    "native": [
+      515,
+      466
+    ]
+  },
+  {
+    "id": "sun_4",
+    "file": "sun_4.png",
+    "source": "11-sonnen.png",
+    "cell": 4,
+    "box": [
+      523,
+      505,
+      511,
+      465
+    ],
+    "native": [
+      511,
+      465
+    ]
+  },
+  {
+    "id": "sun_5",
+    "file": "sun_5.png",
+    "source": "11-sonnen.png",
+    "cell": 5,
+    "box": [
+      1037,
+      508,
+      499,
+      463
+    ],
+    "native": [
+      499,
+      463
+    ]
+  },
+  {
+    "id": "blackhole_0",
+    "file": "blackhole_0.png",
+    "source": "12-schwarze-loecher-wurmloch.png",
+    "cell": 0,
+    "box": [
+      13,
+      35,
+      708,
+      667
+    ],
+    "native": [
+      708,
+      667
+    ]
+  },
+  {
+    "id": "blackhole_1",
+    "file": "blackhole_1.png",
+    "source": "12-schwarze-loecher-wurmloch.png",
+    "cell": 1,
+    "box": [
+      721,
+      44,
+      722,
+      665
+    ],
+    "native": [
+      722,
+      665
+    ]
+  },
+  {
+    "id": "wormhole",
+    "file": "wormhole.png",
+    "source": "12-schwarze-loecher-wurmloch.png",
+    "cell": 2,
+    "box": [
+      1443,
+      43,
+      714,
+      668
+    ],
+    "native": [
+      714,
+      668
+    ]
+  },
+  {
+    "id": "zone_gravity",
+    "file": "zone_gravity.png",
+    "source": "13-weltraumzonen.png",
+    "cell": 0,
+    "box": [
+      2,
+      17,
+      547,
+      492
+    ],
+    "native": [
+      547,
+      492
+    ]
+  },
+  {
+    "id": "zone_ionstorm",
+    "file": "zone_ionstorm.png",
+    "source": "13-weltraumzonen.png",
+    "cell": 1,
+    "box": [
+      549,
+      14,
+      473,
+      486
+    ],
+    "native": [
+      473,
+      486
+    ]
+  },
+  {
+    "id": "zone_nebula",
+    "file": "zone_nebula.png",
+    "source": "13-weltraumzonen.png",
+    "cell": 2,
+    "box": [
+      1022,
+      19,
+      512,
+      490
+    ],
+    "native": [
+      512,
+      490
+    ]
+  },
+  {
+    "id": "zone_solarwind",
+    "file": "zone_solarwind.png",
+    "source": "13-weltraumzonen.png",
+    "cell": 3,
+    "box": [
+      3,
+      509,
+      698,
+      466
+    ],
+    "native": [
+      698,
+      466
+    ]
+  },
+  {
+    "id": "zone_plasma",
+    "file": "zone_plasma.png",
+    "source": "13-weltraumzonen.png",
+    "cell": 4,
+    "box": [
+      701,
+      509,
+      771,
+      469
+    ],
+    "native": [
+      771,
+      469
+    ]
+  },
+  {
+    "id": "background_teal",
+    "file": "background_teal.png",
+    "source": "14-weltraum-hintergrund-teal.png"
+  },
+  {
+    "id": "background_violet",
+    "file": "background_violet.png",
+    "source": "15-weltraum-hintergrund-violett.png"
+  }
+]
