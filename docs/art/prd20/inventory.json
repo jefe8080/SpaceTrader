@@ -1,0 +1,487 @@
+{
+  "planets": [
+    {
+      "id": "ruins",
+      "name": "Ruinenwelt",
+      "sheet": "02-planeten-heimat-v2",
+      "progression": "05-ruinenwelt-progression",
+      "stages": 6
+    },
+    {
+      "id": "agrar",
+      "name": "Agrarwelt",
+      "sheet": "01-planeten-lebendig-v2"
+    },
+    {
+      "id": "ocean",
+      "name": "Ozeanwelt",
+      "sheet": "01-planeten-lebendig-v2"
+    },
+    {
+      "id": "desert",
+      "name": "Wüstenwelt",
+      "sheet": "01-planeten-lebendig-v2"
+    },
+    {
+      "id": "mining",
+      "name": "Bergbauwelt",
+      "sheet": "01-planeten-lebendig-v2"
+    },
+    {
+      "id": "ice",
+      "name": "Eiswelt",
+      "sheet": "01-planeten-lebendig-v2"
+    },
+    {
+      "id": "urban",
+      "name": "Metropole",
+      "sheet": "01-planeten-lebendig-v2"
+    },
+    {
+      "id": "resort",
+      "name": "Paradieswelt",
+      "sheet": "01-planeten-lebendig-v2"
+    },
+    {
+      "id": "gasgiant",
+      "name": "Gasriese",
+      "sheet": "01-planeten-lebendig-v2"
+    },
+    {
+      "id": "jungle",
+      "name": "Dschungelwelt",
+      "sheet": "02-planeten-heimat-v2"
+    },
+    {
+      "id": "volcanic",
+      "name": "Vulkanwelt",
+      "sheet": "02-planeten-heimat-v2"
+    },
+    {
+      "id": "colony",
+      "name": "Kolonie",
+      "sheet": "02-planeten-heimat-v2"
+    },
+    {
+      "id": "industrial",
+      "name": "Industriewelt",
+      "sheet": "02-planeten-heimat-v2"
+    }
+  ],
+  "stations": [
+    {
+      "id": "wreck",
+      "name": "Bergungswrack",
+      "sheet": "04-stationen-fundstellen"
+    },
+    {
+      "id": "waterworks",
+      "name": "Wasserwerk",
+      "sheet": "06-produktion-grundstoffe"
+    },
+    {
+      "id": "foodplant",
+      "name": "Nahrungsfabrik",
+      "sheet": "06-produktion-grundstoffe"
+    },
+    {
+      "id": "fueldepot",
+      "name": "Treibstoffdepot",
+      "sheet": "06-produktion-grundstoffe"
+    },
+    {
+      "id": "refinery",
+      "name": "Raffinerie",
+      "sheet": "06-produktion-grundstoffe"
+    },
+    {
+      "id": "smelter",
+      "name": "Schmelzwerk",
+      "sheet": "06-produktion-grundstoffe"
+    },
+    {
+      "id": "oilworks",
+      "name": "Ölwerk",
+      "sheet": "06-produktion-grundstoffe"
+    },
+    {
+      "id": "chemworks",
+      "name": "Kunststoffwerk",
+      "sheet": "06-produktion-grundstoffe"
+    },
+    {
+      "id": "glassworks",
+      "name": "Glashütte",
+      "sheet": "06-produktion-grundstoffe"
+    },
+    {
+      "id": "chemplant",
+      "name": "Chemiefabrik",
+      "sheet": "06-produktion-grundstoffe"
+    },
+    {
+      "id": "siliconworks",
+      "name": "Siliziumwerk",
+      "sheet": "06-produktion-grundstoffe"
+    },
+    {
+      "id": "weavery",
+      "name": "Weberei",
+      "sheet": "06-produktion-grundstoffe"
+    },
+    {
+      "id": "fertilizerplant",
+      "name": "Düngerwerk",
+      "sheet": "06-produktion-grundstoffe"
+    },
+    {
+      "id": "refinery2",
+      "name": "Scheideanstalt",
+      "sheet": "07-produktion-materialien"
+    },
+    {
+      "id": "rollingmill",
+      "name": "Walzwerk",
+      "sheet": "07-produktion-materialien"
+    },
+    {
+      "id": "toolworks",
+      "name": "Werkzeugbau",
+      "sheet": "07-produktion-materialien"
+    },
+    {
+      "id": "cableworks",
+      "name": "Kabelwerk",
+      "sheet": "07-produktion-materialien"
+    },
+    {
+      "id": "chipfab",
+      "name": "Chipfabrik",
+      "sheet": "07-produktion-materialien"
+    },
+    {
+      "id": "alloyworks",
+      "name": "Legierungswerk",
+      "sheet": "07-produktion-materialien"
+    },
+    {
+      "id": "pharma",
+      "name": "Pharmawerk",
+      "sheet": "07-produktion-materialien"
+    },
+    {
+      "id": "coolantworks",
+      "name": "Kühlmittelwerk",
+      "sheet": "07-produktion-materialien"
+    },
+    {
+      "id": "tailor",
+      "name": "Bekleidungswerk",
+      "sheet": "07-produktion-materialien"
+    },
+    {
+      "id": "cannery",
+      "name": "Konservenfabrik",
+      "sheet": "07-produktion-materialien"
+    },
+    {
+      "id": "opticsworks",
+      "name": "Optikwerk",
+      "sheet": "07-produktion-materialien"
+    },
+    {
+      "id": "batteryplant",
+      "name": "Akkufabrik",
+      "sheet": "07-produktion-materialien"
+    },
+    {
+      "id": "gearworks",
+      "name": "Getriebewerk",
+      "sheet": "08-produktion-technik"
+    },
+    {
+      "id": "electronicsworks",
+      "name": "Elektronikwerk",
+      "sheet": "08-produktion-technik"
+    },
+    {
+      "id": "hullworks",
+      "name": "Rumpfwerk",
+      "sheet": "08-produktion-technik"
+    },
+    {
+      "id": "sensorworks",
+      "name": "Sensorwerk",
+      "sheet": "08-produktion-technik"
+    },
+    {
+      "id": "jeweler",
+      "name": "Luxusmanufaktur",
+      "sheet": "08-produktion-technik"
+    },
+    {
+      "id": "reactorworks",
+      "name": "Reaktorwerk",
+      "sheet": "08-produktion-technik"
+    },
+    {
+      "id": "cellworks",
+      "name": "Energiezellenwerk",
+      "sheet": "08-produktion-technik"
+    },
+    {
+      "id": "robotics",
+      "name": "Robotikwerk",
+      "sheet": "08-produktion-technik"
+    },
+    {
+      "id": "machineworks",
+      "name": "Maschinenbau",
+      "sheet": "08-produktion-technik"
+    },
+    {
+      "id": "engineworks",
+      "name": "Triebwerkswerk",
+      "sheet": "08-produktion-technik"
+    },
+    {
+      "id": "shippartsworks",
+      "name": "Schiffsteilewerk",
+      "sheet": "08-produktion-technik"
+    },
+    {
+      "id": "consumerworks",
+      "name": "Konsumgüterfabrik",
+      "sheet": "08-produktion-technik"
+    },
+    {
+      "id": "medtechworks",
+      "name": "Medtechwerk",
+      "sheet": "09-produktion-hochtechnologie"
+    },
+    {
+      "id": "computerworks",
+      "name": "Computerwerk",
+      "sheet": "09-produktion-hochtechnologie"
+    },
+    {
+      "id": "aiforge",
+      "name": "KI-Schmiede",
+      "sheet": "09-produktion-hochtechnologie"
+    },
+    {
+      "id": "habitatworks",
+      "name": "Habitatwerk",
+      "sheet": "09-produktion-hochtechnologie"
+    },
+    {
+      "id": "goldpurifier",
+      "name": "Edelmetallwerk",
+      "sheet": "09-produktion-hochtechnologie"
+    },
+    {
+      "id": "diamondcutter",
+      "name": "Kristallschleiferei",
+      "sheet": "09-produktion-hochtechnologie"
+    },
+    {
+      "id": "uraniumrefiner",
+      "name": "Isotopenwerk",
+      "sheet": "09-produktion-hochtechnologie"
+    },
+    {
+      "id": "antimatterstabilizer",
+      "name": "Feldstabilisator",
+      "sheet": "09-produktion-hochtechnologie"
+    },
+    {
+      "id": "exocrystalrefiner",
+      "name": "Resonanzwerk",
+      "sheet": "09-produktion-hochtechnologie"
+    },
+    {
+      "id": "nebulagasrefiner",
+      "name": "Gasfraktionierer",
+      "sheet": "09-produktion-hochtechnologie"
+    },
+    {
+      "id": "hotel",
+      "name": "Orbitalhotel",
+      "sheet": "03-stationen-haefen"
+    },
+    {
+      "id": "shipyard",
+      "name": "Werft",
+      "sheet": "03-stationen-haefen"
+    },
+    {
+      "id": "bigyard",
+      "name": "Große Werft",
+      "sheet": "03-stationen-haefen"
+    },
+    {
+      "id": "hub",
+      "name": "Handels-Hub",
+      "sheet": "03-stationen-haefen"
+    },
+    {
+      "id": "outpost",
+      "name": "Außenposten",
+      "sheet": "03-stationen-haefen"
+    },
+    {
+      "id": "factionyard",
+      "name": "Fraktionswerft",
+      "sheet": "03-stationen-haefen"
+    },
+    {
+      "id": "deepmine",
+      "name": "Tiefenmine",
+      "sheet": "04-stationen-fundstellen"
+    },
+    {
+      "id": "antimatterlab",
+      "name": "Antimaterie-Labor",
+      "sheet": "04-stationen-fundstellen"
+    },
+    {
+      "id": "gasharvester",
+      "name": "Nebelgas-Sammler",
+      "sheet": "04-stationen-fundstellen"
+    }
+  ],
+  "resources": [
+    {
+      "id": "ore",
+      "name": "Erzfeld"
+    },
+    {
+      "id": "ice",
+      "name": "Eisfeld"
+    },
+    {
+      "id": "crystals",
+      "name": "Kristallfeld"
+    },
+    {
+      "id": "rareearth",
+      "name": "Seltenerdfeld"
+    },
+    {
+      "id": "acid",
+      "name": "Säurefeld"
+    },
+    {
+      "id": "gold",
+      "name": "Goldader"
+    },
+    {
+      "id": "diamond",
+      "name": "Diamantfeld"
+    },
+    {
+      "id": "uranium",
+      "name": "Uranfeld"
+    },
+    {
+      "id": "exotic",
+      "name": "Exotenfeld"
+    },
+    {
+      "id": "debris",
+      "name": "Trümmerfeld"
+    }
+  ],
+  "images": [
+    {
+      "id": "01-planeten-lebendig-v2",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2915349
+    },
+    {
+      "id": "02-planeten-heimat-v2",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2672507
+    },
+    {
+      "id": "03-stationen-haefen",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2798174
+    },
+    {
+      "id": "04-stationen-fundstellen",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3102577
+    },
+    {
+      "id": "05-ruinenwelt-progression",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3184526
+    },
+    {
+      "id": "06-produktion-grundstoffe",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3063678
+    },
+    {
+      "id": "07-produktion-materialien",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3140051
+    },
+    {
+      "id": "08-produktion-technik",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3232964
+    },
+    {
+      "id": "09-produktion-hochtechnologie",
+      "width": 1448,
+      "height": 1086,
+      "bytes": 2653940
+    },
+    {
+      "id": "10-ressourcenfelder",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2761010
+    },
+    {
+      "id": "11-sonnen",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2967662
+    },
+    {
+      "id": "12-schwarze-loecher-wurmloch",
+      "width": 1983,
+      "height": 793,
+      "bytes": 2743629
+    },
+    {
+      "id": "13-weltraumzonen",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2949903
+    },
+    {
+      "id": "14-weltraum-hintergrund-teal",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2356099
+    },
+    {
+      "id": "15-weltraum-hintergrund-violett",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2203017
+    }
+  ]
+}
