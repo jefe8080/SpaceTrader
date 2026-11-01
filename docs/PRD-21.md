@@ -7,6 +7,7 @@ Neue gezeichnete Comic-Sci-Fi-Entwürfe für die vorhandenen Orbital-Ausbaustufe
 Quelle: server/orbital.js und client/js/ui/homeworld.js. Gebrochener/nicht wiederhergestellter kleiner Ring; betriebsbereiter kleiner Ring (small); erster fertiger großer Abschnitt (largeStage=1); großer Ring vollständig (large und largeStage=2); Doppelwerft (doubleYard). Laufende Projekte sind zusätzliche Bauzustände, keine neue Spielmechanik. Die derzeitige Kartenzeichnung in orbitalRings.js zeigt nur dünne geometrische kleine/große Ringe; Abschnitt und Doppelwerft haben bisher keine eigene Silhouette.
 
 ## Gestaltungsanforderungen
+- Nutzerfeedback zur ersten Tafel: deutlich zu wuchtig, kaum Freiraum zwischen Ring und Planet. Fassung 1 verworfen. Fassung 2 reduziert Ringbreite und Modulvolumen stark und schafft sichtbare dunkle Zwischenräume. Diese Proportionen müssen vor Detailausarbeitung bestätigt werden.
 - Massive zusammenhängende druckfeste Ringsegmente, breite industrielle Tragwerke, angeschlossene Docks und sichtbar wachsende Werftkapazität.
 - Creme und verwittertes Teal, dunkle Tuschekonturen, Messing/Kupfer, warme Arbeitslichter; passende gemalte Dreiviertelperspektive.
 - In der Übersicht derselbe Planet in allen fünf Zuständen, ohne Veränderung seiner Boden-Ausbaustufe und ohne blauen Atmosphärensaum.
@@ -18,9 +19,9 @@ Quelle: server/orbital.js und client/js/ui/homeworld.js. Gebrochener/nicht wiede
 
 ## Schritte und Abnahmekriterien
 - [x] Vorhandene Zustände und Referenzen prüfen; Designumfang festlegen.
-- [ ] Fünf Zustände als gemeinsame Vergleichstafel zeichnen.
-- [ ] Detailentwurf der fertigen Doppelwerft zeichnen.
-- [ ] Bilder auf Perspektive, Fortschritt, Lesbarkeit und Vollständigkeit prüfen; Prompts und Ergebnisse unter docs/art/prd21 sichern.
+- [x] Fünf Zustände als gemeinsame Vergleichstafel zeichnen; zweite Fassung nach Nutzerfeedback erstellt.
+- [ ] Optionaler Detailentwurf der fertigen Doppelwerft, erst nach Bestätigung der überarbeiteten Proportionen.
+- [x] Bilder auf Perspektive, Fortschritt, Lesbarkeit und Vollständigkeit prüfen; Prompts und Ergebnisse unter docs/art/prd21 gesichert. Fassung 2 zeigt fünf Zustände, zwei Ringe bei Großausbau/Doppelwerft, größere Freiräume und lokalisierte Baudocks. Noch keine Spielintegration.
 - [ ] Nutzerabnahme.
 - [ ] Erst nach Abnahme: Produktionsgrafiken mit getrennten Vorder-/Hintergrundteilen erstellen, alte geometrische Ringzeichnung ersetzen und im Spiel prüfen.
 
