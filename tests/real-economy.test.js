@@ -24,7 +24,7 @@ test('Frische und spätere Sektoren haben keine öffentliche Verarbeitung, Ferti
   const f=fixture();for(let q=-2;q<=2;q++)for(let r=-2;r<=2;r++)f.game.world.ensureSector(q,r);
   let reserves=0;
   for(const entity of f.game.world.entities.values()){
-    if(entity.type==='ruins'||entity.market?.strategy==='homeResource')continue;
+    if(entity.type==='ruins')continue;
     assert(!STATION_TYPES[entity.type]?.recipe);const m=entity.market;if(!m)continue;
     assert.deepEqual(m.modules,[]);
     if(entity.id==='origin_yard'){assert.equal(m.forSale.length,1);assert.equal(m.forSale[0].source,'public_start_exception');assert(m.provenance.some(p=>p.id===m.forSale[0].id));}

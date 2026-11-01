@@ -24,7 +24,7 @@ export const HOMEWORLD = freeze({
   },
   money: { incomePerHour: 4, supplyFactor: [0.25, 1.25], employmentFactor: [0.5, 1],
     tax: 0.2, maxTax: 0.4, npcBudgetHours: 2 },
-  industry: { unsuppliedExtraction: 0.25, repairedSpeed: 0.1,
+  industry: { repairedSpeed: 0.1,
     repair: { credits: 250, goods: { ingots: 4 }, seconds: 30, power: 1, workers: { basic: 4, skilled: 0, specialist: 0 } },
     restore: { credits: 4750, goods: { ingots: 6 }, seconds: 60 }, maxBuildSeconds: 600 },
   relic: { speeds: [4, 5, 6], workshopSeconds: 15 },

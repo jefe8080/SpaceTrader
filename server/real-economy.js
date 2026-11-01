@@ -15,7 +15,7 @@ export const naturalGood=good=>GOODS[good]?.tier===0&&GOODS[good].cls!=='passeng
 
 /** Called only on freshly generated public markets, never on a loaded market. */
 export function preparePublicEntity(entity){
-  const market=entity.market;if(!market||market.homeworld||market.strategy==='homeResource')return;
+  const market=entity.market;if(!market||market.homeworld)return;
   market.realEconomy=true;market.provenance=[];market.modules=[];market.moduleInventory={};
   if(market.forSale)market.forSale=[];
   for(const [good,slot] of Object.entries(market.goods)){

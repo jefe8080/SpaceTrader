@@ -20,7 +20,7 @@ import { removeOffersOf } from './offers.js';
 import { tickEvents, sellToEvent } from './events.js';
 import { isConsortiumOwner, consortiumIdOf } from '../shared/consortium.js';
 import { checkWorldFile, WORLD_GEN, WORLD_KIND } from './world-profile.js';
-import { createHomeworld, tickHomeworld, tickHomeResource, migrateHomeResources } from './homeworld.js';
+import { createHomeworld, tickHomeworld, migrateHomeResources } from './homeworld.js';
 import {passengerTrade} from './population.js';
 import {handlingAllowance,recordHandling} from './handling.js';
 import {tickColonies} from './colonies.js';
@@ -684,7 +684,6 @@ export class Game {
         // PRD 15: Raidmalus läuft als halbe Produktionsgeschwindigkeit bis zur Reparatur
         const econDt = this.econAcc * productionFactor(e);
         if (e.market?.strategy === 'homeworld') { tickHomeworld(this, e, econDt); continue; }
-        if (e.market?.strategy === 'homeResource') { tickHomeResource(e, this.econAcc,this.time); continue; }
         if (!e.market) continue;
         tickMarket(e, econDt, this.time, this);
         if (propSectors.has(e.sector) || this.time - (this.activity.get(e.sector) ?? -Infinity) < SUPPLY.ACTIVITY) dispatchRealSupply(this, e);

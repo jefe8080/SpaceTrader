@@ -5,7 +5,6 @@ import { rng, hashN, createPlanet, planetRadius, applyLocationMods, romanNumeral
 import { preparePublicEntity } from './real-economy.js';
 import { newProperty, applyProperty } from './property.js';
 import { grantRelic } from './relic.js';
-import {stat} from './markets.js';
 import { tickHomeOperations, homeAccess, homeConstructionError } from './homeworld-operations.js';
 import {advancedQuestReady,completeAdvancedQuest} from './homequests.js';
 import { syncHomeQuests } from './quest-activation.js';
@@ -251,12 +250,4 @@ export function completeHomeQuest(game, player, entity, id) {
 
 export function tickHomeworld(game, entity, dt) {
   tickHomeOperations(game, entity, dt);
-}
-
-export function tickHomeResource(entity, dt, now=0) {
-  const market = entity.market, food = market.goods.food;
-  const supplied = food.stock >= food.rate * dt;
-  market.eff = supplied ? 1 : HOMEWORLD.industry.unsuppliedExtraction;
-  const consumed=Math.min(food.stock,food.rate*dt);food.stock-=consumed;stat(market,now,'c','food',consumed);
-  for (const [good,slot] of Object.entries(market.goods)) if (slot.role === 'produce') {const amount=Math.max(0,Math.min(slot.cap-slot.stock,slot.rate*market.eff*dt));slot.stock+=amount;stat(market,now,'p',good,amount);}
 }

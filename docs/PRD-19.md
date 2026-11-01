@@ -199,8 +199,10 @@ Fortschritt wird im selben Commit aktualisiert.
   3 Besitzverhältnisse erhalten, 11 Routen mit Halt an diesen Planeten, 0
   Routenhalte ohne Ziel, 0 Planeten danach weder `ruins` noch `realEconomy`.
   Zweiter Start: keine weitere Migration.
-- [ ] **S5: `homeResource` entfernen.** Strategie, Tick, Konstanten und
-  Test-Ausnahmen entfernen.
+- [x] **S5: `homeResource` entfernen.** Strategie, Tick, Konstanten und
+  Test-Ausnahmen entfernen. Der Name `homeResource` steht nur noch als
+  Erkennungsmerkmal in `migrateHomeResources` und im Altbestand-Fixture von
+  `tests/prd19.test.js`.
 - [ ] **S6: Legacy-Zweige für Planeten entfernen.** Nach E5 in Server, Shared
   und Client, plus Start-Prüfung mit Log-Meldung.
 - [ ] **S7: Abnahme.** Sims nach E4, Browser-Test in der lokalen Vorschau
