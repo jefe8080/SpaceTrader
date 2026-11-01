@@ -1,6 +1,7 @@
 import {PLANET_TYPES, STATION_TYPES, BELT_TYPES} from './goods.js';
 import {STUDY_FINDS} from './advanced-homequests.js';
 import {ruinsDevelopment} from './ruins-development.js';
+import {ORBITAL_STAGES} from './orbital-art.js';
 
 export const SUN_COLORS = Object.freeze(['#fff3c4', '#ffe082', '#ffcc80', '#ff8a65', '#bbdefb', '#ffffff']);
 const ids = [
@@ -13,6 +14,7 @@ const ids = [
   'blackhole_0', 'blackhole_1', 'wormhole',
   ...['gravity', 'ionstorm', 'nebula', 'solarwind', 'plasma'].map(id => 'zone_' + id),
   'background_teal', 'background_violet',
+  ...ORBITAL_STAGES.flatMap(stage => ['back', 'front'].map(side => `orbital_${stage}_${side}`)),
 ];
 export const SPACE_ART = Object.freeze(Object.fromEntries(ids.map(id => ['space_' + id, '/assets/art/space/' + id + '.png'])));
 export const spaceArtUrl = key => SPACE_ART[key] || null;

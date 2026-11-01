@@ -30,7 +30,11 @@ for(const id of ['broken','small','partial','large','double']) {
  if(pad<16)throw Error('Insufficient margin: '+id);
  const normalized=await sharp(data,{raw:info}).resize(side,side).extend({left:pad,right:1024-side-pad,top:pad,bottom:1024-side-pad,background:'#00000000'}).ensureAlpha().raw().toBuffer();
  // No planet may be baked into an orbital sprite.
- for(let y=450;y<574;y++)for(let x=450;x<574;x++)if(normalized[(y*1024+x)*4+3]>8)throw Error('Nonempty center: '+id);
+ for(let y=450;y<574;y++)for(let x=450;x<574;x++) {
+  const p=(y*1024+x)*4+3;
+  if(normalized[p]>8)throw Error('Nonempty center: '+id);
+  normalized[p]=0; // Remove only near-zero mask noise in the verified empty opening.
+ }
  for(const front of [false,true]) {
   const pixels=Buffer.from(normalized);
   if(front)pixels.fill(0,0,512*1024*4);else pixels.fill(0,512*1024*4);

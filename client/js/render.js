@@ -1,5 +1,6 @@
 import { drawBattleSymbols, pickBattle } from './ui/battle.js';
 import {drawOrbitalRings} from './orbitalRings.js';
+import {orbitalArtStage, orbitalArtScale, orbitalHitTest} from '/shared/orbital-art.js';
 import {spaceArtKey, sunArtKey} from '/shared/space-art.js';
 import { WORLD, PLANET_TYPES, STATION_TYPES, BELT_TYPES, SHIP_TYPES, ZONE_TYPES, GOODS, cellKey } from '/shared/config.js';
 import { hexAt, hexCorners, hexCenter, hexKey } from '/shared/hex.js';
@@ -463,7 +464,9 @@ function drawSystemLabels() {
     if (!inView(e.x, e.y, e.radius)) continue;
     if (z < 0.09 && e.kind === 'belt') continue;
     const [sx, sy] = worldToScreen(e.x, e.y);
-    const r = e.kind === 'belt' ? e.radius * z * 0.9 : Math.max(e.radius, 7 / z) * z;
+    const orbital = orbitalArtStage(e);
+    const clearance = orbital ? (['broken', 'small'].includes(orbital) ? 1.5 : 2.1) : 1;
+    const r = e.kind === 'belt' ? e.radius * z * 0.9 : Math.max(e.radius, 7 / z) * z * clearance;
     const fav = state.favorites[e.id] ? '★ ' : '';
     const col = e.kind === 'station' ? stationAccent(e) : e.kind === 'belt' ? '#bcaaa4' : e.kind === 'wormhole' ? '#ce93d8' : e.faction ? FACTIONS[e.faction].color : '#e3ecff';
     label(fav + e.name, sx, sy + r + 6, col, e.type === 'hub' ? '700 13px "Segoe UI", sans-serif' : undefined);
@@ -729,7 +732,7 @@ export function render(now, dt) {
   drawZones(now);
   drawBlackHoles(now);
   drawStars();
-  const ents = [...state.entities.values()].filter((e) => inView(e.x, e.y, e.radius * 2.5));
+  const ents = [...state.entities.values()].filter((e) => inView(e.x, e.y, Math.max(e.radius * 2.5, entitySelectRadius(e))));
   for (const e of ents) if (e.kind === 'belt') drawBelt(e, t);
   for (const e of ents) if (e.kind === 'wormhole') drawWormhole(e, t);
   for (const e of ents) if (e.kind === 'planet') drawPlanet(e);
@@ -770,7 +773,8 @@ function drawInterceptRange(){
 }
 function entitySelectRadius(e) {
   if (e.kind === 'belt') return e.radius;
-  return Math.max(e.radius, px(7)) * 1.25;
+  const stage = orbitalArtStage(e);
+  return Math.max(e.radius, px(7)) * (stage ? orbitalArtScale(stage) / 2 : 1.25);
 }
 
 /** Ermittelt Schiff, Objekt, System oder Sektor unter einer Bildschirmposition */
@@ -794,8 +798,9 @@ export function pickAt(sx, sy) {
     for (const e of state.entities.values()) {
       const r = e.kind === 'belt' ? e.radius * 0.9 : Math.max(e.radius * 1.25, 18 / z);
       const d = Math.hypot(e.x - wx, e.y - wy);
-      if (d > r) continue;
-      const score = d / r;
+      const orbitalHit = orbitalHitTest(e, wx - e.x, wy - e.y, Math.max(e.radius, px(7)), px(6));
+      if (d > r && !orbitalHit) continue;
+      const score = d <= r ? d / r : 1 + d / entitySelectRadius(e);
       if (score < bestScore) { bestScore = score; best = { kind: 'entity', id: e.id }; }
     }
     return best;
