@@ -188,9 +188,8 @@ function drawBlackHoles() {
     const variant=strHash(String(sector.id||sector.name||sector.bh.x))%2;
     const image=getSprite('space_blackhole_'+variant);
     if(!image)continue;
-    // Mindestgröße beim Herauszoomen abbauen, damit das Bild nicht den Sektor verdeckt.
-    const zoomScale=Math.min(1,cam.zoom/LOD.SYSTEM)**0.5;
-    const size=Math.max(900,px(6)*zoomScale)*7;
+    // Beim Herauszoomen sichtbar bleiben, ohne den Sektor zu verdecken.
+    const size=Math.max(900*7,px(25));
     ctx.drawImage(image,sector.bh.x-size/2,sector.bh.y-size/2,size,size);
   }
 }
@@ -537,7 +536,7 @@ function drawSectorView(now) {
     if (!inView(sy.x, sy.y, WORLD.SYSTEM_RADIUS)) continue;
     // Sonnen bleiben deutlicher sichtbar als schwarze Löcher, schrumpfen aber mit.
     const zoomScale=Math.min(1,cam.zoom/LOD.SYSTEM)**0.2;
-    const sun=getSprite(sunArtKey(sy.star?.color)),size=px(30*zoomScale);
+    const sun=getSprite(sunArtKey(sy.star?.color)),size=px(39*zoomScale);
     if(sun)ctx.drawImage(sun,sy.x-size/2,sy.y-size/2,size,size);
     ctx.strokeStyle = sy.faction ? FACTIONS[sy.faction].color + 'cc' : 'rgba(255,255,255,0.12)';
     ctx.lineWidth = px(sy.faction ? 2.5 : 1);
