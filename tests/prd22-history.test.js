@@ -8,6 +8,18 @@ import { startBattle, endBattle, joinBattle } from '../server/war/battle.js';
 import '../server/war/outcome.js';
 import { storeCombatReport, combatStats } from '../server/war/history.js';
 import { pilotProfile } from '../server/pilot-profile.js';
+import { combatHistoryPage } from '../shared/combat-history.js';
+
+test('history: search across participants, ships, places and legacy reports; pagination clamps',()=>{
+  const reports=Array.from({length:60},(_,i)=>({battle:'b'+i,result:i%2?'win':'loss',enemies:['Gegner'],
+    location:{planet:{name:'Erde'}},ships:[{name:'Falke',ownerName:'Pilot',factionName:'Technokraten'}]}));
+  assert.equal(combatHistoryPage(reports).reports.length,25);
+  assert.equal(combatHistoryPage(reports,'Erde','win').total,30);
+  assert.equal(combatHistoryPage(reports,'technokraten','',2).reports.length,10);
+  assert.equal(combatHistoryPage(reports,'FALKE','',9).page,2);
+  assert.equal(combatHistoryPage(reports,'unbekannt').total,0);
+  assert.equal(combatHistoryPage([{lost:['Altname']}],'altname').total,1);
+});
 
 test('history: immutable identities, personal outcomes, allies and database roundtrip', () => {
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'combat-history-')), file=path.join(dir,'game.db');

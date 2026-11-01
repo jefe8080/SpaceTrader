@@ -1,3 +1,4 @@
+import { combatStats } from './war/history.js';
 import {interceptRange} from './war/support.js';
 import { pilotProfile } from './pilot-profile.js';
 import { GAME_PROTOCOL } from '../shared/protocol.js';
@@ -130,6 +131,11 @@ export class Net {
         session.subs = subs;
         this.sendMarketsTo(session); // neue Abos sofort bedienen
       }
+    });
+
+    socket.on('combatHistory', (_msg, reply) => {
+      if (!session || typeof reply !== 'function') return;
+      reply({ player:session.player.id, reports:diplo(session.player).reports || [] });
     });
 
     socket.on('stats', (msg) => {
@@ -417,6 +423,6 @@ function playerDetail(p) {
 function warView(game, p) {
   const w = diplo(p);
   const factions = [...game.fsecs.values()].filter((fs) => { const e = game.world.entities.get(fs.admin); return e && game.isKnown(p, e); }).map((fs) => ({ admin: fs.admin, ...fsecView(game, fs, p) }));
-  return { friends: w.friends, friendQuest: w.friendQuest || null, galactic: !!w.galactic, reports: (w.reports || []).slice(0, 5), factions,
+  return { friends: w.friends, friendQuest: w.friendQuest || null, galactic: !!w.galactic, combatStats:combatStats(p), historyRevision:[w.reports?.[0]?.battle || '',w.reports?.length || 0,combatStats(p).total].join(':'), factions,
     aggr: Object.fromEntries(Object.entries(w.aggr).map(([k, v]) => [k, Math.round(v)])), peace: w.peace };
 }

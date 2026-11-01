@@ -13,8 +13,10 @@ Historienbereich und einzelne Berichte sind beim Öffnen eingeklappt. Neueste Be
 
 ## Umsetzung und Abnahme
 - [x] U1: Abschluss-Snapshots, persistente 500-Berichte-Grenze und dauerhafte Summen implementieren. Daten vor Zerstörung/Besitzwechsel sichern; Altberichte unverändert erhalten. Automatisierte Tests für Ergebnisse, Verluste, Unterstützung, Limit, Altbestand und Persistenz.
-- [ ] U2: Persönliche Daten an Client übertragen; Profilzähler anbinden; zugängliches Fenster mit Statistik, eingeklappter Historie, Suche, Filter und Pagination erstellen. Leere und unvollständige Daten verständlich anzeigen.
+- [x] U2: Persönliche Daten an Client übertragen; Profilzähler anbinden; zugängliches Fenster mit Statistik, eingeklappter Historie, Suche, Filter und Pagination erstellen. Leere und unvollständige Daten verständlich anzeigen.
 - [ ] U3: Gesamttests und Oberflächenprüfung, Fehler korrigieren und Ergebnis dokumentieren.
 
 ## Prüfprotokoll
 Planung durch Grilling abgeschlossen und vom Nutzer bestätigt. U1 abgeschlossen: neun gezielte Tests erfolgreich (PRD 15 Kampfregression und neue Historientests), einschließlich Datenbank-Neustart, unveränderlicher Identität, Verbündeten, Ergebniszählern und 500er-Limit.
+
+U2 abgeschlossen: persönlicher Socket-Endpunkt lädt Berichte nur bei Bedarf; normale Updates enthalten Summen und eine Historienrevision. Suche/Filter/Pagination durch automatisierten Test und Browserlauf mit 32 Berichten geprüft. Vollständige Suite: 393/393 erfolgreich. Browser ohne JavaScript-Fehler; Screenshot unter docs/qa/prd22/combat-history.png. Eine bei der Nachprüfung gefundene verwaiste diplo-Referenz wurde entfernt.

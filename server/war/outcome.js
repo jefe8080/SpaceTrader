@@ -16,7 +16,6 @@ export function immobile(game, b, u) {
 function report(game, owner, rep) {
   const p = game.players.get(owner);
   if (!p) return;
-  const w = diplo(p);
   storeCombatReport(p, rep);
   game.emit('notice', p, `Schlacht beendet: ${rep.result === 'win' ? 'Sieg' : rep.result === 'loss' ? 'Niederlage' : 'Unentschieden'} (${rep.lost.length} Verluste, ${rep.prisoners.length} Gefangene)`);
 }

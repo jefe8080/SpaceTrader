@@ -580,3 +580,12 @@ body.fleet-collapsed #fleet .fleet-item img { width:30px; }
 .orbital-ship { border:1px solid var(--panel-border); background:rgba(0,0,0,.18); overflow-wrap:anywhere; }
 .orbital-ship h4 { margin:6px 0; }
 [data-disclosure^="orbital-"] > summary { font-weight:600; min-height:40px; display:list-item; }
+/* Personal combat archive */
+#combatHistoryModal .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); overflow-wrap: anywhere; }
+#combatHistoryDisclosure { margin-top: 18px; }
+.combat-filters { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
+.combat-filters label { display: grid; gap: 5px; flex: 1 1 180px; min-width: 0; }
+.combat-filters input, .combat-filters select { width: 100%; min-width: 0; box-sizing: border-box; }
+.combat-report { padding: 10px 0; border-bottom: 1px solid var(--panel-border); overflow-wrap: anywhere; }
+.combat-report summary, #combatHistoryDisclosure > summary { cursor: pointer; }
+.combat-report li { margin: 7px 0; }
