@@ -160,14 +160,14 @@ Fortschritt wird im selben Commit aktualisiert.
 
   | Seed | `sim:homeworld` bis H06 (s) | `sim:progression` |
   |------|-----------------------------|-------------------|
-  | 1 | 2091 | läuft noch, wird nachgetragen |
+  | 1 | 2091 | Abbruch nach H10 (39846 s): „Zeitlimit Produktion water“ |
   | 2 | 2048 | Abbruch nach H09 (47844 s): „Keine reale Rohstoffquelle gold“ |
   | 3 | 1986 | Abbruch nach H09 (37291 s): „Keine reale Rohstoffquelle gold“ |
   | 4 | 2126 | Abbruch nach H09 (41235 s): „Keine reale Rohstoffquelle gold“ |
   | 5 | 2047 | Abbruch nach H08 (30044 s): „homeBuild: Nicht genug Credits.“ |
 
   Befund: Der Progressionsplaner ist auf Seed 42 abgestimmt und läuft schon vor
-  der Umstellung auf den Seeds 2 bis 5 nicht durch. Kriterium 7 kann für
+  der Umstellung auf keinem der Seeds 1 bis 5 durch. Kriterium 7 kann für
   `sim:progression` deshalb nur relativ zur Baseline geprüft werden (mindestens
   dieselbe letzte Quest, keine neue Fehlerursache). Dazu läuft zusätzlich der
   Referenzlauf auf Seed 42 als Baseline. Mit dem Nutzer zu klären.
@@ -178,8 +178,10 @@ Fortschritt wird im selben Commit aktualisiert.
   `tests/world.test.js` vergleicht Prüfsummen über 25 Sektoren für Seed 42
   und 7 mit dem Stand vor der Änderung. Dazu `romanNumeral` für Namen über
   VIII hinaus.
-- [ ] **S3: Neuerzeugung.** `createHomeworld` erzeugt Rohstoffplaneten nach E2.
-  Tests für Typ, `realEconomy`, Name, Gas/Helium-3-Deckung.
+- [x] **S3: Neuerzeugung.** `createHomeworld` erzeugt Rohstoffplaneten nach E2.
+  Tests für Typ, `realEconomy`, Name, Gas/Helium-3-Deckung. Ortsmodifikatoren
+  werden wie in `ensureSector` nur über die neuen Planeten berechnet, bestehende
+  Märkte des Systems bleiben unberührt. RNG: `hashN(seed, Spieler, 502)`.
 - [ ] **S4: Migration.** `migrateHomeResources` nach E3 mit Tests für
   Idempotenz, Bestandsübernahme, Besitz, Routen. Prüflauf gegen Kopie des
   Prod-Spielstands.

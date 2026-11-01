@@ -1,7 +1,8 @@
-import { GOODS,propertyBasePrice } from '../shared/config.js';
+import { GOODS,PLANET_TYPES,propertyBasePrice } from '../shared/config.js';
 import { HOMEWORLD, HOME_QUESTS, availableHomeStock } from '../shared/homeworld.js';
 import { hexAt, hexKey } from '../shared/hex.js';
-import { rng, hashN } from './worldgen.js';
+import { rng, hashN, createPlanet, planetRadius, applyLocationMods, romanNumeral } from './worldgen.js';
+import { preparePublicEntity } from './real-economy.js';
 import { newProperty } from './property.js';
 import { grantRelic } from './relic.js';
 import {stat} from './markets.js';
@@ -14,6 +15,8 @@ const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const done = (player, id) => !!player.homeQuest?.completed[id];
 const plantDone = (home, id) => home.facilities[id]?.status === 'ready';
 const emitHome = (game, entity) => { entity.market.rev = (entity.market.rev || 0) + 1; game.emit('entity', entity); };
+/** Planetentyp je Grundrohstoff der Heimat; ein Gasriese liefert Gas und Helium-3 */
+export const RESOURCE_PLANET_TYPES = Object.freeze({ ice: 'ice', grain: 'agrar', gas: 'gasgiant', helium3: 'gasgiant', crude: 'ocean', ore: 'mining' });
 
 export function ringCoordinates(ring) {
   const out = [];
@@ -58,15 +61,24 @@ function selectSite(game, player) {
         for (const good of HOMEWORLD.placement.resources) {
           const existing = game.world.sectorEntities(system.sector).find((e) => e.system === system.id && e.market?.goods[good]?.role === 'produce' && distance(e, point) <= HOMEWORLD.placement.maxResourceDistance);
           if (existing) { resources.push({ good, existing }); continue; }
+          // Ein schon geplanter Planet kann die Ware mitliefern (Gasriese: Gas und Helium-3)
+          const planned = resources.find((e) => e.point && PLANET_TYPES[e.type].produce[good]);
+          if (planned) { resources.push({ good, planned }); continue; }
           const source = clearPosition(game.world, system, point, random, 1600, 5300, resources.filter((e) => e.point).map((e) => e.point));
           if (!source) { suitable = false; break; }
-          resources.push({ good, point: source });
+          resources.push({ good, type: RESOURCE_PLANET_TYPES[good], point: source });
         }
         if (suitable) return { system, point, resources };
       }
     }
   }
   throw new Error('Kein geeigneter Heimatstandort gefunden.');
+}
+
+/** Nächste freie römische Ziffer der Orbit-Namenskette; bestehende Planeten behalten ihren Namen */
+function nextOrbitName(world, system) {
+  const names = new Set(world.sectorEntities(system.sector).filter((e) => e.system === system.id).map((e) => e.name));
+  for (let n = 1; ; n++) if (!names.has(`${system.name} ${romanNumeral(n)}`)) return `${system.name} ${romanNumeral(n)}`;
 }
 
 export function createHomeworld(game, player) {
@@ -90,16 +102,13 @@ export function createHomeworld(game, player) {
   const prop = newProperty(id, player.id, game.time); prop.mode = 'private'; prop.personal = true;
   game.ownership.set(id, prop);
   entity.ownerName = player.name; entity.ownerColor = player.color;
-  const resourceTypes = { ice: 'ice', grain: 'agrar', gas: 'gasgiant', helium3: 'gasgiant', crude: 'ocean', ore: 'mining' };
-  const rates = { ice: 1.2, grain: 1.2, gas: 1.4, helium3: 0.6, crude: 1, ore: 1 };
-  for (const resource of site.resources) {
-    if (resource.existing) continue;
-    const good = resource.good;
-    game.world.addEntity({ id: `${id}_source_${good}`, name: `${GOODS[good].name} – ${site.system.name}`, kind: 'planet',
-      type: resourceTypes[good], radius: 80, size: 1, ...resource.point, sector: entity.sector, system: entity.system,
-      market: { strategy: 'homeResource', eff: 0.25, provenance:[{id:`${id}_source_${good}:natural`,source:'natural_reserve',good,amount:150}], goods: { [good]: { role: 'produce', rate: rates[good], cap: 600, stock: 150, mod: 1 },
-        food: { role: 'consume', rate: 0.02, cap: 100, stock: 0, mod: 1 } } } });
-  }
+  const random = rng(hashN(game.world.seed, Number(player.id.slice(1)), 502));
+  const planets = site.resources.filter((resource) => resource.point).map((resource) => {
+    const radius = planetRadius(resource.type, random);
+    return createPlanet(resource.type, radius, random, { id: `${id}_source_${resource.good}`, ...resource.point, sector: entity.sector, system: entity.system });
+  });
+  for (const planet of planets) { planet.name = nextOrbitName(game.world, site.system); preparePublicEntity(planet); game.world.addEntity(planet); }
+  applyLocationMods(planets, random);
   player.credits = HOMEWORLD.start.credits;
   const ship = game.spawnShip(player, HOMEWORLD.start.ship, entity);
   home.grants.push({id:`${entity.id}:start-ship`,source:'start_exception',recipient:player.id,ship:ship.id,fuel:ship.fuel});

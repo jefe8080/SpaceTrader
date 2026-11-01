@@ -5,7 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { Game } from '../server/game.js';
 import {runCommand,acknowledgeStories} from './home-story-helper.js';
-import { createHomeworld, tickHomeworld, ringCoordinates } from '../server/homeworld.js';
+import { createHomeworld, tickHomeworld, ringCoordinates, RESOURCE_PLANET_TYPES } from '../server/homeworld.js';
 import { HOMEWORLD } from '../shared/homeworld.js';
 
 function fixture(seed = 42, db = ':memory:') {
@@ -55,6 +55,38 @@ test('Persönliche Heimat: gleichzeitige und spätere Spieler haben Abstand, get
   }
   assert.equal(new Set(homes.map(h=>h.id)).size,24);
   game.store.close();
+});
+
+test('Rohstoffplaneten der Heimat sind gewöhnliche Planeten der echten Wirtschaft (PRD 19)', () => {
+  const game = new Game(':memory:', { seed: 42 });
+  let gasGiants = 0;
+  for (let i = 0; i < 8; i++) {
+    const player = game.createPlayer(`Quelle ${i}`), home = game.world.entities.get(player.homeworld);
+    const sources = [...game.world.entities.values()].filter((e) => e.id.startsWith(`${home.id}_source_`));
+    for (const planet of sources) {
+      const good = planet.id.slice(`${home.id}_source_`.length);
+      assert.equal(planet.type, RESOURCE_PLANET_TYPES[good], planet.id);
+      assert.equal(planet.market.strategy, 'planet');
+      assert.equal(planet.market.realEconomy, true);
+      assert.ok(planet.market.economy.population > 0);
+      assert.equal(planet.market.goods[good].role, 'produce');
+      assert.ok(planet.market.goods[good].cap > 600, 'Lager aus Typ und Größe');
+      assert.ok(planet.size >= 0.7 && planet.size <= 1.3);
+      assert.match(planet.name, new RegExp(`^${game.world.systems.get(home.system).name} [IVX]+$`));
+      assert.ok(!game.ownership.has(planet.id));
+      if (planet.type === 'gasgiant') gasGiants++;
+    }
+    if (sources.some((e) => e.type === 'gasgiant')) assert.ok(!sources.some((e) => e.id.endsWith('_source_helium3')), 'der Gasriese deckt auch Helium-3');
+    const system = [...game.world.entities.values()].filter((e) => e.system === home.system && e.kind === 'planet');
+    assert.equal(new Set(system.map((e) => e.name)).size, system.length, 'Namen im System eindeutig');
+    for (const good of HOMEWORLD.placement.resources) assert.ok(system.some((e) => e.market?.goods[good]?.role === 'produce' && Math.hypot(e.x - home.x, e.y - home.y) <= 6000), good);
+  }
+  assert.ok(gasGiants > 0, 'mindestens ein neuer Gasriese im Testlauf');
+  const again = new Game(':memory:', { seed: 42 });
+  for (let i = 0; i < 8; i++) again.createPlayer(`Quelle ${i}`);
+  const sources = (g) => [...g.world.entities.values()].filter((e) => e.id.includes('_source_')).map((e) => [e.id, e.name, e.x, e.y, e.radius, e.market.goods]);
+  assert.deepEqual(sources(again), sources(game), 'deterministisch je Weltseed und Spieler');
+  game.store.close(); again.store.close();
 });
 
 test('Erschöpfte Startringe erweitern die Suche ringweise', () => {
