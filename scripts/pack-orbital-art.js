@@ -11,17 +11,28 @@ for(const id of ['broken','small','partial','large','double']) {
  if(['partial','large','double'].includes(id)) {
   const labels=new Int32Array(w*h),queue=new Int32Array(w*h),parts=[];
   for(let start=0;start<w*h;start++) {
-   if(labels[start]||data[start*4+3]<2)continue;
+   if(labels[start]||data[start*4+3]<80)continue;
    const label=parts.length+1;let head=0,n=1,x0=w,x1=0;queue[0]=start;labels[start]=label;
    while(head<n) {
     const p=queue[head++],x=p%w,y=Math.floor(p/w);x0=Math.min(x0,x);x1=Math.max(x1,x);
-    for(const q of [x>0?p-1:-1,x<w-1?p+1:-1,y>0?p-w:-1,y<h-1?p+w:-1])if(q>=0&&!labels[q]&&data[q*4+3]>=2){labels[q]=label;queue[n++]=q;}
+    for(const q of [x>0?p-1:-1,x<w-1?p+1:-1,y>0?p-w:-1,y<h-1?p+w:-1])if(q>=0&&!labels[q]&&data[q*4+3]>=80){labels[q]=label;queue[n++]=q;}
    }
    parts.push({label,n,x0,x1});
   }
   const outer=parts.filter(p=>p.x1-p.x0>w*.8).sort((a,b)=>b.n-a.n)[0];
   if(!outer)throw Error('No separated outer ring: '+id);
-  for(let p=0;p<w*h;p++)if(labels[p]!==outer.label)data[p*4+3]=0;
+  // Near-transparent generator noise can bridge two separate rings. Identify
+  // the opaque outer structure first, then recover only its nearby alpha edge.
+  let mask=Uint8Array.from(labels,label=>label===outer.label?1:0);
+  for(let pass=0;pass<6;pass++) {
+   const next=Uint8Array.from(mask);
+   for(let p=0;p<w*h;p++)if(!mask[p]&&data[p*4+3]>=2){
+    const x=p%w,y=Math.floor(p/w);
+    if((x>0&&mask[p-1])||(x<w-1&&mask[p+1])||(y>0&&mask[p-w])||(y<h-1&&mask[p+w]))next[p]=1;
+   }
+   mask=next;
+  }
+  for(let p=0;p<w*h;p++)if(!mask[p])data[p*4+3]=0;
  }
  let left=w,right=0,transparent=0;
  for(let p=0;p<w*h;p++){const a=data[p*4+3];if(a<8)transparent++;if(a>16){left=Math.min(left,p%w);right=Math.max(right,p%w);}}

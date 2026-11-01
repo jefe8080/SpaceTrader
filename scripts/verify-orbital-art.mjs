@@ -44,10 +44,20 @@ try {
     for(let y=0;y<1024;y++)for(let xx=0;xx<1024;xx++){const a=d[(y*1024+xx)*4+3];if(side==='back'?y>=512:y<512)wrong+=a;if(xx>=450&&xx<574&&y>=450&&y<574)center+=a;}
     sides.push({side,wrong,center});
    }
-   rows.push({stage,sides});
+   // Inspect the actual artwork, not only which logical layers were requested.
+   const occupied=[];
+   for(const side of ['back','front']) {
+    x.clearRect(0,0,1024,1024);x.drawImage(getSprite('space_orbital_'+stage+'_'+side),0,0);
+    const d=x.getImageData(0,0,1024,1024).data;
+    for(let y=0;y<1024;y++){let n=0;for(let xx=502;xx<522;xx++)if(d[(y*1024+xx)*4+3]>=100)n++;if(n>=3)occupied.push(y);}
+   }
+   occupied.sort((a,b)=>a-b);const bands=[];
+   for(const y of occupied){const last=bands.at(-1);if(last&&y-last[1]<=12)last[1]=y;else bands.push([y,y]);}
+   rows.push({stage,sides,bands});
   }return rows;
  });
  for(const layer of layerCheck)for(const side of layer.sides){assert.equal(side.wrong,0);assert.equal(side.center,0);}
+ for(const layer of layerCheck)if(['partial','large','double'].includes(layer.stage))assert.equal(layer.bands.length,layer.stage==='partial'?1:2,layer.stage+' must contain only the outer ring');
  await page.setViewportSize({width:800,height:650});await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
  await page.evaluate(()=>window.showOrbitalStages(.5));await page.screenshot({path:fileURLToPath(new URL('small-viewport.png',out))});
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
