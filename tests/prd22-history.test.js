@@ -9,6 +9,45 @@ import '../server/war/outcome.js';
 import { storeCombatReport, combatStats } from '../server/war/history.js';
 import { pilotProfile } from '../server/pilot-profile.js';
 import { combatHistoryPage } from '../shared/combat-history.js';
+import { Net } from '../server/net.js';
+import { blueprint } from '../shared/combat.js';
+
+test('history: captured warship preserves former owner and separates capture from destruction',()=>{
+  const game=new Game(':memory:',{seed:22});
+  try {
+    const p=game.createPlayer('Sieger'), q=game.createPlayer('Verlierer'), yard=game.world.entities.get('origin_yard');
+    const a=game.spawnShip(p,'korvette',yard), d=game.spawnShip(q,'korvette',yard);
+    for(const s of [a,d]){s.dockedAt=null;s.queue=[];}
+    q.faction='tech';
+    const b=startBattle(game,[a],[d]);
+    for(const sys of blueprint(d.type).systems)if(['engine','thrust'].includes(sys.kind))d.dmg.sys[sys.id]=0;
+    endBattle(game,b,'A');
+    assert.equal(d.owner,p.id);
+    const ship=p.war.reports[0].ships.find(s=>s.id===d.id);
+    assert.equal(ship.owner,q.id);assert.equal(ship.faction,'tech');assert.equal(ship.outcome,'captured');
+    assert.equal(p.war.combatStats.captured,1);assert.equal(q.war.combatStats.lost,1);
+    assert.equal(q.war.combatStats.destroyed,0);
+  } finally {game.store.close();}
+});
+
+test('history: network endpoint requires login and only returns session owner reports',()=>{
+  const game=new Game(':memory:',{seed:22});
+  try {
+    const p=game.createPlayer('Eigener Pilot'), q=game.createPlayer('Fremder Pilot');
+    p.war={reports:[{battle:'own'}]};q.war={reports:[{battle:'secret'}]};
+    const handlers={},messages={};
+    const socket={on:(event,fn)=>handlers[event]=fn,emit:(event,data)=>messages[event]=data};
+    const net=new Net({on(){},emit(){}},game);
+    net.onConnection(socket);
+    let response;
+    handlers.combatHistory({player:q.id},data=>response=data);assert.equal(response,undefined);
+    handlers.login({name:p.name});
+    handlers.combatHistory({player:q.id},data=>response=data);
+    assert.equal(response.player,p.id);assert.deepEqual(response.reports,[{battle:'own'}]);
+    assert.equal(messages.me.war.reports,undefined,'regular updates do not include the archive');
+    assert.equal(messages.me.war.combatStats.total,0);
+  } finally {game.store.close();}
+});
 
 test('history: search across participants, ships, places and legacy reports; pagination clamps',()=>{
   const reports=Array.from({length:60},(_,i)=>({battle:'b'+i,result:i%2?'win':'loss',enemies:['Gegner'],
