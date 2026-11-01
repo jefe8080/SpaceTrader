@@ -11,6 +11,8 @@ import { diplo } from '../server/war/diplomacy.js';
 import { serializeEntity } from '../server/net.js';
 import { applyLevel } from '../server/markets.js';
 import { questProgress } from '../server/quests.js';
+import { downstreamDemand } from '../server/real-economy.js';
+import { initializePopulation } from '../server/population.js';
 
 function fixture(file = ':memory:') {
   const game = new Game(file, { seed: 21 });
@@ -23,6 +25,25 @@ function fixture(file = ':memory:') {
   const ship = game.spawnShip(player, 'lastesel', admin);
   return { game, faction, admin, player, ship };
 }
+
+test('Nachfrageprüfung am Verwaltungsplaneten erhält dynamische Fraktionsversorgung', () => {
+  const { game, faction, admin } = fixture();
+  try {
+    const supply = { ...faction.supply }, slots = admin.market.goods;
+    const trader = { id: 'regression-trader', type: 'trader', sector: admin.sector,
+      x: admin.x, y: admin.y, market: { goods: { water: { stock: 0 } } } };
+    assert.doesNotThrow(() => downstreamDemand(game, trader, 'water'));
+    assert.doesNotThrow(() => initializePopulation(admin));
+    assert.equal(admin.market.goods, slots);
+    assert.deepEqual(Object.keys(slots), ['water', 'food']);
+    assert.deepEqual(faction.supply, supply);
+    faction.level = 2;
+    assert.equal(slots.water.rate, F.DEMAND_PER_MIN * 2 / 60);
+    assert.equal(slots.water.cap, F.BUFFER * 2);
+    slots.water.stock += 1;
+    assert.equal(faction.supply.water, supply.water + 1);
+  } finally { game.store.close(); }
+});
 
 test('Verwaltungsmarkt migriert Bestände einmalig, erhält Grundversorgung und übersteht Neustarts', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'admin-migration-'));

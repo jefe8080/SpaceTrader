@@ -13,6 +13,9 @@ export function grantSchoolStaff(h,schools){
   }
 }
 export function initializePopulation(e){
+  // Administrative markets use faction-owned supply buffers and level-based
+  // read-only rates; ordinary population demand must not rewrite these slots.
+  if(e.market?.strategy==='factionadmin')return;
   migrateCivilAccounts(e.market);
   if(e.type==='hotel'&&e.kind==='station'){
     const h=e.market.economy||=( {cash:0,rate:0,population:0} );
