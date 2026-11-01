@@ -3,7 +3,6 @@
 import { GOODS, RECIPES, RECIPE_CATS, PLANET_TYPES, factoryCost, factorySlots, recipeCat, recipeText } from '/shared/config.js';
 import { state, fmt, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
-import { goodTag } from '../util.js';
 import { $, setHtml, toast,confirmAction } from './dom.js';
 import { questBoardSection } from './quests.js';
 import { scene, canLand, accessTo, resetPlanetside, selectBuilding, hidePlanetside, getPlanetView } from '../planetside.js';
@@ -131,7 +130,7 @@ export function renderPlanetUi() {
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   let body = '';
   if (e.type === 'ruins') body = homePanel(e, it, ship);
-  else if (it.kind === 'questhouse') body = questBoardSection(e, ship, true)+(e.market.realEconomy?propertySection(e):'');
+  else if (it.kind === 'questhouse') body = questBoardSection(e, ship, true)+propertySection(e);
   else if (it.worldInfrastructure) {const building=e.market.economy?.infrastructure?.find(b=>b.id===it.worldInfrastructure);body=building&&state.props.get(e.id)?.manage?housingPanel(e,building):'<p>Wohngebiet des Planeten.</p>';}
   else if (it.kind === 'produce' || it.kind === 'consume') body = goodBuilding(it, e);
   else if (it.kind === 'factory') body = factoryPanel(it, e);
@@ -159,8 +158,7 @@ panel.addEventListener('click', ev => {
 function goodBuilding(it, e) {
   const s = e.market.goods[it.good];
   if (!s) return '<div class="muted">Dieses Gebäude ist stillgelegt.</div>';
-  if(e.market.realEconomy)return `<p>${GOODS[it.good].name} ${stockLabel(s.stock)} / ${fmt(s.cap)} · tatsächliche Rate ${fmt(s.rate*3600)}/h</p>`+(state.props.get(e.id)?.manage?specializationPanel(e):'<p>Natürlicher Standort. Konkrete Spezialisierung kann der Besitzer ausbauen.</p>');
-  return `<p>${goodTag(it.good)} · Lager ${fmt(s.stock)} / ${fmt(s.cap)} · Rate ${fmt(s.rate*3600)} / h</p>`;
+  return `<p>${GOODS[it.good].name} ${stockLabel(s.stock)} / ${fmt(s.cap)} · tatsächliche Rate ${fmt(s.rate*3600)}/h</p>`+(state.props.get(e.id)?.manage?specializationPanel(e):'<p>Natürlicher Standort. Konkrete Spezialisierung kann der Besitzer ausbauen.</p>');
 }
 
 function factoryPanel(it, e) {

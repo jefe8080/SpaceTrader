@@ -9,10 +9,6 @@ export const BUILDING = {
   MAX_PUBLIC: 6,      // jeder Spieler bis Level 6
   MAX_OWNER: 10,      // Level 7 bis 10 nur bei eigenem Besitz (bzw. Handelsmeister bei Konsortiumsbesitz)
 };
-/** Wirksames Level: ohne Besitz auf 6 gedeckelt */
-export const effectiveLevel = (lvl, owned) => Math.min(lvl || 0, owned ? BUILDING.MAX_OWNER : BUILDING.MAX_PUBLIC);
-export const buildingRateMul = (lvl) => 1 + BUILDING.RATE * lvl;
-export const buildingCapMul = (lvl) => 1 + BUILDING.STORAGE * lvl;
 
 // ---------- Fabrik-Bauplätze ----------
 export const RECIPE_CATS = {

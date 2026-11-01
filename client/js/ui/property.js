@@ -1,6 +1,6 @@
 // Besitz: Kauf, Verwaltung eigener Planeten und Stationen, eigene Werften, Besitzübersicht (Taste B)
 import { GOODS, SHIP_TYPES, GOVERNOR_LICENSES, UNLOCK_NAMES, FIXED, CUSTOMS_MAX,
-  propertyKind, minGovernorFor, propertyPrice, priceWindow, fixedPrice, PLANET_TYPES,
+  propertyKind, minGovernorFor, propertyPrice, priceWindow, fixedPrice,
   CONSORTIUM_LEVELS } from '/shared/config.js';
 import { state, fmt, fmtK, esc, myShips } from '../state.js';
 import { cmd } from '../net.js';
@@ -80,19 +80,18 @@ function manageSection(e, prop) {
 
   // Fixpreis-Verbrauch
   if (e.kind === 'planet') {
-    h += `<div class="sub-title">${e.market.realEconomy?'Fixpreise und tatsächlicher Bedarf':'Fixpreis-Verbrauch der Bevölkerung'}</div><table class="market"><tr><th>Ware</th><th>Position</th><th>Preis</th><th>Verbrauch/h</th></tr>`;
+    h += `<div class="sub-title">Fixpreise und tatsächlicher Bedarf</div><table class="market"><tr><th>Ware</th><th>Position</th><th>Preis</th><th>Verbrauch/h</th></tr>`;
     for (const [g, s] of Object.entries(e.market.goods)) {
-      if (s.role !== 'consume'||(e.market.realEconomy&&!CIVIL_GOODS.includes(g))) continue;
+      if (s.role !== 'consume'||!CIVIL_GOODS.includes(g)) continue;
       const sv = prop.fixed[g] ?? FIXED.DEFAULT;
       const { pmin, pmax } = priceWindow(g, s.mod || 1);
-      const rate = e.market.realEconomy?s.rate:(PLANET_TYPES[e.type].consume[g] || s.rate) * (e.size || 1);
       h += `<tr><td>${GOODS[g].name}</td><td><input type="range" class="prop-fixed" data-ent="${e.id}" data-good="${g}" min="${FIXED.MIN}" max="${FIXED.MAX}" step="0.05" value="${sv}"></td>
-        <td>${fixedPrice(pmin, pmax, sv).toFixed(1)}</td><td>${localDemandPerHour(g,s,prop,rate).toFixed(0)}</td></tr>`;
+        <td>${fixedPrice(pmin, pmax, sv).toFixed(1)}</td><td>${localDemandPerHour(g,s,prop,s.rate).toFixed(0)}</td></tr>`;
     }
-    h += e.market.realEconomy?'</table><p>Tatsächlicher ziviler Verbrauch wird aus neu erzeugtem Geld bezahlt. Betriebsmittel bezahlen keine fiktiven Erlöse.</p>':`</table><div class="muted small-note">Günstiger Preis = mehr Verbrauch: Position 0,3 bringt doppelt so viel Erlös wie 0,7 (bei voller Belieferung).</div>`;
+    h += '</table><p>Tatsächlicher ziviler Verbrauch wird aus neu erzeugtem Geld bezahlt. Betriebsmittel bezahlen keine fiktiven Erlöse.</p>';
+    return h+specializationPanel(e)+'</div>';
   }
 
-  if(e.market.realEconomy&&e.kind==='planet')return h+specializationPanel(e)+'</div>';
   return h+(e.market.strategy==='shipyard'?yardSection(e,prop):'')+'</div>';
 }
 

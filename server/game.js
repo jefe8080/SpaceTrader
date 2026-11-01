@@ -10,7 +10,7 @@ import { refreshBoards, boardSectors, isGiver, questProgress, exploreCells, expl
 import { World } from './world.js';
 import { hexAt, hexKey } from '../shared/hex.js';
 import { planPath, zoneEffects } from '../shared/nav.js';
-import { tickMarket, stat, applyLevel, runRecipe } from './markets.js';
+import { tickMarket, stat, ensureFactoryStorage, runRecipe } from './markets.js';
 import { updateShip, setWarn } from './ships.js';
 import { Store } from './db.js';
 import { addToBuckets, bucketOf, summary, sumWindow, balance, SHIP_STATS } from './stats.js';
@@ -20,7 +20,7 @@ import { removeOffersOf } from './offers.js';
 import { tickEvents, sellToEvent } from './events.js';
 import { isConsortiumOwner, consortiumIdOf } from '../shared/consortium.js';
 import { checkWorldFile, WORLD_GEN, WORLD_KIND } from './world-profile.js';
-import { createHomeworld, tickHomeworld, migrateHomeResources } from './homeworld.js';
+import { createHomeworld, tickHomeworld, migrateHomeResources, legacyPlanets } from './homeworld.js';
 import {passengerTrade} from './population.js';
 import {handlingAllowance,recordHandling} from './handling.js';
 import {tickColonies} from './colonies.js';
@@ -123,7 +123,7 @@ export class Game {
       const e = this.world.entities.get(r.entity);
       if (!e?.market) continue;
       this.attachBuildings(e, r.data);
-      if (e.kind === 'planet') applyLevel(e);
+      ensureFactoryStorage(e);
     }
     for (const r of st.loadAll('ship_offers')) if (this.ships.has(r.ship)) this.shipOffers.set(r.ship, r.data);
     for (const r of st.loadAll('ownership')) {
@@ -139,6 +139,7 @@ export class Game {
     for (const player of this.players.values()) syncHomeQuests(this, player);
     const resources = migrateHomeResources(this); // PRD 19: wiederholbar und idempotent
     if (resources.length) console.log(`PRD 19: ${resources.length} Rohstoffplaneten auf echte Wirtschaft umgestellt: ${resources.join(', ')}`);
+    for (const e of legacyPlanets(this)) console.warn(`Planet ohne echte Wirtschaft: ${e.id} „${e.name}“ (Typ ${e.type}, Strategie ${e.market?.strategy ?? 'kein Markt'}). Dieser Planet läuft in keinem Wirtschaftszweig mehr und braucht eine Korrektur oder Migration.`);
     migrateBuildingRecipes(this);
     syncRouteReservations(this);
     this.routeStats = groupRows(st.loadAll('route_stats'), 'route');
@@ -247,7 +248,6 @@ export class Game {
   /** Wirkung der Level von Planeten und Werften */
   onGiverLevel(e, lvl) {
     e.market.lvl = lvl;
-    if (e.kind === 'planet') applyLevel(e);
     const prop = this.ownership.get(e.id);
     if (prop) this.notifyOwner(prop.player, `${e.name} erreicht Level ${lvl}`);
     this.emit('entity', e);

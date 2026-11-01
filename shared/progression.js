@@ -43,11 +43,7 @@ export function giverLevel(xp = 0) {
 export const GIVER_TRADE_CR = 20000;
 
 export const LEVEL_FX = {
-  PLANET_RATE: 0.1,     // Produktion und Verbrauch +10 % je Level
-  PLANET_STORAGE: 0.15, // Lager +15 % je Level
-  PLANET_PRICE: 0.4,    // Kaufpreis ×(1 + 0,4 × Level)
   YARD_BONUS: 0.05,     // Werte der gebauten Schiffe +5 % je Werftlevel
-  EXTRA_RATE_CR: 6,     // Zusatzware: Warenfluss von 6 Cr/s zum Basispreis (× Planetengröße)
 };
 
 /** Zusatzwaren je Planetentyp (Kapitel 17.3): Level 2 produziert, Level 4 verbraucht, Level 6 produziert */
@@ -65,7 +61,6 @@ export const PLANET_EXTRAS = {
   colony: ['workers', 'consumer', 'ingots'],
   industrial: ['plates', 'electronics', 'hullparts'],
 };
-export const EXTRA_STEPS = [[2, 'produce'], [4, 'consume'], [6, 'produce']];
 
 /** Questtafel: Slots je Level, neues Angebot alle 30 bis 60 min */
 export const QUEST = {

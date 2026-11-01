@@ -9,7 +9,6 @@ import { FACTION_WAR as F } from '../shared/warfare.js';
 import { ensureFactionSectors, prepareAdminMarket, supplyDelivery, receiveGoods, capOf } from '../server/war/factions.js';
 import { diplo } from '../server/war/diplomacy.js';
 import { serializeEntity } from '../server/net.js';
-import { applyLevel } from '../server/markets.js';
 import { questProgress } from '../server/quests.js';
 import { downstreamDemand } from '../server/real-economy.js';
 import { initializePopulation } from '../server/population.js';
@@ -130,7 +129,7 @@ test('Feindliche Versorgung erfordert ausdrückliche Abgabe; Beute bleibt nutzba
     receiveGoods(faction, 'ore', 100);
     assert.equal(faction.pool, capOf(faction));
     faction.level++;
-    applyLevel(admin);
+    game.onGiverLevel(admin, 6);
     assert.deepEqual(Object.keys(admin.market.goods), ['water', 'food']);
     assert.equal(admin.market.goods.water.cap, F.BUFFER * faction.level);
     assert.equal(admin.market.goods.water.rate, F.DEMAND_PER_MIN * faction.level / 60);

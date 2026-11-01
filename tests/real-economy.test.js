@@ -8,7 +8,6 @@ import {GOODS,STATION_TYPES,buyPrice,sellPrice,NPC_OWNER} from '../shared/config
 import {preparePublicEntity,tickRealMarket,ensureCash,dispatchRealSupply,loadRealSupply,finishRealSupply,tickCivilMoney} from '../server/real-economy.js';
 import {runCommand} from '../server/handlers/index.js';
 import {questProgress} from '../server/quests.js';
-import {applyLevel} from '../server/markets.js';
 import {updateShip} from '../server/ships.js';
 
 const fixture=()=>{const game=new Game(':memory:',{seed:42}),player=game.createPlayer('Bilanz');return {game,player,home:game.world.entities.get(player.homeworld),ship:game.shipsOf(player.id)[0]};};
@@ -125,7 +124,7 @@ test('PRD14: ausdrückliche Questabgabe funktioniert bei vollem Lager ohne zusä
 
 test('Questgeberlevel erzeugt weder Waren noch Förderbonus und unberechtigte Fabrikbauten werden abgewiesen',()=>{
   const f=fixture(),e=market(f,'plain',{ore:slot('produce',10,1)}),before=structuredClone(e.market.goods);
-  e.market.lvl=100;applyLevel(e);assert.deepEqual(e.market.goods,before);
+  f.game.onGiverLevel(e,6);assert.equal(e.market.lvl,6);assert.deepEqual(e.market.goods,before);
   f.player.known.visit.add(e.id);f.ship.dockedAt=e.id;
   const credits=f.player.credits,error=runCommand(f.game,f.player,{cmd:'facBuild',target:e.id,recipe:'waterworks'});
   assert.match(error,/eigenen Planeten/);assert.equal(f.player.credits,credits);close(f);

@@ -99,3 +99,28 @@ test('Migration deckelt übernommene Bestände auf das neue Lager', () => {
   assert.equal(ice.market.provenance.find((p) => p.source === 'migration' && p.good === 'ice').amount, ice.market.goods.ice.cap);
   game.store.close();
 });
+
+test('Start-Prüfung meldet Planeten ohne echte Wirtschaft, bricht aber nicht ab', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prd19-check-'));
+  const file = path.join(dir, 'world.db');
+  const warn = console.warn;
+  let game;
+  try {
+    game = new Game(file, { seed: 42 });
+    const player = game.createPlayer('Prüfung'), home = game.world.entities.get(player.homeworld);
+    game.world.addEntity({ id: 'odd-planet', name: 'Sonderling', kind: 'planet', type: 'ice', radius: 70, size: 1, x: home.x + 3000, y: home.y, sector: home.sector, system: home.system,
+      market: { strategy: 'planet', goods: { ice: { role: 'produce', rate: 1, cap: 100, stock: 1, mod: 1 } } } });
+    game.close(); game = null;
+    const lines = [];
+    console.warn = (line) => lines.push(String(line));
+    game = new Game(file);
+    console.warn = warn;
+    assert.equal(lines.length, 1);
+    assert.match(lines[0], /odd-planet „Sonderling“ \(Typ ice, Strategie planet\).*Korrektur/);
+    assert.ok(game.world.entities.has('odd-planet'));
+  } finally {
+    console.warn = warn;
+    game?.store.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});

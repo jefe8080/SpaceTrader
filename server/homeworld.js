@@ -153,6 +153,11 @@ export function migrateHomeResources(game) {
   return migrated;
 }
 
+/** PRD 19: Planeten außerhalb der echten Wirtschaft, die keine Heimat oder Kolonie sind, hat kein Code mehr vorgesehen. */
+export function legacyPlanets(game) {
+  return [...game.world.entities.values()].filter((e) => e.kind === 'planet' && e.type !== 'ruins' && !e.market?.realEconomy);
+}
+
 export function ownHome(game, player, entity) {
   return entity?.type === 'ruins' && entity.market?.homeworld?.owner === player.id;
 }

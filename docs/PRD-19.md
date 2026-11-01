@@ -203,8 +203,24 @@ Fortschritt wird im selben Commit aktualisiert.
   Test-Ausnahmen entfernen. Der Name `homeResource` steht nur noch als
   Erkennungsmerkmal in `migrateHomeResources` und im Altbestand-Fixture von
   `tests/prd19.test.js`.
-- [ ] **S6: Legacy-Zweige für Planeten entfernen.** Nach E5 in Server, Shared
-  und Client, plus Start-Prüfung mit Log-Meldung.
+- [x] **S6: Legacy-Zweige für Planeten entfernen.** Nach E5 in Server, Shared
+  und Client, plus Start-Prüfung mit Log-Meldung. Umgesetzt:
+  - `applyLevel` entfällt ganz, weil nach dem Planetenteil nur noch
+    `ensureFactoryStorage` übrig blieb. Das Laden ruft diese direkt auf,
+    `onGiverLevel` setzt nur noch das Questgeberlevel.
+  - `applyProperty` übernimmt bei allen Planeten nur Besitzer und Modus, die
+    Zusatzproduktion für Planeten entfällt. `releaseMarket` setzt Lager nur noch
+    bei Stationen zurück.
+  - Kein Levelaufschlag mehr in `propertyPrice`. Mit entfernt, weil nur dafür
+    genutzt: `LEVEL_FX.PLANET_*`, `LEVEL_FX.EXTRA_RATE_CR`, `EXTRA_STEPS`,
+    `effectiveLevel`, `buildingRateMul`, `buildingCapMul`.
+    `PLANET_EXTRAS` bleibt, weil die Stadtplanung im Test damit Kapazität prüft.
+  - Client: Weichen über `realEconomy` für Planeten in `property.js`,
+    `planetPanel.js` und `quests.js` entfernt.
+  - Start-Prüfung `legacyPlanets` mit `console.warn` je Planet, Test in
+    `tests/prd19.test.js`. Prod-Kopie: keine Meldung.
+  - Nicht entfernt: Fabriken auf Bauplätzen (`bld`, `facBuild`), weil sie für
+    eigene Planeten der echten Wirtschaft noch erreichbar sind.
 - [ ] **S7: Abnahme.** Sims nach E4, Browser-Test in der lokalen Vorschau
   (Planetenansicht eines migrierten Planeten, Besitzansicht), Ergebnisse
   notieren.

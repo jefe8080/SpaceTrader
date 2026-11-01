@@ -1,6 +1,6 @@
 import {recordInventoryTrade} from './pilot-profile.js';
 import { RECIPES, PROP_UPGRADES, buyPrice } from '../shared/config.js';
-import { applyLevel, ensureFactoryStorage } from './markets.js';
+import { ensureFactoryStorage } from './markets.js';
 import { addToBuckets } from './stats.js';
 import { isConsortiumOwner } from '../shared/consortium.js';
 import { bookRevenue } from './consortium.js';
@@ -13,7 +13,10 @@ export function newProperty(entityId, playerId, time) {
   return { entity: entityId, player: playerId, mode: 'open', customs: 0, fixed: {}, upg: {}, extras: [], yardSale: false, since: Math.round(time), tot: {}, stats: [] };
 }
 
-/** Besitz auf Markt und Entity anwenden: Lager, Tempo, Ertrag, Zusatzproduktion, Anzeige */
+/**
+ * Besitz auf Markt und Entity anwenden. Planeten (echte Wirtschaft, Heimat und Kolonien) und Märkte der echten
+ * Wirtschaft übernehmen nur Besitzer und Handelsmodus; Lager, Tempo, Ertrag und Zusatzrezepte gelten für alte Stationen.
+ */
 export function applyProperty(game, e, prop) {
   const m = e.market;
   ensureFactoryStorage(e);
@@ -23,18 +26,13 @@ export function applyProperty(game, e, prop) {
   const label = game.ownerLabel(prop.player);
   e.ownerName = label.name;
   e.ownerColor = label.color;
-  if (e.type === 'ruins'||m.realEconomy) { m.rev = (m.rev || 0) + 1; return; }
+  if (e.kind === 'planet' || m.realEconomy) { m.rev = (m.rev || 0) + 1; return; }
   const u = prop.upg || {};
   m.storageMul = 1 + PROP_UPGRADES.storage.per * (u.storage || 0);
   m.boost = 1 + PROP_UPGRADES.speed.per * (u.speed || 0);
   m.yieldBoost = 1 + PROP_UPGRADES.yield.per * (u.yield || 0);
-  // Zusatzproduktion
-  if (e.kind === 'planet') {
-    for (const g of prop.extras) {
-      if (!m.goods[g]) m.goods[g] = { role: 'produce', rate: 0.3 * (e.size || 1), baseRate: 0.3 * (e.size || 1), cap: 600, baseCap: 600, stock: 0, mod: 1 };
-      else if (m.goods[g].role !== 'produce') Object.assign(m.goods[g], { role: 'produce', rate: 0.3 * (e.size || 1), baseRate: 0.3 * (e.size || 1) });
-    }
-  } else if (m.strategy === 'factory') {
+  // Zusatzrezepte
+  if (m.strategy === 'factory') {
     m.extraRecipes = [...prop.extras];
     for (const id of prop.extras) {
       const r = RECIPES[id];
@@ -42,9 +40,8 @@ export function applyProperty(game, e, prop) {
       for (const [g, n] of Object.entries(r.out)) if (!m.goods[g]) m.goods[g] = { role: 'produce', rate: n / r.time, cap: n * 300, baseCap: n * 300, stock: 0, mod: 1 };
     }
   }
-  // Lager: Besitz-Upgrade, bei Planeten zusätzlich das Planetenlevel
-  if (e.kind === 'planet') applyLevel(e);
-  else for (const s of Object.values(m.goods)) { s.baseCap ??= s.cap; s.cap = Math.round(s.baseCap * m.storageMul); }
+  // Lager: Besitz-Upgrade
+  for (const s of Object.values(m.goods)) { s.baseCap ??= s.cap; s.cap = Math.round(s.baseCap * m.storageMul); }
   m.rev = (m.rev || 0) + 1; // Struktur geändert -> Clients bekommen den ganzen Markt neu
 }
 
@@ -59,8 +56,7 @@ export function releaseMarket(game, e) {
   delete e.ownerName;
   delete e.ownerColor;
   if (m.forSale) { m.forSale = m.forSale.filter((it) => !it.own); m.building = null; }
-  if (e.kind === 'planet') applyLevel(e);
-  else for (const s of Object.values(m.goods)) { s.baseCap ??= s.cap; s.cap = s.baseCap; s.stock = Math.min(s.stock, s.cap); }
+  if (e.kind !== 'planet') for (const s of Object.values(m.goods)) { s.baseCap ??= s.cap; s.cap = s.baseCap; s.stock = Math.min(s.stock, s.cap); }
   m.rev = (m.rev || 0) + 1;
 }
 

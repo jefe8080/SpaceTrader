@@ -1,7 +1,6 @@
 // Besitz von Planeten und Stationen: Gouverneurslizenz, Kaufpreise, Upgrades, Fixpreis-Verbrauch. Zahlen sind Annahmen.
 import { GOODS, STATION_TYPES, PLANET_TYPES } from './goods.js';
 import { curveMax, curveMin } from './price.js';
-import { LEVEL_FX } from './progression.js';
 
 export const GOVERNOR_LICENSES = [
   null,
@@ -46,11 +45,10 @@ export function propertyBasePrice(e) {
   }
   return 500000;
 }
-/** Kaufpreis: Basiswert × Größe × Ausbaustufe */
+/** Kaufpreis: Basiswert × Größe × Ausbaustufe; Planetenlevel wirken nicht mehr auf den Preis (PRD 19) */
 export function propertyPrice(e, upg = {}) {
   const levels = Object.values(upg).reduce((a, b) => a + b, 0);
-  const lvl = e.kind === 'planet'&&!e.market?.realEconomy ? 1 + LEVEL_FX.PLANET_PRICE * (e.market?.lvl || 0) : 1;
-  return Math.round(propertyBasePrice(e) * (1 + 0.5 * levels) * lvl);
+  return Math.round(propertyBasePrice(e) * (1 + 0.5 * levels));
 }
 // ---------- Fixpreis-Verbrauch ----------
 export const FIXED = { MIN: 0.3, MAX: 0.7, DEFAULT: 0.5 };

@@ -1,6 +1,5 @@
 import { GOODS, PLANET_TYPES, STATION_TYPES, STATION_FOOD, SHIP_TYPES, SHIPYARD, STORAGE, STATS, TRADER, ULTRA, MODULES,
-  ECON, LEVEL_FX, PLANET_EXTRAS, EXTRA_STEPS, slotPrice, targetOf, driftDelta,
-  effectiveLevel, buildingRateMul, buildingCapMul, recipeOf } from '../shared/config.js';
+  ECON, slotPrice, targetOf, driftDelta, recipeOf } from '../shared/config.js';
 import {tickRealMarket} from './real-economy.js';
 import {RAW_FOR_REFINED,refinedAmountFor} from '../shared/goods.js';
 
@@ -156,37 +155,6 @@ const MISSING_INPUTS = {
       .sort((a, b) => (m.goods[a]?.stock || 0) / req[a] - (m.goods[b]?.stock || 0) / req[b]);
   },
 };
-
-/**
- * Planetenlevel anwenden (PRD-2 10.1): Produktion und Verbrauch +10 %, Lager +15 % je Level,
- * Zusatzwaren bei Level 2, 4 und 6. Auch das Lager-Upgrade des Besitzers (m.storageMul) fließt ein.
- */
-export function applyLevel(e) {
-  if (e.admin || e.market?.strategy === 'factionadmin') return;
-  ensureFactoryStorage(e);
-  const m = e.market;
-  if (e.kind !== 'planet' || !m || e.type === 'ruins' || m.realEconomy) return;
-  const L = m.lvl || 0;
-  EXTRA_STEPS.forEach(([lv, role], i) => {
-    const g = PLANET_EXTRAS[e.type]?.[i];
-    if (!g || L < lv) return;
-    const s = m.goods[g];
-    if (s && (s.role !== 'trade' || s.lvlExtra)) return; // nie eine Ware, die der Planet schon produziert oder verbraucht
-    const rate = (LEVEL_FX.EXTRA_RATE_CR / GOODS[g].base) * (e.size || 1);
-    const baseCap = capOf(rate, role === 'produce' ? STORAGE.PLANET_PRODUCE : STORAGE.PLANET_CONSUME);
-    const target = randomTarget(role, Math.random);
-    if (s) Object.assign(s, { role, rate, baseRate: rate, baseCap, target, lvlExtra: true });
-    else m.goods[g] = { role, rate, baseRate: rate, cap: baseCap, baseCap, stock: target * baseCap, mod: 1, target, lvlExtra: true };
-  });
-  // Gebäude-Ausbau (PRD-3 6.3): Rate +20 % und Lager +15 % je Level der Ware, ohne Besitz höchstens Level 6 wirksam
-  for (const [g, s] of Object.entries(m.goods)) {
-    const b = effectiveLevel(m.bld?.lvl?.[g], !!m.owner);
-    if (s.role !== 'trade') { s.baseRate ??= s.rate; s.rate = s.baseRate * (1 + LEVEL_FX.PLANET_RATE * L) * buildingRateMul(b); }
-    s.baseCap ??= s.cap;
-    s.cap = Math.max(1, Math.round(s.baseCap * (m.storageMul || 1) * (1 + LEVEL_FX.PLANET_STORAGE * L) * buildingCapMul(b)));
-  }
-  m.rev = (m.rev || 0) + 1;
-}
 
 /** Einfacher Rezeptlauf ohne Verpflegung (für Zusatzrezepte und Fabriken auf Bauplätzen). Liefert neuen Fortschritt. */
 export function recipeBlockReason(m, r) {
