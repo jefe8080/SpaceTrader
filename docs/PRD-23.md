@@ -27,9 +27,16 @@ ein langsamer Abfänger kann einen schnellen Angriff weiterhin verpassen.
 ## Teilschritte und Fortschritt
 
 1. [x] Regeln und bestehende Radiusdefinition klären; PRD anlegen.
-2. [ ] Aktive Bedrohungserkennung, Anflug, Abbruch und Schlachtbeitritt umsetzen;
+2. [x] Aktive Bedrohungserkennung, Anflug, Abbruch und Schlachtbeitritt umsetzen;
    UI-Beschreibung anpassen und Regressionstests ausführen.
 
 ## Prüfung
 
-Ausstehend.
+`npm test`: 401 Tests bestanden, einschließlich sechs neuer Regressionstests
+in `tests/active-interception.test.js`. Geprüft sind tatsächlicher Anflug,
+mehrere Abfänger, Sichtbarkeit, Bündnis, Haltungen und Reparatursperre,
+Fortsetzung nach Angriffsabbruch, fester Radius einschließlich Schutz vor
+sofortigem Neustart mit verschobenem Ursprung, Planetenraids und Tick-Reihenfolge.
+Bestehende Tests für Bewachen, Schlachtunterstützung und Abfangkreise bestehen.
+`git diff --check` bestanden. Keine visuelle Browserprüfung durchgeführt;
+die UI-Änderung beschränkt sich auf den Erklärungstext der Haltung.

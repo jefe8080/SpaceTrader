@@ -4,7 +4,7 @@ import { tickBattles } from './battle.js';
 import { tickEngagements } from './engage.js';
 import { tickDebris } from './outcome.js';
 import { tickRepairs } from './repair.js';
-import { tickSupport, snapshotAllies, stockProtection } from './support.js';
+import { tickSupport, tickInterceptions, snapshotAllies, stockProtection } from './support.js';
 import { tickFactions, recordActivity } from './factions.js';
 import { tickRaids, onDefendersBeaten } from './raids.js';
 
@@ -44,6 +44,7 @@ export function tickWarBefore(game, dt) {
   formRouteStacks(game);
   tickBattles(game, dt);
   tickEngagements(game, dt);
+  tickInterceptions(game);
 }
 
 /** Nach der Schiffsbewegung */

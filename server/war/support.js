@@ -1,8 +1,9 @@
 // PRD 15 U08: strategisches Bewachen/Abfangen, Unterstützungsrechte, Konsortiumsbündnis und Schutzmodul an Werften.
 import { COMBAT, navalClass } from '../../shared/combat.js';
-import { joinBattle } from './battle.js';
+import { joinBattle, startBattle } from './battle.js';
+import { planetOwner, raidError } from './raids.js';
 import { stackOf, stackMembers, leaderOf } from './stacks.js';
-import { isProtected } from './engage.js';
+import { isProtected, targetError, attackerError } from './engage.js';
 import { allianceActive, sameCamp, isFactionOwner } from './diplomacy.js';
 import { setWarn } from '../ships.js';
 
@@ -15,7 +16,7 @@ export function postureOf(ship) {
 export function canSupport(game, ship) {
   const lead = leaderOf(game, ship);
   if (lead !== ship) return false;
-  if (ship.battle || ship.captive || ship.repairRun || ship.repairHold) return false;
+  if (ship.battle || ship.captive || ship.repairRun || ship.repairHold || ship.transit || ship.relocationHold) return false;
   const c = ship.queue[0];
   if (c && (c.t === 'attack' || c.t === 'intercept' || c.t === 'repairRun' || c.t === 'repairWait' || c.t === 'salvage')) return false;
   const st = stackOf(game, ship);
@@ -45,6 +46,77 @@ export function supportSide(game, b, owner) {
 }
 
 const speedOf = (game, ship) => game.shipSpeed(ship);
+
+/** Aktiver Angriff vor Schlachtbeginn; keine künstlichen Gegenangriffe auf eigene Abfänger. */
+function threatOwner(game, attacker) {
+  if (attacker.captive || attacker.battle || isProtected(attacker) || attackerError(game, attacker)) return null;
+  const c = attacker.queue[0];
+  if (c?.t === 'attack') {
+    const target = game.ships.get(c.target);
+    return target && !target.battle && !targetError(game, attacker, target) ? target.owner : null;
+  }
+  if (c?.t === 'raid') {
+    const planet = game.world.entities.get(c.planet);
+    return !raidError(game, attacker.owner, planet) ? planetOwner(game, planet) : null;
+  }
+  return null;
+}
+
+/** Vor der Bewegung ausrücken: alle verfügbaren Abfänger wählen den nächsten sichtbaren Angreifer. */
+export function tickInterceptions(game) {
+  const threats = [...game.ships.values()].map((s) => ({ ship: s, owner: threatOwner(game, s) })).filter((t) => t.owner);
+  for (const ship of game.ships.values()) {
+    if (postureOf(ship).mode !== 'intercept' || !canSupport(game, ship)) continue;
+    const limit = ship.interceptLimit;
+    if (limit && !threats.some((t) => t.ship.id === limit.target)) delete ship.interceptLimit;
+    const player = game.players.get(ship.owner);
+    // Spieleraufklärung statt allwissender NPC-Verfolgung; NPCs behalten ihre bestehende KI.
+    if (!player) continue;
+    let best = null, distance = Infinity;
+    for (const threat of threats) {
+      const enemy = threat.ship;
+      if (ship.interceptLimit?.target === enemy.id && Math.hypot(enemy.x - limit.x, enemy.y - limit.y) > COMBAT.INTERCEPT) continue;
+      if (!allianceActive(game, ship.owner, threat.owner) || sameCamp(game, ship.owner, enemy.owner) || !game.isKnown(player, enemy)) continue;
+      const d = Math.hypot(enemy.x - ship.x, enemy.y - ship.y);
+      if (d <= COMBAT.INTERCEPT && d < distance) { best = enemy; distance = d; }
+    }
+    if (!best) continue;
+    delete ship.interceptLimit;
+    ship.queue.unshift({ t: 'intercept', target: best.id, originX: ship.x, originY: ship.y, qid: ++ship.qid });
+    ship.nav = null;
+    delete ship.coverageLeg;
+    game.shipLog(ship, `Abfangen: verfolgt ${best.name}`);
+  }
+}
+
+function runActiveIntercept(ship, c, dt, game, flyTo) {
+  const enemy = game.ships.get(c.target);
+  const b = enemy?.battle && game.battles.get(enemy.battle);
+  const side = b && supportSide(game, b, ship.owner);
+  const owner = enemy && threatOwner(game, enemy);
+  const player = game.players.get(ship.owner);
+  const validBattle = b && !b.ended && side && b.units[enemy.id]?.side !== side && !b.retreated.includes(ship.id);
+  const outside = enemy && Math.hypot((b?.x ?? enemy.x) - c.originX, (b?.y ?? enemy.y) - c.originY) > COMBAT.INTERCEPT;
+  if (!enemy || postureOf(ship).mode !== 'intercept' || sameCamp(game, ship.owner, enemy.owner)
+      || outside
+      || (!validBattle && (!owner || !allianceActive(game, ship.owner, owner) || !player || !game.isKnown(player, enemy)))) {
+    ship.nav = null;
+    if (outside) ship.interceptLimit = { target: c.target, x: c.originX, y: c.originY };
+    delete ship.coverageLeg;
+    game.shipLog(ship, 'Abfangen beendet: Angriff abgebrochen oder Ziel außerhalb des Abfangbereichs');
+    return true;
+  }
+  const x = b ? b.x : enemy.x, y = b ? b.y : enemy.y;
+  if (Math.hypot(x - ship.x, y - ship.y) > COMBAT.ENGAGE) {
+    ship.state = 'flying';
+    ship.dockedAt = null;
+    flyTo(ship, x, y, dt, game);
+    return false;
+  }
+  if (validBattle) joinBattle(game, b, [ship], side);
+  else startBattle(game, [ship], [enemy]);
+  return false;
+}
 
 /**
  * Hilferufe verteilen: Abfangen bis halbe Sektorweite, Bewachen nur im lokalen Radius um den Schutzort.
@@ -79,6 +151,7 @@ export function tickSupport(game) {
 
 /** Anflug zur Schlacht; Beitritt erst beim tatsächlichen Erreichen, keine sofortige Übertragung */
 export function runIntercept(ship, c, dt, game, flyTo) {
+  if (c.target) return runActiveIntercept(ship, c, dt, game, flyTo);
   const b = game.battles.get(c.battle);
   if (!b || b.ended) { game.shipLog(ship, 'Hilferuf erledigt: Schlacht bereits beendet'); return true; }
   if (b.retreated.includes(ship.id)) return true;

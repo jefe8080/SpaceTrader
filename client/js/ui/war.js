@@ -96,7 +96,7 @@ export function ownWarSection(s) {
   if (COMBAT_TYPES[s.type]?.cls === 'war' || (s.stack && stackById(s.stack)?.members[0] === s.id)) {
     const m = s.posture?.mode || 'intercept';
     h += `<div class="section"><div class="section-title">Strategische Haltung</div><div class="btnrow">
-      ${[['intercept', '⇢ Abfangen', 'Hilft eigenen und verbündeten Einheiten bis zu einer halben Sektorweite'], ['guard', '⛨ Bewachen', 'Sichert die aktuelle Position im Radius eines Viertel-Systemdurchmessers'], ['passive', '⏸ Passiv', 'Keine automatische Unterstützung']]
+      ${[['intercept', '⇢ Abfangen', 'Fliegt sichtbare Angreifer auf eigene und militärisch verbündete Ziele im Abfangradius aktiv an; unterstützt laufende Schlachten'], ['guard', '⛨ Bewachen', 'Sichert die aktuelle Position im Radius eines Viertel-Systemdurchmessers'], ['passive', '⏸ Passiv', 'Keine automatische Unterstützung']]
         .map(([k, t, d]) => `<button class="small${m === k ? ' on' : ''}" data-war="posture" data-ship="${s.id}" data-mode="${k}" title="${d}">${t}</button>`).join('')}</div>
       <div class="muted">Nur Kriegsschiffe und Stacks mit Kriegsschiffen lösen Unterstützung aus.</div></div>`;
   }
