@@ -86,3 +86,34 @@ test('PRD24: NPC gold transports can still be attacked across sector boundaries'
   pulse(game, 60);
   assert.ok([...game.ships.values()].some(s => s.fsec === fs.key && s.queue[0]?.target === transport.id));
 });
+
+test('PRD24: aggression counts only own-sector activity, reaching 60 after 60 active minutes', t => {
+  const { game, fs, w } = fixture(t);
+  fs.ok = false;
+  w.peace[fs.key] = 0;
+  game.time = A.PEACE + 100;
+  const [q, r] = fs.sector.split(',').map(Number);
+  w.act = { [`${q + 1},${r}`]: game.time };
+  pulse(game, 60);
+  assert.equal(w.aggr[fs.key] || 0, 0);
+  // Suppress raids so the measured rate is independent of target selection.
+  fs.raidAt = Infinity;
+  for (let i = 0; i < 60; i++) {
+    game.time += 60;
+    w.act[fs.sector] = game.time;
+    pulse(game, 60);
+    assert.equal(w.aggr[fs.key], i + 1);
+  }
+  assert.equal(w.aggr[fs.key], A.RAID_AT);
+  game.time += 61;
+  pulse(game, 60);
+  assert.equal(w.aggr[fs.key], 60, 'stale activity does not count');
+  w.act[fs.sector] = game.time;
+  fs.ok = true;
+  pulse(game, 60);
+  assert.equal(w.aggr[fs.key], 60, 'supply pauses growth');
+  fs.ok = false;
+  w.friends.push(fs.faction);
+  pulse(game, 60);
+  assert.equal(w.aggr[fs.key], 60, 'friendship prevents growth');
+});

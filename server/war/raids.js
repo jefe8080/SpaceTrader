@@ -36,9 +36,8 @@ function tickAggression(game, mins) {
       if (w.peace[key] === undefined || game.time - w.peace[key] < A.PEACE) continue;
       // Ausreichende Versorgung pausiert den Anstieg, senkt aber nicht
       if (fs.ok) continue;
-      const [q, r] = fs.sector.split(',').map(Number);
-      const near = [fs.sector, ...hexNeighbors(q, r).map((h) => hexKey(h.q, h.r))].some((k) => w.act?.[k] !== undefined && game.time - w.act[k] <= 60 * Math.max(1, mins));
-      if (near) w.aggr[key] = (w.aggr[key] || 0) + A.RISE_PER_MIN * mins;
+      const active = w.act?.[fs.sector] !== undefined && game.time - w.act[fs.sector] <= 60 * Math.max(1, mins);
+      if (active) w.aggr[key] = (w.aggr[key] || 0) + A.RISE_PER_MIN * mins;
     }
   }
 }

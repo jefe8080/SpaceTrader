@@ -41,7 +41,7 @@ export function fleetChoices(level) {
 /** U10: Aggression, Friedenszeit, Raids, Planetenschutz */
 export const AGGRESSION = {
   PEACE: 86_400,          // bestätigt: einmaliger 24-Stunden-Friedenstimer ab erster Erfassung
-  RISE_PER_MIN: 0.5,      // Anstieg je Minute Spieleraktivität im Sektor oder angrenzend
+  RISE_PER_MIN: 1.0,      // Anstieg je aktiver Spielminute ausschließlich im eigenen Sektor
   RAID_AT: 60,            // Schwelle für Raids
   RAID_COST: 40,          // Aggressionsabbau je ausgelöstem Raid
   RAID_COOLDOWN: 1800,    // Sekunden zwischen Raids je Fraktionssektor

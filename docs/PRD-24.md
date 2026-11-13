@@ -94,7 +94,7 @@ damit eine höhere Rohstoffbasis nicht indirekt auch Veredelungserlöse erhöht.
 2. [x] Preishöhe und Preiswirkung bestätigen; Planung abschließen.
 3. [x] Zielauswahl auf eigenen Sektor begrenzen; Verfolgung und Fraktionskriege
    durch Regressionstests absichern.
-4. [ ] Aggressionsgebiet und Rate anpassen; Ausnahmen und Nachbarsektoren testen.
+4. [x] Aggressionsgebiet und Rate anpassen; Ausnahmen und Nachbarsektoren testen.
 5. [ ] Asteroidenverteilung und Garantie umsetzen; Förderstationen erhalten.
 6. [ ] Bestätigte Preisanpassung umsetzen und Margen vorher/nachher prüfen.
 7. [ ] Gesamte Regression prüfen, relevante Spielbeschreibungen aktualisieren
@@ -132,3 +132,7 @@ Laufzeittests. Dokumentprüfung vor dem Planungscommit: `git diff --check`.
 Umsetzung Schritt 3: Sektorprüfung anhand der Zielposition bei offensiver und
 defensiver Spielerzielauswahl. Bestehende Verfolgung bleibt unverändert.
 Prüfung: `node --test tests/prd24-war.test.js tests/prd15-raids.test.js` (6/6).
+
+Umsetzung Schritt 4: Nur eigene Sektoraktivität zählt, Rate 1,0 pro Minute.
+Fraktionswirtschaft unverändert. Prüfung: PRD24-Krieg, PRD15-Raids und
+PRD15-Fraktionen (14/14 Tests).
