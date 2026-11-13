@@ -3,7 +3,7 @@
 ## Status und Ziel
 
 Planung vom 13.11.2026 abgeschlossen. Die Grundregeln und die Preiserhöhung
-sind mit dem Nutzer bestätigt. Umsetzung am 13.11.2026 beauftragt.
+sind mit dem Nutzer bestätigt. Umsetzung am 13.11.2026 beauftragt und abgeschlossen.
 
 Fraktionen sollen neue Angriffe auf Spieler auf ihren eigenen Sektor begrenzen.
 Kostenlos abbaubare ultraseltene Rohstoffe werden auf Fraktionssektoren
@@ -97,7 +97,7 @@ damit eine höhere Rohstoffbasis nicht indirekt auch Veredelungserlöse erhöht.
 4. [x] Aggressionsgebiet und Rate anpassen; Ausnahmen und Nachbarsektoren testen.
 5. [x] Asteroidenverteilung und Garantie umsetzen; Förderstationen erhalten.
 6. [x] Bestätigte Preisanpassung umsetzen und Margen vorher/nachher prüfen.
-7. [ ] Gesamte Regression prüfen, relevante Spielbeschreibungen aktualisieren
+7. [x] Gesamte Regression prüfen, relevante Spielbeschreibungen aktualisieren
    und Abnahme dokumentieren.
 
 Jeder abgeschlossene Umsetzungsschritt erhält passende Prüfungen und einen
@@ -126,8 +126,9 @@ eigenen Commit einschließlich aktualisiertem PRD-Fortschritt.
 
 ## Prüfstand
 
-Nur Planung und lesende Codeprüfung; keine Spielcodeänderung und keine
-Laufzeittests. Dokumentprüfung vor dem Planungscommit: `git diff --check`.
+Planungsstand: Dokumentprüfung vor dem Planungscommit mit `git diff --check`.
+Abnahme der Umsetzung am 13.11.2026: `npm test` — 408/408 Tests erfolgreich,
+keine Fehler, keine übersprungenen Tests. `git diff --check` erfolgreich.
 
 Umsetzung Schritt 3: Sektorprüfung anhand der Zielposition bei offensiver und
 defensiver Spielerzielauswahl. Bestehende Verfolgung bleibt unverändert.
@@ -167,3 +168,23 @@ Gleiche Slots, Rezepte und Verkaufserlöse vor/nach dem Kaufaufschlag.
 | Unstabile Antimaterie | 1373.69 | 1648.43 | 682.86 | 408.12 |
 | Exotische Rohkristalle | 636.24 | 763.48 | 527.33 | 272.83 |
 | Rohes Nebelgas | 224.13 | 268.95 | 252.11 | 117.63 |
+
+### Abnahme und Abschluss (Schritt 7)
+
+- Alle Umsetzungsschritte abgeschlossen und mit separaten Commits dokumentiert.
+- Neue Zielauswahl prüft die tatsächliche Position des Spielerziels, unabhängig
+  von zwischengespeicherten Sektorfeldern. Verfolgung und NPC-Ziele bleiben erhalten.
+- Aggression: Nachbaraktivität ausgeschlossen, 60 Punkte nach 60 aktiven Minuten;
+  Frieden, Neutralität, Freundschaft und Versorgung durch Regression abgedeckt.
+- Generierung: 245 neue Sektoren über fünf Seeds, Garantie je Fraktionssystem,
+  keine ultraseltenen Asteroidenfelder in fraktionsfreien Sektoren; getrennte
+  Förderstationen weiterhin dort nachgewiesen. Wiederholung identischer Seeds
+  und Koordinaten erzeugt identische Welten.
+- Preise: alle sechs Rohstoffketten mit Kaufaufschlag und kleinerer Marge;
+  unveränderte Warenbasis, Rezepte, Ausbeuten und Verkaufserlöse abgesichert.
+  Clientdarstellung und tatsächlicher Einkauf berücksichtigen denselben Aufschlag.
+- Spielbeschreibungen im Objektführer und Aggressionshinweis aktualisiert.
+- Die Welt wird gemäß Nutzerangabe neu generiert; keine laufenden Fraktionskriege
+  zu übernehmen. Keine Migration und keine automatische Spielstandlöschung.
+- Vollständige Node-Testsuite erfolgreich. Kein manueller Browserdurchlauf;
+  die Änderungen der Oberfläche beschränken sich auf erklärende Texte.

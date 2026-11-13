@@ -179,7 +179,7 @@ function tickPlanetRepairs(game) {
   }
 }
 
-/** Grenzverteidigung: Kriegsschiffe im Schutzradius feindlicher Fraktionen werden abgefangen (nicht in der Neutralitätsphase) */
+/** Grenzverteidigung: Kriegsschiffe im eigenen Sektor und Schutzradius feindlicher Fraktionen werden abgefangen (nicht in der Neutralitätsphase) */
 function borderDefense(game) {
   for (const fs of game.fsecs.values()) {
     const points = [game.world.entities.get(fs.admin), game.world.entities.get(fs.yard)].filter(Boolean);

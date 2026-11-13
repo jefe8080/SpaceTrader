@@ -151,7 +151,7 @@ export function adminSection(e, ship) {
     <span>Geldpool</span><span>${fmt(fs.pool)} / ${fmt(fs.cap)} Cr</span>
     ${sup('water', 'Wasser')}${sup('food', 'Nahrung')}
     <span>Kriegsschiffe</span><span>${fs.warships} / ${fs.limit}</span>
-    ${fs.relation === 'hostile' ? `<span>Aggression</span><span>${fs.aggr}${fs.peaceLeft ? ` · Friedenszeit noch ${Math.ceil(fs.peaceLeft / 3600)} h` : ''}${fs.ok ? ' · Anstieg pausiert (versorgt)' : ''}</span>` : ''}</div>
+    ${fs.relation === 'hostile' ? `<span title="+1 pro aktiver Spielminute im eigenen Sektor; neue Spielerziele nur dort, laufende Verfolgungen auch über Grenzen">Aggression</span><span>${fs.aggr}${fs.peaceLeft ? ` · Friedenszeit noch ${Math.ceil(fs.peaceLeft / 3600)} h` : ''}${fs.ok ? ' · Anstieg pausiert (versorgt)' : ''}</span>` : ''}</div>
     <div class="muted">Alle Fraktionsquests dieses Sektors laufen hier. Quests geben Ruf und Fraktions-XP, keine Credits; Abgabe nur bei ausreichender Versorgung.</div>`;
   if (ship) {
     const donate = fs.relation === 'hostile';
