@@ -3,7 +3,7 @@
 ## Status und Ziel
 
 Planung vom 13.11.2026 abgeschlossen. Die Grundregeln und die Preiserhöhung
-sind mit dem Nutzer bestätigt. Keine Umsetzung beauftragt.
+sind mit dem Nutzer bestätigt. Umsetzung am 13.11.2026 beauftragt.
 
 Fraktionen sollen neue Angriffe auf Spieler auf ihren eigenen Sektor begrenzen.
 Kostenlos abbaubare ultraseltene Rohstoffe werden auf Fraktionssektoren
@@ -92,7 +92,7 @@ damit eine höhere Rohstoffbasis nicht indirekt auch Veredelungserlöse erhöht.
 
 1. [x] Grundregeln klären und PRD-Entwurf anlegen.
 2. [x] Preishöhe und Preiswirkung bestätigen; Planung abschließen.
-3. [ ] Zielauswahl auf eigenen Sektor begrenzen; Verfolgung und Fraktionskriege
+3. [x] Zielauswahl auf eigenen Sektor begrenzen; Verfolgung und Fraktionskriege
    durch Regressionstests absichern.
 4. [ ] Aggressionsgebiet und Rate anpassen; Ausnahmen und Nachbarsektoren testen.
 5. [ ] Asteroidenverteilung und Garantie umsetzen; Förderstationen erhalten.
@@ -128,3 +128,7 @@ eigenen Commit einschließlich aktualisiertem PRD-Fortschritt.
 
 Nur Planung und lesende Codeprüfung; keine Spielcodeänderung und keine
 Laufzeittests. Dokumentprüfung vor dem Planungscommit: `git diff --check`.
+
+Umsetzung Schritt 3: Sektorprüfung anhand der Zielposition bei offensiver und
+defensiver Spielerzielauswahl. Bestehende Verfolgung bleibt unverändert.
+Prüfung: `node --test tests/prd24-war.test.js tests/prd15-raids.test.js` (6/6).

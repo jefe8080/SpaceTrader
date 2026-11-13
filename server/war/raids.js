@@ -14,6 +14,10 @@ import { warshipsOf, poolSpend, receiveGoods } from './factions.js';
 import { setWarn } from '../ships.js';
 
 const aggrKey = (fs) => fs.key;
+const inFactionSector = (fs, target) => {
+  const h = hexAt(target.x, target.y);
+  return hexKey(h.q, h.r) === fs.sector;
+};
 
 
 /** Minütliche Aggression je feindlicher Fraktion, Sektor und Spieler */
@@ -182,7 +186,7 @@ function borderDefense(game) {
     const points = [game.world.entities.get(fs.admin), game.world.entities.get(fs.yard)].filter(Boolean);
     const intruders = [...game.ships.values()].filter((s) => !s.battle && !s.captive && game.players.has(s.owner) && leaderOf(game, s) === s
       && (stackOf(game, s) ? stackMembers(game, stackOf(game, s)) : [s]).some((m) => isWarship(m.type) && !isProtected(m))
-      && factionHostileTo(game, fs.faction, s.owner) && points.some((p) => Math.hypot(p.x - s.x, p.y - s.y) <= A.BORDER_RADIUS));
+      && inFactionSector(fs, s) && factionHostileTo(game, fs.faction, s.owner) && points.some((p) => Math.hypot(p.x - s.x, p.y - s.y) <= A.BORDER_RADIUS));
     for (const t of intruders) {
       if ([...game.ships.values()].some((s) => s.fsec === fs.key && s.queue[0]?.t === 'attack' && s.queue[0].target === t.id)) continue;
       const lead = formRaidStack(game, fs, 3) || idleFleet(game, fs)[0];
@@ -202,12 +206,12 @@ function launchRaids(game) {
       const admin = game.world.entities.get(fs.admin);
       const targets = [];
       for (const s of game.shipsOf(p.id)) {
-        if (s.battle || s.captive || isProtected(s) || navalClass(s.type) === 'war') continue;
+        if (!inFactionSector(fs, s) || s.battle || s.captive || isProtected(s) || navalClass(s.type) === 'war') continue;
         const guarded = game.shipsOf(p.id).filter((g) => isWarship(g.type) && Math.hypot(g.x - s.x, g.y - s.y) < 3000).length;
         targets.push({ kind: 'ship', id: s.id, score: Math.hypot(s.x - admin.x, s.y - admin.y) * (1 + guarded) * (0.7 + Math.random() * 0.6) });
       }
       for (const e of game.world.entities.values()) {
-        if (e.kind !== 'planet' || planetOwner(game, e) !== p.id || raidProtected(game, e)) continue;
+        if (e.kind !== 'planet' || !inFactionSector(fs, e) || planetOwner(game, e) !== p.id || raidProtected(game, e)) continue;
         const guarded = game.shipsOf(p.id).filter((g) => isWarship(g.type) && Math.hypot(g.x - e.x, g.y - e.y) < 3000).length;
         targets.push({ kind: 'planet', id: e.id, score: Math.hypot(e.x - admin.x, e.y - admin.y) * (1 + guarded) * (0.7 + Math.random() * 0.6) });
       }
