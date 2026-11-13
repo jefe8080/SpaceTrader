@@ -48,10 +48,11 @@ function member(c) {
   const master = c.rank === 'master';
   const next = CONSORTIUM_LEVELS[c.level + 1];
   const L = CONSORTIUM_LEVELS[c.level];
+  const roundTrip=CONSORTIUM.DEPOSIT_SHARE*CONSORTIUM.WITHDRAW_SHARE;
   let h = section('overview', 'Übersicht', `<div class="kv">
     <span>Name</span><span><span class="dot" style="background:${c.color}"></span> <b>${esc(c.name)}</b></span>
     <span>Level</span><span>${c.level} · max. ${L.maxProps} Besitztümer</span>
-    <span>Pool</span><span><b>${fmt(c.pool)} Cr</b></span>
+    <span>Pool</span><span><b>${fmt(c.pool)} Cr</b></span><span>Einzahlen und später auszahlen</span><span>${Math.round(roundTrip*100)} % des ursprünglichen Betrags kommen zurück: z. B. 1.000 → ${fmt(1000*CONSORTIUM.DEPOSIT_SHARE)} im Pool → ${fmt(1000*roundTrip)} Cr ausgezahlt. Gebühren bleiben unverändert.</span>
     <span>Besitz</span><span>${c.props} / ${c.maxProps}</span>
     <span>Militärisches Bündnis</span><span><label><input type="checkbox" data-c-military ${c.military ? 'checked' : ''} ${master ? '' : 'disabled'}> automatische Unterstützung der Mitglieder</label> <span class="muted">(gilt für neue Begegnungen; Angriffe untereinander bleiben verboten)</span></span></div>
     ${c.level < MAX_CONSORTIUM_LEVEL ? `<div class="small-note">Nächstes Level ${next.level}: ${next.maxProps} Besitztümer, Kosten ${fmt(next.cost)} Cr aus dem Pool.

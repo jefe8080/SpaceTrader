@@ -4,11 +4,12 @@ import {HOMEWORLD} from '/shared/homeworld.js';
 import {CIVIL_GOODS,localDemandPerHour} from '/shared/local-demand.js';
 import {FIXED,priceWindow,fixedPrice} from '/shared/property.js';
 import {GOODS} from '/shared/config.js';
+import {populationGuidance} from './settlementPlanning.js';
 export function populationPanel(e,{prices=true}={}){
   const h=e.market?.homeworld||e.market?.economy;if(!h?.workers)return '';
   const ships=myShips().filter(s=>s.dockedAt===e.id),source=ships.find(s=>s.passengers?.length)||ships[0];
   return `<div class="section"><h3>Bevölkerung und Reisen</h3><p>${h.population} Einwohner / ${h.housing} Wohnplätze · Qualifikationen: ${h.workers.basic} einfach, ${h.workers.skilled} Fachkräfte, ${h.workers.specialist} Spezialisten. Höchstens 60 % arbeiten gleichzeitig.</p>
-    <p class="muted">Tatsächlich verbrauchte Zivilwaren werden vollständig aus neu erzeugtem Geld bezahlt. Nachfrage und verfügbare Bestände bestimmen den Absatz.</p>
+    ${populationGuidance(h)}<p class="muted">Tatsächlich verbrauchte Zivilwaren werden vollständig aus neu erzeugtem Geld bezahlt. Nachfrage und verfügbare Bestände bestimmen den Absatz.</p>
     <p>Besucher: ${(h.visitors||[]).reduce((n,v)=>n+v.n,0)} / ${h.visitorCapacity||0} Plätze · ${(h.visitors||[]).filter(v=>v.ready).reduce((n,v)=>n+v.n,0)} warten auf Abreise.</p>
     <p>Anwerbbare Personen verlassen ihren Herkunftsbestand. ${e.owner===state.me.id?'Eigener Standort: kostenlos.':'Anwerbung: 24 Cr je Kraft; Touristenaufnahme: 28 Cr je Person.'} Touristischer Aufenthalt: 20 Minuten, danach Abreise. Jede neue Reise erhält 28 Cr Reisegeld pro Person. Weitertransport erzeugt kein neues Reisegeld; unverbrauchtes Geld verfällt bei Heimkehr.</p>
     ${ships.map(s=>`<p><b>${esc(s.name)}</b> · ${s.cargo?.workers||0} Arbeiter / ${s.cargo?.tourists||0} Touristen</p><div class="btnrow"><button class="small" data-act="personBoard" data-ent="${e.id}" data-ship="${s.id}" data-good="workers" data-dir="buy">10 Kräfte anwerben</button><button class="small" data-act="personBoard" data-ent="${e.id}" data-ship="${s.id}" data-good="tourists" data-dir="buy">10 Touristen aufnehmen</button><button class="small" data-act="personBoard" data-ent="${e.id}" data-ship="${s.id}" data-good="workers" data-dir="sell">Kräfte ansiedeln</button><button class="small" data-act="personBoard" data-ent="${e.id}" data-ship="${s.id}" data-good="tourists" data-dir="sell">Touristen aussteigen lassen</button></div>`).join('')}
