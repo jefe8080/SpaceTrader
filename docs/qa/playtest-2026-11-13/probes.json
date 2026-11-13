@@ -1,0 +1,5006 @@
+{
+  "onboarding": [
+    {
+      "seed": 7,
+      "stages": [
+        {
+          "id": "H00",
+          "seconds": 91,
+          "credits": 5000,
+          "ships": 1
+        },
+        {
+          "id": "H01",
+          "seconds": 166,
+          "credits": 5500,
+          "ships": 1
+        },
+        {
+          "id": "H02",
+          "seconds": 815,
+          "credits": 5797,
+          "ships": 1
+        },
+        {
+          "id": "H04",
+          "seconds": 1076,
+          "credits": 5874,
+          "ships": 1
+        },
+        {
+          "id": "H03",
+          "seconds": 1357,
+          "credits": 6001,
+          "ships": 1
+        },
+        {
+          "id": "H05",
+          "seconds": 1987,
+          "credits": 6688,
+          "ships": 2
+        },
+        {
+          "id": "H06",
+          "seconds": 3307,
+          "credits": 8966,
+          "ships": 2
+        }
+      ],
+      "credits": 8966,
+      "stock": {
+        "ore": 4,
+        "tourists": 41,
+        "workers": 52,
+        "water": 99.81,
+        "food": 45.19,
+        "shipfuel": 40,
+        "fuel": 2,
+        "ingots": 92,
+        "plates": 40,
+        "electronics": 12,
+        "machinery": 4
+      }
+    },
+    {
+      "seed": 77,
+      "stages": [
+        {
+          "id": "H00",
+          "seconds": 91,
+          "credits": 5000,
+          "ships": 1
+        },
+        {
+          "id": "H01",
+          "seconds": 166,
+          "credits": 5500,
+          "ships": 1
+        },
+        {
+          "id": "H02",
+          "seconds": 784,
+          "credits": 5942,
+          "ships": 1
+        },
+        {
+          "id": "H04",
+          "seconds": 1041,
+          "credits": 6018,
+          "ships": 1
+        },
+        {
+          "id": "H03",
+          "seconds": 1309,
+          "credits": 6237,
+          "ships": 1
+        },
+        {
+          "id": "H05",
+          "seconds": 1939,
+          "credits": 6924,
+          "ships": 2
+        },
+        {
+          "id": "H06",
+          "seconds": 3317,
+          "credits": 9095,
+          "ships": 2
+        }
+      ],
+      "credits": 9095,
+      "stock": {
+        "ore": 4,
+        "tourists": 41,
+        "workers": 52,
+        "water": 99.71,
+        "food": 45.14,
+        "shipfuel": 40,
+        "fuel": 2,
+        "ingots": 92,
+        "plates": 40,
+        "electronics": 12,
+        "machinery": 4
+      }
+    },
+    {
+      "seed": 2026,
+      "stages": [
+        {
+          "id": "H00",
+          "seconds": 91,
+          "credits": 5000,
+          "ships": 1
+        },
+        {
+          "id": "H01",
+          "seconds": 166,
+          "credits": 5500,
+          "ships": 1
+        },
+        {
+          "id": "H02",
+          "seconds": 769,
+          "credits": 5817,
+          "ships": 1
+        },
+        {
+          "id": "H04",
+          "seconds": 1003,
+          "credits": 5887,
+          "ships": 1
+        },
+        {
+          "id": "H03",
+          "seconds": 1276,
+          "credits": 6050,
+          "ships": 1
+        },
+        {
+          "id": "H05",
+          "seconds": 1906,
+          "credits": 6736,
+          "ships": 2
+        },
+        {
+          "id": "H06",
+          "seconds": 3233,
+          "credits": 9107,
+          "ships": 2
+        }
+      ],
+      "credits": 9107,
+      "stock": {
+        "ore": 4,
+        "tourists": 41,
+        "workers": 52,
+        "water": 100.52,
+        "food": 45.54,
+        "shipfuel": 40,
+        "fuel": 2,
+        "ingots": 92,
+        "plates": 40,
+        "electronics": 12,
+        "machinery": 4
+      }
+    }
+  ],
+  "battles": [
+    {
+      "name": "mirror",
+      "a": [
+        "korvette"
+      ],
+      "b": [
+        "korvette"
+      ],
+      "costA": 220000,
+      "costB": 220000,
+      "runs": [
+        {
+          "seed": 1,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 49
+          },
+          "tacticalSeconds": 49,
+          "hullA": 0.1705768421052649,
+          "hullB": 0.1246273684210543,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 2,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 50
+          },
+          "tacticalSeconds": 50,
+          "hullA": 0.11108210526315962,
+          "hullB": 0.10650105263158059,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 3,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 50
+          },
+          "tacticalSeconds": 50,
+          "hullA": 0.12054315789473846,
+          "hullB": 0.12402105263158057,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 4,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 49
+          },
+          "tacticalSeconds": 49,
+          "hullA": 0.09355368421052797,
+          "hullB": 0.1944926315789491,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 5,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 50
+          },
+          "tacticalSeconds": 50,
+          "hullA": 0.09138947368421223,
+          "hullB": 0.15964210526315953,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 6,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 49
+          },
+          "tacticalSeconds": 49,
+          "hullA": 0.07325894736842271,
+          "hullB": 0.13370526315789646,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 7,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 50
+          },
+          "tacticalSeconds": 50,
+          "hullA": 0.11968842105263323,
+          "hullB": 0.07109473684210693,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 8,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 49
+          },
+          "tacticalSeconds": 49,
+          "hullA": 0.08176421052631745,
+          "hullB": 0.174353684210528,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 9,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 49
+          },
+          "tacticalSeconds": 49,
+          "hullA": 0.135953684210528,
+          "hullB": 0.10637894736842284,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 10,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 49
+          },
+          "tacticalSeconds": 49,
+          "hullA": 0.13675368421052797,
+          "hullB": 0.08551157894737009,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "frigates-destroyer",
+      "a": [
+        "fregatte",
+        "fregatte",
+        "fregatte"
+      ],
+      "b": [
+        "zerstoerer"
+      ],
+      "costA": 2400000,
+      "costB": 2400000,
+      "runs": [
+        {
+          "seed": 1,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 180
+          },
+          "tacticalSeconds": 180,
+          "hullA": 0,
+          "hullB": 0.7403039999999984,
+          "owners": [
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 2,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 172
+          },
+          "tacticalSeconds": 172,
+          "hullA": 0,
+          "hullB": 0.730252,
+          "owners": [
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 3,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 169
+          },
+          "tacticalSeconds": 169,
+          "hullA": 0,
+          "hullB": 0.7809359999999947,
+          "owners": [
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 4,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 180
+          },
+          "tacticalSeconds": 180,
+          "hullA": 0,
+          "hullB": 0.7777439999999965,
+          "owners": [
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 5,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 169
+          },
+          "tacticalSeconds": 169,
+          "hullA": 0,
+          "hullB": 0.8107279999999948,
+          "owners": [
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 6,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 175
+          },
+          "tacticalSeconds": 175,
+          "hullA": 0,
+          "hullB": 0.729291999999998,
+          "owners": [
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 7,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 186
+          },
+          "tacticalSeconds": 186,
+          "hullA": 0.028045614035087683,
+          "hullB": 0.7161919999999932,
+          "owners": [
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 8,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 180
+          },
+          "tacticalSeconds": 180,
+          "hullA": 0,
+          "hullB": 0.7639839999999966,
+          "owners": [
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 9,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 185
+          },
+          "tacticalSeconds": 185,
+          "hullA": 0,
+          "hullB": 0.689971999999998,
+          "owners": [
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 10,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 180
+          },
+          "tacticalSeconds": 180,
+          "hullA": 0,
+          "hullB": 0.731343999999998,
+          "owners": [
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "fregatte",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "squadrons-cruiser",
+      "a": [
+        "abfangstaffel",
+        "abfangstaffel",
+        "abfangstaffel",
+        "abfangstaffel",
+        "bomberstaffel",
+        "bomberstaffel"
+      ],
+      "b": [
+        "kreuzer"
+      ],
+      "costA": 880000,
+      "costB": 7000000,
+      "runs": [
+        {
+          "seed": 1,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 32
+          },
+          "tacticalSeconds": 32,
+          "hullA": 0.03217241379310343,
+          "hullB": 0.7720680656234266,
+          "owners": [
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 2,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 38
+          },
+          "tacticalSeconds": 38,
+          "hullA": 0.025266729519424182,
+          "hullB": 0.7083419117772748,
+          "owners": [
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 3,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 39
+          },
+          "tacticalSeconds": 39,
+          "hullA": 0.060844827586206886,
+          "hullB": 0.6430685542835336,
+          "owners": [
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 4,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 33
+          },
+          "tacticalSeconds": 33,
+          "hullA": 0.004310344827586197,
+          "hullB": 0.8240131389252012,
+          "owners": [
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 5,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 33
+          },
+          "tacticalSeconds": 33,
+          "hullA": 0.02378066440131521,
+          "hullB": 0.8074769230769266,
+          "owners": [
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 6,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 34
+          },
+          "tacticalSeconds": 34,
+          "hullA": 0.024141714551037797,
+          "hullB": 0.7648209002565388,
+          "owners": [
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 7,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 33
+          },
+          "tacticalSeconds": 33,
+          "hullA": 0.0030629794264768924,
+          "hullB": 0.8543222414987179,
+          "owners": [
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 8,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 32
+          },
+          "tacticalSeconds": 32,
+          "hullA": 0.013796131551832428,
+          "hullB": 0.8108688426439713,
+          "owners": [
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 9,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 26
+          },
+          "tacticalSeconds": 26,
+          "hullA": 0,
+          "hullB": 0.8612356370911803,
+          "owners": [
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 10,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 26
+          },
+          "tacticalSeconds": 26,
+          "hullA": 0,
+          "hullB": 0.8593854466175145,
+          "owners": [
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "abfangstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": false
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ion-cruiser",
+      "a": [
+        "fx_tech"
+      ],
+      "b": [
+        "kreuzer"
+      ],
+      "costA": 14000000,
+      "costB": 7000000,
+      "runs": [
+        {
+          "seed": 1,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 139
+          },
+          "tacticalSeconds": 139,
+          "hullA": 0.7717885714285707,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 2,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 149
+          },
+          "tacticalSeconds": 149,
+          "hullA": 0.7833828571428562,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 3,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 134
+          },
+          "tacticalSeconds": 134,
+          "hullA": 0.7726857142857132,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 4,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 154
+          },
+          "tacticalSeconds": 154,
+          "hullA": 0.6898742857142838,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 5,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 149
+          },
+          "tacticalSeconds": 149,
+          "hullA": 0.763359999999999,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 6,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 147
+          },
+          "tacticalSeconds": 147,
+          "hullA": 0.7385285714285691,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 7,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 149
+          },
+          "tacticalSeconds": 149,
+          "hullA": 0.7300457142857127,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 8,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 162
+          },
+          "tacticalSeconds": 162,
+          "hullA": 0.6747285714285688,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 9,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 157
+          },
+          "tacticalSeconds": 157,
+          "hullA": 0.7097828571428555,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 10,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 147
+          },
+          "tacticalSeconds": 147,
+          "hullA": 0.7152885714285688,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ion-equal-budget",
+      "a": [
+        "fx_tech"
+      ],
+      "b": [
+        "kreuzer",
+        "kreuzer"
+      ],
+      "costA": 14000000,
+      "costB": 14000000,
+      "runs": [
+        {
+          "seed": 1,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 121
+          },
+          "tacticalSeconds": 121,
+          "hullA": 0.2265142857142797,
+          "hullB": 0.6892861839743577,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 2,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 129
+          },
+          "tacticalSeconds": 129,
+          "hullA": 0.22538571428570792,
+          "hullB": 0.651636824999999,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 3,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 122
+          },
+          "tacticalSeconds": 122,
+          "hullA": 0.2194499999999945,
+          "hullB": 0.6767537349358977,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 4,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 126
+          },
+          "tacticalSeconds": 126,
+          "hullA": 0.22798571428570832,
+          "hullB": 0.6776711131410248,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 5,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 117
+          },
+          "tacticalSeconds": 117,
+          "hullA": 0.20099642857142358,
+          "hullB": 0.7188487814102559,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 6,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 132
+          },
+          "tacticalSeconds": 132,
+          "hullA": 0.21951428571427903,
+          "hullB": 0.6371283673076917,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 7,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 128
+          },
+          "tacticalSeconds": 128,
+          "hullA": 0.2198571428571367,
+          "hullB": 0.642926884294871,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 8,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 119
+          },
+          "tacticalSeconds": 119,
+          "hullA": 0.22225952380951897,
+          "hullB": 0.6441339275641004,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 9,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 120
+          },
+          "tacticalSeconds": 120,
+          "hullA": 0.2240142857142805,
+          "hullB": 0.7265284987179482,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 10,
+          "ended": {
+            "winner": "B",
+            "why": null,
+            "t": 125
+          },
+          "tacticalSeconds": 125,
+          "hullA": 0.20076785714285106,
+          "hullB": 0.6516381032051282,
+          "owners": [
+            {
+              "type": "fx_tech",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "kreuzer",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "bombers-destroyer",
+      "a": [
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel",
+        "bomberstaffel"
+      ],
+      "b": [
+        "zerstoerer"
+      ],
+      "costA": 4000000,
+      "costB": 2400000,
+      "runs": [
+        {
+          "seed": 1,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 16
+          },
+          "tacticalSeconds": 16,
+          "hullA": 0.9807272727272729,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 2,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 17
+          },
+          "tacticalSeconds": 17,
+          "hullA": 0.9559545454545456,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 3,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 17
+          },
+          "tacticalSeconds": 17,
+          "hullA": 0.9765454545454546,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 4,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 18
+          },
+          "tacticalSeconds": 18,
+          "hullA": 0.860409090909091,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 5,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 16
+          },
+          "tacticalSeconds": 16,
+          "hullA": 0.9700454545454545,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 6,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 17
+          },
+          "tacticalSeconds": 17,
+          "hullA": 0.9801818181818184,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 7,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 17
+          },
+          "tacticalSeconds": 17,
+          "hullA": 0.9744545454545456,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 8,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 16
+          },
+          "tacticalSeconds": 16,
+          "hullA": 0.9736818181818183,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 9,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 16
+          },
+          "tacticalSeconds": 16,
+          "hullA": 0.9713636363636363,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 10,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 16
+          },
+          "tacticalSeconds": 16,
+          "hullA": 0.9794545454545456,
+          "hullB": 0,
+          "owners": [
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "bomberstaffel",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "zerstoerer",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "escort",
+      "a": [
+        "korvette",
+        "korvette"
+      ],
+      "b": [
+        "lastesel",
+        "korvette"
+      ],
+      "costA": 440000,
+      "costB": 260000,
+      "runs": [
+        {
+          "seed": 1,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 18
+          },
+          "tacticalSeconds": 18,
+          "hullA": 0.8809296049332199,
+          "hullB": 0.42424242424242425,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 2,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 18
+          },
+          "tacticalSeconds": 18,
+          "hullA": 0.904293171131943,
+          "hullB": 0.42424242424242425,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 3,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 18
+          },
+          "tacticalSeconds": 18,
+          "hullA": 0.9137604189003127,
+          "hullB": 0.42424242424242425,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 4,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 18
+          },
+          "tacticalSeconds": 18,
+          "hullA": 0.909052708204509,
+          "hullB": 0.42424242424242425,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 5,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 18
+          },
+          "tacticalSeconds": 18,
+          "hullA": 0.8955599386095389,
+          "hullB": 0.42424242424242425,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 6,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 18
+          },
+          "tacticalSeconds": 18,
+          "hullA": 0.9105604189003127,
+          "hullB": 0.42424242424242425,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 7,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 18
+          },
+          "tacticalSeconds": 18,
+          "hullA": 0.8925814715318916,
+          "hullB": 0.42424242424242425,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 8,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 18
+          },
+          "tacticalSeconds": 18,
+          "hullA": 0.892876208373997,
+          "hullB": 0.42424242424242425,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 9,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 18
+          },
+          "tacticalSeconds": 18,
+          "hullA": 0.8717927628279568,
+          "hullB": 0.42424242424242425,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        },
+        {
+          "seed": 10,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 18
+          },
+          "tacticalSeconds": 18,
+          "hullA": 0.8997669222952783,
+          "hullB": 0.42424242424242425,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            },
+            {
+              "type": "korvette",
+              "owner": "p2",
+              "exists": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "civilian",
+      "a": [
+        "korvette"
+      ],
+      "b": [
+        "lastesel"
+      ],
+      "costA": 220000,
+      "costB": 40000,
+      "runs": [
+        {
+          "seed": 1,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 0
+          },
+          "tacticalSeconds": 0,
+          "hullA": 1,
+          "hullB": 1,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 2,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 0
+          },
+          "tacticalSeconds": 0,
+          "hullA": 1,
+          "hullB": 1,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 3,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 0
+          },
+          "tacticalSeconds": 0,
+          "hullA": 1,
+          "hullB": 1,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 4,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 0
+          },
+          "tacticalSeconds": 0,
+          "hullA": 1,
+          "hullB": 1,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 5,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 0
+          },
+          "tacticalSeconds": 0,
+          "hullA": 1,
+          "hullB": 1,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 6,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 0
+          },
+          "tacticalSeconds": 0,
+          "hullA": 1,
+          "hullB": 1,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 7,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 0
+          },
+          "tacticalSeconds": 0,
+          "hullA": 1,
+          "hullB": 1,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 8,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 0
+          },
+          "tacticalSeconds": 0,
+          "hullA": 1,
+          "hullB": 1,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 9,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 0
+          },
+          "tacticalSeconds": 0,
+          "hullA": 1,
+          "hullB": 1,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        },
+        {
+          "seed": 10,
+          "ended": {
+            "winner": "A",
+            "why": null,
+            "t": 0
+          },
+          "tacticalSeconds": 0,
+          "hullA": 1,
+          "hullB": 1,
+          "owners": [
+            {
+              "type": "korvette",
+              "owner": "p1",
+              "exists": true
+            },
+            {
+              "type": "lastesel",
+              "owner": "p2",
+              "exists": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "recipes": [
+    {
+      "id": "waterworks",
+      "in": {
+        "ice": 2
+      },
+      "out": {
+        "water": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 23.135897671214718,
+          "revenue": 35.53033739994951,
+          "margin": 12.394439728734792
+        },
+        {
+          "fill": 0.5,
+          "input": 15.264000000000001,
+          "revenue": 24.612495883189087,
+          "margin": 9.348495883189086
+        },
+        {
+          "fill": 0.8,
+          "input": 10.07048437501873,
+          "revenue": 17.049513118354476,
+          "margin": 6.979028743335746
+        }
+      ]
+    },
+    {
+      "id": "foodplant",
+      "in": {
+        "grain": 2,
+        "water": 1
+      },
+      "out": {
+        "food": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 46.060947456683834,
+          "revenue": 64.86906446902762,
+          "margin": 18.808117012343786
+        },
+        {
+          "fill": 0.5,
+          "input": 31.04925831711725,
+          "revenue": 47.08802189601937,
+          "margin": 16.03876357890212
+        },
+        {
+          "fill": 0.8,
+          "input": 20.942318275861894,
+          "revenue": 34.180881506910936,
+          "margin": 13.238563231049042
+        }
+      ]
+    },
+    {
+      "id": "fueldepot",
+      "in": {
+        "helium3": 1,
+        "gas": 1
+      },
+      "out": {
+        "shipfuel": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 39.04182732017483,
+          "revenue": 53.54571974358587,
+          "margin": 14.503892423411038
+        },
+        {
+          "fill": 0.5,
+          "input": 25.758000000000003,
+          "revenue": 37.09207126058073,
+          "margin": 11.334071260580728
+        },
+        {
+          "fill": 0.8,
+          "input": 16.993942382844104,
+          "revenue": 25.694336671322944,
+          "margin": 8.70039428847884
+        }
+      ]
+    },
+    {
+      "id": "refinery",
+      "in": {
+        "crude": 2
+      },
+      "out": {
+        "fuel": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 40.48782092462575,
+          "revenue": 49.91762191049244,
+          "margin": 9.429800985866692
+        },
+        {
+          "fill": 0.5,
+          "input": 26.712,
+          "revenue": 34.5788234415227,
+          "margin": 7.866823441522701
+        },
+        {
+          "fill": 0.8,
+          "input": 17.623347656282775,
+          "revenue": 23.95336526135013,
+          "margin": 6.330017605067354
+        }
+      ]
+    },
+    {
+      "id": "smelter",
+      "in": {
+        "ore": 2,
+        "fuel": 1
+      },
+      "out": {
+        "ingots": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 85.20995637106307,
+          "revenue": 109.3298839365634,
+          "margin": 24.119927565500333
+        },
+        {
+          "fill": 0.5,
+          "input": 58.073141327674534,
+          "revenue": 79.36183465621242,
+          "margin": 21.28869332853789
+        },
+        {
+          "fill": 0.8,
+          "input": 39.599347146466116,
+          "revenue": 57.60822725883866,
+          "margin": 18.008880112372545
+        }
+      ]
+    },
+    {
+      "id": "oilworks",
+      "in": {
+        "crude": 2
+      },
+      "out": {
+        "hydraulicoil": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 40.48782092462575,
+          "revenue": 50.29294237598487,
+          "margin": 9.80512145135912
+        },
+        {
+          "fill": 0.5,
+          "input": 26.712,
+          "revenue": 34.83881459521836,
+          "margin": 8.12681459521836
+        },
+        {
+          "fill": 0.8,
+          "input": 17.623347656282775,
+          "revenue": 24.133465752036976,
+          "margin": 6.510118095754201
+        }
+      ]
+    },
+    {
+      "id": "chemworks",
+      "in": {
+        "crude": 1,
+        "gas": 1
+      },
+      "out": {
+        "plastics": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 33.257852902371155,
+          "revenue": 42.16099895698235,
+          "margin": 8.903146054611192
+        },
+        {
+          "fill": 0.5,
+          "input": 21.942,
+          "revenue": 29.20567293181241,
+          "margin": 7.263672931812408
+        },
+        {
+          "fill": 0.8,
+          "input": 14.476321289089423,
+          "revenue": 20.231288453822042,
+          "margin": 5.754967164732619
+        }
+      ]
+    },
+    {
+      "id": "glassworks",
+      "in": {
+        "silicate": 2,
+        "fuel": 1
+      },
+      "out": {
+        "glass": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 82.31796916216123,
+          "revenue": 106.1714650672849,
+          "margin": 23.853495905123665
+        },
+        {
+          "fill": 0.5,
+          "input": 56.16514132767453,
+          "revenue": 77.06915943281074,
+          "margin": 20.904018105136203
+        },
+        {
+          "fill": 0.8,
+          "input": 38.34053659958877,
+          "revenue": 55.94398958247222,
+          "margin": 17.603452982883447
+        }
+      ]
+    },
+    {
+      "id": "chemplant",
+      "in": {
+        "sulfur": 1,
+        "gas": 1
+      },
+      "out": {
+        "chemicals": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 30.365865693469317,
+          "revenue": 38.908221589381334,
+          "margin": 8.542355895912017
+        },
+        {
+          "fill": 0.5,
+          "input": 20.034000000000002,
+          "revenue": 26.95241626645003,
+          "margin": 6.918416266450027
+        },
+        {
+          "fill": 0.8,
+          "input": 13.217510742212081,
+          "revenue": 18.670417534536067,
+          "margin": 5.4529067923239865
+        }
+      ]
+    },
+    {
+      "id": "siliconworks",
+      "in": {
+        "silicate": 2,
+        "crystals": 1
+      },
+      "out": {
+        "silicon": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 57.839744178036796,
+          "revenue": 70.56024751257578,
+          "margin": 12.72050333453899
+        },
+        {
+          "fill": 0.5,
+          "input": 38.160000000000004,
+          "revenue": 48.87833689478396,
+          "margin": 10.71833689478396
+        },
+        {
+          "fill": 0.8,
+          "input": 25.176210937546823,
+          "revenue": 33.8588922491265,
+          "margin": 8.682681311579675
+        }
+      ]
+    },
+    {
+      "id": "weavery",
+      "in": {
+        "biomass": 2
+      },
+      "out": {
+        "textiles": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 28.919872089018398,
+          "revenue": 37.28183290558082,
+          "margin": 8.361960816562423
+        },
+        {
+          "fill": 0.5,
+          "input": 19.080000000000002,
+          "revenue": 25.825787933768833,
+          "margin": 6.745787933768831
+        },
+        {
+          "fill": 0.8,
+          "input": 12.588105468773412,
+          "revenue": 17.88998207489308,
+          "margin": 5.301876606119668
+        }
+      ]
+    },
+    {
+      "id": "fertilizerplant",
+      "in": {
+        "sulfur": 1,
+        "biomass": 1
+      },
+      "out": {
+        "fertilizer": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 31.81185929792024,
+          "revenue": 45.28866950275255,
+          "margin": 13.476810204832308
+        },
+        {
+          "fill": 0.5,
+          "input": 20.988000000000003,
+          "revenue": 31.37226587927624,
+          "margin": 10.384265879276239
+        },
+        {
+          "fill": 0.8,
+          "input": 13.846916015650752,
+          "revenue": 21.7321258762124,
+          "margin": 7.885209860561648
+        }
+      ]
+    },
+    {
+      "id": "refinery2",
+      "in": {
+        "rareearth": 2,
+        "acid": 1
+      },
+      "out": {
+        "raremetals": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 109.8955139382699,
+          "revenue": 129.86088106037883,
+          "margin": 19.96536712210893
+        },
+        {
+          "fill": 0.5,
+          "input": 72.504,
+          "revenue": 89.95693917869814,
+          "margin": 17.45293917869813
+        },
+        {
+          "fill": 0.8,
+          "input": 47.83480078133896,
+          "revenue": 62.3147697776477,
+          "margin": 14.479968996308735
+        }
+      ]
+    },
+    {
+      "id": "rollingmill",
+      "in": {
+        "ingots": 2,
+        "hydraulicoil": 1
+      },
+      "out": {
+        "plates": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 180.0002083950013,
+          "revenue": 218.34540417321526,
+          "margin": 38.34519577821396
+        },
+        {
+          "fill": 0.5,
+          "input": 128.77945553884751,
+          "revenue": 165.86778783115182,
+          "margin": 37.0883322923043
+        },
+        {
+          "fill": 0.8,
+          "input": 92.17680275694488,
+          "revenue": 126.00275762238807,
+          "margin": 33.825954865443194
+        }
+      ]
+    },
+    {
+      "id": "toolworks",
+      "in": {
+        "ingots": 1,
+        "raremetals": 1,
+        "crystals": 1
+      },
+      "out": {
+        "cutters": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 239.89417037279276,
+          "revenue": 271.1709051828641,
+          "margin": 31.276734810071332
+        },
+        {
+          "fill": 0.5,
+          "input": 167.1753701034177,
+          "revenue": 205.99709133868856,
+          "margin": 38.82172123527087
+        },
+        {
+          "fill": 0.8,
+          "input": 116.59799730447102,
+          "revenue": 156.4872957568368,
+          "margin": 39.88929845236578
+        }
+      ]
+    },
+    {
+      "id": "cableworks",
+      "in": {
+        "ingots": 1,
+        "plastics": 1
+      },
+      "out": {
+        "wires": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 109.18669934125522,
+          "revenue": 139.92888267444764,
+          "margin": 30.742183333192415
+        },
+        {
+          "fill": 0.5,
+          "input": 77.68062305905718,
+          "revenue": 106.29806617996397,
+          "margin": 28.617443120906785
+        },
+        {
+          "fill": 0.8,
+          "input": 55.29524064705943,
+          "revenue": 80.75015434725086,
+          "margin": 25.454913700191426
+        }
+      ]
+    },
+    {
+      "id": "chipfab",
+      "in": {
+        "silicon": 1,
+        "raremetals": 1,
+        "chemicals": 1
+      },
+      "out": {
+        "chips": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 269.8820331617831,
+          "revenue": 320.4580375829492,
+          "margin": 50.57600442116609
+        },
+        {
+          "fill": 0.5,
+          "input": 186.9520785960937,
+          "revenue": 232.61835535898712,
+          "margin": 45.6662767628934
+        },
+        {
+          "fill": 0.8,
+          "input": 129.50502588828604,
+          "revenue": 168.856115009796,
+          "margin": 39.35108912150997
+        }
+      ]
+    },
+    {
+      "id": "alloyworks",
+      "in": {
+        "ingots": 2,
+        "raremetals": 1
+      },
+      "out": {
+        "alloys": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 269.7257562731477,
+          "revenue": 316.95300605789316,
+          "margin": 47.22724978474548
+        },
+        {
+          "fill": 0.5,
+          "input": 190.93393645213322,
+          "revenue": 240.77582104522037,
+          "margin": 49.841884593087144
+        },
+        {
+          "fill": 0.8,
+          "input": 135.23231580710166,
+          "revenue": 182.90722880669236,
+          "margin": 47.6749129995907
+        }
+      ]
+    },
+    {
+      "id": "pharma",
+      "in": {
+        "biomass": 2,
+        "chemicals": 1,
+        "water": 1
+      },
+      "out": {
+        "medicine": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 92.82816326637739,
+          "revenue": 120.01991703258294,
+          "margin": 27.19175376620555
+        },
+        {
+          "fill": 0.5,
+          "input": 63.35040857502899,
+          "revenue": 87.12165848926432,
+          "margin": 23.771249914235327
+        },
+        {
+          "fill": 0.8,
+          "input": 43.25500391487565,
+          "revenue": 63.24103170192512,
+          "margin": 19.986027787049466
+        }
+      ]
+    },
+    {
+      "id": "coolantworks",
+      "in": {
+        "water": 2,
+        "chemicals": 1
+      },
+      "out": {
+        "coolant": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 83.94135375392628,
+          "revenue": 109.57283923420023,
+          "margin": 25.631485480273952
+        },
+        {
+          "fill": 0.5,
+          "input": 58.14766689214623,
+          "revenue": 79.53819428878181,
+          "margin": 21.390527396635576
+        },
+        {
+          "fill": 0.8,
+          "input": 40.27992180006807,
+          "revenue": 57.736245541636094,
+          "margin": 17.456323741568028
+        }
+      ]
+    },
+    {
+      "id": "tailor",
+      "in": {
+        "textiles": 2,
+        "plastics": 1
+      },
+      "out": {
+        "clothing": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 131.62568580237516,
+          "revenue": 162.78004941666106,
+          "margin": 31.1543636142859
+        },
+        {
+          "fill": 0.5,
+          "input": 91.1794507737352,
+          "revenue": 118.16095382147184,
+          "margin": 26.981503047736638
+        },
+        {
+          "fill": 0.8,
+          "input": 63.161625276409254,
+          "revenue": 85.77224947427091,
+          "margin": 22.610624197861654
+        }
+      ]
+    },
+    {
+      "id": "cannery",
+      "in": {
+        "food": 3,
+        "plastics": 1
+      },
+      "out": {
+        "preserves": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 157.2685865959098,
+          "revenue": 193.45872369755847,
+          "margin": 36.19013710164867
+        },
+        {
+          "fill": 0.5,
+          "input": 112.58294481105528,
+          "revenue": 146.9624270676012,
+          "margin": 34.37948225654591
+        },
+        {
+          "fill": 0.8,
+          "input": 80.6306035713189,
+          "revenue": 111.6411529901589,
+          "margin": 31.01054941884
+        }
+      ]
+    },
+    {
+      "id": "opticsworks",
+      "in": {
+        "glass": 2,
+        "crystals": 1
+      },
+      "out": {
+        "optics": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 151.5371284163479,
+          "revenue": 177.49368339242014,
+          "margin": 25.956554976072226
+        },
+        {
+          "fill": 0.5,
+          "input": 107.89577553061638,
+          "revenue": 134.8344597853234,
+          "margin": 26.938684254707013
+        },
+        {
+          "fill": 0.8,
+          "input": 76.93269150226837,
+          "revenue": 102.42804813174772,
+          "margin": 25.495356629479346
+        }
+      ]
+    },
+    {
+      "id": "batteryplant",
+      "in": {
+        "raremetals": 1,
+        "chemicals": 1,
+        "ingots": 1
+      },
+      "out": {
+        "batteries": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 251.95753967566426,
+          "revenue": 295.5880256495463,
+          "margin": 43.63048597388203
+        },
+        {
+          "fill": 0.5,
+          "input": 176.58052036132943,
+          "revenue": 224.54574718217222,
+          "margin": 47.96522682084279
+        },
+        {
+          "fill": 0.8,
+          "input": 123.8049563809567,
+          "revenue": 170.5779267167598,
+          "margin": 46.77297033580311
+        }
+      ]
+    },
+    {
+      "id": "gearworks",
+      "in": {
+        "plates": 2,
+        "cutters": 1
+      },
+      "out": {
+        "gears": 3
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 552.0077531036641,
+          "revenue": 651.1986513238069,
+          "margin": 99.1908982201428
+        },
+        {
+          "fill": 0.5,
+          "input": 419.33699140428814,
+          "revenue": 517.3078737795898,
+          "margin": 97.9708823753017
+        },
+        {
+          "fill": 0.8,
+          "input": 318.5526133850834,
+          "revenue": 410.9459313687873,
+          "margin": 92.39331798370387
+        }
+      ]
+    },
+    {
+      "id": "electronicsworks",
+      "in": {
+        "chips": 1,
+        "wires": 2
+      },
+      "out": {
+        "electronics": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 338.47593144029537,
+          "revenue": 394.6248023969542,
+          "margin": 56.14887095665881
+        },
+        {
+          "fill": 0.5,
+          "input": 251.02518988406916,
+          "revenue": 313.4873161264424,
+          "margin": 62.462126242373245
+        },
+        {
+          "fill": 0.8,
+          "input": 186.26479208859342,
+          "revenue": 249.03223714080093,
+          "margin": 62.767445052207506
+        }
+      ]
+    },
+    {
+      "id": "hullworks",
+      "in": {
+        "plates": 3,
+        "alloys": 1
+      },
+      "out": {
+        "hullparts": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 548.0364743043572,
+          "revenue": 621.2857300894839,
+          "margin": 73.2492557851267
+        },
+        {
+          "fill": 0.5,
+          "input": 416.3201785164875,
+          "revenue": 493.5452482722937,
+          "margin": 77.2250697558062
+        },
+        {
+          "fill": 0.8,
+          "input": 316.2608679650468,
+          "revenue": 392.0690598463868,
+          "margin": 75.80819188133995
+        }
+      ]
+    },
+    {
+      "id": "sensorworks",
+      "in": {
+        "optics": 1,
+        "chips": 1
+      },
+      "out": {
+        "sensors": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 380.8362386329026,
+          "revenue": 428.4884868131689,
+          "margin": 47.65224818026627
+        },
+        {
+          "fill": 0.5,
+          "input": 283.2045273539426,
+          "revenue": 340.38840160640024,
+          "margin": 57.183874252457656
+        },
+        {
+          "fill": 0.8,
+          "input": 210.71007656898348,
+          "revenue": 270.4022803737072,
+          "margin": 59.692203804723704
+        }
+      ]
+    },
+    {
+      "id": "jeweler",
+      "in": {
+        "clothing": 1,
+        "glass": 1,
+        "crystals": 1
+      },
+      "out": {
+        "luxury": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 183.45473448567702,
+          "revenue": 213.76719408571236,
+          "margin": 30.31245960003534
+        },
+        {
+          "fill": 0.5,
+          "input": 131.0645532178402,
+          "revenue": 162.3899148604986,
+          "margin": 31.325361642658407
+        },
+        {
+          "fill": 0.8,
+          "input": 93.75075293062294,
+          "revenue": 123.36076431740251,
+          "margin": 29.610011386779576
+        }
+      ]
+    },
+    {
+      "id": "reactorworks",
+      "in": {
+        "alloys": 2,
+        "coolant": 2,
+        "batteries": 1
+      },
+      "out": {
+        "reactorcores": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 647.6372868126367,
+          "revenue": 728.4078517927761,
+          "margin": 80.7705649801394
+        },
+        {
+          "fill": 0.5,
+          "input": 487.81074708573794,
+          "revenue": 578.6423486738937,
+          "margin": 90.83160158815576
+        },
+        {
+          "fill": 0.8,
+          "input": 367.5408340096924,
+          "revenue": 459.66962993981355,
+          "margin": 92.12879593012116
+        }
+      ]
+    },
+    {
+      "id": "cellworks",
+      "in": {
+        "batteries": 2,
+        "wires": 1
+      },
+      "out": {
+        "powercells": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 412.2187393680599,
+          "revenue": 483.1218976713283,
+          "margin": 70.90315830326841
+        },
+        {
+          "fill": 0.5,
+          "input": 313.14517775370587,
+          "revenue": 383.78881951406555,
+          "margin": 70.64364176035969
+        },
+        {
+          "fill": 0.8,
+          "input": 237.88317459979612,
+          "revenue": 304.87928345612926,
+          "margin": 66.99610885633314
+        }
+      ]
+    },
+    {
+      "id": "robotics",
+      "in": {
+        "gears": 2,
+        "electronics": 1,
+        "sensors": 1
+      },
+      "out": {
+        "robots": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 1195.2439591076259,
+          "revenue": 1335.2620448055225,
+          "margin": 140.0180856978966
+        },
+        {
+          "fill": 0.5,
+          "input": 949.4938447383429,
+          "revenue": 1108.9524137687963,
+          "margin": 159.45856903045342
+        },
+        {
+          "fill": 0.8,
+          "input": 754.2715897674084,
+          "revenue": 920.9993355145158,
+          "margin": 166.7277457471074
+        }
+      ]
+    },
+    {
+      "id": "machineworks",
+      "in": {
+        "gears": 2,
+        "plates": 1,
+        "hydraulicoil": 1
+      },
+      "out": {
+        "machinery": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 669.3765568076294,
+          "revenue": 743.3718103409092,
+          "margin": 73.99525353327977
+        },
+        {
+          "fill": 0.5,
+          "input": 521.7056402400909,
+          "revenue": 617.3799117650331,
+          "margin": 95.67427152494213
+        },
+        {
+          "fill": 0.8,
+          "input": 407.19651780599423,
+          "revenue": 512.7420089769096,
+          "margin": 105.54549117091534
+        }
+      ]
+    },
+    {
+      "id": "engineworks",
+      "in": {
+        "alloys": 2,
+        "gears": 1,
+        "powercells": 1
+      },
+      "out": {
+        "engines": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 874.5904067250879,
+          "revenue": 966.5453080859576,
+          "margin": 91.95490136086971
+        },
+        {
+          "fill": 0.5,
+          "input": 682.3537872899044,
+          "revenue": 802.7283907219427,
+          "margin": 120.37460343203827
+        },
+        {
+          "fill": 0.8,
+          "input": 532.6261473586674,
+          "revenue": 666.6763201686703,
+          "margin": 134.0501728100029
+        }
+      ]
+    },
+    {
+      "id": "shippartsworks",
+      "in": {
+        "hullparts": 1,
+        "electronics": 1,
+        "coolant": 1
+      },
+      "out": {
+        "shipparts": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 984.880451020601,
+          "revenue": 1098.4843570673072,
+          "margin": 113.60390604670624
+        },
+        {
+          "fill": 0.5,
+          "input": 778.150514562447,
+          "revenue": 912.3054789103045,
+          "margin": 134.15496434785746
+        },
+        {
+          "fill": 0.8,
+          "input": 615.0856375094273,
+          "revenue": 757.6815104329816,
+          "margin": 142.59587292355423
+        }
+      ]
+    },
+    {
+      "id": "consumerworks",
+      "in": {
+        "electronics": 1,
+        "plastics": 2,
+        "powercells": 1
+      },
+      "out": {
+        "consumer": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 589.9862434308429,
+          "revenue": 672.2197372814089,
+          "margin": 82.23349385056599
+        },
+        {
+          "fill": 0.5,
+          "input": 459.0131686222463,
+          "revenue": 558.287193994059,
+          "margin": 99.27402537181263
+        },
+        {
+          "fill": 0.8,
+          "input": 357.9398270622082,
+          "revenue": 463.66474188674505,
+          "margin": 105.72491482453682
+        }
+      ]
+    },
+    {
+      "id": "medtechworks",
+      "in": {
+        "electronics": 1,
+        "medicine": 1,
+        "optics": 1
+      },
+      "out": {
+        "medtech": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 490.32447414214903,
+          "revenue": 543.5197811555754,
+          "margin": 53.19530701342637
+        },
+        {
+          "fill": 0.5,
+          "input": 377.9226424667738,
+          "revenue": 451.4002143536929,
+          "margin": 73.47757188691907
+        },
+        {
+          "fill": 0.8,
+          "input": 291.5729399003164,
+          "revenue": 374.89372159618915,
+          "margin": 83.32078169587277
+        }
+      ]
+    },
+    {
+      "id": "computerworks",
+      "in": {
+        "electronics": 2,
+        "chips": 1,
+        "plastics": 1
+      },
+      "out": {
+        "computers": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 673.2294780363148,
+          "revenue": 739.8088081998417,
+          "margin": 66.57933016352683
+        },
+        {
+          "fill": 0.5,
+          "input": 517.5981880234184,
+          "revenue": 614.4207923622376,
+          "margin": 96.82260433881925
+        },
+        {
+          "fill": 0.8,
+          "input": 398.8437000909492,
+          "revenue": 510.2844220057785,
+          "margin": 111.44072191482928
+        }
+      ]
+    },
+    {
+      "id": "aiforge",
+      "in": {
+        "computers": 2,
+        "robots": 1
+      },
+      "out": {
+        "aicores": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 3174.2260009335305,
+          "revenue": 3679.1776048187103,
+          "margin": 504.9516038851798
+        },
+        {
+          "fill": 0.5,
+          "input": 2636.2357855349665,
+          "revenue": 3055.6046293834806,
+          "margin": 419.3688438485142
+        },
+        {
+          "fill": 0.8,
+          "input": 2189.427947125146,
+          "revenue": 2537.7192008565244,
+          "margin": 348.2912537313782
+        }
+      ]
+    },
+    {
+      "id": "habitatworks",
+      "in": {
+        "hullparts": 1,
+        "machinery": 1,
+        "medtech": 1
+      },
+      "out": {
+        "habitats": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 2151.7744264692838,
+          "revenue": 2465.3815420950355,
+          "margin": 313.6071156257517
+        },
+        {
+          "fill": 0.5,
+          "input": 1761.771166866469,
+          "revenue": 2047.5312861645261,
+          "margin": 285.76011929805713
+        },
+        {
+          "fill": 0.8,
+          "input": 1443.0713594092072,
+          "revenue": 1700.5012393578436,
+          "margin": 257.4298799486364
+        }
+      ]
+    },
+    {
+      "id": "goldpurifier",
+      "in": {
+        "gold": 2,
+        "chemicals": 1
+      },
+      "out": {
+        "finegold": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 1258.5098563395643,
+          "revenue": 1389.2183918872656,
+          "margin": 130.70853554770133
+        },
+        {
+          "fill": 0.5,
+          "input": 831.7531502579118,
+          "revenue": 1008.4243790316059,
+          "margin": 176.6712287736941
+        },
+        {
+          "fill": 0.8,
+          "input": 549.7543047806197,
+          "revenue": 732.0085410356434,
+          "margin": 182.25423625502367
+        }
+      ]
+    },
+    {
+      "id": "diamondcutter",
+      "in": {
+        "diamond": 2,
+        "cutters": 1
+      },
+      "out": {
+        "cutdiamonds": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 2185.5801533328295,
+          "revenue": 2265.8191242889193,
+          "margin": 80.23897095608982
+        },
+        {
+          "fill": 0.5,
+          "input": 1472.4945923606488,
+          "revenue": 1799.951629463981,
+          "margin": 327.45703710333214
+        },
+        {
+          "fill": 0.8,
+          "input": 994.6912528130878,
+          "revenue": 1429.8695927137576,
+          "margin": 435.1783399006698
+        }
+      ]
+    },
+    {
+      "id": "uraniumrefiner",
+      "in": {
+        "uranium": 2,
+        "chemicals": 1,
+        "coolant": 1
+      },
+      "out": {
+        "enricheduranium": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 1609.4890078617973,
+          "revenue": 1723.1678429347457,
+          "margin": 113.67883507294846
+        },
+        {
+          "fill": 0.5,
+          "input": 1067.3991534207357,
+          "revenue": 1309.0178804158484,
+          "margin": 241.61872699511264
+        },
+        {
+          "fill": 0.8,
+          "input": 708.188774507787,
+          "revenue": 994.4056339457176,
+          "margin": 286.21685943793057
+        }
+      ]
+    },
+    {
+      "id": "antimatterstabilizer",
+      "in": {
+        "antimatter": 1,
+        "powercells": 2,
+        "coolant": 1
+      },
+      "out": {
+        "stableantimatter": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 3353.96531263306,
+          "revenue": 3357.859593551528,
+          "margin": 3.894280918468212
+        },
+        {
+          "fill": 0.5,
+          "input": 2290.2291400616637,
+          "revenue": 2788.7458614222987,
+          "margin": 498.5167213606351
+        },
+        {
+          "fill": 0.8,
+          "input": 1572.2234776191806,
+          "revenue": 2316.0895394599693,
+          "margin": 743.8660618407887
+        }
+      ]
+    },
+    {
+      "id": "exocrystalrefiner",
+      "in": {
+        "exocrystals": 2,
+        "optics": 1
+      },
+      "out": {
+        "refinedexocrystals": 1
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 2745.101195318688,
+          "revenue": 2827.166132961703,
+          "margin": 82.06493764301513
+        },
+        {
+          "fill": 0.5,
+          "input": 1831.0873695451521,
+          "revenue": 2245.881956436749,
+          "margin": 414.79458689159696
+        },
+        {
+          "fill": 0.8,
+          "input": 1223.2572504219036,
+          "revenue": 1784.1136760379004,
+          "margin": 560.8564256159968
+        }
+      ]
+    },
+    {
+      "id": "nebulagasrefiner",
+      "in": {
+        "nebulagas": 3,
+        "coolant": 1
+      },
+      "out": {
+        "refinednebulagas": 2
+      },
+      "quotes": [
+        {
+          "fill": 0.2,
+          "input": 1406.5544827714043,
+          "revenue": 1519.0266290330137,
+          "margin": 112.4721462616094
+        },
+        {
+          "fill": 0.5,
+          "input": 932.0660031628238,
+          "revenue": 1153.9404164167229,
+          "margin": 221.8744132538991
+        },
+        {
+          "fill": 0.8,
+          "input": 617.9003193373968,
+          "revenue": 876.5998299105923,
+          "margin": 258.69951057319554
+        }
+      ]
+    }
+  ]
+}

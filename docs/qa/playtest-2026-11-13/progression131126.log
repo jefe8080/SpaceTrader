@@ -1,0 +1,1259 @@
+{"seconds":3463,"action":"Bau","credits":3291,"kind":"school"}
+{"seconds":4302,"action":"Export","credits":5996,"good":"ingots","net":2661,"exports":1}
+{"seconds":4302,"action":"Finanzierung","credits":5996,"earned":0,"quests":0}
+{"seconds":4374,"action":"Bau","credits":4768,"kind":"plant","recipe":"glassworks"}
+{"seconds":5260,"action":"Export","credits":7328,"good":"ingots","net":2558,"exports":2}
+{"seconds":5260,"action":"Finanzierung","credits":7328,"earned":0,"quests":0}
+{"seconds":5332,"action":"Bau","credits":4350,"kind":"solar"}
+{"seconds":5414,"action":"Bau","credits":3125,"kind":"plant","recipe":"oilworks"}
+{"seconds":6202,"action":"Export","credits":5563,"good":"ingots","net":2472,"exports":3}
+{"seconds":6202,"action":"Finanzierung","credits":5563,"earned":0,"quests":0}
+{"seconds":6304,"action":"Bau","credits":3095,"kind":"plant","recipe":"rollingmill"}
+{"seconds":7085,"action":"Export","credits":7753,"good":"plates","net":4880,"exports":4}
+{"seconds":7085,"action":"Finanzierung","credits":7753,"earned":0,"quests":0}
+{"seconds":7706,"action":"Bau","credits":5266,"kind":"plant","recipe":"cableworks"}
+{"seconds":8181,"action":"Bau","credits":4057,"kind":"plant","recipe":"chemworks"}
+{"seconds":8749,"action":"H07","credits":9024,"population":106}
+{"seconds":10783,"action":"Bau","credits":3899,"kind":"plant","recipe":"electronicsworks"}
+{"seconds":11741,"action":"Export","credits":8755,"good":"plates","net":4833,"exports":5}
+{"seconds":11741,"action":"Finanzierung","credits":8755,"earned":0,"quests":0}
+{"seconds":12209,"action":"Bau","credits":5796,"kind":"land"}
+{"seconds":12825,"action":"Bau","credits":3246,"kind":"plant","recipe":"chipfab"}
+{"seconds":13778,"action":"Export","credits":7759,"good":"plates","net":4569,"exports":6}
+{"seconds":13778,"action":"Finanzierung","credits":7759,"earned":0,"quests":0}
+{"seconds":14246,"action":"Bau","credits":6402,"kind":"plant","recipe":"siliconworks"}
+{"seconds":15198,"action":"Bau","credits":3550,"kind":"plant","recipe":"refinery2"}
+{"seconds":16418,"action":"Export","credits":7506,"good":"plates","net":4417,"exports":7}
+{"seconds":16418,"action":"Finanzierung","credits":7506,"earned":0,"quests":0}
+{"seconds":16946,"action":"Bau","credits":4378,"kind":"moduleBench"}
+{"seconds":18707,"action":"Export","credits":8208,"good":"plates","net":4228,"exports":8}
+{"seconds":18707,"action":"Finanzierung","credits":8208,"earned":0,"quests":0}
+{"seconds":19175,"action":"Bau","credits":3901,"kind":"land"}
+{"seconds":20169,"action":"Export","credits":7860,"good":"plates","net":4140,"exports":9}
+{"seconds":20169,"action":"Finanzierung","credits":7860,"earned":0,"quests":0}
+{"seconds":20790,"action":"Bau","credits":5180,"kind":"plant","recipe":"chemplant"}
+{"seconds":23634,"action":"Export","credits":11570,"good":"electronics","net":7010,"exports":10}
+{"seconds":23634,"action":"Finanzierung","credits":11570,"earned":0,"quests":0}
+{"seconds":24093,"action":"Bau","credits":6487,"kind":"plant","recipe":"hullworks"}
+{"seconds":25884,"action":"Bau","credits":3284,"kind":"plant","recipe":"alloyworks"}
+{"seconds":27125,"action":"H08","credits":12999,"population":109}
+{"seconds":29747,"action":"Export","credits":19496,"good":"electronics","net":6926,"exports":11}
+{"seconds":30935,"action":"Export","credits":26421,"good":"electronics","net":6926,"exports":12}
+{"seconds":30935,"action":"Finanzierung","credits":26421,"earned":0,"quests":0}
+{"seconds":31067,"action":"Bau","credits":6422,"kind":"researchWorkshop"}
+{"seconds":31547,"action":"Bau","credits":435,"kind":"land"}
+{"seconds":31880,"action":"Finanzierung","credits":1186,"earned":750,"quests":1}
+{"seconds":32177,"action":"Finanzierung","credits":1769,"earned":1530,"quests":2}
+{"seconds":33962,"action":"Export","credits":1710,"good":"fuel","net":1275,"exports":13}
+{"seconds":33962,"action":"Finanzierung","credits":1710,"earned":1530,"quests":2}
+{"seconds":35476,"action":"Export","credits":8572,"good":"electronics","net":7049,"exports":14}
+{"seconds":35476,"action":"Finanzierung","credits":8572,"earned":1530,"quests":2}
+{"seconds":35847,"action":"Bau","credits":3515,"kind":"plant","recipe":"sensorworks"}
+{"seconds":36962,"action":"Export","credits":10444,"good":"electronics","net":7033,"exports":15}
+{"seconds":36962,"action":"Finanzierung","credits":10444,"earned":1530,"quests":2}
+{"seconds":37435,"action":"Bau","credits":7851,"kind":"plant","recipe":"opticsworks"}
+{"seconds":38754,"action":"H09","credits":15205,"population":109}
+{"seconds":39776,"action":"Bau","credits":9915,"kind":"plant","recipe":"goldpurifier"}
+{"seconds":40915,"action":"Finanzierung","credits":1734,"earned":2310,"quests":3}
+{"seconds":41767,"action":"Export","credits":6285,"good":"plates","net":5331,"exports":16}
+{"seconds":41767,"action":"Finanzierung","credits":6285,"earned":2310,"quests":3}
+{"seconds":42005,"action":"H10","credits":18187,"population":109}
+{"seconds":47875,"action":"Finanzierung","credits":5796,"earned":2910,"quests":4}
+{"seconds":49387,"action":"Export","credits":32376,"good":"finegold","net":14538,"exports":17}
+{"seconds":49387,"action":"Finanzierung","credits":32376,"earned":2910,"quests":4}
+{"seconds":49459,"action":"Bau","credits":30400,"kind":"housing"}
+{"seconds":50452,"action":"Bau","credits":22207,"kind":"land"}
+{"seconds":50920,"action":"Bau","credits":21005,"kind":"plant","recipe":"weavery"}
+{"seconds":55338,"action":"H11","credits":27861,"population":256}
+{"seconds":56514,"action":"Bau","credits":25747,"kind":"plant","recipe":"pharma"}
+{"seconds":59711,"action":"Export","credits":41200,"good":"finegold","net":14989,"exports":18}
+{"seconds":62087,"action":"Export","credits":50908,"good":"finegold","net":9708,"exports":19}
+{"seconds":62087,"action":"Finanzierung","credits":50908,"earned":2910,"quests":4}
+{"seconds":62219,"action":"Bau","credits":20911,"kind":"academy","recipe":null}
+{"seconds":69390,"action":"Export","credits":32394,"good":"finegold","net":10338,"exports":20}
+{"seconds":69390,"action":"Finanzierung","credits":32394,"earned":2910,"quests":4}
+{"seconds":69522,"action":"Bau","credits":27395,"kind":"plant","recipe":"gearworks"}
+{"seconds":70443,"action":"Bau","credits":24650,"kind":"plant","recipe":"toolworks"}
+{"seconds":73356,"action":"Export","credits":32419,"good":"finegold","net":7876,"exports":21}
+{"seconds":75732,"action":"Export","credits":36198,"good":"finegold","net":3779,"exports":22}
+{"seconds":78108,"action":"Export","credits":35882,"good":"finegold","net":-316,"exports":23}
+{"seconds":80484,"action":"Export","credits":31366,"good":"finegold","net":-4516,"exports":24}
+{"seconds":82860,"action":"Export","credits":22513,"good":"finegold","net":-8853,"exports":25}
+{"seconds":84011,"action":"Finanzierung","credits":26902,"earned":7290,"quests":10}
+{"seconds":86810,"action":"Finanzierung","credits":9490,"earned":13590,"quests":21}
+{"seconds":88322,"action":"Export","credits":24072,"good":"finegold","net":1559,"exports":26}
+{"seconds":89641,"action":"Finanzierung","credits":27742,"earned":17250,"quests":26}
+{"seconds":92815,"action":"Finanzierung","credits":10057,"earned":24270,"quests":36}
+{"seconds":94327,"action":"Export","credits":27026,"good":"finegold","net":2954,"exports":27}
+{"seconds":95240,"action":"Finanzierung","credits":28853,"earned":26090,"quests":42}
+{"seconds":98409,"action":"Finanzierung","credits":10478,"earned":33470,"quests":53}
+{"seconds":99921,"action":"Export","credits":28925,"good":"finegold","net":1900,"exports":28}
+{"seconds":100169,"action":"Finanzierung","credits":29637,"earned":34180,"quests":54}
+{"seconds":103474,"action":"Finanzierung","credits":10494,"earned":42200,"quests":67}
+{"seconds":104986,"action":"Export","credits":29136,"good":"finegold","net":211,"exports":29}
+{"seconds":105951,"action":"Finanzierung","credits":31373,"earned":44430,"quests":71}
+{"seconds":109646,"action":"Finanzierung","credits":10838,"earned":52120,"quests":87}
+{"seconds":111158,"action":"Export","credits":30097,"good":"finegold","net":961,"exports":30}
+{"seconds":113199,"action":"Finanzierung","credits":4654,"earned":53150,"quests":89}
+{"seconds":116198,"action":"Finanzierung","credits":7273,"earned":59750,"quests":99}
+{"seconds":118012,"action":"Finanzierung","credits":4094,"earned":62360,"quests":103}
+{"seconds":119524,"action":"Export","credits":30940,"good":"finegold","net":843,"exports":31}
+{"seconds":121913,"action":"Finanzierung","credits":4994,"earned":64770,"quests":107}
+{"seconds":125392,"action":"Finanzierung","credits":8428,"earned":72160,"quests":117}
+{"seconds":126904,"action":"Export","credits":31359,"good":"finegold","net":419,"exports":32}
+{"seconds":130497,"action":"Finanzierung","credits":4959,"earned":75320,"quests":121}
+{"seconds":133202,"action":"Finanzierung","credits":6763,"earned":81060,"quests":129}
+{"seconds":134278,"action":"Finanzierung","credits":1619,"earned":81790,"quests":130}
+{"seconds":134892,"action":"Export","credits":31487,"good":"finegold","net":128,"exports":33}
+{"seconds":138489,"action":"Finanzierung","credits":5241,"earned":85110,"quests":134}
+{"seconds":141359,"action":"Finanzierung","credits":7356,"earned":91160,"quests":143}
+{"seconds":142871,"action":"Export","credits":31382,"good":"finegold","net":-105,"exports":34}
+{"seconds":144004,"action":"FEHLER","credits":10856,"message":"Fortschritt überschreitet 40 Stunden."}
+{
+  "completed": false,
+  "seconds": 144004,
+  "earned": 91160,
+  "quests": 143,
+  "error": "Fortschritt überschreitet 40 Stunden.",
+  "allocations": [
+    {
+      "id": "project_4",
+      "state": "active",
+      "power": 0,
+      "workers": {
+        "basic": 2
+      }
+    },
+    {
+      "id": "control",
+      "state": "active",
+      "power": 3,
+      "workers": {
+        "basic": 2,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "dock",
+      "state": "active",
+      "power": 2,
+      "workers": {
+        "basic": 2
+      }
+    },
+    {
+      "id": "foodplant",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_11",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_12",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_13",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_17",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_18",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_19",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_22",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_23",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_24",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_27",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_29",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_3",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_32",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_33",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_5",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_6",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_7",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_8",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_9",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "refinery",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "smelter",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "waterworks",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "fueldepot",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_1",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_14",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_20",
+      "state": "paused",
+      "reason": "Pausiert",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "project_25",
+      "state": "active",
+      "power": 1,
+      "workers": {}
+    }
+  ],
+  "stock": {
+    "ice": 20,
+    "biomass": 2,
+    "grain": 10,
+    "gold": 21,
+    "finegold": 10,
+    "shipfuel": 40,
+    "alloys": 12,
+    "gears": 6,
+    "electronics": 8,
+    "machinery": 4
+  },
+  "events": [
+    {
+      "seconds": 3463,
+      "action": "Bau",
+      "credits": 3291,
+      "kind": "school"
+    },
+    {
+      "seconds": 4302,
+      "action": "Export",
+      "credits": 5996,
+      "good": "ingots",
+      "net": 2661,
+      "exports": 1
+    },
+    {
+      "seconds": 4302,
+      "action": "Finanzierung",
+      "credits": 5996,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 4374,
+      "action": "Bau",
+      "credits": 4768,
+      "kind": "plant",
+      "recipe": "glassworks"
+    },
+    {
+      "seconds": 5260,
+      "action": "Export",
+      "credits": 7328,
+      "good": "ingots",
+      "net": 2558,
+      "exports": 2
+    },
+    {
+      "seconds": 5260,
+      "action": "Finanzierung",
+      "credits": 7328,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 5332,
+      "action": "Bau",
+      "credits": 4350,
+      "kind": "solar"
+    },
+    {
+      "seconds": 5414,
+      "action": "Bau",
+      "credits": 3125,
+      "kind": "plant",
+      "recipe": "oilworks"
+    },
+    {
+      "seconds": 6202,
+      "action": "Export",
+      "credits": 5563,
+      "good": "ingots",
+      "net": 2472,
+      "exports": 3
+    },
+    {
+      "seconds": 6202,
+      "action": "Finanzierung",
+      "credits": 5563,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 6304,
+      "action": "Bau",
+      "credits": 3095,
+      "kind": "plant",
+      "recipe": "rollingmill"
+    },
+    {
+      "seconds": 7085,
+      "action": "Export",
+      "credits": 7753,
+      "good": "plates",
+      "net": 4880,
+      "exports": 4
+    },
+    {
+      "seconds": 7085,
+      "action": "Finanzierung",
+      "credits": 7753,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 7706,
+      "action": "Bau",
+      "credits": 5266,
+      "kind": "plant",
+      "recipe": "cableworks"
+    },
+    {
+      "seconds": 8181,
+      "action": "Bau",
+      "credits": 4057,
+      "kind": "plant",
+      "recipe": "chemworks"
+    },
+    {
+      "seconds": 8749,
+      "action": "H07",
+      "credits": 9024,
+      "population": 106
+    },
+    {
+      "seconds": 10783,
+      "action": "Bau",
+      "credits": 3899,
+      "kind": "plant",
+      "recipe": "electronicsworks"
+    },
+    {
+      "seconds": 11741,
+      "action": "Export",
+      "credits": 8755,
+      "good": "plates",
+      "net": 4833,
+      "exports": 5
+    },
+    {
+      "seconds": 11741,
+      "action": "Finanzierung",
+      "credits": 8755,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 12209,
+      "action": "Bau",
+      "credits": 5796,
+      "kind": "land"
+    },
+    {
+      "seconds": 12825,
+      "action": "Bau",
+      "credits": 3246,
+      "kind": "plant",
+      "recipe": "chipfab"
+    },
+    {
+      "seconds": 13778,
+      "action": "Export",
+      "credits": 7759,
+      "good": "plates",
+      "net": 4569,
+      "exports": 6
+    },
+    {
+      "seconds": 13778,
+      "action": "Finanzierung",
+      "credits": 7759,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 14246,
+      "action": "Bau",
+      "credits": 6402,
+      "kind": "plant",
+      "recipe": "siliconworks"
+    },
+    {
+      "seconds": 15198,
+      "action": "Bau",
+      "credits": 3550,
+      "kind": "plant",
+      "recipe": "refinery2"
+    },
+    {
+      "seconds": 16418,
+      "action": "Export",
+      "credits": 7506,
+      "good": "plates",
+      "net": 4417,
+      "exports": 7
+    },
+    {
+      "seconds": 16418,
+      "action": "Finanzierung",
+      "credits": 7506,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 16946,
+      "action": "Bau",
+      "credits": 4378,
+      "kind": "moduleBench"
+    },
+    {
+      "seconds": 18707,
+      "action": "Export",
+      "credits": 8208,
+      "good": "plates",
+      "net": 4228,
+      "exports": 8
+    },
+    {
+      "seconds": 18707,
+      "action": "Finanzierung",
+      "credits": 8208,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 19175,
+      "action": "Bau",
+      "credits": 3901,
+      "kind": "land"
+    },
+    {
+      "seconds": 20169,
+      "action": "Export",
+      "credits": 7860,
+      "good": "plates",
+      "net": 4140,
+      "exports": 9
+    },
+    {
+      "seconds": 20169,
+      "action": "Finanzierung",
+      "credits": 7860,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 20790,
+      "action": "Bau",
+      "credits": 5180,
+      "kind": "plant",
+      "recipe": "chemplant"
+    },
+    {
+      "seconds": 23634,
+      "action": "Export",
+      "credits": 11570,
+      "good": "electronics",
+      "net": 7010,
+      "exports": 10
+    },
+    {
+      "seconds": 23634,
+      "action": "Finanzierung",
+      "credits": 11570,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 24093,
+      "action": "Bau",
+      "credits": 6487,
+      "kind": "plant",
+      "recipe": "hullworks"
+    },
+    {
+      "seconds": 25884,
+      "action": "Bau",
+      "credits": 3284,
+      "kind": "plant",
+      "recipe": "alloyworks"
+    },
+    {
+      "seconds": 27125,
+      "action": "H08",
+      "credits": 12999,
+      "population": 109
+    },
+    {
+      "seconds": 29747,
+      "action": "Export",
+      "credits": 19496,
+      "good": "electronics",
+      "net": 6926,
+      "exports": 11
+    },
+    {
+      "seconds": 30935,
+      "action": "Export",
+      "credits": 26421,
+      "good": "electronics",
+      "net": 6926,
+      "exports": 12
+    },
+    {
+      "seconds": 30935,
+      "action": "Finanzierung",
+      "credits": 26421,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 31067,
+      "action": "Bau",
+      "credits": 6422,
+      "kind": "researchWorkshop"
+    },
+    {
+      "seconds": 31547,
+      "action": "Bau",
+      "credits": 435,
+      "kind": "land"
+    },
+    {
+      "seconds": 31880,
+      "action": "Finanzierung",
+      "credits": 1186,
+      "earned": 750,
+      "quests": 1
+    },
+    {
+      "seconds": 32177,
+      "action": "Finanzierung",
+      "credits": 1769,
+      "earned": 1530,
+      "quests": 2
+    },
+    {
+      "seconds": 33962,
+      "action": "Export",
+      "credits": 1710,
+      "good": "fuel",
+      "net": 1275,
+      "exports": 13
+    },
+    {
+      "seconds": 33962,
+      "action": "Finanzierung",
+      "credits": 1710,
+      "earned": 1530,
+      "quests": 2
+    },
+    {
+      "seconds": 35476,
+      "action": "Export",
+      "credits": 8572,
+      "good": "electronics",
+      "net": 7049,
+      "exports": 14
+    },
+    {
+      "seconds": 35476,
+      "action": "Finanzierung",
+      "credits": 8572,
+      "earned": 1530,
+      "quests": 2
+    },
+    {
+      "seconds": 35847,
+      "action": "Bau",
+      "credits": 3515,
+      "kind": "plant",
+      "recipe": "sensorworks"
+    },
+    {
+      "seconds": 36962,
+      "action": "Export",
+      "credits": 10444,
+      "good": "electronics",
+      "net": 7033,
+      "exports": 15
+    },
+    {
+      "seconds": 36962,
+      "action": "Finanzierung",
+      "credits": 10444,
+      "earned": 1530,
+      "quests": 2
+    },
+    {
+      "seconds": 37435,
+      "action": "Bau",
+      "credits": 7851,
+      "kind": "plant",
+      "recipe": "opticsworks"
+    },
+    {
+      "seconds": 38754,
+      "action": "H09",
+      "credits": 15205,
+      "population": 109
+    },
+    {
+      "seconds": 39776,
+      "action": "Bau",
+      "credits": 9915,
+      "kind": "plant",
+      "recipe": "goldpurifier"
+    },
+    {
+      "seconds": 40915,
+      "action": "Finanzierung",
+      "credits": 1734,
+      "earned": 2310,
+      "quests": 3
+    },
+    {
+      "seconds": 41767,
+      "action": "Export",
+      "credits": 6285,
+      "good": "plates",
+      "net": 5331,
+      "exports": 16
+    },
+    {
+      "seconds": 41767,
+      "action": "Finanzierung",
+      "credits": 6285,
+      "earned": 2310,
+      "quests": 3
+    },
+    {
+      "seconds": 42005,
+      "action": "H10",
+      "credits": 18187,
+      "population": 109
+    },
+    {
+      "seconds": 47875,
+      "action": "Finanzierung",
+      "credits": 5796,
+      "earned": 2910,
+      "quests": 4
+    },
+    {
+      "seconds": 49387,
+      "action": "Export",
+      "credits": 32376,
+      "good": "finegold",
+      "net": 14538,
+      "exports": 17
+    },
+    {
+      "seconds": 49387,
+      "action": "Finanzierung",
+      "credits": 32376,
+      "earned": 2910,
+      "quests": 4
+    },
+    {
+      "seconds": 49459,
+      "action": "Bau",
+      "credits": 30400,
+      "kind": "housing"
+    },
+    {
+      "seconds": 50452,
+      "action": "Bau",
+      "credits": 22207,
+      "kind": "land"
+    },
+    {
+      "seconds": 50920,
+      "action": "Bau",
+      "credits": 21005,
+      "kind": "plant",
+      "recipe": "weavery"
+    },
+    {
+      "seconds": 55338,
+      "action": "H11",
+      "credits": 27861,
+      "population": 256
+    },
+    {
+      "seconds": 56514,
+      "action": "Bau",
+      "credits": 25747,
+      "kind": "plant",
+      "recipe": "pharma"
+    },
+    {
+      "seconds": 59711,
+      "action": "Export",
+      "credits": 41200,
+      "good": "finegold",
+      "net": 14989,
+      "exports": 18
+    },
+    {
+      "seconds": 62087,
+      "action": "Export",
+      "credits": 50908,
+      "good": "finegold",
+      "net": 9708,
+      "exports": 19
+    },
+    {
+      "seconds": 62087,
+      "action": "Finanzierung",
+      "credits": 50908,
+      "earned": 2910,
+      "quests": 4
+    },
+    {
+      "seconds": 62219,
+      "action": "Bau",
+      "credits": 20911,
+      "kind": "academy",
+      "recipe": null
+    },
+    {
+      "seconds": 69390,
+      "action": "Export",
+      "credits": 32394,
+      "good": "finegold",
+      "net": 10338,
+      "exports": 20
+    },
+    {
+      "seconds": 69390,
+      "action": "Finanzierung",
+      "credits": 32394,
+      "earned": 2910,
+      "quests": 4
+    },
+    {
+      "seconds": 69522,
+      "action": "Bau",
+      "credits": 27395,
+      "kind": "plant",
+      "recipe": "gearworks"
+    },
+    {
+      "seconds": 70443,
+      "action": "Bau",
+      "credits": 24650,
+      "kind": "plant",
+      "recipe": "toolworks"
+    },
+    {
+      "seconds": 73356,
+      "action": "Export",
+      "credits": 32419,
+      "good": "finegold",
+      "net": 7876,
+      "exports": 21
+    },
+    {
+      "seconds": 75732,
+      "action": "Export",
+      "credits": 36198,
+      "good": "finegold",
+      "net": 3779,
+      "exports": 22
+    },
+    {
+      "seconds": 78108,
+      "action": "Export",
+      "credits": 35882,
+      "good": "finegold",
+      "net": -316,
+      "exports": 23
+    },
+    {
+      "seconds": 80484,
+      "action": "Export",
+      "credits": 31366,
+      "good": "finegold",
+      "net": -4516,
+      "exports": 24
+    },
+    {
+      "seconds": 82860,
+      "action": "Export",
+      "credits": 22513,
+      "good": "finegold",
+      "net": -8853,
+      "exports": 25
+    },
+    {
+      "seconds": 84011,
+      "action": "Finanzierung",
+      "credits": 26902,
+      "earned": 7290,
+      "quests": 10
+    },
+    {
+      "seconds": 86810,
+      "action": "Finanzierung",
+      "credits": 9490,
+      "earned": 13590,
+      "quests": 21
+    },
+    {
+      "seconds": 88322,
+      "action": "Export",
+      "credits": 24072,
+      "good": "finegold",
+      "net": 1559,
+      "exports": 26
+    },
+    {
+      "seconds": 89641,
+      "action": "Finanzierung",
+      "credits": 27742,
+      "earned": 17250,
+      "quests": 26
+    },
+    {
+      "seconds": 92815,
+      "action": "Finanzierung",
+      "credits": 10057,
+      "earned": 24270,
+      "quests": 36
+    },
+    {
+      "seconds": 94327,
+      "action": "Export",
+      "credits": 27026,
+      "good": "finegold",
+      "net": 2954,
+      "exports": 27
+    },
+    {
+      "seconds": 95240,
+      "action": "Finanzierung",
+      "credits": 28853,
+      "earned": 26090,
+      "quests": 42
+    },
+    {
+      "seconds": 98409,
+      "action": "Finanzierung",
+      "credits": 10478,
+      "earned": 33470,
+      "quests": 53
+    },
+    {
+      "seconds": 99921,
+      "action": "Export",
+      "credits": 28925,
+      "good": "finegold",
+      "net": 1900,
+      "exports": 28
+    },
+    {
+      "seconds": 100169,
+      "action": "Finanzierung",
+      "credits": 29637,
+      "earned": 34180,
+      "quests": 54
+    },
+    {
+      "seconds": 103474,
+      "action": "Finanzierung",
+      "credits": 10494,
+      "earned": 42200,
+      "quests": 67
+    },
+    {
+      "seconds": 104986,
+      "action": "Export",
+      "credits": 29136,
+      "good": "finegold",
+      "net": 211,
+      "exports": 29
+    },
+    {
+      "seconds": 105951,
+      "action": "Finanzierung",
+      "credits": 31373,
+      "earned": 44430,
+      "quests": 71
+    },
+    {
+      "seconds": 109646,
+      "action": "Finanzierung",
+      "credits": 10838,
+      "earned": 52120,
+      "quests": 87
+    },
+    {
+      "seconds": 111158,
+      "action": "Export",
+      "credits": 30097,
+      "good": "finegold",
+      "net": 961,
+      "exports": 30
+    },
+    {
+      "seconds": 113199,
+      "action": "Finanzierung",
+      "credits": 4654,
+      "earned": 53150,
+      "quests": 89
+    },
+    {
+      "seconds": 116198,
+      "action": "Finanzierung",
+      "credits": 7273,
+      "earned": 59750,
+      "quests": 99
+    },
+    {
+      "seconds": 118012,
+      "action": "Finanzierung",
+      "credits": 4094,
+      "earned": 62360,
+      "quests": 103
+    },
+    {
+      "seconds": 119524,
+      "action": "Export",
+      "credits": 30940,
+      "good": "finegold",
+      "net": 843,
+      "exports": 31
+    },
+    {
+      "seconds": 121913,
+      "action": "Finanzierung",
+      "credits": 4994,
+      "earned": 64770,
+      "quests": 107
+    },
+    {
+      "seconds": 125392,
+      "action": "Finanzierung",
+      "credits": 8428,
+      "earned": 72160,
+      "quests": 117
+    },
+    {
+      "seconds": 126904,
+      "action": "Export",
+      "credits": 31359,
+      "good": "finegold",
+      "net": 419,
+      "exports": 32
+    },
+    {
+      "seconds": 130497,
+      "action": "Finanzierung",
+      "credits": 4959,
+      "earned": 75320,
+      "quests": 121
+    },
+    {
+      "seconds": 133202,
+      "action": "Finanzierung",
+      "credits": 6763,
+      "earned": 81060,
+      "quests": 129
+    },
+    {
+      "seconds": 134278,
+      "action": "Finanzierung",
+      "credits": 1619,
+      "earned": 81790,
+      "quests": 130
+    },
+    {
+      "seconds": 134892,
+      "action": "Export",
+      "credits": 31487,
+      "good": "finegold",
+      "net": 128,
+      "exports": 33
+    },
+    {
+      "seconds": 138489,
+      "action": "Finanzierung",
+      "credits": 5241,
+      "earned": 85110,
+      "quests": 134
+    },
+    {
+      "seconds": 141359,
+      "action": "Finanzierung",
+      "credits": 7356,
+      "earned": 91160,
+      "quests": 143
+    },
+    {
+      "seconds": 142871,
+      "action": "Export",
+      "credits": 31382,
+      "good": "finegold",
+      "net": -105,
+      "exports": 34
+    },
+    {
+      "seconds": 144004,
+      "action": "FEHLER",
+      "credits": 10856,
+      "message": "Fortschritt überschreitet 40 Stunden."
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "seed": 42,
+  "decisionSeconds": 30,
+  "decisions": 47,
+  "stages": [
+    {
+      "id": "H00",
+      "seconds": 91,
+      "credits": 5000,
+      "ships": 1
+    },
+    {
+      "id": "H01",
+      "seconds": 166,
+      "credits": 5500,
+      "ships": 1
+    },
+    {
+      "id": "H02",
+      "seconds": 795,
+      "credits": 5867,
+      "ships": 1
+    },
+    {
+      "id": "H04",
+      "seconds": 1043,
+      "credits": 5941,
+      "ships": 1
+    },
+    {
+      "id": "H03",
+      "seconds": 1328,
+      "credits": 6117,
+      "ships": 1
+    },
+    {
+      "id": "H05",
+      "seconds": 1958,
+      "credits": 6804,
+      "ships": 2
+    },
+    {
+      "id": "H06",
+      "seconds": 3235,
+      "credits": 9175,
+      "ships": 2
+    }
+  ],
+  "serverSeconds": 3235,
+  "credits": 9175,
+  "produced": {
+    "water": 60,
+    "food": 20,
+    "fuel": 22,
+    "ingots": 40
+  },
+  "stock": {
+    "ore": 4,
+    "tourists": 41,
+    "workers": 52,
+    "water": 100.51,
+    "food": 45.53,
+    "shipfuel": 40,
+    "fuel": 2,
+    "ingots": 92,
+    "plates": 40,
+    "electronics": 12,
+    "machinery": 4
+  },
+  "grants": [
+    {
+      "id": "home_p1:repairs",
+      "source": "start_exception",
+      "recipient": "p1",
+      "goods": {
+        "ingots": 80,
+        "plates": 40,
+        "electronics": 12,
+        "machinery": 4
+      }
+    },
+    {
+      "id": "home_p1:start-ship",
+      "source": "start_exception",
+      "recipient": "p1",
+      "ship": "s1",
+      "fuel": 6
+    },
+    {
+      "id": "home_p1:supplies",
+      "source": "start_exception",
+      "recipient": "p1",
+      "goods": {
+        "water": 80,
+        "food": 40,
+        "shipfuel": 40
+      }
+    },
+    {
+      "id": "p1:relic:H04",
+      "source": "quest_salvage",
+      "recipient": "p1",
+      "relic": "p1:relic"
+    },
+    {
+      "id": "home_p1:second-ship",
+      "source": "quest_H05",
+      "recipient": "p1",
+      "ship": "s22",
+      "fuel": 6
+    }
+  ],
+  "relic": {
+    "id": "p1:relic",
+    "speed": 4,
+    "location": {
+      "kind": "world",
+      "id": "home_p1"
+    },
+    "operation": null
+  },
+  "population": 101,
+  "civilianMoney": {
+    "taxRate": 0.2,
+    "gross": 191.8993703703641,
+    "taxes": 38.37987407407402,
+    "consumptionPayments": 876.0526239474343,
+    "incomePerHour": 228.93333333333334
+  },
+  "publicMarkets": 235,
+  "publicManufacturedStock": {
+    "finegold": 87.04511623977655,
+    "cutdiamonds": 72.98046689207,
+    "enricheduranium": 82.70104082953415,
+    "stableantimatter": 142.2148739498532,
+    "refinedexocrystals": 81.33011832993833,
+    "refinednebulagas": 117.79778515046559,
+    "water": 1328.153102602369,
+    "food": 376.3436135927806,
+    "shipfuel": 8744.996279785591,
+    "fuel": 1245.9654525031365,
+    "ingots": 1476.462301453333,
+    "hydraulicoil": 1176.0314800546116,
+    "glass": 302.36457352199284,
+    "chemicals": 1043.6782214516466,
+    "silicon": 648.9033164754112,
+    "fertilizer": 2134.797131376964,
+    "raremetals": 753.7027253334095,
+    "cutters": 132.69175798558194,
+    "wires": 260.9153241206289,
+    "chips": 478.11345297636507,
+    "alloys": 364.05608600381004,
+    "medicine": 944.4809773759457,
+    "coolant": 1452.8901250964698,
+    "clothing": 359.9602434741531,
+    "gears": 286.0319783107572,
+    "electronics": 711.5836422294847,
+    "hullparts": 204.5213269767572,
+    "sensors": 381.30262954810905,
+    "luxury": 328.0059017551759,
+    "powercells": 135.26435329346546,
+    "robots": 225.27133913113497,
+    "shipparts": 208.02479558683513,
+    "consumer": 203.64122858195404,
+    "medtech": 123.38302496363434
+  }
+}
