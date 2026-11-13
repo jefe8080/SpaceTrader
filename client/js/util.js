@@ -7,6 +7,7 @@ import { shipStats, holdUsage } from '/shared/ships.js';
 import { state, esc } from './state.js';
 import { spriteUrl } from './assets.js';
 import { spaceArtKey } from '/shared/space-art.js';
+import {shipActivity} from '/shared/ship-activity.js';
 
 export function typeName(e) {
   if (e.kind === 'planet') return PLANET_TYPES[e.type].name + (e.faction ? ' · ' + FACTIONS[e.faction].name : '');
@@ -62,6 +63,7 @@ export const hasWarn = (s) => Object.keys(s.warn || {}).length > 0;
 
 /** Zustandssymbol: ↻ Route, ➤ in Bewegung, ⚓ angedockt untätig, ⏸ untätig, ⛏ Abbau */
 export function shipSymbol(s) {
+  if(shipActivity(s))return shipActivity(s).symbol;
   const c = s.queue?.[0];
   if (s.state === 'mining') return '⛏';
   if (c?.t === 'route') return '↻';
@@ -99,6 +101,7 @@ export function queueText(c) {
 }
 
 export function statusText(s) {
+  if(shipActivity(s))return shipActivity(s).text;
   const c = s.queue?.[0];
   if (!c) return s.dockedAt ? `Angedockt: ${nm(s.dockedAt)}` : 'Wartet im All';
   if (c.t === 'route') {

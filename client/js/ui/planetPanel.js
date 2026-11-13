@@ -212,6 +212,12 @@ panel.addEventListener('click', (ev) => {
   const ship = chosenShip(e.id);
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'homeSource':{
+      const source=[...state.entities.values()].filter(x=>x.id!==e.id&&x.market?.goods[d.good]?.role==='produce').sort((a,b)=>Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y))[0];
+      if(!source){toast('Noch keine Quelle für '+GOODS[d.good].name+' bekannt. Erkunde die Rohstoffwelten.');return;}
+      toast(GOODS[d.good].name+' an der Quelle kaufen, dann zur Heimat zurückkehren und im Zentrallager einlagern.');
+      leavePlanet();state.camera.x=source.x;state.camera.y=source.y;bus.select({kind:'entity',id:source.id});return;
+    }
     case 'homeAllGoods':state.showAllHomeGoods=!state.showAllHomeGoods;renderPlanetUi();return;
     case 'homeSurplus':{
       state.surplusChoice=d.choice;

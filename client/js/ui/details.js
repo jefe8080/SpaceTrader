@@ -1,4 +1,5 @@
 import {canLand} from '../planetside.js';
+import {warehouseTransfer} from '/shared/warehouse-transfer.js';
 import { GOODS, SHIP_TYPES, STATION_TYPES, PLANET_TYPES, BELT_TYPES, SUPPLY, recipeText, canBuyFrom, canSellTo } from '/shared/config.js';
 import { state, fmt, fmtK, esc, playerColor, playerName, selectedShips, fleetOrder } from '../state.js';
 import { socket, cmd } from '../net.js';
@@ -152,7 +153,7 @@ function shipDetails(s) {
       <button class="small" data-act="qup" data-ship="${s.id}" data-qid="${c.qid}" ${i === 0 ? 'disabled' : ''}>↑</button>
       <button class="small" data-act="qdown" data-ship="${s.id}" data-qid="${c.qid}" ${i === s.queue.length - 1 ? 'disabled' : ''}>↓</button>
       <button class="small danger" data-act="qdel" data-ship="${s.id}" data-qid="${c.qid}">✕</button></div>`).join('')}</div>`;
-  } else h += `<div class="muted">leer – Schiff ist untätig</div>`;
+  } else h += `<div class="muted">${s.battle?'Queue pausiert während der Schlacht':s.captive?'Queue pausiert während der Gefangenschaft':s.repairRun||s.repairHold?'Reparatur hat Vorrang':'leer – Schiff ist untätig'}</div>`;
   h += `</div>`;
 
   h += `<div class="section"><div class="section-title">Ladung</div>`;
@@ -264,10 +265,12 @@ export function marketTable(e, ship) {
 function ownRow(e, g, sl, ship) {
   let act = '';
   if (ship) {
-    act = ['10', 'max'].map((a) => `<button class="small" data-act="trade" data-dir="buy" data-ship="${ship.id}" data-ent="${e.id}" data-good="${g}" data-amt="${a}" title="Laden (kostenlos)">${a === 'max' ? 'Ins Schiff: Max' : 'Ins Schiff: ' + a}</button>`).join(' ');
-    if (ship.cargo?.[g]) act += ' ' + ['10', 'max'].map((a) => `<button class="small" data-act="trade" data-dir="sell" data-ship="${ship.id}" data-ent="${e.id}" data-good="${g}" data-amt="${a}" title="Einlagern (kostenlos)">${a === 'max' ? 'Ins Lager: Alle' : 'Ins Lager: ' + a}</button>`).join(' ');
+    for(const dir of ['buy','sell']){
+      const q=warehouseTransfer(e.market,ship,g,dir);
+      act+=['10','max'].map(a=>`<button class="small" data-act="trade" data-dir="${dir}" data-ship="${ship.id}" data-ent="${e.id}" data-good="${g}" data-amt="${a}" ${q.amount?'':'disabled'} title="${esc(q.reason||'Eigentumstransfer ohne Geldbewegung')}">${dir==='buy'?'Entnehmen':'Einlagern'}: ${a==='max'?'Max '+q.amount:Math.min(10,q.amount)}</button>`).join(' ');
+    }
   }
-  return `<tr><td>${goodTag(g)} <span class="role role-${sl.role}">${ROLE_LABEL[sl.role]}</span></td>
+  return `<tr><td>${goodTag(g)} <span class="role">Eigenlager</span></td>
     <td>${stockBar(sl.stock, sl.cap, '#81c784')} <span class="muted">${Math.floor(sl.stock)}/${sl.cap}</span></td>
     <td><span class="muted" title="${e.type === 'ruins' ? 'Eigene Lagertransfers sind kostenlos' : 'Marktpreis für Fremde'}">${e.type === 'ruins' ? 'kostenlos' : playerPrice(e, g, canBuyFrom(sl) ? 'buy' : 'sell').toFixed(1)}</span></td>
     <td style="white-space:nowrap">${act}</td></tr>`;

@@ -1,4 +1,5 @@
 import { mainShip } from '/shared/planet-access.js';
+import {isShipIdle} from '/shared/ship-activity.js';
 import { SHIP_TYPES } from '/shared/config.js';
 import { state, fleetOrder, esc, fmtK } from '../state.js';
 import { cmd } from '../net.js';
@@ -9,7 +10,7 @@ import { bus } from './bus.js';
 const FILTERS = { all: 'Alle', idle: 'Untätig', route: 'Route', warn: '⚠' };
 const filterFn = {
   all: () => true,
-  idle: (s) => !s.queue?.length,
+  idle: isShipIdle,
   route: (s) => s.queue?.[0]?.t === 'route',
   warn: hasWarn,
 };

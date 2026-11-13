@@ -493,6 +493,9 @@ details[open]>summary { color:var(--accent2); }
 .supply-stat { display:flex; flex-direction:column; gap:0; flex:none; }
 .supply-label { color:var(--muted); font-size:10px; white-space:nowrap; }
 .supply-stat > span:last-child { font-size:12px; font-weight:600; white-space:nowrap; }
+.supply-details > summary { cursor:pointer; font-size:12px; padding:6px; }
+.supply-detail-content { position:fixed; top:52px; right:16px; z-index:90; display:flex; flex-wrap:wrap; gap:16px; max-width:calc(100vw - 64px); padding:16px; background:#101e2b; border:1px solid #b69a64; border-radius:8px; box-shadow:0 8px 28px #000b; }
+@media(max-width:1250px) { #topbar { flex-wrap:wrap; } .topbar-status { flex-basis:100%; scrollbar-width:thin; } .main-nav { flex-wrap:wrap; } }
 body.landed #topbar { gap:8px; }
 body.landed .topbar-status { gap:12px; }
 body.landed #topbar .logo { display:none; }

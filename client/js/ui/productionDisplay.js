@@ -19,8 +19,7 @@ export function planetSummary(entity) {
   const stat=(label,need,available,warn=true)=>`<div class="supply-stat"><span class="supply-label">${label}</span>${pair(need,available,warn)}</div>`;
   return `<div class="supply-grid">
     ${stat('Lager',storage?.usage.normal,storage?.capacity.normal,false)}
-    ${stat('Gefahrgut',storage?.usage.hazard,storage?.capacity.hazard,false)}
     ${stat('Arbeitskräfte',supply?.workers.required,supply?.workers.available)}
-    ${['basic','skilled','specialist'].map((q,i)=>stat(['Einfache Arbeit','Fachkräfte','Spezialisten'][i],supply?.qualifications[q]?.required,supply?.qualifications[q]?.available)).join('')}
-    ${stat('Strom',supply?.power.required,supply?.power.available)}</div>`;
+    ${stat('Strom',supply?.power.required,supply?.power.available)}
+    <details class="supply-details"><summary>Versorgungsdetails${['basic','skilled','specialist'].some(q=>supply?.qualifications[q]?.required>supply?.qualifications[q]?.available)?' ⚠':''}</summary><div class="supply-detail-content">${stat('Gefahrgut',storage?.usage.hazard,storage?.capacity.hazard,false)}${['basic','skilled','specialist'].map((q,i)=>stat(['Einfache Arbeit','Fachkräfte','Spezialisten'][i],supply?.qualifications[q]?.required,supply?.qualifications[q]?.available)).join('')}</div></details></div>`;
 }

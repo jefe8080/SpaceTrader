@@ -20,6 +20,7 @@ import {housingPanel} from './housing.js';
 import {activeSideQuests} from '/shared/side-quests.js';
 import {homeQuestConditions} from '/shared/home-quest-progress.js';
 import {toast} from './dom.js';
+import {warehouseTransfer} from '/shared/warehouse-transfer.js';
 const productionNotices=new Set();
 function productionMilestone(){
   const h=state.entities.get(state.homeworld)?.market?.homeworld;
@@ -157,9 +158,12 @@ export function homePanel(entity, item, ship) {
     const goods = Object.entries(entity.market.goods).filter(([g,slot]) => ['normal','hazard'].includes(GOODS[g].cls)&&(state.showAllHomeGoods||slot.stock>0||ship?.cargo?.[g]||['ice','grain'].includes(g)));
     html += `<label>Schiff für Transfers <select id="homeDockShip">${myShips().filter(s=>s.dockedAt===entity.id).map(s=>`<option value="${s.id}" ${s.id===ship?.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label><p>${ship?'Schiff: '+esc(ship.name):'Kein eigenes Schiff angedockt.'} · gemeinsames Planetenlager</p>`+storageBatchPanel(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market home-storage"><tr><th>Ware / Bestand</th><th>Lagerregeln</th></tr>';
     html=html.replace('<table class="market home-storage">',`<button class="small" data-pp="homeAllGoods">${state.showAllHomeGoods?'Nur Bestände und Fracht zeigen':'Alle Waren einblenden'}</button><table class="market home-storage">`);
-    for (const [good, slot] of goods) html += `<tr><td><b>${GOODS[good].name}</b><p>${fmt(slot.stock)} im Lager<br>${fmt(ship?.cargo?.[good] || 0)} an Bord</p>
-      <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${ship && slot.stock >= 1 ? '' : 'disabled'}>Ins Schiff laden</button>
-      <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Ins Heimatlager entladen</button></td><td><details><summary>${GOODS[good].name}: Lagerregeln</summary>${storageControls(entity,good)}</details></td></tr>`;
+    for (const [good, slot] of goods) {
+      const load=warehouseTransfer(entity.market,ship,good,'buy'),unload=warehouseTransfer(entity.market,ship,good,'sell');
+      html += `<tr><td><b>${GOODS[good].name}</b><p>${fmt(slot.stock)} im Lager · ${fmt(availableHomeStock(entity.market,good))} verfügbar<br>${fmt(ship?.cargo?.[good] || 0)} an Bord</p>
+      <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${load.amount?'':'disabled'} title="${esc(load.reason)}">Entnehmen: Max ${load.amount}</button>
+      <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${unload.amount?'':'disabled'} title="${esc(unload.reason)}">Einlagern: Max ${unload.amount}</button></td><td><details><summary>${GOODS[good].name}: Lagerregeln</summary>${storageControls(entity,good)}</details></td></tr>`;
+    }
     html += '</table>';
     html+='<details id="storage-modules"><summary>Modulfracht</summary>'+moduleStockPanel(entity,ship,'pp',false)+jump('home:workshop','Schiff ausrüsten')+'</details><details id="storage-population"><summary>Personenreisen</summary>'+populationPanel(entity,{prices:false})+'</details>'+homePrices(entity,home);
     html+=`<details><summary>Lokaler Handel</summary><p>${entity.market.mode==='open'?'Andere Spieler und NPCs dürfen unreservierte Waren handeln.':'Nur du kannst auf das Lager zugreifen.'}</p><button class="small" data-pp="homeTradeMode" data-mode="${entity.market.mode==='open'?'private':'open'}">Handel ${entity.market.mode==='open'?'auf privat stellen':'öffnen'}</button></details>`;
@@ -283,7 +287,7 @@ function productionPanel(entity,building,recipeId,speed){
   const recipe=RECIPES[recipeId],home=entity.market.homeworld;
   const assignment=home.allocations?.find(a=>a.id===(building.id||recipeId));
   const running=assignment?.state==='active';
-  return `<p>${recipeWithStock(entity.market,recipe,recipeId)}</p><p>${running?'Produziert':'Steht: '+esc(assignment?.reason||'Anlage nicht fertig')} · Zyklus ${recipe.time/speed} s bei ${speed*100} % Betrieb. ${running?'Nächster Ertrag in '+Math.ceil(Math.max(0,recipe.time-(building.progress||0))/speed)+' s.':''}</p><p>${Object.entries(recipe.out).map(([g,n])=>`${GOODS[g].name}: ${running?fmt(n*speed*3600/recipe.time):0}/h`).join(', ')}</p>`+Object.entries(recipe.in).map(([g,n])=>`<p>${GOODS[g].name}: ${fmt(availableHomeStock(entity.market,g))} verfügbar · ${Math.floor(availableHomeStock(entity.market,g)/n*recipe.time/speed/60)} min Zutatenvorrat</p>`).join('')+jump('home:control','Versorgung organisieren')+jump('home:dock','Lager öffnen');
+  return `<p>${recipeWithStock(entity.market,recipe,recipeId)}</p><p>${running?'Produziert':'Steht: '+esc(assignment?.reason||'Anlage nicht fertig')} · Zyklus ${recipe.time/speed} s bei ${speed*100} % Betrieb. ${running?'Nächster Ertrag in '+Math.ceil(Math.max(0,recipe.time-(building.progress||0))/speed)+' s.':''}</p><p>${Object.entries(recipe.out).map(([g,n])=>`${GOODS[g].name}: ${running?fmt(n*speed*3600/recipe.time):0}/h`).join(', ')}</p>`+Object.entries(recipe.in).map(([g,n])=>`<p>${GOODS[g].name}: ${fmt(availableHomeStock(entity.market,g))} verfügbar · ${Math.floor(availableHomeStock(entity.market,g)/n*recipe.time/speed/60)} min Zutatenvorrat</p><button class="small" data-pp="homeSource" data-good="${g}">${GOODS[g].name} manuell beschaffen</button>`).join('')+(entity.market.homeworld.facilities.control?.status==='ready'?jump('home:control','Versorgung automatisieren'):'<p>Automatisierung wird mit der reparierten Leitstelle verfügbar. Manuelle Beschaffung ist bereits möglich; danach im Zentrallager einlagern.</p>')+jump('home:dock','Lager öffnen');
 }
 
 function structurePanel(entity,id,ship){
