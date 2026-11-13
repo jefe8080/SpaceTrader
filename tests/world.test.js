@@ -18,16 +18,16 @@ test('Sektorgenerierung ist deterministisch je Seed und Hex-Koordinate', () => {
   assert.deepEqual(layoutSector(1234, 2, -1).systems.map((s) => s.id), a.sector.systems.map((s) => s.id));
 });
 
-test('Gemeinsame Planetenerzeugung erzeugt dieselbe Welt wie vor PRD 19', () => {
-  // Prüfsummen über 25 Sektoren je Seed, gemessen vor dem Auslagern von createPlanet
+test('Weltgenerierung hält die PRD-24-Referenzwelten stabil', () => {
+  // Prüfsummen über 25 Sektoren je Seed nach PRD 24 (neue Welten)
   const canon = (v) => Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])])) : v;
   const digest = (seed) => {
     const h = createHash('sha256');
     for (let q = -2; q <= 2; q++) for (let r = -2; r <= 2; r++) h.update(JSON.stringify(canon(generateSector(seed, q, r))));
     return h.digest('hex');
   };
-  assert.equal(digest(42), '60cc228ad025114de853dd203a8ddc7ca005f157b08caf5f0ffc3b865652eeaf');
-  assert.equal(digest(7), '9673fe9eca7ddd909a121986e5d9925d137aed5146498ab907bd692924242ed9');
+  assert.equal(digest(42), '2f3a39f78d6b9b797bde291b7b6746af4ec48962c7575dc3b3a63dbd9bd2cc2e');
+  assert.equal(digest(7), '0e5492d777769e112bed9396135e78d754a6876eb15d61430eaf5d9973e5eeb5');
   assert.deepEqual([1, 4, 6, 9, 11, 14].map(romanNumeral), ['I', 'IV', 'VI', 'IX', 'XI', 'XIV']);
 });
 

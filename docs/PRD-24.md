@@ -95,7 +95,7 @@ damit eine höhere Rohstoffbasis nicht indirekt auch Veredelungserlöse erhöht.
 3. [x] Zielauswahl auf eigenen Sektor begrenzen; Verfolgung und Fraktionskriege
    durch Regressionstests absichern.
 4. [x] Aggressionsgebiet und Rate anpassen; Ausnahmen und Nachbarsektoren testen.
-5. [ ] Asteroidenverteilung und Garantie umsetzen; Förderstationen erhalten.
+5. [x] Asteroidenverteilung und Garantie umsetzen; Förderstationen erhalten.
 6. [ ] Bestätigte Preisanpassung umsetzen und Margen vorher/nachher prüfen.
 7. [ ] Gesamte Regression prüfen, relevante Spielbeschreibungen aktualisieren
    und Abnahme dokumentieren.
@@ -136,3 +136,12 @@ Prüfung: `node --test tests/prd24-war.test.js tests/prd15-raids.test.js` (6/6).
 Umsetzung Schritt 4: Nur eigene Sektoraktivität zählt, Rate 1,0 pro Minute.
 Fraktionswirtschaft unverändert. Prüfung: PRD24-Krieg, PRD15-Raids und
 PRD15-Fraktionen (14/14 Tests).
+
+Umsetzung Schritt 5: Normale Systeme filtern ultraseltene Felder außerhalb von
+Fraktionssektoren. Jedes Fraktionssystem reserviert vor den übrigen Objekten
+ein ultraseltenes Feld; maximal zwei Felder pro System bleiben erhalten.
+Förderstationen werden weiterhin separat erzeugt. Keine Migration/Löschung.
+Prüfung: 245 Sektoren (5 Seeds), Determinismus, Garantie, Überlappungen,
+normale Systeme und fraktionsfreie Förderstationen; Weltregression (11/11).
+Die alten Weltprüfsummen wurden wegen der absichtlichen Generierungsänderung
+auf neue Referenzwelten aktualisiert.

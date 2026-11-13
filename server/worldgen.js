@@ -11,6 +11,8 @@ import {refinedAmountFor} from '../shared/goods.js';
  */
 
 const TAU = Math.PI * 2;
+const COMMON_BELTS = Object.fromEntries(Object.entries(BELT_TYPES).filter(([, d]) => !GOODS[d.good].ultra));
+const ULTRA_BELTS = Object.fromEntries(Object.entries(BELT_TYPES).filter(([, d]) => GOODS[d.good].ultra));
 
 /** Deterministischer Zufallsgenerator (mulberry32) */
 export function rng(seed) {
@@ -159,7 +161,7 @@ export function generateSector(seed, q, r) {
   for (const sys of sector.systems) {
     if (sys.start) entities.push(...startSystem(sys, rr, hub));
     else if (sys.faction) entities.push(...populateFactionSystem(sys, rr, nextId, sector.systems.filter((x) => x.faction)[0] === sys));
-    else entities.push(...populateSystem(sys, rr, nextId));
+    else entities.push(...populateSystem(sys, rr, nextId, !!faction));
     if (sys.bigyard) sector.bigyard = entities.find((e) => e.system === sys.id && e.type === 'bigyard')?.id || null;
   }
 
@@ -315,7 +317,7 @@ export function romanNumeral(n) {
   return out;
 }
 
-function populateSystem(sys, r, nextId) {
+function populateSystem(sys, r, nextId, factionSector) {
   const out = [];
   const place = placer(sys, r);
   const base = { sector: sys.sector, system: sys.id };
@@ -351,7 +353,7 @@ function populateSystem(sys, r, nextId) {
 
   // Asteroidenfelder
   for (let i = 0, nb = between(r, 0, 2); i < nb; i++) {
-    const type = weightedTagged(r, BELT_TYPES, 'belt', sys.tags);
+    const type = weightedTagged(r, factionSector ? BELT_TYPES : COMMON_BELTS, 'belt', sys.tags);
     const radius = Math.round(200 + r() * 160);
     const p = place(radius);
     if (!p) continue;
@@ -370,6 +372,12 @@ function populateFactionSystem(sys, r, nextId, withYard) {
   const out = [];
   const place = placer(sys, r);
   const base = { sector: sys.sector, system: sys.id, faction: sys.faction, noBuy: true };
+  // Reserve the guaranteed mining field before other objects can occupy its space.
+  const guaranteedType = weightedTagged(r, ULTRA_BELTS, 'belt', F.tags);
+  const guaranteedRadius = Math.round(200 + r() * 160);
+  const guaranteedPos = place(guaranteedRadius);
+  out.push({ id: nextId(), kind: 'belt', type: guaranteedType, name: BELT_TYPES[guaranteedType].name + ' ' + sys.name,
+    ...guaranteedPos, radius: guaranteedRadius, richness: Math.round((0.8 + r() * 0.8) * 100) / 100, ...base });
   const planets = [];
   for (let i = 0, n = between(r, 2, 5); i < n; i++) {
     const type = weightedTagged(r, PLANET_TYPES, 'planet', F.tags);
@@ -398,7 +406,7 @@ function populateFactionSystem(sys, r, nextId, withYard) {
     if (type === 'factionyard') e.market.forSale = factionShips(sys.faction).map((t) => ({ type: t, price: SHIP_TYPES[t].price, currency: SHIP_TYPES[t].currency, faction: true }));
     out.push(e);
   }
-  for (let i = 0, nb = between(r, 0, 2); i < nb; i++) {
+  for (let i = 0, nb = between(r, 0, 1); i < nb; i++) {
     const type = weightedTagged(r, BELT_TYPES, 'belt', F.tags);
     const radius = Math.round(200 + r() * 160);
     const p = place(radius);
