@@ -2,8 +2,8 @@
 
 ## Status und Ziel
 
-Planungsentwurf vom 13.11.2026. Die unten aufgeführten Grundregeln sind mit
-dem Nutzer geklärt; die Preiserhöhung ist noch offen. Keine Umsetzung beauftragt.
+Planung vom 13.11.2026 abgeschlossen. Die Grundregeln und die Preiserhöhung
+sind mit dem Nutzer bestätigt. Keine Umsetzung beauftragt.
 
 Fraktionen sollen neue Angriffe auf Spieler auf ihren eigenen Sektor begrenzen.
 Kostenlos abbaubare ultraseltene Rohstoffe werden auf Fraktionssektoren
@@ -55,11 +55,11 @@ weniger lukrativ werden.
 
 - Förderstationen bleiben weiterhin selten in allen Sektortypen möglich.
   Ihre bisherige Verteilung wird durch die Asteroidenregel nicht eingeschränkt.
-- Die Einkaufspreise ultraseltener Rohstoffe sollen etwas steigen, damit
+- Die Einkaufspreise der sechs ultraseltenen Rohstoffe an Förderstationen
+  steigen um 20 %, damit
   Einkauf, Verarbeitung und Weiterverkauf weniger Gewinn abwerfen.
-- Die Höhe und technische Ausgestaltung der Erhöhung sind noch zu bestätigen.
-- Verkaufspreise veredelter Waren dürfen nicht automatisch im gleichen Maß
-  steigen und damit die beabsichtigte Margensenkung aufheben.
+- Bestehende Verkaufserlöse und die Preisbasis veredelter Waren bleiben
+  unverändert, damit die beabsichtigte Margensenkung erhalten bleibt.
 
 ### 5. Welt und Spielstände
 
@@ -67,9 +67,9 @@ weniger lukrativ werden.
 - Keine Migration oder Kompatibilitätsarbeit für bisherige Welten erforderlich.
 - Keine automatische Löschung vorhandener Spielstände als Teil dieses PRD.
 
-## Offene Preisentscheidung
+## Bestätigte Preisentscheidung
 
-Vorschlag, noch nicht bestätigt: Spieler zahlen an ultraseltenen Förderstationen
+Bestätigt am 13.11.2026: Spieler zahlen an ultraseltenen Förderstationen
 20 % mehr für die sechs Rohstoffe. Bestehende Verkaufserlöse und die Preisbasis
 veredelter Waren bleiben unverändert. Vor Umsetzung die Preisableitung prüfen,
 damit eine höhere Rohstoffbasis nicht indirekt auch Veredelungserlöse erhöht.
@@ -91,7 +91,7 @@ damit eine höhere Rohstoffbasis nicht indirekt auch Veredelungserlöse erhöht.
 ## Teilschritte und Fortschritt
 
 1. [x] Grundregeln klären und PRD-Entwurf anlegen.
-2. [ ] Preishöhe und Preiswirkung bestätigen; Planung abschließen.
+2. [x] Preishöhe und Preiswirkung bestätigen; Planung abschließen.
 3. [ ] Zielauswahl auf eigenen Sektor begrenzen; Verfolgung und Fraktionskriege
    durch Regressionstests absichern.
 4. [ ] Aggressionsgebiet und Rate anpassen; Ausnahmen und Nachbarsektoren testen.
