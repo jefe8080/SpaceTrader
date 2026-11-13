@@ -212,6 +212,14 @@ panel.addEventListener('click', (ev) => {
   const ship = chosenShip(e.id);
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'homeSurplus':{
+      state.surplusChoice=d.choice;
+      if(d.choice==='keep'){toast('Reserve geplant. Du kannst dich jederzeit anders entscheiden.','success');renderPlanetUi();return;}
+      const buyer=[...state.entities.values()].find(x=>x.id!==e.id&&x.market?.goods.water&&['consume','trade'].includes(x.market.goods.water.role));
+      if(!buyer){toast('Noch kein bekannter Wasserabnehmer. Erkunde weitere Planeten.');return;}
+      toast('Lade nur deinen geplanten Überschuss ein und prüfe den aktuellen Verkaufspreis am Ziel.','success');
+      leavePlanet();state.camera.x=buyer.x;state.camera.y=buyer.y;bus.select({kind:'entity',id:buyer.id});return;
+    }
     case 'homeSupplyRoute':{
       const source=[...state.entities.values()].filter(x=>x.system===e.system&&x.id!==e.id&&x.market?.goods.ice?.role==='produce').sort((a,b)=>Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y))[0];
       if(!source){toast('Noch keine Eisquelle bekannt. Erkunde die Eiswelt im Heimatsystem.');return;}

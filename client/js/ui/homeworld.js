@@ -19,9 +19,23 @@ import {warpPanel,worldsPanel} from './colonies.js';
 import {housingPanel} from './housing.js';
 import {activeSideQuests} from '/shared/side-quests.js';
 import {homeQuestConditions} from '/shared/home-quest-progress.js';
+import {toast} from './dom.js';
+const productionNotices=new Set();
+function productionMilestone(){
+  const h=state.entities.get(state.homeworld)?.market?.homeworld;
+  if(!state.me||!h)return;
+  for(const good of ['water','food']){
+    const key='st-first-production:'+state.me.id+':'+good;
+    if(!(h.produced?.[good]>0)||productionNotices.has(key))continue;
+    productionNotices.add(key);
+    try{if(localStorage.getItem(key))continue;localStorage.setItem(key,'1');}catch{}
+    toast(good==='water'?'Das erste eigene Wasser fließt! Deine Eislieferung versorgt die Heimat.':'Die erste eigene Nahrung ist fertig! Deine Lieferkette ernährt die Siedlung.','success');
+  }
+}
 
 let dialog, currentScene, closingScene;
 export function renderHomeDialog() {
+  productionMilestone();
   if (!dialog) {
     dialog = document.createElement('div'); dialog.className = 'overlay'; dialog.id = 'homeStory'; dialog.hidden = true;
     dialog.addEventListener('click', (event) => {
@@ -94,6 +108,11 @@ export function homePanel(entity, item, ship) {
     for(const [module,find] of Object.entries(STUDY_FINDS))if(completed(find.quest)&&!state.homeQuest.finds?.[module])html+=`<p>${find.name}: ${state.homeQuest.finds?.[module]?'einmalige Vorlage geborgen':'Studienvorlage verfügbar'}</p><button class="small" data-pp="homeSite" data-id="${state.homeQuest.sites?.[module]||''}">Forschungsfund zeigen</button>`;
     html+=`<p>Volle Grundversorgung: ${Math.floor(home.fullSupplySeconds||0)} / 1.800 s · Selbst ausgebildete Fachkräfte: ${home.trained?.skilled||0}</p>`;
     html+=jump('home:orbital','Zum Orbitalring')+jump('home:control','Welten und Expeditionen verwalten');
+    if(completed('H02')){
+      const surplus=Math.max(0,Math.floor(availableHomeStock(entity.market,'water')-home.population*.4));
+      html+=`<details><summary>Deine Entscheidung: Überschuss nutzen</summary><p>${surplus} Wasser über dem rechnerischen Zwei-Stunden-Grundbedarf. Behalten stützt weitere Produktion und Versorgung; Verkaufen kann den nächsten Ausbau finanzieren. Beachte auch den Wasserbedarf deiner Fabriken. Es wird nichts automatisch verkauft.</p><button class="small" data-pp="homeSurplus" data-choice="keep">Für den Aufbau behalten</button><button class="small" data-pp="homeSurplus" data-choice="sell">Verkaufsmöglichkeit ansehen</button><p>${state.surplusChoice==='keep'?'Du planst eine Reserve. Die Entscheidung bindet keine Waren.':state.surplusChoice==='sell'?'Du prüfst einen Verkauf. Du bestimmst Menge und Preis am Markt.':''}</p></details>`;
+      if(state.homeQuest.active?.H04&&!completed('H04'))html+='<p>Während deine Anlagen arbeiten: Erkunde den markierten Fund für Iven oder plane die nächste Versorgung. Die Ziele sind unabhängig.</p>';
+    }
     html+=civicPanel(home)+planetNamePanel(entity)+historyPanel();
     return html;
   }

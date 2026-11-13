@@ -78,7 +78,7 @@ function rowHtml(r) {
   <td><button data-f="fly" data-id="${r.id}" ${view.ship?'':'disabled'}>${r.e.kind==='belt'?'Anfliegen / abbauen':'Anfliegen'}</button><details><summary>Aktionen</summary><div class="trade-actions">${r.e.kind!=='belt'?`<button data-f="buy" data-id="${r.id}">Einkauf einreihen</button>`:''}<button data-f="show" data-id="${r.id}">Karte & Details</button>${r.e.kind!=='belt'?`<button data-f="route" data-id="${r.id}">Neue Route ab hier</button><label>Zu Route hinzufügen <select data-f="toRoute" data-id="${r.id}"><option value="">Route wählen</option><option value="draft">Offener / neuer Entwurf</option>${[...state.routes.values()].map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('')}</select></label>`:''}</div></details></td></tr>`;
 }
 function update(explicit=false) {
-  if(!initialized){view.ship=selectedShips()[0]?.id||'';initialized=true;}
+  if(!initialized){view.ship=selectedShips()[0]?.id||state.ships.get(state.manualShip)?.id||(fleetOrder().length===1?fleetOrder()[0].id:'');initialized=true;}
   const all=rows(), byId=new Map(all.map(r=>[r.id,r]));
   const filtered=filterTradeRows(all,view), result=reconcileTradeRows(rowIds,filtered,explicit);
   rowIds=result.ids;
@@ -128,4 +128,4 @@ function showBuy(e){
  if(!goods.length)return toast('Kein verfügbares Angebot.');
  const f=$('favBuy');f.hidden=false;f.innerHTML=`<b>Einkaufen bei ${esc(e.name)}</b><select id="favBuyGood">${options(goods.map(g=>[g,GOODS[g].name]),view.good)}</select><input id="favBuyAmt" type="number" min="0" placeholder="Menge (0 = max.)"><button data-f="doBuy" data-id="${e.id}">In Queue einreihen</button><button data-f="cancelBuy">Abbrechen</button>`;f.scrollIntoView({block:'nearest'});
 }
-registerModal('favorites',()=>{if(!$('tradeRows')){if(!initialized){view.ship=selectedShips()[0]?.id||'';initialized=true;}shell();}else update();},()=>extraSubs.favorites.clear(),{liveWhileTyping:true});
+registerModal('favorites',()=>{if(!$('tradeRows')){if(!initialized){view.ship=selectedShips()[0]?.id||state.ships.get(state.manualShip)?.id||(fleetOrder().length===1?fleetOrder()[0].id:'');initialized=true;}shell();}else update();},()=>extraSubs.favorites.clear(),{liveWhileTyping:true});

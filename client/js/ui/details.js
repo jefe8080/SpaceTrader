@@ -106,7 +106,7 @@ function shipDetails(s) {
     h += `<div class="warnbox">${Object.values(s.warn).map((w) => `<div>⚠ ${esc(w)}</div>`).join('')}
       <button class="small" data-act="clearWarn" data-ship="${s.id}">Quittieren</button></div>`;
   }
-  h += ownWarSection(s) + stackSection(s) + combatSection(s);
+  h += `<details data-disclosure="ship-combat" ${s.battle?'open':''}><summary>Kampf und Komponenten</summary>`+ownWarSection(s)+stackSection(s)+combatSection(s)+'</details>';
   const here = state.entities.get(s.dockedAt);
   const st = shipStats(s), hu = holdUsage(s);
   const mods = Object.entries(countModules(s));
@@ -167,7 +167,7 @@ function shipDetails(s) {
   if (docked?.kind === 'planet') h += eventSection(docked, s);
   if (docked?.market) h += `<div class="section"><div class="section-title">Markt: ${esc(docked.name)}</div>${marketTable(docked, s)}</div>`;
   if (docked?.market?.strategy === 'shipyard' || docked?.type === 'hub') h += `<div class="muted small-note">Werft- und Lizenzdienste: Station anklicken.</div>`;
-  h += shipStatsSection(s);
+  h += '<details data-disclosure="ship-statistics"><summary>Statistik</summary>'+shipStatsSection(s)+'</details>';
   if (s.log?.length) {
     h += `<div class="section"><div class="section-title">Logbuch</div><div class="loglines">${s.log.slice(0, 8).map((l) => `<div>${esc(l.msg)}</div>`).join('')}</div></div>`;
   }
@@ -223,12 +223,13 @@ const ROLE_LABEL = { produce: 'verkauft', consume: 'kauft', trade: 'Händler' };
 
 export function marketTable(e, ship) {
   if (e.admin) return '<div class="muted">Das Verwaltungszentrum kauft ausschließlich Wasser und Nahrung zum regulären Bestpreis. Verkäufe nutzen den Fraktionspool und den Versorgungspuffer; Versorgung und Abgabe sind im Verwaltungsbereich aufgeführt.</div>';
+  const emptyToggle=`<button class="small" data-act="emptyOffers" aria-pressed="${!!state.hideEmptyOffers}">Leere Angebote ${state.hideEmptyOffers?'anzeigen':'ausblenden'}</button>`;
   const onRoute = ship?.queue?.[0]?.t === 'route';
   const canTrade = ship && ship.dockedAt === e.id && !onRoute;
   const mine = e.owner === state.me.id;
   const member = !mine && state.props.get(e.id)?.cons;
   const customs = !mine && !member && e.owner ? (e.market.customs || 0) : 0;
-  const rows = Object.entries(e.market.goods).filter(([g])=>GOODS[g].cls!=='passenger').filter(([g, sl]) => e.type !== 'ruins' || e.market.homeworld?.knownGoods?.[g] || (sl.cap > 0 && (sl.stock > 0 || ship?.cargo?.[g] || ['ore','ice','grain','gas','helium3','crude','water','food','shipfuel','fuel','ingots'].includes(g)))).map(([g, sl]) => {
+  const rows = Object.entries(e.market.goods).filter(([g])=>GOODS[g].cls!=='passenger').filter(([g,sl])=>!state.hideEmptyOffers||sl.stock>=1||ship?.cargo?.[g]).filter(([g, sl]) => e.type !== 'ruins' || e.market.homeworld?.knownGoods?.[g] || (sl.cap > 0 && (sl.stock > 0 || ship?.cargo?.[g] || ['ore','ice','grain','gas','helium3','crude','water','food','shipfuel','fuel','ingots'].includes(g)))).map(([g, sl]) => {
     if (e.market.homeworld) sl = { ...sl, cap: homeGoodLimit(e.market, g) };
     if (mine) return ownRow(e, g, sl, canTrade ? ship : null);
     if (member) return memberRow(e, g, sl, canTrade ? ship : null);
@@ -247,7 +248,7 @@ export function marketTable(e, ship) {
       <td>${prices.join('<br>')}</td>
       <td style="white-space:nowrap">${act}</td></tr>`;
   });
-  let h = `<table class="market"><tr><th>Ware</th><th>Lager</th><th>Preis</th><th></th></tr>${rows.join('')}</table>`;
+  let h = emptyToggle+`<table class="market"><tr><th>Ware</th><th>Lager</th><th>Preis</th><th></th></tr>${rows.join('')}</table>`;
   if(!e.owner&&e.market.economy)h=`<p class="muted">Marktkasse: ${fmt(e.market.economy.cash)} Cr · begrenzte Nachfrage ${fmt(e.market.economy.rate)} Cr/h. Angebote garantieren keinen Ankauf.</p>`+h;
   h+=moduleStockPanel(e,ship);
   if (mine && canTrade) {
@@ -263,8 +264,8 @@ export function marketTable(e, ship) {
 function ownRow(e, g, sl, ship) {
   let act = '';
   if (ship) {
-    act = ['10', 'max'].map((a) => `<button class="small" data-act="trade" data-dir="buy" data-ship="${ship.id}" data-ent="${e.id}" data-good="${g}" data-amt="${a}" title="Laden (kostenlos)">${a === 'max' ? '⇧ Max' : '⇧' + a}</button>`).join(' ');
-    if (ship.cargo?.[g]) act += ' ' + ['10', 'max'].map((a) => `<button class="small" data-act="trade" data-dir="sell" data-ship="${ship.id}" data-ent="${e.id}" data-good="${g}" data-amt="${a}" title="Einlagern (kostenlos)">${a === 'max' ? '⇩ Alle' : '⇩' + a}</button>`).join(' ');
+    act = ['10', 'max'].map((a) => `<button class="small" data-act="trade" data-dir="buy" data-ship="${ship.id}" data-ent="${e.id}" data-good="${g}" data-amt="${a}" title="Laden (kostenlos)">${a === 'max' ? 'Ins Schiff: Max' : 'Ins Schiff: ' + a}</button>`).join(' ');
+    if (ship.cargo?.[g]) act += ' ' + ['10', 'max'].map((a) => `<button class="small" data-act="trade" data-dir="sell" data-ship="${ship.id}" data-ent="${e.id}" data-good="${g}" data-amt="${a}" title="Einlagern (kostenlos)">${a === 'max' ? 'Ins Lager: Alle' : 'Ins Lager: ' + a}</button>`).join(' ');
   }
   return `<tr><td>${goodTag(g)} <span class="role role-${sl.role}">${ROLE_LABEL[sl.role]}</span></td>
     <td>${stockBar(sl.stock, sl.cap, '#81c784')} <span class="muted">${Math.floor(sl.stock)}/${sl.cap}</span></td>
@@ -407,6 +408,7 @@ det.addEventListener('click', (ev) => {
   const d = b.dataset;
   if (handlePropertyAction(d)) return;
   switch (d.act) {
+    case 'emptyOffers':state.hideEmptyOffers=!state.hideEmptyOffers;renderDetails();return;
     case 'homeArchiveVisit':cmd('homeArchiveVisit',{target:d.ent,ship:d.ship});break;
     case 'moduleTransfer':case 'moduleInstall':case 'moduleRemove':handleModuleAction(d);break;
     case 'rename': {

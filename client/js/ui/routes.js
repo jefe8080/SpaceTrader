@@ -111,9 +111,9 @@ function renderEditor() {
   if (!ed) return;
   const ship = refShip();
   let h = `<h2>${ed.id ? 'Route bearbeiten' : 'Neue Route'}</h2>
-    <div class="muted">Eine Route ist eine Vorlage. Alle zugewiesenen Schiffe fliegen sie. Erst Speichern ändert die Vorlage für alle; gültige Stoppindizes bleiben erhalten, ungültige werden auf den ersten Stopp gesetzt.
+    <p>Kaufen am ersten Halt → Entladen am Ziel → Fahrt wiederholen. Zugewiesene Schiffe führen die gespeicherte Vorlage aus.</p><details data-disclosure="route-rules"><summary>Erweiterte Routenregeln</summary><div class="muted">Eine Route ist eine Vorlage. Alle zugewiesenen Schiffe fliegen sie. Erst Speichern ändert die Vorlage für alle; gültige Stoppindizes bleiben erhalten, ungültige werden auf den ersten Stopp gesetzt.
     Käufe ergänzen den Zielbestand der jeweiligen Ware an Bord. Verkäufe verwenden die zusätzliche Verkaufsmenge.
-    Leer/0 = so viel wie möglich. Teilkäufe fahren weiter; Wartebedingungen gelten separat. Preisgrenzen verhindern Verlustgeschäfte.</div>
+    Leer/0 = so viel wie möglich. Teilkäufe fahren weiter; Wartebedingungen gelten separat. Preisgrenzen verhindern Verlustgeschäfte.</div></details>
     <div class="form-row"><label>Name <input id="reName" maxlength="32" value="${esc(ed.name)}"></label>
     <label title="Automatische Einkäufe dieser Route nur, solange der Kontostand darüber bleibt">Mindestkontostand <input id="reMin" type="number" min="0" placeholder="0 = aus" value="${ed.minBalance || ''}"></label></div><label><input id="reTargetSpace" type="checkbox" ${ed.onlyWithTargetSpace?'checked':''}> Nur bei Platz am Ziel kaufen</label><p class="muted">Begrenzt Käufe, eigene Beladungen und Rohstoffabbau auf spätere Abladeziele und reserviert deren freien Platz. Produktion und manuelle Lieferungen können den Platz danach verändern.</p>`;
 
