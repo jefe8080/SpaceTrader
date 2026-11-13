@@ -25,7 +25,7 @@ Die vorhandene Spieltiefe bleibt erhalten. Informationen und Entscheidungen erha
 ## Umsetzung und Fortschritt
 
 - [x] U1 – Blockaden: Wrack-Zielnavigation und Wasserstillstand im Langzeitplaner reproduzieren, Ursachen trennen und gezielt beheben; Nachweise sichern.
-- [ ] U2 – Ansichtsgrundlage: reine Planetenbilanz, gemeinsame Übersicht, Gebäudenavigation/Zustand/Rückweg; gespeicherte Detailbereiche.
+- [x] U2 – Ansichtsgrundlage: reine Planetenbilanz, gemeinsame Übersicht, Gebäudenavigation/Zustand/Rückweg; gespeicherte Detailbereiche.
 - [ ] U3 – Fachorte: Rathaus, Lager/Reisen, Leitstelle, Orbitalring sowie Baukatalog neu zuordnen; keine doppelten Bearbeitungsformulare.
 - [ ] U4 – Spezialanlagen: Produktion, Energie, Lagerkapazität, Raumhafen, Wohnraum, Ausbildung, Forschung/Fertigung/Ausrüstung samt Berechtigungen und Diagnose.
 - [ ] U5 – Einstieg und Quests: Funkkontakt, kurze Einführung, Fortschrittsbedingungen, Abschlussmeldung und geführte echte H03-Lieferung.
@@ -45,3 +45,5 @@ Jeder abgeschlossene Schritt erhält passende Prüfungen, dokumentiertes Ergebni
 ## Prüfprotokoll
 
 U1: Wrackziel lag in bereits enthüllter Zelle und wurde deshalb nicht erneut übertragen; gezielte Reveal-Nachricht ergänzt. Regressionstest plus Heimat-/Relikttests: 13/13 bestanden. Gesamtsuite vor weiteren Serveränderungen: erfolgreich (0 Fehler). Wasserstillstand war eine Annahme des Simulationsplaners: Zivilverbrauch erschöpfte einmalig berechnete Zutaten. Nachbeschaffung bei Zutatenmangel ergänzt, keine Spielraten geändert. Wiederaufnahme am H10-Checkpoint erreicht H11 und passiert die frühere Fehlerstelle; weiterer Lauf läuft noch. Hauptwelt unverändert.
+
+U2: Direkte Gebäudeliste mit Zustand, Planetenlage mit Engpassverweisen und Rückweg implementiert; Aufklappzustände je Gebäude gemerkt. Browserprüfung am vorhandenen QA-Stand: Rathaus, Übersicht, Zurück und Wrackziel funktionieren. Syntax- und Diffprüfung bestanden. Fachorte aus U3 teilweise bereits als notwendige Grundlage umgeordnet; abschließende Fachformulare folgen. Gesamtsuite: 409/409 bestanden.

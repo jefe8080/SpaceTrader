@@ -59,10 +59,11 @@ const completed = (id) => !!state.homeQuest?.completed[id];
 export function homePanel(entity, item, ship) {
   const home = entity.market.homeworld;
   if (home.owner !== state.me.id) return '<div class="muted">Persönliche Ruinenwelt eines anderen Kapitäns.</div>';
+  if(item.homeOverview)return '<p>Versorgung und laufende Arbeiten deiner Welt. Wähle ein Gebäude für Änderungen.</p>'+homeBalance(entity);
   if (item.kind === 'questhouse') {
     const mode=entity.market.mode==='open'?'open':'private';
     const trade=`<h3>Handel</h3><p>Handelsmodus: <b>${mode==='open'?'offen':'privat'}</b></p><p>${mode==='open'?'Andere Spieler und NPCs können unreservierte Waren handeln.':'Nur du kannst auf das Lager zugreifen.'} Reservierte Waren bleiben geschützt.</p><button class="small" data-pp="homeTradeMode" data-mode="${mode==='open'?'private':'open'}">Handel ${mode==='open'?'auf privat stellen':'öffnen'}</button>`;
-    const overview='<details><summary>Planetenübersicht</summary>'+homeBalance(entity)+'</details>'+trade+planetNamePanel(entity);
+    const overview='';
     if(entity.id!==state.homeworld)return overview+'<h3>Laufende Quests</h3>'+activeSideQuests(state).map(q=>'<p>'+questText(q)+'</p>').join('')+Object.entries(HOME_QUESTS).filter(([id])=>state.homeQuest?.active?.[id]&&!completed(id)).map(([id,q])=>'<p><b>'+id+' · '+esc(q.title)+'</b><br>'+esc(q.goal)+'</p>').join('')+'<button class="small" data-pp="homeSite" data-id="'+state.homeworld+'">Zur Hauptheimat zeigen</button>'+historyPanel()+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+worldsPanel()+warpPanel(entity);
     let html = overview+(activeSideQuests(state).length?'<h3>Laufende Nebenquests</h3>'+activeSideQuests(state).map(q=>'<p>'+questText(q)+'</p>').join(''):'')+`<div class="muted">Hauptquests laufen unabhängig von normalen Quests. Mehrere freigeschaltete Zweige können gleichzeitig fortschreiten.</div>`;
     for (const [id, quest] of Object.entries(HOME_QUESTS)) {
@@ -83,10 +84,9 @@ export function homePanel(entity, item, ship) {
       }
     }
     for(const [module,find] of Object.entries(STUDY_FINDS))if(completed(find.quest)&&!state.homeQuest.finds?.[module])html+=`<p>${find.name}: ${state.homeQuest.finds?.[module]?'einmalige Vorlage geborgen':'Studienvorlage verfügbar'}</p><button class="small" data-pp="homeSite" data-id="${state.homeQuest.sites?.[module]||''}">Forschungsfund zeigen</button>`;
-    html+=`<p>Volle Grundversorgung: ${Math.floor(home.fullSupplySeconds||0)} / 1.800 s · Selbst ausgebildete Fachkräfte: ${home.trained?.skilled||0}</p>`+orbitalPanel(entity);
-    html+=worldsPanel();
-    html+=warpPanel(entity);
-    html += historyPanel();
+    html+=`<p>Volle Grundversorgung: ${Math.floor(home.fullSupplySeconds||0)} / 1.800 s · Selbst ausgebildete Fachkräfte: ${home.trained?.skilled||0}</p>`;
+    html+=jump('home:orbital','Zum Orbitalring')+jump('home:control','Welten und Expeditionen verwalten');
+    html+=civicPanel(home)+planetNamePanel(entity)+historyPanel();
     return html;
   }
   if (item.homeStructure) return structurePanel(entity,item.homeStructure);
@@ -130,6 +130,7 @@ export function homePanel(entity, item, ship) {
       html+=`<p>${spec.name}: ${costLabel(cost)} · 2 Energie / 2 Fachkräfte</p><button class="small" data-pp="homeControlUpgrade" data-module="${id}" ${pending?'disabled':''}>Funktionsmodul bauen</button>`;
     }
     html+=logisticsPanel(entity);
+    html+=worldsPanel()+warpPanel(entity)+'<p>Routen wiederholen feste Halte und Aktionen. Leitstellenaufträge planen Versorgung, Produktion oder Absatz mit gebundenem Budget.</p><button class="small" data-pp="homeRoutes">Meine Routen öffnen</button>';
   }
   if (RECIPES[facility]) {
     const recipe = RECIPES[facility];
@@ -141,12 +142,13 @@ export function homePanel(entity, item, ship) {
   }
   if (facility === 'dock' && building.status === 'ready') {
     const goods = Object.entries(entity.market.goods).filter(([g]) => ['normal','hazard'].includes(GOODS[g].cls));
-    html += homeBalance(entity)+'<details id="storage-limits"><summary>Einstellbare Lagerlimits und Transfers</summary>'+storageBatchPanel(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market home-storage"><tr><th>Ware / Bestand</th><th>Lagerregeln</th></tr>';
+    html += `<p>${ship?'Schiff: '+esc(ship.name):'Kein eigenes Schiff angedockt.'} · gemeinsames Planetenlager</p>`+storageBatchPanel(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market home-storage"><tr><th>Ware / Bestand</th><th>Lagerregeln</th></tr>';
     for (const [good, slot] of goods) html += `<tr><td><b>${GOODS[good].name}</b><p>${fmt(slot.stock)} im Lager<br>${fmt(ship?.cargo?.[good] || 0)} an Bord</p>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${ship && slot.stock >= 1 ? '' : 'disabled'}>Laden</button>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Einlagern</button></td><td>${storageControls(entity,good)}</td></tr>`;
-    html += '</table></details>';
-    html+='<details id="storage-modules"><summary>Physische Module</summary>'+moduleStockPanel(entity,ship,'pp')+'</details><details id="storage-population"><summary>Bevölkerung und Reisen</summary>'+populationPanel(entity,{prices:false})+'</details>'+homePrices(entity,home);
+    html += '</table>';
+    html+='<details id="storage-modules"><summary>Modulfracht</summary>'+moduleStockPanel(entity,ship,'pp',false)+jump('home:workshop','Schiff ausrüsten')+'</details><details id="storage-population"><summary>Personenreisen</summary>'+populationPanel(entity,{prices:false})+'</details>'+homePrices(entity,home);
+    html+=`<details><summary>Lokaler Handel</summary><p>${entity.market.mode==='open'?'Andere Spieler und NPCs dürfen unreservierte Waren handeln.':'Nur du kannst auf das Lager zugreifen.'}</p><button class="small" data-pp="homeTradeMode" data-mode="${entity.market.mode==='open'?'private':'open'}">Handel ${entity.market.mode==='open'?'auf privat stellen':'öffnen'}</button></details>`;
     html += `<p class="muted">Zwei Stunden Grundbedarf: ${Math.ceil(home.population*.4)} Wasser und ${Math.ceil(home.population*.2)} Nahrung. Reserven sind Teil des Lagerbestands, kein zusätzliches Lager.</p>`;
   }
   return html;
@@ -161,6 +163,8 @@ function planetNamePanel(entity){
 }
 
 const costLabel=cost=>`${fmt(cost.credits)} Cr · ${Object.entries(cost.goods).map(([g,n])=>`${n} ${GOODS[g]?.name||g}`).join(', ')} · ${cost.seconds||60} s`;
+const jump=(key,label)=>`<button class="small" data-pp="homeOpen" data-key="${key}">${label}</button>`;
+function civicPanel(home){return home.civil?homeBalance(null,{civil:home.civil}):'';}
 function orbitalPanel(entity){
   const o=entity.market.homeworld.orbital;
   let html=`<h3>Orbitalring</h3><p>Kleiner Ring: ${o?.small?'betriebsbereit':'gebrochen'} · Großer Ring: ${o?.large?'betriebsbereit':`${o?.largeStage||0} / 2 Abschnitte`}. Eigener Orbitalanker, kein Bodenbauplatz.</p>`;
@@ -215,21 +219,20 @@ function logisticsPanel(entity){
     <p>Budget wird beim Anlegen gebunden. Grundreserven und bestehende Materialreservierungen bleiben geschützt. Beim Abbruch bleibt geladene Ware an Bord. Produktion endet nach ganzen Zyklen; Abbrechen hebt die Rezeptbindung auf.</p>
     <button class="primary" data-pp="homeLogistics">Auftrag anlegen</button></details>`;
 }
-function homeBalance(entity){
+function homeBalance(entity,{civil}={}){
+  if(civil)return `<details><summary>Bürger und Steuern</summary><p>Einkommen ${fmt(civil.incomePerHour||0)} Cr/h · bisher ${fmt(civil.taxes)} Cr Steuern und ${fmt(civil.consumptionPayments)} Cr bezahlter Konsum.</p><label>Steuer 0–40 % <input id="homeTaxPercent" type="number" min="0" max="40" value="${Math.round(civil.taxRate*100)}"></label><button class="small" data-pp="homeTax">Steuersatz setzen</button></details>`;
   const home=entity.market.homeworld,used=homeStorageUsage(entity.market),work=home.workforce;
-  let html=`<div class="kv"><span>Einwohner / Wohnraum</span><span>${home.population} / ${home.housing}</span><span>Energie benutzt / verfügbar</span><span>${home.energy?.used||0} / ${home.energy?.generation??home.power??0}</span>
+  let html=(home.allocations||[]).filter(a=>a.state!=='active'&&a.reason&&a.reason!=='Pausiert').map(a=>`<p class="neg">${esc(names[a.id]||RECIPES[a.id]?.name||home.structures?.find(s=>s.id===a.id)?.kind||a.id)}: ${esc(a.reason)} ${jump(home.facilities[a.id]?'home:'+a.id:'home:structure:'+a.id,'Anlage öffnen')}</p>`).join('');
+  html+=`<div class="kv"><span>Einwohner / Wohnraum</span><span>${home.population} / ${home.housing}</span><span>Energie benutzt / verfügbar</span><span>${home.energy?.used||0} / ${home.energy?.generation??home.power??0}</span>
     <span>Normales Lager</span><span>${fmt(used.normal)} / ${home.storage}</span><span>Gefahrgutlager</span><span>${fmt(used.hazard)} / ${home.hazardStorage}</span>
     <span>Unzugeordnet: einfach / Fach / Spezial</span><span>${work?`${work.free.basic} / ${work.free.skilled} / ${work.free.specialist}`:'48 / 12 / 0'} · höchstens ${work?.freeSlots??Math.floor(home.population*.6)} weitere Arbeitsplätze</span>
     <span>Grundversorgung</span><span>${Math.round((home.supply?.basic||0)*100)} % · Notversorgung erhält Einwohner und Fortschritt</span></div>`;
-  if(home.civil)html+=`<details><summary>Bürger und Geld</summary><p>Brutto ${fmt(home.civil.incomePerHour||0)} Cr/h · Steuer ${Math.round(home.civil.taxRate*100)} %</p>
-    <p>Bisher: ${fmt(home.civil.gross)} Cr Einkommen, davon ${fmt(home.civil.taxes)} Cr Steuern und ${fmt(home.civil.consumptionPayments)} Cr tatsächlich bezahlter Konsum.</p>
-    <label>Steuer 0–40 % <input id="homeTaxPercent" type="number" min="0" max="40" value="${Math.round(home.civil.taxRate*100)}"></label><button class="small" data-pp="homeTax">Steuersatz setzen</button></details>`;
   html+='<details id="storage-overview"><summary>Warenübersicht: verfügbar / geschützt / Zu- und Abfluss</summary><table class="market"><tr><th>Ware</th><th>Verfügbar / geschützt</th><th>Zu- / Abfluss je h</th></tr>';
   for(const [g,slot] of Object.entries(entity.market.goods)){
     if(GOODS[g].cls==='passenger')continue;
     const protectedAmount=slot.stock-availableHomeStock(entity.market,g),flow=home.flows?.[g];
     if(!slot.stock&&!protectedAmount&&!flow)continue;
-    const drain=(flow?.consume||0)-(flow?.produce||0),duration=drain>0?`${(availableHomeStock(entity.market,g)/drain).toFixed(1)} h Vorrat`:'kein Nettoverbrauch';
+    const drain=(flow?.consume||0)-(flow?.produce||0),duration=drain>0?`${Math.floor(availableHomeStock(entity.market,g)/drain*60)} min Vorrat`:'kein Nettoverbrauch';
     html+=`<tr><td>${GOODS[g].name}<div class="muted">${duration}</div></td><td>${fmt(availableHomeStock(entity.market,g))} / ${fmt(protectedAmount)}</td><td>+${fmt(flow?.produce||0)} / −${fmt(flow?.consume||0)}</td></tr>`;
   }
   html+='</table></details><details><summary>Belegung und Engpässe</summary>'+(home.allocations||[]).map(a=>`<p>${esc(names[a.id]||RECIPES[a.id]?.name||home.structures?.find(s=>s.id===a.id)?.kind||a.id)}: ${a.state==='active'?'Betrieb':esc(a.reason||'Pausiert')} · ${a.power} Energie</p>`).join('')+'</details>';
@@ -279,7 +282,7 @@ function structurePanel(entity,id){
 
 function homeBuildPanel(entity){
   const home=entity.market.homeworld;
-  let html=homeBalance(entity)+'<h3>Industrie bauen</h3><select id="homeRecipe" aria-label="Industrierezept">';
+  let html='<p>Baue auf diesem Platz. Zutaten liegen im gemeinsamen Lager; zusätzliche Anlagen benötigen freie Energie und Arbeitskräfte.</p><h3>Industrie bauen</h3><select id="homeRecipe" aria-label="Industrierezept">';
   for(const [id,recipe] of Object.entries(RECIPES)){
     const group=industrySpec(id);
     html+=`<option value="${id}" ${completed(group.quest)?'':'disabled'}>${recipe.name} · Gruppe ${industryGroup(id)} · ${costLabel(group)} · ${group.power} Energie · ${group.workers.basic}/${group.workers.skilled}/${group.workers.specialist} Personal</option>`;

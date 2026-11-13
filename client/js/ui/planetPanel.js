@@ -27,6 +27,19 @@ export const panelKinds = {};
 let current = null; // gewähltes Gebäude
 let cityNames = false;
 let panelContext = null;
+const buildingHistory=[];
+const disclosureMemory=new Map();
+panel.addEventListener('toggle',event=>{
+  if(event.target.tagName==='DETAILS'&&current)disclosureMemory.set(current.key+':'+event.target.querySelector('summary')?.textContent,event.target.open);
+},true);
+export function openHomeBuilding(key){
+  if(!state.landed)return;
+  const item=key==='overview'?{key:'overview',label:'Planetenübersicht',homeOverview:true}:scene.items.find(it=>it.key===key);
+  if(!item)return;
+  if(current&&current.key!==key)buildingHistory.push(current.key);
+  openBuilding(item,true);
+}
+bus.openHomeBuilding=openHomeBuilding;
 addEventListener('resize', renderPlanetUi);
 
 const shipsHere = (id) => myShips().filter((s) => s.dockedAt === id);
@@ -42,6 +55,7 @@ export function enterPlanet(id) {
   resetPlanetside(e);
   current = null;
   state.follow = null;
+  buildingHistory.length=0;
   sfx('dock');
   renderPlanetUi();
 }
@@ -79,7 +93,7 @@ export function planetEscape() {
 
 function syncManagementControls(lost){
   for(const button of panel.querySelectorAll('button[data-pp]')){
-    if(['close','homeReplay','homeSite','homeWreck'].includes(button.dataset.pp))continue;
+    if(['close','homeReplay','homeSite','homeWreck','homeOpen','homeBack'].includes(button.dataset.pp))continue;
     if(lost){
       if(button.dataset.connectionDisabled===undefined)button.dataset.connectionDisabled=String(button.disabled);
       button.disabled=true;
@@ -108,7 +122,7 @@ export function renderPlanetUi() {
   const e = state.landed && state.entities.get(state.landed);
   bar.hidden = !e;
   if (e && current) {
-    current = scene.items.find(x => x.key === current.key) ?? null;
+    current = current.homeOverview?current:scene.items.find(x => x.key === current.key) ?? null;
     if (!current) selectBuilding(null);
   }
   panel.hidden = !e || !current;
@@ -116,7 +130,7 @@ export function renderPlanetUi() {
   if (!e) return;
   setHtml(bar, `<button class="small" data-pp="leave">Planet verlassen <kbd>Esc</kbd></button>
     <button class="small" data-pp="overview" title="Zur gesamten Stadt zurückkehren">Übersicht</button>
-    <button class="small" data-pp="names" aria-pressed="${cityNames}" title="Namen aller Stadtorte anzeigen">Namen</button>`);
+    <button class="small" data-pp="names" aria-pressed="${cityNames}" title="Namen aller Stadtorte anzeigen">Namen</button>${e.type==='ruins'?`<button class="small" data-pp="homeOpen" data-key="overview">Planetenlage</button><label>Gebäude <select id="homeBuildingNav" aria-label="Gebäude öffnen"><option value="">Gebäude wählen …</option>${scene.items.map(it=>{const h=e.market.homeworld,b=h.facilities?.[it.homeFacility]||h.structures?.find(b=>b.id===it.homeStructure),a=h.allocations?.find(a=>a.id===(it.homeFacility||it.homeStructure));return `<option value="${esc(it.key)}" ${current?.key===it.key?'selected':''}>${esc(it.label)}${b?' · '+(b.status==='building'?'Bau läuft':b.status==='ruined'?'Ruine':a?.reason||'Betriebsbereit'):''}</option>`;}).join('')}</select></label>`:''}`);
   bar.setAttribute('aria-label', `${e.name} · ${PLANET_TYPES[e.type].name}`);
   bar.style.top = `${Math.ceil($('topbar').getBoundingClientRect().bottom)+12}px`;
   if(innerWidth>1100)panel.style.top=`${Math.ceil(bar.getBoundingClientRect().bottom)+12}px`;
@@ -141,12 +155,13 @@ export function renderPlanetUi() {
   const context = JSON.stringify([e.id, it.key]);
   const updatePanel = context === panelContext ? patchPanelContent : (element, html) => { element.innerHTML = html; };
   panelContext = context;
-  updatePanel(panel, `<div class="panel-head"><h2>${esc(it.label)}</h2><button class="small ghost" data-guide-help aria-label="Erklärung anzeigen">?</button><span style="flex:1"></span><button class="small ghost" data-pp="close" aria-label="Ort schließen">✕</button></div>${connection}${body}`);
+  updatePanel(panel, `<div class="panel-head"><h2>${esc(it.label)}</h2><button class="small ghost" data-guide-help aria-label="Erklärung anzeigen">?</button><span style="flex:1"></span>${buildingHistory.length?'<button class="small" data-pp="homeBack">Zurück</button>':''}<button class="small ghost" data-pp="close" aria-label="Ort schließen">✕</button></div>${connection}${body}`);
   for(const input of panel.querySelectorAll('[data-storage-rule]'))input.value=input.getAttribute('value');
   const selectedRecipe = panel.querySelector('#homeRecipe');
   if (selectedRecipe) selectedRecipe.dispatchEvent(new Event('change', { bubbles: true }));
   syncManagementControls(lost);
   for(const details of panel.querySelectorAll('details'))if(expanded.has(details.dataset.disclosure||details.querySelector('summary')?.textContent))details.open=true;
+  for(const details of panel.querySelectorAll('details')){const key=current.key+':'+details.querySelector('summary')?.textContent;if(disclosureMemory.has(key))details.open=disclosureMemory.get(key);}
 }
 
 panel.addEventListener('click', ev => {
@@ -196,6 +211,9 @@ panel.addEventListener('click', (ev) => {
   const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'homeRoutes':bus.openRouteEditor(null);return;
+    case 'homeOpen':openHomeBuilding(d.key);return;
+    case 'homeBack':{const key=buildingHistory.pop();current=null;if(key)openHomeBuilding(key);return;}
     case 'homeTradeMode':cmd('propMode',{target:e.id,mode:d.mode});return;
     case 'homeRename':cmd('homeRename',{target:e.id,name:document.getElementById('homePlanetName')?.value});return;
     case 'homeQuestDeliver':cmd('homeQuestDeliver',{target:e.id,quest:d.quest,good:d.good,amount:Number(document.getElementById(`questDelivery-${d.quest}-${d.good}`)?.value)});return;
@@ -250,6 +268,7 @@ panel.addEventListener('click', (ev) => {
     case 'homeWreck': {
       const wreck = state.entities.get(state.homeQuest?.salvage?.wreck);
       if (wreck) { leavePlanet(); state.camera.x = wreck.x; state.camera.y = wreck.y; bus.select({kind:'entity',id:wreck.id}); }
+      else toast('Wrackziel noch nicht geladen. Verbindung prüfen und erneut versuchen.');
       return;
     }
     case 'homeReplay': state.homeDialogReplay = d.scene || 'H00'; return;
@@ -263,10 +282,12 @@ panel.addEventListener('click', (ev) => {
   if (panelKinds[current?.kind]?.click?.(d, current, e, ship, ev)) renderPlanetUi();
 });
 bar.addEventListener('click', ev => {
+  const jump=ev.target.closest('[data-pp=homeOpen]');if(jump)openHomeBuilding(jump.dataset.key);
   if (ev.target.closest('[data-pp=leave]')) leavePlanet();
   if (ev.target.closest('[data-pp=overview]')) closeBuilding(true);
   if (ev.target.closest('[data-pp=names]')) { cityNames=!cityNames;getPlanetView()?.setNames(cityNames);renderPlanetUi(); }
 });
+bar.addEventListener('change',ev=>{if(ev.target.id==='homeBuildingNav'&&ev.target.value)openHomeBuilding(ev.target.value);});
 panel.addEventListener('input',event=>{
   const el=event.target;
   if(el.dataset.storageRule){for(const sibling of panel.querySelectorAll('[data-storage-rule="'+el.dataset.storageRule+'"][data-good="'+el.dataset.good+'"]'))if(sibling!==el)sibling.value=el.value;}

@@ -3,7 +3,7 @@ import {MODULE_RECIPES} from '/shared/module-production.js';
 import {state,esc,myShips} from '../state.js';
 import {cmd} from '../net.js';
 
-export function moduleStockPanel(entity,ship,attribute='act'){
+export function moduleStockPanel(entity,ship,attribute='act',equipment=true){
   const own=entity.market.owner===state.me.id;
   let html='<h3>Physische Module</h3><p class="muted">Verpackt je 30 normale Frachteinheiten. Einbau verbraucht ein Exemplar, Ausbau erhält es ohne Rückerstattung.</p><table class="market"><tr><th>Modul</th><th>Lager / Fracht</th><th></th></tr>';
   for(const [id,spec] of Object.entries(MODULES)){
@@ -12,9 +12,9 @@ export function moduleStockPanel(entity,ship,attribute='act'){
     html+=`<tr><td>${spec.name}${own?'':`<div class="muted">${spec.price} Cr Kauf / ${Math.round(spec.price*.8)} Cr Verkauf</div>`}</td><td>${stored} / ${carried}${installed?' · '+installed+' eingebaut':''}</td><td>`;
     if(ship){
       html+=button('moduleTransfer','Laden','data-dir="buy"',!stored)+button('moduleTransfer',own?'Einlagern':'Verkaufen','data-dir="sell"',!carried);
-      if(carried)html+=button('moduleInstall','Fracht einbauen','data-source="cargo"');
-      if(stored)html+=button('moduleInstall',own?'Lager einbauen':'Kaufen und einbauen','data-source="warehouse"');
-      if(installed){html+=button('moduleRemove','In Fracht ausbauen','data-destination="cargo"');if(own)html+=button('moduleRemove','Ins Lager ausbauen','data-destination="warehouse"');}
+      if(equipment&&carried)html+=button('moduleInstall','Fracht einbauen','data-source="cargo"');
+      if(equipment&&stored)html+=button('moduleInstall',own?'Lager einbauen':'Kaufen und einbauen','data-source="warehouse"');
+      if(equipment&&installed){html+=button('moduleRemove','In Fracht ausbauen','data-destination="cargo"');if(own)html+=button('moduleRemove','Ins Lager ausbauen','data-destination="warehouse"');}
     }
     html+='</td></tr>';
   }
