@@ -1,4 +1,5 @@
 import {GOODS} from '/shared/config.js';
+import {motionReduced} from './displayPrefs.js';
 import {productionBubble} from '/shared/production-display.js';
 import {CITY_TYPES, planCity, citySprite, cityDevelopment, pickCity} from './planetCityLayout.js';
 import {constrainCityPose,fitCityOverview,fitCityFocus} from './planetCityCamera2D.js';
@@ -51,7 +52,7 @@ export class PlanetCityScene {
     this.records=new Map();this.assignments=new Map();this.active=false;this.loading=true;this.epoch=0;
     this.selected=null;this.hover=null;this.names=false;this.time=0;this.pose={x:0,y:0,zoom:1};this.pointers=new Map();
     this.label=document.getElementById('planetLabel');
-    this.reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.reducedMotion=motionReduced();
     canvas.setAttribute('aria-label','Planetare Stadtansicht. Ziehen zum Verschieben, Mausrad zum Zoomen. Mit Tab zu den Stadtorten wechseln.');
     canvas.addEventListener('contextmenu',event=>event.preventDefault());
     canvas.addEventListener('wheel',event=>{if(!this.active)return;event.preventDefault();this.zoomTo(this.pose.zoom*Math.exp(-event.deltaY*.001),event.clientX,event.clientY);},{passive:false});
@@ -158,6 +159,7 @@ export class PlanetCityScene {
   }
   drawRecord(ctx,r){
     const item=r.item,cell=citySprite(this.entity,item,GOODS),active=r.key===this.selected||r.key===this.hover;
+    if(!r.painted&&!r.character&&cell!==null)ellipse(ctx,r.x,r.y+2,r.w*.36,Math.max(5,r.w*.07),'#30261a65');
     if(typeof cell==='string'&&cell.startsWith('housing-')){
       const level=Number(cell.slice(-1)),image=this.art.housing[level-1];
       // Authored alpha bounds keep foundations aligned across three different canvases.
@@ -218,6 +220,7 @@ export class PlanetCityScene {
     ctx.font='bold 15px system-ui';ctx.textAlign='center';ctx.fillStyle='#443c2b';ctx.fillText(text,0,5);ctx.restore();
   }
   render(dt){
+    this.reducedMotion=motionReduced();
     if(!this.active||this.loading||!this.plan)return;this.resize();this.time+=Math.min(dt||0,.06);
     if(this.flight){const f=this.flight;f.elapsed+=Math.min(dt||0,.06);const t=Math.min(1,f.elapsed/.5),k=1-(1-t)**3;for(const key of ['x','y','zoom'])this.pose[key]=f.from[key]+(f.to[key]-f.from[key])*k;if(t===1)this.flight=null;}
     this.clampPose();
@@ -229,7 +232,8 @@ export class PlanetCityScene {
     ctx.drawImage(this.art.terrain,0,0,1536,1024);
     for(const r of [...this.records.values()].sort((a,b)=>a.y-b.y))this.drawRecord(ctx,r);
     if(!this.reducedMotion)for(const r of this.records.values()){
-      if(r.item.kind!=='factory'||cityDevelopment(this.entity,r.item)!=='ready')continue;
+      const id=r.item.homeFacility||r.item.homeStructure,h=this.entity.market?.homeworld;
+      if(r.item.kind!=='factory'||cityDevelopment(this.entity,r.item)!=='ready'||h&&!h.allocations?.some(a=>a.id===id&&a.state==='active'))continue;
       for(let i=0;i<3;i++){const t=(this.time*.25+i/3)%1;ellipse(ctx,r.x+15+Math.sin(t*5)*6,r.y-115-t*38,4+t*7,3+t*5,`rgba(226,218,191,${(1-t)*.22})`);}
     }
     ctx.restore();

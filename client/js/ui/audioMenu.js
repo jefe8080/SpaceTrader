@@ -1,6 +1,7 @@
 // Lautsprecher-Menü im HUD: Regler für Musik und Effekte, Stummschalter (gespeichert im localStorage)
 import { prefs, setPref, sfx } from '../audio.js';
 import { $ } from './dom.js';
+import {motionMode,setMotionMode} from '../displayPrefs.js';
 
 const btn = $('btnAudio');
 const menu = $('audioMenu');
@@ -11,7 +12,7 @@ function render() {
     <label class="audio-row"><span>Musik</span><input type="range" min="0" max="1" step="0.05" data-pref="music" value="${prefs.music}"></label>
     <label class="audio-row"><span>Effekte</span><input type="range" min="0" max="1" step="0.05" data-pref="sfx" value="${prefs.sfx}"></label>
     <label class="audio-row"><input type="checkbox" data-pref="mute" ${prefs.mute ? 'checked' : ''}> <span>Stumm</span></label>
-    <div class="muted small-note">Musik und Effekte werden im Browser erzeugt.</div>`;
+    <label class="audio-row"><span>Angriffswarnungen</span><input type="checkbox" data-pref="warnings" ${prefs.warnings!==false?'checked':''}></label><label class="audio-row"><span>Bewegung</span><select id="motionPreference"><option value="system" ${motionMode()==='system'?'selected':''}>Systemeinstellung</option><option value="reduce" ${motionMode()==='reduce'?'selected':''}>Reduziert</option><option value="full" ${motionMode()==='full'?'selected':''}>Vollständig</option></select></label><p class="muted small-note">Musik und Effekte getrennt einstellbar. Angriffswarnungen bleiben zusätzlich sichtbar.</p>`;
 }
 
 btn.addEventListener('click', () => {
@@ -23,9 +24,10 @@ btn.addEventListener('click', () => {
   menu.style.top = rc.bottom + 4 + 'px';
 });
 menu.addEventListener('input', (ev) => {
+  if(ev.target.id==='motionPreference'){setMotionMode(ev.target.value);return;}
   const k = ev.target.dataset.pref;
   if (!k) return;
-  setPref(k, k === 'mute' ? ev.target.checked : Number(ev.target.value));
+  setPref(k, ['mute','warnings'].includes(k) ? ev.target.checked : Number(ev.target.value));
   btn.textContent = prefs.mute ? '🔇' : '🔊';
   if (k === 'sfx') sfx('click');
 });

@@ -6,6 +6,7 @@ import { SYSTEMS, STATE_NAMES, COMBAT_TYPES, NAVAL_CLASSES } from '/shared/comba
 import { socket, cmd } from '../net.js';
 import { state, esc } from '../state.js';
 import { getSprite } from '../assets.js';
+import {motionReduced} from '../displayPrefs.js';
 
 const STATE_ICON = { intact: '●', damaged: '◐', critical: '◔', destroyed: '✕', jammed: 'ϟ' };
 const UNIT_ICON = { surrendered: '⚑ kapituliert', retreating: '↩ Rückzug', destroyed: '✖ zerstört' };
@@ -15,6 +16,8 @@ const SIDE_COLOR = { A: '#ef5350', B: '#42a5f5' };
 let el = null, canvas = null, ctx = null, panel = null;
 let view = null, prev = null, recvAt = 0, battleId = null;
 let training=false;
+let launcher=null,frameHandle=null,hitCycle={x:0,y:0,index:0,time:0};
+function animate(){if(frameHandle==null)frameHandle=requestAnimationFrame(frame);}
 const combatCmd=(name,args)=>training?socket.emit('trainingCmd',{cmd:name,...args}):cmd(name,args);
 const sel = new Set();
 let focus = null, drag = null, cam = { x: 0, y: 0, k: 1, fit: true };
@@ -27,9 +30,10 @@ function ensureDom() {
   el.id = 'battleView';
   el.className = 'battle-overlay';
   el.hidden = true;
+  el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Taktische Schlachtansicht');
   el.innerHTML = `<div class="battle-head"><b id="bvTitle">Schlacht</b><span id="bvSides" class="muted"></span><span style="flex:1"></span>
     <span id="bvTime" class="muted"></span><button class="small" id="bvClose" aria-label="Schlachtansicht schließen">✕ Schließen</button></div>
-    <div class="battle-body"><canvas id="bvCanvas"></canvas><div id="bvPanel" class="battle-panel"></div></div>`;
+    <div class="battle-body"><canvas id="bvCanvas" tabindex="0" aria-label="Taktikkarte. Pfeiltasten verschieben, Plus und Minus zoomen. Einheiten auch über die Listen auswählen."></canvas><div id="bvPanel" class="battle-panel"></div></div>`;
   document.body.appendChild(el);
   canvas = el.querySelector('#bvCanvas');
   ctx = canvas.getContext('2d');
@@ -40,6 +44,7 @@ function ensureDom() {
   canvas.addEventListener('mouseup', onUp);
   canvas.addEventListener('contextmenu', onRight);
   canvas.addEventListener('wheel', onWheel, { passive: false });
+  canvas.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','='].includes(e.key)){e.preventDefault();cam.fit=false;if(e.key==='ArrowLeft')cam.x-=80/cam.k;if(e.key==='ArrowRight')cam.x+=80/cam.k;if(e.key==='ArrowUp')cam.y-=80/cam.k;if(e.key==='ArrowDown')cam.y+=80/cam.k;if(['+','='].includes(e.key))cam.k=Math.min(2,cam.k*1.2);if(e.key==='-')cam.k=Math.max(.03,cam.k/1.2);}});
   panel.addEventListener('pointerdown', () => { panelHeld = true; });
   addEventListener('pointerup', () => { if (panelHeld) setTimeout(() => { panelHeld = false; }, 0); });
   panel.addEventListener('click', onPanel);
@@ -48,12 +53,14 @@ function ensureDom() {
 }
 
 export function openBattle(id) {
+  launcher=document.activeElement;
+  if(training)socket.emit('trainingClose');
   training=false;
   ensureDom();
   battleId = id; view = null; prev = null; sel.clear(); focus = null; cam.fit = true; fxList.length = 0;
   el.hidden = false;
   socket.emit('battleView', { id });
-  requestAnimationFrame(frame);
+  el.querySelector('#bvClose').focus();animate();
 }
 export function closeBattle() {
   if (!el) return;
@@ -61,11 +68,13 @@ export function closeBattle() {
   battleId = null;
   socket.emit('battleView', { id: null });
   if(training){socket.emit('trainingClose');training=false;}
+  if(frameHandle!=null){cancelAnimationFrame(frameHandle);frameHandle=null;}launcher?.focus?.();
 }
 
 document.getElementById('btnBattleTraining').onclick=()=>{
+ launcher=document.activeElement;
  ensureDom();training=true;view=null;prev=null;sel.clear();focus=null;cam.fit=true;fxList.length=0;el.hidden=false;
- socket.emit('trainingStart',{},v=>{if(!training)return;battleId=v.id;receiveBattle(v);requestAnimationFrame(frame);});
+ el.querySelector('#bvClose').focus();socket.emit('trainingStart',{},v=>{if(!training)return;battleId=v.id;receiveBattle(v);animate();});
 };
 socket.on('trainingBattle',v=>{if(training&&v.id===battleId)receiveBattle(v);});
 
@@ -86,7 +95,8 @@ function receiveBattle(v){
 // ---------- Koordinaten ----------
 function fit() {
   const r = canvas.getBoundingClientRect();
-  canvas.width = r.width * devicePixelRatio; canvas.height = r.height * devicePixelRatio;
+  const dpr=Math.min(2,devicePixelRatio),w=Math.round(r.width*dpr),h=Math.round(r.height*dpr);
+  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
   if (cam.fit && view) {
     cam.k = Math.min(r.width / view.map.W, r.height / view.map.H) * 0.96;
     cam.x = view.map.W / 2; cam.y = view.map.H / 2;
@@ -112,7 +122,8 @@ function unitAt(wx, wy) {
     const p = pos(u), d = Math.hypot(p.x - wx, p.y - wy);
     if (d < Math.max(lengthOf(u) * 0.6, 14 / cam.k) && d < bd) { bd = d; best = u; }
   }
-  return best;
+  const hits=view.units.filter(u=>{const p=pos(u);return Math.hypot(p.x-wx,p.y-wy)<Math.max(lengthOf(u)*.6,14/cam.k);}).sort((a,b)=>Math.hypot(pos(a).x-wx,pos(a).y-wy)-Math.hypot(pos(b).x-wx,pos(b).y-wy));
+  if(hits.length>1){const now=performance.now(),repeat=Math.hypot(hitCycle.x-wx,hitCycle.y-wy)*cam.k<8&&now-hitCycle.time<1500;hitCycle={x:wx,y:wy,index:repeat?(hitCycle.index+1)%hits.length:0,time:now};return hits[hitCycle.index];}return best;
 }
 /** Hardpoint unter der Maus (Systemangriff direkt am Hardpoint) */
 function hardpointAt(u, wx, wy) {
@@ -193,6 +204,7 @@ function onPanel(ev) {
     case 'hull': order({ t: 'attack', target: d.target }); break;
     case 'dc': for (const id of sel) combatCmd('battleTactic', { ship: id, dcPrio: d.sys }); break;
     case 'fit': cam.fit = true; break;
+    case 'fitUnits': {const units=view.units.filter(u=>u.live);if(units.length){const xs=units.map(u=>u.x),ys=units.map(u=>u.y),r=canvas.getBoundingClientRect(),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);cam.x=(minX+maxX)/2;cam.y=(minY+maxY)/2;cam.k=Math.min(r.width/(maxX-minX+1200),r.height/(maxY-minY+1000),.8);cam.fit=false;}break;}
   }
   renderPanel();
 }
@@ -218,6 +230,9 @@ function renderPanel() {
   if (!view.side) h += `<div class="infobox">👁 Zuschauer: sichtbare Kampfhandlungen ohne verdeckte Systeme, Befehle oder Rückzugsregeln. Keine Steuerung.</div>`;
   if (view.raid) h += `<div class="infobox">Raid: ${view.raid.phase === 'loot' ? `Plünderung läuft (${view.raid.left ?? '?'} s)` : 'Verteidiger besiegen'}</div>`;
   const own = view.units.filter((u) => u.own);
+  h+='<p class="muted">Listen: eigene Einheit wählen, Gegner fokussieren, dann Zielbefehl. Karte: wiederholt auf überlappende Schiffe klicken, um sie durchzuschalten.</p><button class="small" data-bv="fitUnits">Gefechtsbereich vergrößern</button>';
+  const enemies=view.units.filter(u=>view.side&&u.side!==view.side);
+  if(enemies.length)h+='<details data-enemy-list><summary>Bekannte Gegner · '+enemies.length+'</summary>'+enemies.map(u=>`<button class="small" data-bv="focus" data-id="${u.id}">${esc(u.name)} · ${esc(SHIP_TYPES[u.type]?.name||u.type)}${u.live?'':' · letzte Sichtung'}</button>`).join('')+'</details>';
   if (own.length) {
     h += `<div class="section-title">Eigene Einheiten <button class="small ghost" data-bv="all">alle wählen</button> <button class="small ghost" data-bv="fit">⤢ Ansicht</button></div>`;
     h += own.map((u) => `<div class="bv-row${sel.has(u.id) ? ' on' : ''}"><button class="small ghost" data-bv="sel" data-id="${u.id}">${esc(u.name)}</button>
@@ -260,23 +275,32 @@ function renderPanel() {
     </div>`;
   }
   if (view.log?.length) h += `<div class="section"><div class="section-title">Verlauf</div>${view.log.slice().reverse().map((l) => `<div class="muted">${l.t} s · ${esc(l.msg)}</div>`).join('')}</div>`;
-  if (panel._h !== h && !panelHeld && !panel.contains(document.activeElement?.tagName === 'SELECT' ? document.activeElement : null)) { panel.innerHTML = h; panel._h = h; }
+  if (panel._h !== h && !panelHeld && !panel.contains(document.activeElement?.tagName === 'SELECT' ? document.activeElement : null)) {
+    const active=panel.contains(document.activeElement)?document.activeElement:null,data=active?{...active.dataset}:null,tag=active?.tagName,text=active?.textContent,opened=panel.querySelector('[data-enemy-list]')?.open;
+    panel.innerHTML = h; panel._h = h;if(opened&&panel.querySelector('[data-enemy-list]'))panel.querySelector('[data-enemy-list]').open=true;
+    if(data){const replacement=[...panel.querySelectorAll('button,input,select,summary')].find(e=>e.tagName===tag&&(Object.keys(data).length?Object.keys(data).every(k=>e.dataset[k]===data[k]):e.textContent===text));replacement?.focus({preventScroll:true});}
+  }
 }
 
 // ---------- Zeichnen ----------
 function frame() {
+  frameHandle=null;
   if (!el || el.hidden) return;
-  requestAnimationFrame(frame);
+  animate();
   fit();
   const r = canvas.getBoundingClientRect();
-  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  const dpr=Math.min(2,devicePixelRatio);ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = '#060b16';
   ctx.fillRect(0, 0, r.width, r.height);
+  const background=getSprite('space_background_teal');
+  if(background){const scale=Math.max(r.width/background.width,r.height/background.height);ctx.drawImage(background,(r.width-background.width*scale)/2,(r.height-background.height*scale)/2,background.width*scale,background.height*scale);}
+  const shade=ctx.createLinearGradient(0,0,r.width,r.height);shade.addColorStop(0,'#071a24b8');shade.addColorStop(.6,'#0a152391');shade.addColorStop(1,'#201828bf');ctx.fillStyle=shade;ctx.fillRect(0,0,r.width,r.height);
   if (!view?.units) return;
   const now = performance.now();
   // Karte und Rückzugsrand
   const [x0, y0] = toScreen(0, 0), [x1, y1] = toScreen(view.map.W, view.map.H);
-  ctx.strokeStyle = '#29425e'; ctx.lineWidth = 2; ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+  ctx.fillStyle='#07111b70';ctx.fillRect(x0,y0,x1-x0,y1-y0);ctx.strokeStyle = '#b79a65'; ctx.lineWidth = 2; ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+  ctx.strokeStyle='#b79a651c';ctx.lineWidth=1;for(let x=1000;x<view.map.W;x+=1000){const [sx]=toScreen(x,0);ctx.beginPath();ctx.moveTo(sx,y0);ctx.lineTo(sx,y1);ctx.stroke();}for(let y=1000;y<view.map.H;y+=1000){const [,sy]=toScreen(0,y);ctx.beginPath();ctx.moveTo(x0,sy);ctx.lineTo(x1,sy);ctx.stroke();}
   const e = view.edge * cam.k;
   ctx.fillStyle = 'rgba(79,195,247,0.05)';
   ctx.fillRect(x0, y0, x1 - x0, e); ctx.fillRect(x0, y1 - e, x1 - x0, e); ctx.fillRect(x0, y0, e, y1 - y0); ctx.fillRect(x1 - e, y0, e, y1 - y0);
@@ -336,6 +360,7 @@ function drawUnit(u, now) {
   if (u.side === 'A') ctx.strokeRect(sx - L * 0.55, sy - L * 0.55, L * 1.1, L * 1.1);
   else { ctx.beginPath(); ctx.arc(sx, sy, L * 0.6, 0, Math.PI * 2); ctx.stroke(); }
   if (sel.has(u.id)) { ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(sx, sy, L * 0.75, 0, Math.PI * 2); ctx.stroke(); }
+  if(sel.has(u.id)||focus===u.id){ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#09141c';ctx.strokeText(u.name,sx,sy+L*.9+20);ctx.fillStyle='#fff0c8';ctx.fillText(u.name,sx,sy+L*.9+20);}
   if (focus === u.id) { ctx.strokeStyle = '#ffeb3b'; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.arc(sx, sy, L * 0.8, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
   const bw = Math.max(24, L);
   ctx.fillStyle = '#263238'; ctx.fillRect(sx - bw / 2, sy - L * 0.7 - 6, bw, 4);
@@ -355,6 +380,7 @@ function drawProjectile(p) {
 }
 
 function drawFx(now) {
+  if(motionReduced())return;
   for (const f of fxList) {
     const age = (now - f.at) / 1000;
     if (age > 0.8) continue;
@@ -391,7 +417,7 @@ socket.on('ships', (d) => { state.battles = d.battles || []; });
 export function drawBattleSymbols(c, { px, now }) {
   for (const b of state.battles || []) {
     const r = px(16);
-    const pulse = 1 + 0.15 * Math.sin(now / 250);
+    const pulse = motionReduced()?1:1 + 0.15 * Math.sin(now / 250);
     c.save();
     c.strokeStyle = b.mine ? '#ffeb3b' : '#ef5350'; c.lineWidth = px(2);
     c.beginPath(); c.arc(b.x, b.y, r * pulse, 0, Math.PI * 2); c.stroke();

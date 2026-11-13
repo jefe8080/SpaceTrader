@@ -577,6 +577,25 @@ body.fleet-collapsed #fleet .fleet-item img { width:30px; }
   .battle-panel { width: auto; border-left: none; border-top: 1px solid #29425e; flex: 1; }
 }
 .section button.on { outline: 2px solid #4fc3f7; }
+/* PRD 26: the same painted, ink-edged science-fantasy language as the city. */
+.battle-overlay { background:#0b1923 url('/assets/art/space/background_teal.png') center/cover; color:#f3e6cb; }
+.battle-head { background:linear-gradient(110deg,#142d36f2,#15202ef2); border-bottom:2px solid #ad8e54; padding:10px 14px; box-shadow:0 3px 14px #0008; flex-wrap:wrap; }
+.battle-head b { color:#f3d18d; letter-spacing:.04em; }
+.battle-panel { width:360px; box-sizing:border-box; background:linear-gradient(135deg,#172b35f7,#101e2bf7); border-left:2px solid #a78a53; padding:14px; line-height:1.5; box-shadow:-6px 0 20px #0005; }
+.battle-panel .section { border-top:1px solid #ad8e5460; padding-top:12px; }
+.battle-panel button { border-color:#9c855b; background:linear-gradient(#2c4249,#20313c); color:#fff0cf; min-height:30px; border-radius:5px 8px 5px 7px; }
+.battle-panel .infobox { background:#d7b97012; border-color:#b29964; padding:10px; }
+.battle-panel .bv-row { border-bottom:1px solid #b49b6030; padding:5px 2px; flex-wrap:wrap; }
+.battle-panel .bv-row.on { box-shadow:inset 3px 0 #f2d48b; background:#dec17c15; }
+.battle-panel .section-title { color:#e8c887; font-weight:700; }
+.battle-body canvas { background:transparent; }
+:focus-visible { outline:3px solid #ffe29b !important; outline-offset:3px; }
+.panel-head h2 { color:#f1d393; }
+#planetPanel .quest-offer { border-left:3px solid #a58c60; padding-left:12px; }
+#planetPanel .primary { font-weight:700; border-color:#d5b678; }
+[data-reduced-motion="true"] *,[data-reduced-motion="true"] *::before,[data-reduced-motion="true"] *::after { animation-duration:.001ms !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+@media(prefers-reduced-motion:reduce) { html:not([data-reduced-motion="false"]) * { scroll-behavior:auto !important; } }
+@media(max-width:760px) { .battle-panel { width:auto; border-left:0; border-top:2px solid #a78a53; } }
 
 #attackWarnings{position:fixed;right:16px;top:72px;z-index:90;max-height:calc(100dvh - 90px);overflow:auto;width:min(360px,calc(100vw - 32px));pointer-events:none}
 .attack-warning{pointer-events:auto;background:#17232f;color:#fff;border:2px solid #ef5350;border-radius:8px;padding:12px;margin-bottom:10px;box-shadow:0 4px 18px #0008}

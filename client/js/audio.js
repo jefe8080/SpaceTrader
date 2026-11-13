@@ -101,6 +101,7 @@ const SFX = {
 const lastPlayed = {};
 /** Effekt abspielen; 80-ms-Schutz außer für getrennte neue Angriffswarnungen. */
 export function sfx(name) {
+  if(name==='attackWarning'&&prefs.warnings===false)return;
   if (prefs.mute || !prefs.sfx || !SFX[name] || !ensure()) return;
   const now = performance.now();
   if (name !== 'attackWarning' && now - (lastPlayed[name] || 0) < 80) return;

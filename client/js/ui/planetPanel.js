@@ -35,6 +35,7 @@ panel.addEventListener('toggle',event=>{
 },true);
 export function openHomeBuilding(key){
   if(!state.landed)return;
+  if(key==='home:overview')key='overview';
   const item=key==='overview'?{key:'overview',label:'Planetenübersicht',homeOverview:true}:scene.items.find(it=>it.key===key);
   if(!item)return;
   if(current&&current.key!==key)buildingHistory.push(current.key);

@@ -10,5 +10,5 @@ export function createTraining(){
  return {game,player,battle};
 }
 export function trainingCommand(t,msg){if(!['battleOrder','battleTactic'].includes(msg?.cmd))return 'Nur taktische Übungsbefehle.';return runCommand(t.game,t.player,msg);}
-export function trainingView(t,dt=0){if(dt)tickBattle(t.game,t.battle,dt);return {...battleView(t.game,t.battle,t.player),training:true,ended:!!t.battle.ended};}
+export function trainingView(t,dt=0){if(dt)tickBattle(t.game,t.battle,dt);const v=battleView(t.game,t.battle,t.player,t.fxSince??-1);if(v.fx.length)t.fxSince=v.fx.at(-1).t;return {...v,training:true,ended:!!t.battle.ended};}
 export function closeTraining(t){t?.game.store.close();}

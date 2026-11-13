@@ -28,6 +28,7 @@ export const typing = () => document.activeElement?.matches?.('input, select, te
 
 // ---------- Modale Fenster ----------
 const modals = new Map(); // id -> { render, onClose, live }
+const launchers=new Map();
 
 /** live = false: kein automatisches Neuzeichnen bei Updates (z.B. Editoren) */
 export function registerModal(id, render, onClose, { live = true, liveWhileTyping = false } = {}) {
@@ -39,6 +40,7 @@ export function registerModal(id, render, onClose, { live = true, liveWhileTypin
 const tradeIds = ['favorites','routesOverview','routeEditor'];
 let tradeTab='favorites';
 export function openModal(id) {
+  if($(id).hidden)launchers.set(id,document.activeElement);
   if(tradeIds.includes(id)) {
     $('tradeHub').hidden=false;
     if(id!=='routeEditor') {
@@ -57,12 +59,14 @@ export function openModal(id) {
   }
   $(id).hidden = false;
   modals.get(id)?.render();
+  if(!$(id).contains(document.activeElement))$(id).querySelector('button,input,select,summary')?.focus({preventScroll:true});
 }
 
 export function closeModal(id) {
   if ($(id).hidden) return;
   $(id).hidden = true;
   modals.get(id)?.onClose?.();
+  launchers.get(id)?.focus?.({preventScroll:true});
   if(id==='favorites'||id==='routesOverview') {
     // Keep a collapsed draft when closing the workspace; explicit Cancel discards it.
     $('tradeHub').hidden=true;
