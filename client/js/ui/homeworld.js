@@ -18,6 +18,7 @@ import {SHIP_TYPES,SHIPYARD,PILOT_LICENSES,factionRank} from '/shared/config.js'
 import {warpPanel,worldsPanel} from './colonies.js';
 import {housingPanel} from './housing.js';
 import {activeSideQuests} from '/shared/side-quests.js';
+import {homeQuestConditions} from '/shared/home-quest-progress.js';
 
 let dialog, currentScene, closingScene;
 export function renderHomeDialog() {
@@ -71,7 +72,14 @@ export function homePanel(entity, item, ship) {
       const unlocked = true;
       html += `<div class="quest-offer"><b>${id} · ${esc(quest.title)} ${completed(id) ? '✓' : ''}</b><p>${esc(quest.goal)}</p>
       <div class="muted">${quest.credits} Cr · ${quest.xp} XP${unlocked ? '' : ' · Voraussetzung: ' + quest.requires.join(', ')}</div>
-      ${completed(id) ? '' : `<button class="small primary" data-pp="homeQuest" data-quest="${id}" ${unlocked ? '' : 'disabled'}>Fortschritt prüfen und abschließen</button>`}</div>`;
+      ${homeQuestConditions(id,state.homeQuest,home).map(c=>`<p>${c.have>=c.need?'✓':'○'} ${esc(c.label)}: ${c.have} / ${c.need}</p>`).join('')}
+      ${completed(id) ? '' : `<button class="small primary" data-pp="homeQuest" data-quest="${id}" ${state.homeQuest.ready?.[id]?'':'disabled'}>${state.homeQuest.ready?.[id]?'Auftrag erfüllt – Belohnung abholen':'Voraussetzungen noch offen'}</button>`}</div>`;
+      if(id==='H03')html+='<button class="small" data-pp="homeSupplyRoute">Erste Eisversorgung einrichten</button><p>Die Vorlage kauft Eis, entlädt es kostenlos zu Hause und wiederholt die Fahrt. Wähle im Editor ein Schiff und speichere. Lieferung, nicht nur Speichern, erfüllt das Ziel.</p>';
+      if(id==='H02'){
+        html+='<p>Kaufe Eis und Getreide, fliege zurück und entlade sie im Zentrallager. Die reparierten Anlagen produzieren daraus automatisch.</p>';
+        for(const good of ['ice','grain']){const source=[...state.entities.values()].find(e=>e.system===entity.system&&e.market?.goods[good]?.role==='produce');if(source)html+=`<button class="small" data-pp="homeSite" data-id="${source.id}">${GOODS[good].name} kaufen: ${esc(source.name)}</button>`;}
+        html+=jump('home:waterworks','Wasserwerk')+jump('home:foodplant','Nahrungsanlage')+jump('home:dock','Zutaten entladen');
+      }
       if(id==='H05')html+=`<p>Versorgter Betrieb: ${Math.floor(home.suppliedSeconds)} / 600 s</p>`;
       if (id === 'H04' && state.homeQuest?.salvage?.phase === 'available') html += '<button class="small" data-pp="homeWreck">Markiertes Wrack zeigen</button>';
       if(unlocked&&!completed(id)){

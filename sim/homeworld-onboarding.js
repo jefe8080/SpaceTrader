@@ -48,7 +48,10 @@ export function simulateOnboarding({ seed = 42, dbFile = ':memory:', name = 'Hei
     go(wreck);command('relicSalvage',{target:wreck.id,ship:ship.id});go(home);command('relicDeliver',{ship:ship.id});
     until(()=>home.market.homeworld.facilities.workshop.status==='ready','Werkstatt');claim('H04');
     repair('control');repair('fueldepot');
-    command('routeSave',{name:'Lokale Eisversorgung',stops:[{targetId:home.id,actions:[]}],assign:[]});claim('H03');
+    const iceSource=[...game.world.entities.values()].find(e=>e.system===home.system&&e.market?.goods.ice?.role==='produce');
+    command('routeSave',{name:'Lokale Eisversorgung',stops:[{targetId:iceSource.id,actions:[{op:'buy',good:'ice',amount:30}]},{targetId:home.id,actions:[{op:'sell',good:'ice',amount:0}]}],assign:[ship.id]});
+    until(()=>!!player.homeQuest.routeDelivery,'Erste automatische Lieferung');
+    command('stop',{ships:[ship.id]});go(home);claim('H03');
     until(()=>home.market.homeworld.suppliedSeconds>=600,'Versorgungsbetrieb');claim('H05');
     repair('refinery');repair('smelter');deliver('crude',44);deliver('ore',44);
     until(()=>home.market.homeworld.produced.ingots>=40,'Barrenproduktion');claim('H06');

@@ -33,9 +33,8 @@ export function enterGame({ onboardingKey, onboardingRequired = false } = {}) {
   $('login').hidden = true;
   $('hud').hidden = false;
   helpStorageKey = onboardingKey ? `st_help_seen_3:${onboardingKey}` : 'st_help_seen_2';
-  try {
-    $('help').hidden = !!localStorage.getItem(onboardingRequired ? helpStorageKey : 'st_help_seen_2');
-  } catch { $('help').hidden = false; }
+  // First contact is the short introduction. Full reference stays voluntary.
+  $('help').hidden = true;
 }
 
 export function leaveGame(msg) {

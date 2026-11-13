@@ -212,6 +212,11 @@ panel.addEventListener('click', (ev) => {
   const ship = chosenShip(e.id);
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'homeSupplyRoute':{
+      const source=[...state.entities.values()].filter(x=>x.system===e.system&&x.id!==e.id&&x.market?.goods.ice?.role==='produce').sort((a,b)=>Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y))[0];
+      if(!source){toast('Noch keine Eisquelle bekannt. Erkunde die Eiswelt im Heimatsystem.');return;}
+      bus.openRouteEditor(null,{stops:[{targetId:source.id,actions:[{op:'buy',good:'ice',amount:30,limit:0}]},{targetId:e.id,actions:[{op:'sell',good:'ice',amount:0,limit:0}]}],assign:ship?[ship.id]:[]});return;
+    }
     case 'homeRoutes':bus.openRouteEditor(null);return;
     case 'homeOpen':openHomeBuilding(d.key);return;
     case 'homeBack':{const key=buildingHistory.pop();current=null;if(key)openHomeBuilding(key);return;}

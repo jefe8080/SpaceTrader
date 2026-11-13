@@ -354,7 +354,9 @@ body.landed #details { display: none; }
 /* The planetary city canvas owns its input independently of the space map. */
 #planetView { position:fixed; inset:0; width:100vw; height:100vh; display:block; touch-action:none; }
 body.landed #view { visibility:hidden; }
-body.landed #questBox, body.landed #log { display:none; }
+body.landed #log { display:none; }
+body.landed #questBox { display:block; top:110px; left:310px; width:260px; max-height:35vh; overflow:auto; }
+@media(max-width:1000px){body.landed #questBox{display:none;}}
 body.landed #planetBar { top:56px; left:316px; right:16px; transform:none; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 body.landed #planetPanel { top:120px; bottom:auto; left:auto; right:16px; transform:none; width:350px; max-height:calc(100vh - 145px); overflow:auto; }
 #planetLabel { position:fixed; z-index:3; padding:5px 9px; border:1px solid #ffe2a080; border-radius:6px; background:#152337e8; color:#fff2c9; font-size:13px; pointer-events:none; transform:translateX(-50%); }

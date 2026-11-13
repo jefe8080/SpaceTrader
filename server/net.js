@@ -1,4 +1,6 @@
 import { combatStats } from './war/history.js';
+import {homeQuestReady} from './homeworld.js';
+import {HOME_QUESTS} from '../shared/homeworld.js';
 import {interceptRange} from './war/support.js';
 import { pilotProfile } from './pilot-profile.js';
 import { GAME_PROTOCOL } from '../shared/protocol.js';
@@ -237,7 +239,9 @@ export class Net {
       }
     }
     // Spielerdaten und Routen nur bei Änderung
-    const me = JSON.stringify({...playerDetail(p),profile:pilotProfile(this.game,p),coverage:coverageAreas(this.game,p),controlCapacity:controlCapacity(this.game,p),stacks:stacksView(this.game,p),war:warView(this.game,p)});
+    const home=this.game.world.entities.get(p.homeworld);
+    const questReady=home?Object.fromEntries(Object.keys(p.homeQuest?.active||{}).filter(id=>HOME_QUESTS[id]&&!p.homeQuest.completed[id]).map(id=>[id,homeQuestReady(this.game,p,home,id)])):{};
+    const me = JSON.stringify({...playerDetail(p),homeQuest:p.homeQuest?{...p.homeQuest,ready:questReady}:null,profile:pilotProfile(this.game,p),coverage:coverageAreas(this.game,p),controlCapacity:controlCapacity(this.game,p),stacks:stacksView(this.game,p),war:warView(this.game,p)});
     if (me !== s.sentMe) { s.sentMe = me; s.socket.emit('me', JSON.parse(me)); }
     const routes = JSON.stringify([...this.game.routes.values()].filter((r) => r.owner === p.id));
     if (routes !== s.sentRoutes) { s.sentRoutes = routes; s.socket.emit('routes', JSON.parse(routes)); }

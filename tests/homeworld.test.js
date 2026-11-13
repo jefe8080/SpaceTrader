@@ -115,6 +115,12 @@ test('H00–H06 ohne fremde Industrie: echte Transfers, Eigenproduktion, getrenn
   repair(f,'control');repair(f,'fueldepot');
   assert.equal(f.home.controlLevel,1);
   assert.equal(runCommand(f.game,f.player,{cmd:'routeSave',name:'Lokal',stops:[{targetId:f.entity.id,actions:[]}],assign:[]}),undefined);
+  assert.match(command(f,'homeQuestComplete',{quest:'H03'}),/Voraussetzungen/);
+  const source=[...f.game.world.entities.values()].find(e=>e.system===f.entity.system&&e.market?.goods.ice?.role==='produce');
+  assert.equal(runCommand(f.game,f.player,{cmd:'routeSave',name:'Eisversorgung',stops:[{targetId:source.id,actions:[{op:'buy',good:'ice',amount:10}]},{targetId:f.entity.id,actions:[{op:'sell',good:'ice',amount:0}]}],assign:[f.ship.id]}),undefined);
+  for(let i=0;i<600&&!f.player.homeQuest.routeDelivery;i++)f.game.tick(1);
+  assert.ok(f.player.homeQuest.routeDelivery);
+  command(f,'stop',{ships:[f.ship.id]});f.ship.dockedAt=f.entity.id;
   claim(f,'H03');
   advance(f,600);claim(f,'H05');
   assert.equal(f.game.shipsOf(f.player.id).length,2);

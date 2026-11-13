@@ -216,7 +216,7 @@ export function homeQuestReady(game, player, entity, id) {
     case 'H00': return player.homeQuest.landed;
     case 'H01': return plantDone(home, 'dock');
     case 'H02': return plantDone(home, 'waterworks') && plantDone(home, 'foodplant') && (home.produced.water || 0) >= 20 && (home.produced.food || 0) >= 10;
-    case 'H03': return home.controlLevel >= 1 && plantDone(home, 'fueldepot') && [...game.routes.values()].some((route) => route.owner === player.id && route.stops.length && route.stops.every((stop) => game.world.entities.get(stop.targetId)?.system === entity.system));
+    case 'H03': return home.controlLevel >= 1 && plantDone(home, 'fueldepot') && player.homeQuest.routeDelivery?.home===entity.id;
     case 'H04': return player.homeQuest.salvage?.phase === 'workshop' && plantDone(home, 'workshop');
     case 'H05': return home.suppliedSeconds >= 600;
     case 'H06': return plantDone(home, 'refinery') && plantDone(home, 'smelter') && (home.produced.ingots || 0) >= 40;

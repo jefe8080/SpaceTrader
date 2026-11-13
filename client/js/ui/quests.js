@@ -5,6 +5,7 @@ import { cmd } from '../net.js';
 import { $, setHtml } from './dom.js';
 import { bus } from './bus.js';
 import { HOME_QUESTS } from '/shared/homeworld.js';
+import {homeQuestConditions} from '/shared/home-quest-progress.js';
 import { selectHomeQuest } from '/shared/quest-selection.js';
 import {activeSideQuests,sideQuestLimit,selectedSideQuest,minedQuestProgress,explorationOfferAvailable} from '/shared/side-quests.js';
 let selectedHomeQuest = null;
@@ -115,7 +116,10 @@ export function renderQuestBox() {
   const fq = state.war?.friendQuest;
   const friendSummary = fq ? `<div class="qb-head">🤝 Freundschaftsquest</div><p>Bringe ${Object.entries(fq.gift).map(([good, n]) => `${n} ${g(good)}`).join(' und ')} als Geschenk zum Verwaltungsplaneten einer frei gewählten Fraktion.</p><hr>` : '';
   const homeSummary = (state.homeworld && home ? `<div class="qb-head">⌂ Hauptquest · ${selection.id}<span style="flex:1"></span>${navigation}</div><p>${esc(home.title)}: ${esc(home.goal)}</p><button class="small" data-q="homeTarget">Heimat zeigen</button><hr>` : '') + friendSummary;
-  if (!q) { setHtml(box, homeSummary); return; }
+  const h=state.entities.get(state.homeworld)?.market?.homeworld;
+  const progress=home?homeQuestConditions(selection.id,state.homeQuest,h).map(c=>`<div>${c.have>=c.need?'✓':'○'} ${esc(c.label)}: ${c.have}/${c.need}</div>`).join(''):'';
+  const ready=state.homeQuest?.ready?.[selection.id]?'<p class="pos">Auftrag erfüllt – Belohnung im Rathaus abholen.</p>':'';
+  if (!q) { setHtml(box, homeSummary+progress+ready); return; }
   const t = questTarget(q);
   const docked = myShips().filter((s) => s.dockedAt);
   const tabs=`<p>Nebenquests: ${quests.length} / ${sideQuestLimit(state)} Slots</p><div class="btnrow">${quests.map((quest,i)=>`<button class="small" data-q="select" data-quest="${quest.id}" aria-pressed="${quest===q}" title="${esc(quest.giverName||quest.id)}">${i+1} · ${QUEST_TYPES[quest.type].name}</button>`).join('')}</div>`;
@@ -137,6 +141,7 @@ $('questBox').addEventListener('click', (ev) => {
     return;
   }
   if (b?.dataset.q === 'homeTarget') {
+    if(state.landed===state.homeworld){bus.openHomeBuilding('questhouse');return;}
     const home = state.entities.get(state.homeworld);
     if (home) { state.follow = null; state.camera.x = home.x; state.camera.y = home.y; bus.select({ kind: 'entity', id: home.id }); }
     return;

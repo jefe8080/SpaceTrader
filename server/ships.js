@@ -1,4 +1,5 @@
 import {planRoutePurchase,reserveRoutePurchase,releaseRouteDelivery} from './route-capacity.js';
+import {recordHomeRouteDelivery} from './route-learning.js';
 import { SHIP_TYPES, BELT_TYPES, WORLD, GOODS, FUEL, ZONE_TYPES, slotPrice, fuelBurn, shipStats, freeFor, hasAbility } from '../shared/config.js';
 import { stat } from './markets.js';
 import { sellToSupplier as sellToSupplierImpl } from './property.js';
@@ -231,6 +232,7 @@ function doTrade(ship, e, a, game, opts = {}) {
     if(amount<=0){actionOk(ship,key);game.shipLog(ship,'Einkauf übersprungen: kein freier Platz an den Abladezielen.');return;}
   }
   const res = game.trade(ship, e, a.good, amount, a.op, a.limit || 0, opts);
+  if(a.op==='sell'&&res.n>0)recordHomeRouteDelivery(game,ship,e,a.good,res.n,opts.route);
   if(res.n>0 && destinationPlan)reserveRoutePurchase(ship,destinationPlan,res.n);
   if(res.n>0 && a.op==='sell' && opts.route?.onlyWithTargetSpace)releaseRouteDelivery(ship,e.id,a.good,res.n);
   if (res.n > 0) { actionOk(ship, key); return; }

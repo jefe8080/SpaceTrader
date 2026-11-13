@@ -37,5 +37,5 @@ for(const [id,scene] of Object.entries(HOME_STORY)) {
 HOME_STORY.H04_MODULE={image:'workshop',title:'Eine Stimme über den Sternen',speaker:'Tarek · Ingenieur',text:'Unter der Versiegelung liegt mehr als ein Antrieb. Dieses Kommunikationsmodul könnte unsere Leitstellen über Entfernungen verbinden, an denen jeder gewöhnliche Sender verstummt. Doch zuerst muss ich den Fund reparieren. Sobald du ihn in eines deiner Schiffe einbaust, wird dieses Schiff zum Herz unseres Netzes: Solange es in Reichweite unserer eigenen Leitstellen bleibt, kannst du alle deine Ruinenwelten aus der Ferne verwalten. Waren und Funde müssen wir weiterhin mit Schiffen bringen.',hint:'Reparatur abschließen und den Antrieb in der Werkstatt einbauen. Ein eingelagerter Antrieb stellt keine Verbindung her.',requires:[]};
 export function storyAvailable(quest,id){return !!quest&&!!HOME_STORY[id]&&!!(quest.active?.[id]||quest.completed?.[id]||quest.scenesSeen?.[id]||quest.eventDialog===id);}
 export function storyDialogReady(quest, ownShipClicked, helpVisible) {
-  return !helpVisible && !!(quest?.scenesSeen?.H00 || quest?.completed?.H00 || ownShipClicked);
+  return !helpVisible && !!quest;
 }

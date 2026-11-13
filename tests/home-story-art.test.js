@@ -5,10 +5,10 @@ import {HOME_STORY,storyAvailable,storyDialogReady} from '../shared/home-story.j
 import {Game} from '../server/game.js';
 import {runCommand} from '../server/handlers/index.js';
 
-test('Erstkontakt wartet auf den Schiffsklick nach der Erklärung; gelesene Spielstände bleiben freigeschaltet',()=>{
+test('Erstkontakt erscheint ohne vorherigen Schiffsklick; freiwillige Hilfe überlagert ihn nicht',()=>{
   const quest={completed:{}};
   assert.equal(storyDialogReady(quest,false,true),false);
-  assert.equal(storyDialogReady(quest,false,false),false);
+  assert.equal(storyDialogReady(quest,false,false),true);
   assert.equal(storyDialogReady(quest,true,true),false);
   assert.equal(storyDialogReady(quest,true,false),true);
   assert.equal(storyDialogReady({...quest,scenesSeen:{H00:true}},false,false),true);
