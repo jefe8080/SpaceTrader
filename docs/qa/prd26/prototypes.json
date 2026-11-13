@@ -1,0 +1,180 @@
+[
+  {
+    "kind": "contract",
+    "isolated": true,
+    "notice": "Getrennte In-Memory-Testwelt mit ausdrücklich bereitgestellten Beispielressourcen. Dein normaler Spielstand, Geld, Fortschritt und Belohnungen bleiben unverändert.",
+    "result": {
+      "before": {
+        "cash": 10000,
+        "creditsA": 5000,
+        "creditsB": 5000,
+        "water": 0
+      },
+      "contract": {
+        "target": "origin_agrar",
+        "good": "water",
+        "amount": 20,
+        "remaining": 0,
+        "price": 44.725143599999996,
+        "escrow": 0,
+        "expires": 3600,
+        "contributions": [
+          {
+            "player": "Pilot A",
+            "n": 20,
+            "paid": 894.5028719999999
+          }
+        ],
+        "state": "completed"
+      },
+      "after": {
+        "cash": 9105.497128,
+        "creditsA": 5894.502872,
+        "creditsB": 5000,
+        "water": 20
+      },
+      "decision": "20 echte Einheiten, Preis und eine Stunde Laufzeit vor Annahme; Geld beim Auftraggeber gebunden. Kooperative Beiträge werden einzeln vergütet. Nur abgeschirmter Prototyp; parallele öffentliche Kapazitätsreservierung ist vor Liveintegration zusätzlich erforderlich."
+    }
+  },
+  {
+    "kind": "cooperation",
+    "isolated": true,
+    "notice": "Getrennte In-Memory-Testwelt mit ausdrücklich bereitgestellten Beispielressourcen. Dein normaler Spielstand, Geld, Fortschritt und Belohnungen bleiben unverändert.",
+    "result": {
+      "before": {
+        "cash": 10000,
+        "creditsA": 5000,
+        "creditsB": 5000,
+        "water": 0
+      },
+      "contract": {
+        "target": "origin_agrar",
+        "good": "water",
+        "amount": 20,
+        "remaining": 0,
+        "price": 44.725143599999996,
+        "escrow": 0,
+        "expires": 3600,
+        "contributions": [
+          {
+            "player": "Pilot A",
+            "n": 10,
+            "paid": 447.25143599999996
+          },
+          {
+            "player": "Pilot B",
+            "n": 10,
+            "paid": 447.25143599999996
+          }
+        ],
+        "state": "completed"
+      },
+      "after": {
+        "cash": 9105.497128,
+        "creditsA": 5447.251436,
+        "creditsB": 5447.251436,
+        "water": 20
+      },
+      "decision": "20 echte Einheiten, Preis und eine Stunde Laufzeit vor Annahme; Geld beim Auftraggeber gebunden. Kooperative Beiträge werden einzeln vergütet. Nur abgeschirmter Prototyp; parallele öffentliche Kapazitätsreservierung ist vor Liveintegration zusätzlich erforderlich."
+    }
+  },
+  {
+    "kind": "production",
+    "isolated": true,
+    "notice": "Getrennte In-Memory-Testwelt mit ausdrücklich bereitgestellten Beispielressourcen. Dein normaler Spielstand, Geld, Fortschritt und Belohnungen bleiben unverändert.",
+    "result": {
+      "before": {
+        "ice": 20,
+        "water": 0
+      },
+      "operation": {
+        "mode": "standard",
+        "power": 4,
+        "inputs": {
+          "ice": 10
+        },
+        "outputs": {
+          "water": 10
+        },
+        "seconds": 15
+      },
+      "after": {
+        "ice": 10,
+        "water": 10
+      },
+      "decision": "Fünf Zyklen Wasserwerk: Standard 10 Eis/4 Energie gegen sparsam 8 Eis/6 Energie; gleiche Ausbeute und Zeit. Erprobungswerte, keine Änderung gespeicherter Rezepte. Größere Lieferketten und Energieengpässe müssen den Nutzen bestätigen."
+    }
+  },
+  {
+    "kind": "production",
+    "isolated": true,
+    "notice": "Getrennte In-Memory-Testwelt mit ausdrücklich bereitgestellten Beispielressourcen. Dein normaler Spielstand, Geld, Fortschritt und Belohnungen bleiben unverändert.",
+    "result": {
+      "before": {
+        "ice": 20,
+        "water": 0
+      },
+      "operation": {
+        "mode": "efficient",
+        "power": 6,
+        "inputs": {
+          "ice": 8
+        },
+        "outputs": {
+          "water": 10
+        },
+        "seconds": 15
+      },
+      "after": {
+        "ice": 12,
+        "water": 10
+      },
+      "decision": "Fünf Zyklen Wasserwerk: Standard 10 Eis/4 Energie gegen sparsam 8 Eis/6 Energie; gleiche Ausbeute und Zeit. Erprobungswerte, keine Änderung gespeicherter Rezepte. Größere Lieferketten und Energieengpässe müssen den Nutzen bestätigen."
+    }
+  },
+  {
+    "kind": "exploration",
+    "isolated": true,
+    "notice": "Getrennte In-Memory-Testwelt mit ausdrücklich bereitgestellten Beispielressourcen. Dein normaler Spielstand, Geld, Fortschritt und Belohnungen bleiben unverändert.",
+    "result": {
+      "choice": "Kartografie",
+      "known": true,
+      "source": "Glacia",
+      "remainingWreck": 10,
+      "decision": "Quelle aufklären oder endlichen Materialfund bergen: Informationsgewinn gegen sofortige vorhandene Fracht."
+    }
+  },
+  {
+    "kind": "exploration",
+    "isolated": true,
+    "notice": "Getrennte In-Memory-Testwelt mit ausdrücklich bereitgestellten Beispielressourcen. Dein normaler Spielstand, Geld, Fortschritt und Belohnungen bleiben unverändert.",
+    "result": {
+      "choice": "Bergung",
+      "cargo": {
+        "ingots": 10
+      },
+      "remainingWreck": 0,
+      "decision": "Endlicher bereitgestellter Fund; keine neue Währung, keine wiederholbare Materialerzeugung."
+    }
+  },
+  {
+    "kind": "diplomacy",
+    "isolated": true,
+    "notice": "Getrennte In-Memory-Testwelt mit ausdrücklich bereitgestellten Beispielressourcen. Dein normaler Spielstand, Geld, Fortschritt und Belohnungen bleiben unverändert.",
+    "result": {
+      "pact": {
+        "faction": "syndicate",
+        "expires": 3600,
+        "required": {
+          "water": 40,
+          "food": 40
+        },
+        "cancelled": false
+      },
+      "supplied": true,
+      "passageDuring": true,
+      "passageAfterExpiry": false,
+      "decision": "Versorgung gegen zeitlich begrenzten Durchflug ist als Regelprototyp geprüft. Er nutzt bestehende Fraktionsvorräte; Grenzschutz-/Diplomatieintegration bleibt vor einer Livefreigabe erforderlich. Kein dauerhafter Freundschaftsersatz."
+    }
+  }
+]

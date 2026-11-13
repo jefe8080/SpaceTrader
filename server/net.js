@@ -1,6 +1,7 @@
 import { combatStats } from './war/history.js';
 import {economicView,tradePreview} from './economic-view.js';
 import {createTraining,trainingCommand,trainingView,closeTraining} from './war/training.js';
+import {runPrototype} from './prototypes.js';
 import {homeQuestReady} from './homeworld.js';
 import {HOME_QUESTS} from '../shared/homeworld.js';
 import {interceptRange} from './war/support.js';
@@ -142,6 +143,7 @@ export class Net {
       reply({ player:session.player.id, reports:diplo(session.player).reports || [] });
     });
     socket.on('economicView',(_msg,reply)=>{if(session&&typeof reply==='function')reply(economicView(this.game,session.player));});
+    socket.on('prototypeRun',(msg,reply)=>{if(session&&typeof reply==='function'){try{reply(runPrototype(msg?.kind,msg?.choice));}catch{reply({error:'Prototypszenario konnte nicht ausgeführt werden.'});}}});
     socket.on('trainingStart',(_msg,reply)=>{if(!session||typeof reply!=='function')return;closeTraining(session.training);session.training=createTraining();reply(trainingView(session.training));});
     socket.on('trainingCmd',msg=>{if(session?.training){const err=trainingCommand(session.training,msg);if(err)socket.emit('errorMsg',err);}});
     socket.on('trainingClose',()=>{if(session){closeTraining(session.training);session.training=null;}});
