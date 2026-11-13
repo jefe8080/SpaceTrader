@@ -1,4 +1,5 @@
 import { GOODS, BELT_TYPES, canBuyFrom, canSellTo } from '/shared/config.js';
+import {routePreflight,deliveryHealth} from '/shared/route-preflight.js';
 import { state, esc, fmtK, fleetOrder, selectedShips } from '../state.js';
 import { socket, cmd } from '../net.js';
 import { typeName, playerPrice, dist, shipSymbol, hasWarn, actionText, canMine } from '../util.js';
@@ -179,6 +180,9 @@ card.addEventListener('click', (ev) => {
       return;
     case 'cancel': closeModal('routeEditor'); return;
     case 'save': {
+      const check=routePreflight(ed,[...new Set([...ed.assign,...(ed.id?shipsOnRoute(ed.id).filter(s=>!ed.unassign.has(s.id)).map(s=>s.id):[])])].map(id=>state.ships.get(id)).filter(Boolean),state.entities,state.credits);
+      if(check.errors.length){toast(check.errors.join(' '));return;}
+      if(check.warnings.length&&!confirm('Vorprüfung: '+check.warnings.join(' ')+' Trotzdem speichern?'))return;
       cmd('routeSave', { id: ed.id, name: ed.name.trim() || 'Route', stops: ed.stops, minBalance: ed.minBalance || 0, onlyWithTargetSpace: ed.onlyWithTargetSpace, assign: [...ed.assign], unassign: [...ed.unassign] });
       closeModal('routeEditor');
       return;
@@ -281,6 +285,7 @@ function renderOverview() {
     const ships = shipsOnRoute(r.id);
     const warned = ships.filter(hasWarn);
     const sum = state.fleetStats.routes[r.id] || { h1: 0, d24: 0 };
+    const health=deliveryHealth(r.deliveries,state.time,r.created);
     const open = expanded.has(r.id);
     h += `<div class="route-row${r.paused ? ' paused' : ''}">
       <div class="rr-head">
@@ -303,7 +308,7 @@ function renderOverview() {
         <button class="small" data-r="pause" data-id="${r.id}">${r.paused ? '▶ Fortsetzen' : '⏸ Pausieren'}</button>
         <button class="small danger" data-r="delete" data-id="${r.id}">🗑 Löschen</button>
       </div>`;
-    h += `<div class="muted">${r.stops.length} Stopps · ${ships.length} Schiffe · ${r.paused?'pausiert':'bereit / aktiv'}</div>`;
+    h += `<div class="muted">${r.stops.length} Stopps · ${ships.length} Schiffe · ${r.paused?'pausiert':'bereit / aktiv'} · letzte Zustellung ${health.last==null?'noch nicht erfasst':Math.floor((state.time-health.last)/60)+' min her'} · ${health.perHour.toFixed(1)} Einheiten/h seit Start, höchstens letzte Stunde. Zusammengefasst über alle Waren/Ziele.</div>`;
     if (open) {
       h += `<div class="rr-stops">`;
       routeGoods(r).forEach(({ st, goods }, i) => {

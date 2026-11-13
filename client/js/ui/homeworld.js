@@ -23,6 +23,7 @@ import {toast} from './dom.js';
 import {warehouseTransfer} from '/shared/warehouse-transfer.js';
 import {impactText} from './productionPlanning.js';
 import {visibleQuestBranches,questWorkplaces} from '/shared/quest-guidance.js';
+import {deliveryHealth} from '/shared/route-preflight.js';
 const productionNotices=new Set();
 function productionMilestone(){
   const h=state.entities.get(state.homeworld)?.market?.homeworld;
@@ -245,6 +246,8 @@ function logisticsPanel(entity){
   const h=entity.market.homeworld,states={planned:'Geplant',reserved:'Reserviert',collecting:'In Abholung',intransit:'Unterwegs',delivered:'Geliefert',paused:'Pausiert',cancelled:'Abgebrochen'};
   let html='<h3>Leitstellenaufträge</h3>';
   for(const o of h.logistics?.orders||[]){
+    const health=deliveryHealth(o.deliveries,state.time,o.created,o.good),netNeed=Math.max(0,(h.flows?.[o.good]?.consume||0)-(h.flows?.[o.good]?.produce||0));
+    html+=`<p>Lieferdiagnose: letzte Zustellung ${health.last==null?'noch nicht erfasst':Math.floor((state.time-health.last)/60)+' min her'} · ${health.perHour.toFixed(1)} Einheiten/h seit Auftrag, höchstens letzte Stunde.${o.kind==='supply'?` Aktueller Nettoverbrauch ${netNeed.toFixed(1)}/h${health.perHour<netNeed?' · gemessene Lieferung reicht derzeit nicht aus':''}.`:''}</p>`;
     const jobs=(h.logistics.jobs||[]).filter(j=>j.order===o.id&&!['cancelled','delivered'].includes(j.state));
     html+=`<div class="quest-offer"><b>${esc(o.kind==='production'?RECIPES[o.recipe]?.name:GOODS[o.good]?.name)} · ${states[o.state]}</b><p>${o.kind==='production'?`Ziel ${o.target} · ${o.cycles} fertige Zyklen`:`Zielbestand ${o.target} · ${o.delivered} geliefert`} · Budgetrest ${fmt(o.escrow)} Cr · Ausgaben ${fmt(o.spent)} Cr</p>${o.reason?`<p>${esc(o.reason)}</p>`:''}${jobs.map(j=>`<p>${esc(state.ships.get(j.ship)?.name||j.ship)}: ${states[j.state]} · ${j.loaded??j.amount} ${GOODS[j.good].name} · ${esc(state.entities.get(j.source)?.name||j.source)} → ${esc(state.entities.get(j.destination)?.name||j.destination)}</p>`).join('')}${o.state!=='cancelled'?`<button class="small" data-pp="homeLogisticsCancel" data-id="${o.id}">Abbrechen / Bindung freigeben</button>`:''}</div>`;
   }

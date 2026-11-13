@@ -34,6 +34,7 @@ import { coveredPath, pointCovered } from './coverage.js';
 import {dispatchRealSupply,finishRealSupply,receiveMarketCash,spendMarketCash,downstreamDemand} from './real-economy.js';
 import { initWar, loadWar, saveWar, tickWarBefore, tickWarAfter } from './war/index.js';
 import {recordEconomic} from './economic-view.js';
+import {recordDelivery} from '../shared/route-preflight.js';
 import { migrateWar } from './war/migrate.js';
 import { stackSpeed, removeFromStacks } from './war/stacks.js';
 import { recordActivity, tradeAdminSupply } from './war/factions.js';
@@ -725,6 +726,7 @@ export class Game {
     const sellerBefore=seller&&seller.id!==player.id?syncInventoryBasis(this,seller,good).quantity:null;
     const result=this.tradeHandled(ship,e,good,amount,dir,limit,{...opts,profileAccounting:true});
     if(result.n)recordEconomic(this,player,result.total?(dir==='buy'?'Wareneinkauf':'Warenverkauf'):'Eigenlagertransfer',result.total?(dir==='buy'?-result.total:result.total):0,{ship:ship.id,place:e.id,good,units:result.n,direction:dir});
+    if(result.n&&dir==='sell'&&opts.route)recordDelivery(opts.route,this.time,good,result.n,e.id);
     recordGoodsTrade(this,player,good,dir,result,before);
     if(sellerBefore!=null)recordGoodsTrade(this,seller,good,dir==='buy'?'sell':'buy',result,sellerBefore);
     return result;

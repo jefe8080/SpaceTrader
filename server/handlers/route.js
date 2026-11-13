@@ -1,4 +1,5 @@
 import { GOODS } from '../../shared/config.js';
+import {routePreflight} from '../../shared/route-preflight.js';
 import { V, CmdError } from './validate.js';
 import { giveOrder, batchOrderError } from './ship.js';
 import { remoteManagementError } from '../coverage.js';
@@ -53,6 +54,7 @@ export default {
     },
     run({ game, player }, { id: route, name, stops, minBalance, onlyWithTargetSpace, assign, unassign = [] }) {
       if (!stops.length) return 'Eine Route braucht mindestens einen Stopp.';
+      const check=routePreflight({stops,minBalance},[...new Set([...assign,...(route?shipsOnRoute(game,route.id):[])])],game.world.entities,player.credits);if(check.errors.length)return check.errors.join(' ');
       if(stops.some(stop=>game.world.entities.get(stop.targetId)?.market?.homeworld?.warp))return 'Eine Routenstation bereitet einen Warptransfer vor.';
       for(const stop of stops){const error=remoteManagementError(game,player,game.world.entities.get(stop.targetId),false);if(error)return error;}
       const error=batchOrderError(game,[...new Set([...assign,...(route?shipsOnRoute(game,route.id):[])])],{t:'route',route:route?.id},false,{stops});if(error)return error;
@@ -85,6 +87,7 @@ export default {
   routeAssign: {
     args: { route: V.ownRoute(), ships: V.ownShips(), rounds: V.opt(V.int(0, 1000), 0), append: V.bool() },
     run({ game, player }, { route, ships, rounds, append }) {
+      const check=routePreflight(route,ships,game.world.entities,player.credits);if(check.errors.length)return check.errors.join(' ');
       const error=batchOrderError(game,ships,{t:'route',route:route.id,rounds},append);if(error)return error;
       for (const s of ships) {
         const err = giveOrder(game, s, { t: 'route', route: route.id, rounds }, append);

@@ -1,4 +1,5 @@
 import {GOODS,RECIPES} from '../shared/goods.js';
+import {recordDelivery} from '../shared/route-preflight.js';
 import {freeFor,canBuyFrom,canSellTo,buyPrice,sellPrice} from '../shared/config.js';
 import {availableHomeStock} from '../shared/homeworld.js';
 import {pointCovered,coveredPath,controlAdmissionCapacity} from './coverage.js';
@@ -136,6 +137,7 @@ export function runLogistics(ship,c,dt,game,fly){
   }
   const result=game.trade(ship,e,j.good,j.loaded,'sell',o.kind==='sales'?o.limit:0,{manual:false});
   j.loaded-=result.n||0;o.delivered+=result.n||0;
+  recordDelivery(o,game.time,j.good,result.n||0,e.id);
   if(j.loaded>0){
     reason(j,result.reason||'Ziel nimmt nur eine Teilmenge an; Restladung bleibt an Bord.');reason(o,j.reason);
     if(o.kind==='sales'&&(j.retryAt||0)<=game.time){
