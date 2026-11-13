@@ -6,6 +6,8 @@ export function recordEconomic(game,player,category,amount,extra={}) {
   if(!player||!Number.isFinite(amount))return;
   player.profileStats ||= {since:Date.now(),revenue:0,knownProfit:0,unknownRevenue:0,unknownUnits:0,inventory:{}};
   const ledger=player.profileStats.ledger ||= [];
+  player.profileStats.moneyTotals ||= ledger.reduce((tot,r)=>{tot[r.category]=(tot[r.category]||0)+r.amount;return tot;},{});
+  player.profileStats.moneyTotals[category]=(player.profileStats.moneyTotals[category]||0)+amount;
   const row={time:game.time,category,amount,...extra};
   const last=ledger.slice(-100).reverse().find(x=>Math.floor(x.time/60)===Math.floor(row.time/60)&&['category','ship','place','good','direction'].every(k=>x[k]===row[k]));
   if(last&&Math.floor(last.time/60)===Math.floor(row.time/60)&&['category','ship','place','good'].every(k=>last[k]===row[k])){last.amount+=amount;last.units=(last.units||0)+(row.units||0);}
@@ -20,8 +22,9 @@ export function tradePreview(game,player,{ship:shipId,target,good,amount,dir}) {
   if(!Number.isInteger(amount)||amount<1||amount>10000)return {error:'Menge zwischen 1 und 10.000 wählen.'};
   const clone=Object.assign(Object.create(Object.getPrototypeOf(game)),game);
   clone.players=structuredClone(game.players);clone.ships=structuredClone(game.ships);clone.ownership=structuredClone(game.ownership);clone.consortia=structuredClone(game.consortia);clone.fsecs=structuredClone(game.fsecs);
-  const entity=structuredClone(originalEntity),ship=clone.ships.get(shipId),p=clone.players.get(player.id);
-  clone.world=Object.assign(Object.create(Object.getPrototypeOf(game.world)),game.world,{entities:new Map(game.world.entities)});clone.world.entities.set(target,entity);
+  clone.warActivity=structuredClone(game.warActivity);
+  const ship=clone.ships.get(shipId),p=clone.players.get(player.id);
+  clone.world=Object.assign(Object.create(Object.getPrototypeOf(game.world)),game.world,{entities:structuredClone(game.world.entities)});const entity=clone.world.entities.get(target);
   clone.emit=()=>{};clone.recordShip=()=>{};clone.shipLog=()=>{};clone.afterTrade=()=>{};
   ship.dockedAt=target;ship.queue=[];
   // A sale plan may describe a future load, but it still uses the real hull capacity.

@@ -499,7 +499,11 @@ details[open]>summary { color:var(--accent2); }
 .planning-fields label { display:flex; flex-direction:column; gap:4px; flex:1 1 150px; }
 .planning-fields select { max-width:100%; }
 .supply-detail-content { position:fixed; top:52px; right:16px; z-index:90; display:flex; flex-wrap:wrap; gap:16px; max-width:calc(100vw - 64px); padding:16px; background:#101e2b; border:1px solid #b69a64; border-radius:8px; box-shadow:0 8px 28px #000b; }
-@media(max-width:1250px) { #topbar { flex-wrap:wrap; } .topbar-status { flex-basis:100%; scrollbar-width:thin; } .main-nav { flex-wrap:wrap; } }
+@media(max-width:1250px) { #topbar { flex-wrap:wrap; height:auto; min-height:80px; padding:6px 10px; } .topbar-status { flex-basis:100%; scrollbar-width:thin; } .main-nav { flex-wrap:wrap; } }
+.main-nav>details:first-child .nav-content { right:auto; left:0; }
+#questBox { top:calc(var(--hud-bottom,46px) + 12px); }
+body.landed #questBox { top:calc(var(--hud-bottom,46px) + 70px); }
+.supply-detail-content { top:calc(var(--hud-bottom,46px) + 8px); }
 body.landed #topbar { gap:8px; }
 body.landed .topbar-status { gap:12px; }
 body.landed #topbar .logo { display:none; }

@@ -1,0 +1,465 @@
+{
+  "seed": 131127,
+  "decisionSeconds": 30,
+  "decisions": 47,
+  "stages": [
+    {
+      "id": "H00",
+      "seconds": 91,
+      "credits": 5000,
+      "ships": 1
+    },
+    {
+      "id": "H01",
+      "seconds": 166,
+      "credits": 5500,
+      "ships": 1
+    },
+    {
+      "id": "H02",
+      "seconds": 810,
+      "credits": 5927,
+      "ships": 1
+    },
+    {
+      "id": "H04",
+      "seconds": 1053,
+      "credits": 6000,
+      "ships": 1
+    },
+    {
+      "id": "H03",
+      "seconds": 1352,
+      "credits": 6214,
+      "ships": 1
+    },
+    {
+      "id": "H05",
+      "seconds": 1982,
+      "credits": 6901,
+      "ships": 2
+    },
+    {
+      "id": "H06",
+      "seconds": 3311,
+      "credits": 9348,
+      "ships": 2
+    }
+  ],
+  "serverSeconds": 3311,
+  "credits": 9348,
+  "produced": {
+    "water": 60,
+    "food": 20,
+    "fuel": 73,
+    "ingots": 142,
+    "glass": 4
+  },
+  "stock": {
+    "ore": 4,
+    "tourists": 41,
+    "workers": 52,
+    "water": 99.77,
+    "food": 45.17,
+    "shipfuel": 40,
+    "fuel": 2,
+    "ingots": 92,
+    "plates": 40,
+    "electronics": 12,
+    "machinery": 4
+  },
+  "grants": [
+    {
+      "id": "home_p1:repairs",
+      "source": "start_exception",
+      "recipient": "p1",
+      "goods": {
+        "ingots": 80,
+        "plates": 40,
+        "electronics": 12,
+        "machinery": 4
+      }
+    },
+    {
+      "id": "home_p1:start-ship",
+      "source": "start_exception",
+      "recipient": "p1",
+      "ship": "s1",
+      "fuel": 6
+    },
+    {
+      "id": "home_p1:supplies",
+      "source": "start_exception",
+      "recipient": "p1",
+      "goods": {
+        "water": 80,
+        "food": 40,
+        "shipfuel": 40
+      }
+    },
+    {
+      "id": "p1:relic:H04",
+      "source": "quest_salvage",
+      "recipient": "p1",
+      "relic": "p1:relic"
+    },
+    {
+      "id": "home_p1:second-ship",
+      "source": "quest_H05",
+      "recipient": "p1",
+      "ship": "s54",
+      "fuel": 6
+    }
+  ],
+  "relic": {
+    "id": "p1:relic",
+    "speed": 4,
+    "location": {
+      "kind": "ship",
+      "id": "s1"
+    },
+    "operation": null
+  },
+  "population": 101,
+  "civilianMoney": {
+    "taxRate": 0.2,
+    "gross": 477.81358092868686,
+    "taxes": 95.5627161857372,
+    "consumptionPayments": 2188.1885161017335,
+    "incomePerHour": 232.1904761904762
+  },
+  "publicMarkets": 120,
+  "publicManufacturedStock": {
+    "finegold": 45.7611291363427,
+    "cutdiamonds": 39.840582648983094,
+    "enricheduranium": 45.33741497767276,
+    "stableantimatter": 67.42780989859506,
+    "refinedexocrystals": 43.092875110124524,
+    "refinednebulagas": 58.541264300546494,
+    "food": 458.7278354301918,
+    "shipfuel": 4278.656730083196,
+    "ingots": 316.2011548408909,
+    "plastics": 670.0638608672874,
+    "glass": 380.4838627514978,
+    "chemicals": 751.3482689277891,
+    "plates": 160.69485766428042,
+    "alloys": 545.1139909957575,
+    "medicine": 643.4557568762243,
+    "clothing": 562.7210320485917,
+    "batteries": 289.99226054044163,
+    "electronics": 527.8442259734177,
+    "hullparts": 107.7550912433475,
+    "powercells": 292.01921746164675,
+    "machinery": 105.21280629132843,
+    "engines": 116.94510779287585,
+    "shipparts": 138.63262023090545,
+    "consumer": 334.2417607863954,
+    "aicores": 184.89969745630378,
+    "habitats": 97.6374842383529
+  },
+  "advanced": {
+    "completed": false,
+    "seconds": 7657,
+    "earned": 0,
+    "quests": 0,
+    "error": "trade: Verkauf nicht möglich: Lager voll",
+    "allocations": [
+      {
+        "id": "project_4",
+        "state": "active",
+        "power": 0,
+        "workers": {
+          "basic": 2
+        }
+      },
+      {
+        "id": "control",
+        "state": "active",
+        "power": 3,
+        "workers": {
+          "basic": 2,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "dock",
+        "state": "active",
+        "power": 2,
+        "workers": {
+          "basic": 2
+        }
+      },
+      {
+        "id": "project_3",
+        "state": "paused",
+        "reason": "Pausiert",
+        "power": 0,
+        "workers": {
+          "basic": 0,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "refinery",
+        "state": "paused",
+        "reason": "Pausiert",
+        "power": 0,
+        "workers": {
+          "basic": 0,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "smelter",
+        "state": "paused",
+        "reason": "Pausiert",
+        "power": 0,
+        "workers": {
+          "basic": 0,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "foodplant",
+        "state": "paused",
+        "reason": "Pausiert",
+        "power": 0,
+        "workers": {
+          "basic": 0,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "fueldepot",
+        "state": "paused",
+        "reason": "Pausiert",
+        "power": 0,
+        "workers": {
+          "basic": 0,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "project_1",
+        "state": "paused",
+        "reason": "Pausiert",
+        "power": 0,
+        "workers": {
+          "basic": 0,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "project_5",
+        "state": "paused",
+        "reason": "Zutaten fehlen",
+        "power": 0,
+        "workers": {
+          "basic": 0,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "waterworks",
+        "state": "paused",
+        "reason": "Pausiert",
+        "power": 0,
+        "workers": {
+          "basic": 0,
+          "skilled": 0,
+          "specialist": 0
+        }
+      }
+    ],
+    "stock": {
+      "ice": 890,
+      "crude": 1,
+      "grain": 886,
+      "water": 56.32921861746023,
+      "food": 23.855033153685486,
+      "shipfuel": 40,
+      "ingots": 64,
+      "plates": 28,
+      "electronics": 6,
+      "machinery": 4
+    },
+    "events": [
+      {
+        "seconds": 3313,
+        "action": "Parallelversorgung",
+        "credits": 9348,
+        "ship": "s54"
+      },
+      {
+        "seconds": 3468,
+        "action": "Bau",
+        "credits": 3130,
+        "kind": "school"
+      },
+      {
+        "seconds": 4282,
+        "action": "Export",
+        "credits": 4301,
+        "good": "ingots",
+        "net": 1508,
+        "exports": 1,
+        "moneyCategories": {
+          "Wareneinkauf": -1503,
+          "Warenverkauf": 2804,
+          "Ziviler Absatz": 199,
+          "Steuern": 9,
+          "Investition": 0
+        },
+        "estimatedInputCost": 182.29312278783553,
+        "estimatedRevenue": 2803.715999897717
+      },
+      {
+        "seconds": 4282,
+        "action": "Finanzierung",
+        "credits": 4301,
+        "earned": 0,
+        "quests": 0
+      },
+      {
+        "seconds": 4354,
+        "action": "Bau",
+        "credits": 2924,
+        "kind": "plant",
+        "recipe": "glassworks"
+      },
+      {
+        "seconds": 5342,
+        "action": "Export",
+        "credits": 3752,
+        "good": "ingots",
+        "net": 1428,
+        "exports": 2,
+        "moneyCategories": {
+          "Wareneinkauf": -1523,
+          "Warenverkauf": 2734,
+          "Ziviler Absatz": 208,
+          "Steuern": 9,
+          "Investition": 0
+        },
+        "estimatedInputCost": 181.432987345169,
+        "estimatedRevenue": 2734.4701914819875
+      },
+      {
+        "seconds": 6045,
+        "action": "Export",
+        "credits": 4965,
+        "good": "ingots",
+        "net": 1213,
+        "exports": 3,
+        "moneyCategories": {
+          "Wareneinkauf": -1672,
+          "Warenverkauf": 2667,
+          "Ziviler Absatz": 209,
+          "Steuern": 9,
+          "Investition": 0
+        },
+        "estimatedInputCost": 181.432987345169,
+        "estimatedRevenue": 2666.9346069203566
+      },
+      {
+        "seconds": 6748,
+        "action": "Export",
+        "credits": 6146,
+        "good": "ingots",
+        "net": 1181,
+        "exports": 4,
+        "moneyCategories": {
+          "Wareneinkauf": -1639,
+          "Warenverkauf": 2601,
+          "Ziviler Absatz": 210,
+          "Steuern": 9,
+          "Investition": 0
+        },
+        "estimatedInputCost": 181.432987345169,
+        "estimatedRevenue": 2601.067007329376
+      },
+      {
+        "seconds": 6748,
+        "action": "Finanzierung",
+        "credits": 6146,
+        "earned": 0,
+        "quests": 0
+      },
+      {
+        "seconds": 6820,
+        "action": "Bau",
+        "credits": 3019,
+        "kind": "solar"
+      },
+      {
+        "seconds": 7533,
+        "action": "Export",
+        "credits": 4915,
+        "good": "ingots",
+        "net": 1892,
+        "exports": 5,
+        "moneyCategories": {
+          "Wareneinkauf": -865,
+          "Warenverkauf": 2537,
+          "Ziviler Absatz": 211,
+          "Steuern": 9,
+          "Investition": 0
+        },
+        "estimatedInputCost": 181.432987345169,
+        "estimatedRevenue": 2536.8261970359736
+      },
+      {
+        "seconds": 7533,
+        "action": "Finanzierung",
+        "credits": 4915,
+        "earned": 0,
+        "quests": 0
+      },
+      {
+        "seconds": 7605,
+        "action": "Bau",
+        "credits": 3648,
+        "kind": "plant",
+        "recipe": "oilworks"
+      },
+      {
+        "seconds": 7657,
+        "action": "FEHLER",
+        "credits": 3483,
+        "message": "trade: Verkauf nicht möglich: Lager voll"
+      }
+    ]
+  },
+  "corridors": {
+    "H05": {
+      "seconds": 1982,
+      "min": 1800,
+      "max": 3600,
+      "within": true,
+      "documentedDeviation": null,
+      "accepted": true
+    },
+    "H08": {
+      "min": 14400,
+      "max": 28800,
+      "within": false,
+      "documentedDeviation": null,
+      "accepted": false
+    },
+    "H13": {
+      "min": 72000,
+      "max": 108000,
+      "within": false,
+      "documentedDeviation": null,
+      "accepted": false
+    }
+  }
+}

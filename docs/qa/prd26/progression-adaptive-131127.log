@@ -1,0 +1,1090 @@
+{"seconds":3466,"action":"Bau","credits":3394,"kind":"school"}
+{"seconds":4280,"action":"Export","credits":6268,"good":"ingots","net":2831,"exports":1,"moneyCategories":{"Wareneinkauf":-180,"Warenverkauf":2804,"Ziviler Absatz":199,"Steuern":9,"Investition":0},"estimatedInputCost":182.33660863733093,"estimatedRevenue":2803.715999897717}
+{"seconds":4280,"action":"Finanzierung","credits":6268,"earned":0,"quests":0}
+{"seconds":4352,"action":"Bau","credits":5040,"kind":"plant","recipe":"glassworks"}
+{"seconds":5340,"action":"Export","credits":7837,"good":"ingots","net":2751,"exports":2,"moneyCategories":{"Wareneinkauf":-200,"Warenverkauf":2734,"Ziviler Absatz":208,"Steuern":9,"Investition":0},"estimatedInputCost":181.432987345169,"estimatedRevenue":2734.4701914819875}
+{"seconds":5340,"action":"Finanzierung","credits":7837,"earned":0,"quests":0}
+{"seconds":5412,"action":"Bau","credits":4859,"kind":"solar"}
+{"seconds":5494,"action":"Bau","credits":3634,"kind":"plant","recipe":"oilworks"}
+{"seconds":6252,"action":"Export","credits":6294,"good":"ingots","net":2686,"exports":3,"moneyCategories":{"Wareneinkauf":-200,"Warenverkauf":2667,"Ziviler Absatz":210,"Steuern":9,"Investition":0},"estimatedInputCost":181.432987345169,"estimatedRevenue":2666.9346069203566}
+{"seconds":6252,"action":"Finanzierung","credits":6294,"earned":0,"quests":0}
+{"seconds":6354,"action":"Bau","credits":3825,"kind":"plant","recipe":"rollingmill"}
+{"seconds":7095,"action":"Export","credits":9015,"good":"plates","net":5364,"exports":4,"moneyCategories":{"Wareneinkauf":-144,"Warenverkauf":5365,"Ziviler Absatz":137,"Steuern":6,"Investition":0},"estimatedInputCost":285.11247617801143,"estimatedRevenue":5365.070851005326}
+{"seconds":7095,"action":"Finanzierung","credits":9015,"earned":0,"quests":0}
+{"seconds":7691,"action":"Bau","credits":6539,"kind":"plant","recipe":"cableworks"}
+{"seconds":8151,"action":"Bau","credits":5335,"kind":"plant","recipe":"chemworks"}
+{"seconds":8704,"action":"H07","credits":10321,"population":106}
+{"seconds":10658,"action":"Bau","credits":5258,"kind":"plant","recipe":"electronicsworks"}
+{"seconds":11586,"action":"Export","credits":10471,"good":"plates","net":5186,"exports":5,"moneyCategories":{"Wareneinkauf":-208,"Warenverkauf":5222,"Ziviler Absatz":164,"Steuern":7,"Investition":0},"estimatedInputCost":285.11247617801143,"estimatedRevenue":5222.414562117499}
+{"seconds":11586,"action":"Finanzierung","credits":10471,"earned":0,"quests":0}
+{"seconds":12039,"action":"Bau","credits":7517,"kind":"land"}
+{"seconds":12630,"action":"Bau","credits":5008,"kind":"plant","recipe":"chipfab"}
+{"seconds":13090,"action":"Bau","credits":3736,"kind":"plant","recipe":"siliconworks"}
+{"seconds":14428,"action":"Export","credits":8312,"good":"plates","net":4941,"exports":6,"moneyCategories":{"Wareneinkauf":-144,"Warenverkauf":5084,"Ziviler Absatz":0,"Steuern":2,"Investition":0},"estimatedInputCost":285.11247617801143,"estimatedRevenue":5083.55147882274}
+{"seconds":14428,"action":"Finanzierung","credits":8312,"earned":0,"quests":0}
+{"seconds":15024,"action":"Bau","credits":5651,"kind":"plant","recipe":"refinery2"}
+{"seconds":16324,"action":"Export","credits":9956,"good":"plates","net":4762,"exports":7,"moneyCategories":{"Wareneinkauf":-188,"Warenverkauf":4948,"Ziviler Absatz":0,"Steuern":2,"Investition":0},"estimatedInputCost":285.11247617801143,"estimatedRevenue":4948.380740452494}
+{"seconds":16324,"action":"Finanzierung","credits":9956,"earned":0,"quests":0}
+{"seconds":16837,"action":"Bau","credits":6838,"kind":"moduleBench"}
+{"seconds":18180,"action":"Bau","credits":2253,"kind":"land"}
+{"seconds":19134,"action":"Export","credits":6766,"good":"plates","net":4674,"exports":8,"moneyCategories":{"Wareneinkauf":-144,"Warenverkauf":4817,"Ziviler Absatz":0,"Steuern":2,"Investition":0},"estimatedInputCost":285.11247617801143,"estimatedRevenue":4816.804168205609}
+{"seconds":19134,"action":"Finanzierung","credits":6766,"earned":0,"quests":0}
+{"seconds":19730,"action":"Bau","credits":4106,"kind":"plant","recipe":"chemplant"}
+{"seconds":22544,"action":"Export","credits":11431,"good":"electronics","net":7880,"exports":9,"moneyCategories":{"Wareneinkauf":-478,"Warenverkauf":8355,"Ziviler Absatz":0,"Steuern":4,"Investition":0},"estimatedInputCost":436.73067384857416,"estimatedRevenue":8354.86096708429}
+{"seconds":22544,"action":"Finanzierung","credits":11431,"earned":0,"quests":0}
+{"seconds":22988,"action":"Bau","credits":6358,"kind":"plant","recipe":"hullworks"}
+{"seconds":24729,"action":"Bau","credits":3234,"kind":"plant","recipe":"alloyworks"}
+{"seconds":25935,"action":"H08","credits":12937,"population":109}
+{"seconds":28582,"action":"Export","credits":19921,"good":"electronics","net":7393,"exports":10,"moneyCategories":{"Wareneinkauf":-554,"Warenverkauf":7942,"Ziviler Absatz":0,"Steuern":4,"Investition":0},"estimatedInputCost":436.73067384857416,"estimatedRevenue":7942.273877016963}
+{"seconds":29795,"action":"Export","credits":26921,"good":"electronics","net":7000,"exports":11,"moneyCategories":{"Wareneinkauf":-554,"Warenverkauf":7550,"Ziviler Absatz":0,"Steuern":4,"Investition":0},"estimatedInputCost":436.73067384857416,"estimatedRevenue":7550.061525387636}
+{"seconds":29795,"action":"Finanzierung","credits":26921,"earned":0,"quests":0}
+{"seconds":29927,"action":"Bau","credits":6922,"kind":"researchWorkshop"}
+{"seconds":30392,"action":"Bau","credits":944,"kind":"land"}
+{"seconds":30670,"action":"Finanzierung","credits":1715,"earned":770,"quests":1}
+{"seconds":32588,"action":"Export","credits":8161,"good":"electronics","net":6702,"exports":12,"moneyCategories":{"Wareneinkauf":-478,"Warenverkauf":7177,"Ziviler Absatz":0,"Steuern":4,"Investition":0},"estimatedInputCost":436.73067384857416,"estimatedRevenue":7177.217748948818}
+{"seconds":32588,"action":"Finanzierung","credits":8161,"earned":770,"quests":1}
+{"seconds":33042,"action":"Bau","credits":3087,"kind":"plant","recipe":"sensorworks"}
+{"seconds":34375,"action":"Export","credits":9298,"good":"electronics","net":6371,"exports":13,"moneyCategories":{"Wareneinkauf":-454,"Warenverkauf":6823,"Ziviler Absatz":0,"Steuern":3,"Investition":0},"estimatedInputCost":436.73067384857416,"estimatedRevenue":6822.78607169114}
+{"seconds":34375,"action":"Finanzierung","credits":9298,"earned":770,"quests":1}
+{"seconds":34858,"action":"Bau","credits":6700,"kind":"plant","recipe":"opticsworks"}
+{"seconds":36267,"action":"H09","credits":13994,"population":109}
+{"seconds":37249,"action":"Bau","credits":8738,"kind":"plant","recipe":"goldpurifier"}
+{"seconds":38900,"action":"H10","credits":16425,"population":109}
+{"seconds":45506,"action":"Finanzierung","credits":5988,"earned":4030,"quests":6}
+{"seconds":46668,"action":"Export","credits":59699,"good":"finegold","net":43749,"exports":14,"moneyCategories":{"Wareneinkauf":-18747,"Warenverkauf":58296,"Ziviler Absatz":901,"Steuern":39,"Investition":0},"estimatedInputCost":8915.31019822824,"estimatedRevenue":58296.00211229187}
+{"seconds":46668,"action":"Finanzierung","credits":59699,"earned":4030,"quests":6}
+{"seconds":46740,"action":"Bau","credits":57723,"kind":"housing"}
+{"seconds":47693,"action":"Bau","credits":49550,"kind":"land"}
+{"seconds":48146,"action":"Bau","credits":48351,"kind":"plant","recipe":"weavery"}
+{"seconds":52814,"action":"H11","credits":55273,"population":257}
+{"seconds":54005,"action":"Bau","credits":53152,"kind":"plant","recipe":"pharma"}
+{"seconds":54973,"action":"Bau","credits":23736,"kind":"academy","recipe":null}
+{"seconds":58317,"action":"Bau","credits":20398,"kind":"plant","recipe":"gearworks"}
+{"seconds":60862,"action":"Export","credits":62282,"good":"finegold","net":41815,"exports":15,"moneyCategories":{"Wareneinkauf":-16628,"Warenverkauf":58296,"Ziviler Absatz":133,"Steuern":14,"Investition":0},"estimatedInputCost":8911.461407605424,"estimatedRevenue":58296.00211229187}
+{"seconds":60862,"action":"Finanzierung","credits":62282,"earned":4030,"quests":6}
+{"seconds":60964,"action":"Bau","credits":59783,"kind":"plant","recipe":"toolworks"}
+{"seconds":61859,"action":"Bau","credits":48040,"kind":"land"}
+{"seconds":62051,"action":"Bau","credits":23041,"kind":"plant","recipe":"computerworks"}
+{"seconds":67967,"action":"Export","credits":62721,"good":"finegold","net":41425,"exports":16,"moneyCategories":{"Wareneinkauf":-16885,"Warenverkauf":58296,"Ziviler Absatz":0,"Steuern":14,"Investition":0},"estimatedInputCost":8911.461407605424,"estimatedRevenue":58296.00211229187}
+{"seconds":67967,"action":"Finanzierung","credits":62721,"earned":4030,"quests":6}
+{"seconds":68159,"action":"Bau","credits":37722,"kind":"plant","recipe":"robotics"}
+{"seconds":73791,"action":"Export","credits":77569,"good":"finegold","net":40784,"exports":17,"moneyCategories":{"Wareneinkauf":-17526,"Warenverkauf":58296,"Ziviler Absatz":0,"Steuern":14,"Investition":0},"estimatedInputCost":8911.461407605424,"estimatedRevenue":58296.00211229187}
+{"seconds":73791,"action":"Finanzierung","credits":77569,"earned":4030,"quests":6}
+{"seconds":73983,"action":"Bau","credits":27571,"kind":"researchCenter","recipe":null}
+{"seconds":81335,"action":"H12","credits":43407,"population":264}
+{"seconds":81335,"action":"H13-Materialphase","credits":43407}
+{"seconds":88698,"action":"Export","credits":83853,"good":"finegold","net":42739,"exports":18,"moneyCategories":{"Wareneinkauf":-15570,"Warenverkauf":58296,"Ziviler Absatz":0,"Steuern":14,"Investition":0},"estimatedInputCost":8911.461407605424,"estimatedRevenue":58296.00211229187}
+{"seconds":88698,"action":"Finanzierung","credits":83853,"earned":4030,"quests":6}
+{"seconds":88890,"action":"Bau","credits":58855,"kind":"plant","recipe":"machineworks"}
+{"seconds":90980,"action":"Bau","credits":50032,"kind":"solar"}
+{"seconds":91328,"action":"Bau","credits":33801,"kind":"land"}
+{"seconds":96618,"action":"Export","credits":75849,"good":"finegold","net":42718,"exports":19,"moneyCategories":{"Wareneinkauf":-15592,"Warenverkauf":58296,"Ziviler Absatz":0,"Steuern":14,"Investition":0},"estimatedInputCost":8911.461407605424,"estimatedRevenue":58296.00211229187}
+{"seconds":96618,"action":"Finanzierung","credits":75849,"earned":4030,"quests":6}
+{"seconds":96810,"action":"Bau","credits":25851,"kind":"plant","recipe":"habitatworks"}
+{"seconds":100572,"action":"Export","credits":66638,"good":"finegold","net":41599,"exports":20,"moneyCategories":{"Wareneinkauf":-16710,"Warenverkauf":58296,"Ziviler Absatz":0,"Steuern":14,"Investition":0},"estimatedInputCost":8911.461407605424,"estimatedRevenue":57058.80599423832}
+{"seconds":100572,"action":"Finanzierung","credits":66638,"earned":4030,"quests":6}
+{"seconds":100764,"action":"Bau","credits":41640,"kind":"plant","recipe":"medtechworks"}
+{"seconds":107073,"action":"Export","credits":80780,"good":"finegold","net":41205,"exports":21,"moneyCategories":{"Wareneinkauf":-17136,"Warenverkauf":58296,"Ziviler Absatz":31,"Steuern":14,"Investition":0},"estimatedInputCost":8911.461407605424,"estimatedRevenue":58296.00211229187}
+{"seconds":108849,"action":"Export","credits":116746,"good":"finegold","net":35966,"exports":22,"moneyCategories":{"Wareneinkauf":-19076,"Warenverkauf":55014,"Ziviler Absatz":14,"Steuern":14,"Investition":0},"estimatedInputCost":8911.461407605424,"estimatedRevenue":53831.04402170642}
+{"seconds":108849,"action":"Finanzierung","credits":116746,"earned":4030,"quests":6}
+{"seconds":113994,"action":"H13","credits":16289,"population":244}
+{
+  "completed": true,
+  "seconds": 113994,
+  "elapsed": 110683,
+  "earned": 4030,
+  "quests": 6,
+  "exports": 22,
+  "credits": 16289,
+  "produced": {
+    "water": 488,
+    "food": 186,
+    "fuel": 588,
+    "ingots": 1072,
+    "glass": 104,
+    "hydraulicoil": 329,
+    "plates": 530,
+    "plastics": 183,
+    "wires": 302,
+    "silicon": 103,
+    "raremetals": 177,
+    "chemicals": 299,
+    "chips": 206,
+    "electronics": 262,
+    "alloys": 62,
+    "hullparts": 14,
+    "optics": 44,
+    "sensors": 40,
+    "finegold": 190,
+    "textiles": 2,
+    "medicine": 12,
+    "cutters": 43,
+    "gears": 129,
+    "computers": 24,
+    "robots": 26,
+    "machinery": 26,
+    "medtech": 4,
+    "habitats": 4
+  },
+  "worlds": [
+    {
+      "id": "e-1_-1_69",
+      "population": 20,
+      "workers": {
+        "basic": 20,
+        "skilled": 0,
+        "specialist": 0
+      },
+      "plots": 8,
+      "controlLevel": 0,
+      "grants": [],
+      "founding": {
+        "owner": "p1",
+        "cost": {
+          "first": true,
+          "k": 0,
+          "credits": 100000,
+          "goods": {
+            "plates": 100,
+            "machinery": 20,
+            "habitats": 4
+          },
+          "people": 20,
+          "seconds": 300
+        },
+        "deliveries": {
+          "plates": 100,
+          "machinery": 20,
+          "habitats": 4
+        },
+        "remaining": 0,
+        "started": 113533,
+        "until": 113833,
+        "workers": {
+          "basic": 20,
+          "skilled": 0,
+          "specialist": 0
+        },
+        "immigrants": [
+          {
+            "id": "home_p1:passengers:1",
+            "origin": "home_p1",
+            "ownerAtDeparture": "p1",
+            "n": 20,
+            "workers": {
+              "basic": 20,
+              "skilled": 0,
+              "specialist": 0
+            }
+          }
+        ],
+        "infrastructureShip": {
+          "id": "s333",
+          "name": "Sturmvogel",
+          "type": "spatz",
+          "modules": [
+            "cabin"
+          ],
+          "at": 113533
+        },
+        "completed": 113833
+      }
+    },
+    {
+      "id": "home_p1",
+      "population": 244,
+      "workers": {
+        "basic": 161,
+        "skilled": 14,
+        "specialist": 10
+      },
+      "plots": 32,
+      "controlLevel": 1,
+      "grants": [
+        {
+          "id": "home_p1:repairs",
+          "source": "start_exception",
+          "recipient": "p1",
+          "goods": {
+            "ingots": 80,
+            "plates": 40,
+            "electronics": 12,
+            "machinery": 4
+          }
+        },
+        {
+          "id": "home_p1:start-ship",
+          "source": "start_exception",
+          "recipient": "p1",
+          "ship": "s1",
+          "fuel": 6
+        },
+        {
+          "id": "home_p1:supplies",
+          "source": "start_exception",
+          "recipient": "p1",
+          "goods": {
+            "water": 80,
+            "food": 40,
+            "shipfuel": 40
+          }
+        },
+        {
+          "id": "p1:relic:H04",
+          "source": "quest_salvage",
+          "recipient": "p1",
+          "relic": "p1:relic"
+        },
+        {
+          "id": "home_p1:second-ship",
+          "source": "quest_H05",
+          "recipient": "p1",
+          "ship": "s54",
+          "fuel": 6
+        }
+      ]
+    }
+  ],
+  "ships": [
+    {
+      "id": "s1",
+      "type": "spatz",
+      "modules": [
+        "shielded"
+      ],
+      "relicSpeed": 4,
+      "dockedAt": "home_p1"
+    }
+  ],
+  "events": [
+    {
+      "seconds": 3466,
+      "action": "Bau",
+      "credits": 3394,
+      "kind": "school"
+    },
+    {
+      "seconds": 4280,
+      "action": "Export",
+      "credits": 6268,
+      "good": "ingots",
+      "net": 2831,
+      "exports": 1,
+      "moneyCategories": {
+        "Wareneinkauf": -180,
+        "Warenverkauf": 2804,
+        "Ziviler Absatz": 199,
+        "Steuern": 9,
+        "Investition": 0
+      },
+      "estimatedInputCost": 182.33660863733093,
+      "estimatedRevenue": 2803.715999897717
+    },
+    {
+      "seconds": 4280,
+      "action": "Finanzierung",
+      "credits": 6268,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 4352,
+      "action": "Bau",
+      "credits": 5040,
+      "kind": "plant",
+      "recipe": "glassworks"
+    },
+    {
+      "seconds": 5340,
+      "action": "Export",
+      "credits": 7837,
+      "good": "ingots",
+      "net": 2751,
+      "exports": 2,
+      "moneyCategories": {
+        "Wareneinkauf": -200,
+        "Warenverkauf": 2734,
+        "Ziviler Absatz": 208,
+        "Steuern": 9,
+        "Investition": 0
+      },
+      "estimatedInputCost": 181.432987345169,
+      "estimatedRevenue": 2734.4701914819875
+    },
+    {
+      "seconds": 5340,
+      "action": "Finanzierung",
+      "credits": 7837,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 5412,
+      "action": "Bau",
+      "credits": 4859,
+      "kind": "solar"
+    },
+    {
+      "seconds": 5494,
+      "action": "Bau",
+      "credits": 3634,
+      "kind": "plant",
+      "recipe": "oilworks"
+    },
+    {
+      "seconds": 6252,
+      "action": "Export",
+      "credits": 6294,
+      "good": "ingots",
+      "net": 2686,
+      "exports": 3,
+      "moneyCategories": {
+        "Wareneinkauf": -200,
+        "Warenverkauf": 2667,
+        "Ziviler Absatz": 210,
+        "Steuern": 9,
+        "Investition": 0
+      },
+      "estimatedInputCost": 181.432987345169,
+      "estimatedRevenue": 2666.9346069203566
+    },
+    {
+      "seconds": 6252,
+      "action": "Finanzierung",
+      "credits": 6294,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 6354,
+      "action": "Bau",
+      "credits": 3825,
+      "kind": "plant",
+      "recipe": "rollingmill"
+    },
+    {
+      "seconds": 7095,
+      "action": "Export",
+      "credits": 9015,
+      "good": "plates",
+      "net": 5364,
+      "exports": 4,
+      "moneyCategories": {
+        "Wareneinkauf": -144,
+        "Warenverkauf": 5365,
+        "Ziviler Absatz": 137,
+        "Steuern": 6,
+        "Investition": 0
+      },
+      "estimatedInputCost": 285.11247617801143,
+      "estimatedRevenue": 5365.070851005326
+    },
+    {
+      "seconds": 7095,
+      "action": "Finanzierung",
+      "credits": 9015,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 7691,
+      "action": "Bau",
+      "credits": 6539,
+      "kind": "plant",
+      "recipe": "cableworks"
+    },
+    {
+      "seconds": 8151,
+      "action": "Bau",
+      "credits": 5335,
+      "kind": "plant",
+      "recipe": "chemworks"
+    },
+    {
+      "seconds": 8704,
+      "action": "H07",
+      "credits": 10321,
+      "population": 106
+    },
+    {
+      "seconds": 10658,
+      "action": "Bau",
+      "credits": 5258,
+      "kind": "plant",
+      "recipe": "electronicsworks"
+    },
+    {
+      "seconds": 11586,
+      "action": "Export",
+      "credits": 10471,
+      "good": "plates",
+      "net": 5186,
+      "exports": 5,
+      "moneyCategories": {
+        "Wareneinkauf": -208,
+        "Warenverkauf": 5222,
+        "Ziviler Absatz": 164,
+        "Steuern": 7,
+        "Investition": 0
+      },
+      "estimatedInputCost": 285.11247617801143,
+      "estimatedRevenue": 5222.414562117499
+    },
+    {
+      "seconds": 11586,
+      "action": "Finanzierung",
+      "credits": 10471,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 12039,
+      "action": "Bau",
+      "credits": 7517,
+      "kind": "land"
+    },
+    {
+      "seconds": 12630,
+      "action": "Bau",
+      "credits": 5008,
+      "kind": "plant",
+      "recipe": "chipfab"
+    },
+    {
+      "seconds": 13090,
+      "action": "Bau",
+      "credits": 3736,
+      "kind": "plant",
+      "recipe": "siliconworks"
+    },
+    {
+      "seconds": 14428,
+      "action": "Export",
+      "credits": 8312,
+      "good": "plates",
+      "net": 4941,
+      "exports": 6,
+      "moneyCategories": {
+        "Wareneinkauf": -144,
+        "Warenverkauf": 5084,
+        "Ziviler Absatz": 0,
+        "Steuern": 2,
+        "Investition": 0
+      },
+      "estimatedInputCost": 285.11247617801143,
+      "estimatedRevenue": 5083.55147882274
+    },
+    {
+      "seconds": 14428,
+      "action": "Finanzierung",
+      "credits": 8312,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 15024,
+      "action": "Bau",
+      "credits": 5651,
+      "kind": "plant",
+      "recipe": "refinery2"
+    },
+    {
+      "seconds": 16324,
+      "action": "Export",
+      "credits": 9956,
+      "good": "plates",
+      "net": 4762,
+      "exports": 7,
+      "moneyCategories": {
+        "Wareneinkauf": -188,
+        "Warenverkauf": 4948,
+        "Ziviler Absatz": 0,
+        "Steuern": 2,
+        "Investition": 0
+      },
+      "estimatedInputCost": 285.11247617801143,
+      "estimatedRevenue": 4948.380740452494
+    },
+    {
+      "seconds": 16324,
+      "action": "Finanzierung",
+      "credits": 9956,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 16837,
+      "action": "Bau",
+      "credits": 6838,
+      "kind": "moduleBench"
+    },
+    {
+      "seconds": 18180,
+      "action": "Bau",
+      "credits": 2253,
+      "kind": "land"
+    },
+    {
+      "seconds": 19134,
+      "action": "Export",
+      "credits": 6766,
+      "good": "plates",
+      "net": 4674,
+      "exports": 8,
+      "moneyCategories": {
+        "Wareneinkauf": -144,
+        "Warenverkauf": 4817,
+        "Ziviler Absatz": 0,
+        "Steuern": 2,
+        "Investition": 0
+      },
+      "estimatedInputCost": 285.11247617801143,
+      "estimatedRevenue": 4816.804168205609
+    },
+    {
+      "seconds": 19134,
+      "action": "Finanzierung",
+      "credits": 6766,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 19730,
+      "action": "Bau",
+      "credits": 4106,
+      "kind": "plant",
+      "recipe": "chemplant"
+    },
+    {
+      "seconds": 22544,
+      "action": "Export",
+      "credits": 11431,
+      "good": "electronics",
+      "net": 7880,
+      "exports": 9,
+      "moneyCategories": {
+        "Wareneinkauf": -478,
+        "Warenverkauf": 8355,
+        "Ziviler Absatz": 0,
+        "Steuern": 4,
+        "Investition": 0
+      },
+      "estimatedInputCost": 436.73067384857416,
+      "estimatedRevenue": 8354.86096708429
+    },
+    {
+      "seconds": 22544,
+      "action": "Finanzierung",
+      "credits": 11431,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 22988,
+      "action": "Bau",
+      "credits": 6358,
+      "kind": "plant",
+      "recipe": "hullworks"
+    },
+    {
+      "seconds": 24729,
+      "action": "Bau",
+      "credits": 3234,
+      "kind": "plant",
+      "recipe": "alloyworks"
+    },
+    {
+      "seconds": 25935,
+      "action": "H08",
+      "credits": 12937,
+      "population": 109
+    },
+    {
+      "seconds": 28582,
+      "action": "Export",
+      "credits": 19921,
+      "good": "electronics",
+      "net": 7393,
+      "exports": 10,
+      "moneyCategories": {
+        "Wareneinkauf": -554,
+        "Warenverkauf": 7942,
+        "Ziviler Absatz": 0,
+        "Steuern": 4,
+        "Investition": 0
+      },
+      "estimatedInputCost": 436.73067384857416,
+      "estimatedRevenue": 7942.273877016963
+    },
+    {
+      "seconds": 29795,
+      "action": "Export",
+      "credits": 26921,
+      "good": "electronics",
+      "net": 7000,
+      "exports": 11,
+      "moneyCategories": {
+        "Wareneinkauf": -554,
+        "Warenverkauf": 7550,
+        "Ziviler Absatz": 0,
+        "Steuern": 4,
+        "Investition": 0
+      },
+      "estimatedInputCost": 436.73067384857416,
+      "estimatedRevenue": 7550.061525387636
+    },
+    {
+      "seconds": 29795,
+      "action": "Finanzierung",
+      "credits": 26921,
+      "earned": 0,
+      "quests": 0
+    },
+    {
+      "seconds": 29927,
+      "action": "Bau",
+      "credits": 6922,
+      "kind": "researchWorkshop"
+    },
+    {
+      "seconds": 30392,
+      "action": "Bau",
+      "credits": 944,
+      "kind": "land"
+    },
+    {
+      "seconds": 30670,
+      "action": "Finanzierung",
+      "credits": 1715,
+      "earned": 770,
+      "quests": 1
+    },
+    {
+      "seconds": 32588,
+      "action": "Export",
+      "credits": 8161,
+      "good": "electronics",
+      "net": 6702,
+      "exports": 12,
+      "moneyCategories": {
+        "Wareneinkauf": -478,
+        "Warenverkauf": 7177,
+        "Ziviler Absatz": 0,
+        "Steuern": 4,
+        "Investition": 0
+      },
+      "estimatedInputCost": 436.73067384857416,
+      "estimatedRevenue": 7177.217748948818
+    },
+    {
+      "seconds": 32588,
+      "action": "Finanzierung",
+      "credits": 8161,
+      "earned": 770,
+      "quests": 1
+    },
+    {
+      "seconds": 33042,
+      "action": "Bau",
+      "credits": 3087,
+      "kind": "plant",
+      "recipe": "sensorworks"
+    },
+    {
+      "seconds": 34375,
+      "action": "Export",
+      "credits": 9298,
+      "good": "electronics",
+      "net": 6371,
+      "exports": 13,
+      "moneyCategories": {
+        "Wareneinkauf": -454,
+        "Warenverkauf": 6823,
+        "Ziviler Absatz": 0,
+        "Steuern": 3,
+        "Investition": 0
+      },
+      "estimatedInputCost": 436.73067384857416,
+      "estimatedRevenue": 6822.78607169114
+    },
+    {
+      "seconds": 34375,
+      "action": "Finanzierung",
+      "credits": 9298,
+      "earned": 770,
+      "quests": 1
+    },
+    {
+      "seconds": 34858,
+      "action": "Bau",
+      "credits": 6700,
+      "kind": "plant",
+      "recipe": "opticsworks"
+    },
+    {
+      "seconds": 36267,
+      "action": "H09",
+      "credits": 13994,
+      "population": 109
+    },
+    {
+      "seconds": 37249,
+      "action": "Bau",
+      "credits": 8738,
+      "kind": "plant",
+      "recipe": "goldpurifier"
+    },
+    {
+      "seconds": 38900,
+      "action": "H10",
+      "credits": 16425,
+      "population": 109
+    },
+    {
+      "seconds": 45506,
+      "action": "Finanzierung",
+      "credits": 5988,
+      "earned": 4030,
+      "quests": 6
+    },
+    {
+      "seconds": 46668,
+      "action": "Export",
+      "credits": 59699,
+      "good": "finegold",
+      "net": 43749,
+      "exports": 14,
+      "moneyCategories": {
+        "Wareneinkauf": -18747,
+        "Warenverkauf": 58296,
+        "Ziviler Absatz": 901,
+        "Steuern": 39,
+        "Investition": 0
+      },
+      "estimatedInputCost": 8915.31019822824,
+      "estimatedRevenue": 58296.00211229187
+    },
+    {
+      "seconds": 46668,
+      "action": "Finanzierung",
+      "credits": 59699,
+      "earned": 4030,
+      "quests": 6
+    },
+    {
+      "seconds": 46740,
+      "action": "Bau",
+      "credits": 57723,
+      "kind": "housing"
+    },
+    {
+      "seconds": 47693,
+      "action": "Bau",
+      "credits": 49550,
+      "kind": "land"
+    },
+    {
+      "seconds": 48146,
+      "action": "Bau",
+      "credits": 48351,
+      "kind": "plant",
+      "recipe": "weavery"
+    },
+    {
+      "seconds": 52814,
+      "action": "H11",
+      "credits": 55273,
+      "population": 257
+    },
+    {
+      "seconds": 54005,
+      "action": "Bau",
+      "credits": 53152,
+      "kind": "plant",
+      "recipe": "pharma"
+    },
+    {
+      "seconds": 54973,
+      "action": "Bau",
+      "credits": 23736,
+      "kind": "academy",
+      "recipe": null
+    },
+    {
+      "seconds": 58317,
+      "action": "Bau",
+      "credits": 20398,
+      "kind": "plant",
+      "recipe": "gearworks"
+    },
+    {
+      "seconds": 60862,
+      "action": "Export",
+      "credits": 62282,
+      "good": "finegold",
+      "net": 41815,
+      "exports": 15,
+      "moneyCategories": {
+        "Wareneinkauf": -16628,
+        "Warenverkauf": 58296,
+        "Ziviler Absatz": 133,
+        "Steuern": 14,
+        "Investition": 0
+      },
+      "estimatedInputCost": 8911.461407605424,
+      "estimatedRevenue": 58296.00211229187
+    },
+    {
+      "seconds": 60862,
+      "action": "Finanzierung",
+      "credits": 62282,
+      "earned": 4030,
+      "quests": 6
+    },
+    {
+      "seconds": 60964,
+      "action": "Bau",
+      "credits": 59783,
+      "kind": "plant",
+      "recipe": "toolworks"
+    },
+    {
+      "seconds": 61859,
+      "action": "Bau",
+      "credits": 48040,
+      "kind": "land"
+    },
+    {
+      "seconds": 62051,
+      "action": "Bau",
+      "credits": 23041,
+      "kind": "plant",
+      "recipe": "computerworks"
+    },
+    {
+      "seconds": 67967,
+      "action": "Export",
+      "credits": 62721,
+      "good": "finegold",
+      "net": 41425,
+      "exports": 16,
+      "moneyCategories": {
+        "Wareneinkauf": -16885,
+        "Warenverkauf": 58296,
+        "Ziviler Absatz": 0,
+        "Steuern": 14,
+        "Investition": 0
+      },
+      "estimatedInputCost": 8911.461407605424,
+      "estimatedRevenue": 58296.00211229187
+    },
+    {
+      "seconds": 67967,
+      "action": "Finanzierung",
+      "credits": 62721,
+      "earned": 4030,
+      "quests": 6
+    },
+    {
+      "seconds": 68159,
+      "action": "Bau",
+      "credits": 37722,
+      "kind": "plant",
+      "recipe": "robotics"
+    },
+    {
+      "seconds": 73791,
+      "action": "Export",
+      "credits": 77569,
+      "good": "finegold",
+      "net": 40784,
+      "exports": 17,
+      "moneyCategories": {
+        "Wareneinkauf": -17526,
+        "Warenverkauf": 58296,
+        "Ziviler Absatz": 0,
+        "Steuern": 14,
+        "Investition": 0
+      },
+      "estimatedInputCost": 8911.461407605424,
+      "estimatedRevenue": 58296.00211229187
+    },
+    {
+      "seconds": 73791,
+      "action": "Finanzierung",
+      "credits": 77569,
+      "earned": 4030,
+      "quests": 6
+    },
+    {
+      "seconds": 73983,
+      "action": "Bau",
+      "credits": 27571,
+      "kind": "researchCenter",
+      "recipe": null
+    },
+    {
+      "seconds": 81335,
+      "action": "H12",
+      "credits": 43407,
+      "population": 264
+    },
+    {
+      "seconds": 81335,
+      "action": "H13-Materialphase",
+      "credits": 43407
+    },
+    {
+      "seconds": 88698,
+      "action": "Export",
+      "credits": 83853,
+      "good": "finegold",
+      "net": 42739,
+      "exports": 18,
+      "moneyCategories": {
+        "Wareneinkauf": -15570,
+        "Warenverkauf": 58296,
+        "Ziviler Absatz": 0,
+        "Steuern": 14,
+        "Investition": 0
+      },
+      "estimatedInputCost": 8911.461407605424,
+      "estimatedRevenue": 58296.00211229187
+    },
+    {
+      "seconds": 88698,
+      "action": "Finanzierung",
+      "credits": 83853,
+      "earned": 4030,
+      "quests": 6
+    },
+    {
+      "seconds": 88890,
+      "action": "Bau",
+      "credits": 58855,
+      "kind": "plant",
+      "recipe": "machineworks"
+    },
+    {
+      "seconds": 90980,
+      "action": "Bau",
+      "credits": 50032,
+      "kind": "solar"
+    },
+    {
+      "seconds": 91328,
+      "action": "Bau",
+      "credits": 33801,
+      "kind": "land"
+    },
+    {
+      "seconds": 96618,
+      "action": "Export",
+      "credits": 75849,
+      "good": "finegold",
+      "net": 42718,
+      "exports": 19,
+      "moneyCategories": {
+        "Wareneinkauf": -15592,
+        "Warenverkauf": 58296,
+        "Ziviler Absatz": 0,
+        "Steuern": 14,
+        "Investition": 0
+      },
+      "estimatedInputCost": 8911.461407605424,
+      "estimatedRevenue": 58296.00211229187
+    },
+    {
+      "seconds": 96618,
+      "action": "Finanzierung",
+      "credits": 75849,
+      "earned": 4030,
+      "quests": 6
+    },
+    {
+      "seconds": 96810,
+      "action": "Bau",
+      "credits": 25851,
+      "kind": "plant",
+      "recipe": "habitatworks"
+    },
+    {
+      "seconds": 100572,
+      "action": "Export",
+      "credits": 66638,
+      "good": "finegold",
+      "net": 41599,
+      "exports": 20,
+      "moneyCategories": {
+        "Wareneinkauf": -16710,
+        "Warenverkauf": 58296,
+        "Ziviler Absatz": 0,
+        "Steuern": 14,
+        "Investition": 0
+      },
+      "estimatedInputCost": 8911.461407605424,
+      "estimatedRevenue": 57058.80599423832
+    },
+    {
+      "seconds": 100572,
+      "action": "Finanzierung",
+      "credits": 66638,
+      "earned": 4030,
+      "quests": 6
+    },
+    {
+      "seconds": 100764,
+      "action": "Bau",
+      "credits": 41640,
+      "kind": "plant",
+      "recipe": "medtechworks"
+    },
+    {
+      "seconds": 107073,
+      "action": "Export",
+      "credits": 80780,
+      "good": "finegold",
+      "net": 41205,
+      "exports": 21,
+      "moneyCategories": {
+        "Wareneinkauf": -17136,
+        "Warenverkauf": 58296,
+        "Ziviler Absatz": 31,
+        "Steuern": 14,
+        "Investition": 0
+      },
+      "estimatedInputCost": 8911.461407605424,
+      "estimatedRevenue": 58296.00211229187
+    },
+    {
+      "seconds": 108849,
+      "action": "Export",
+      "credits": 116746,
+      "good": "finegold",
+      "net": 35966,
+      "exports": 22,
+      "moneyCategories": {
+        "Wareneinkauf": -19076,
+        "Warenverkauf": 55014,
+        "Ziviler Absatz": 14,
+        "Steuern": 14,
+        "Investition": 0
+      },
+      "estimatedInputCost": 8911.461407605424,
+      "estimatedRevenue": 53831.04402170642
+    },
+    {
+      "seconds": 108849,
+      "action": "Finanzierung",
+      "credits": 116746,
+      "earned": 4030,
+      "quests": 6
+    },
+    {
+      "seconds": 113994,
+      "action": "H13",
+      "credits": 16289,
+      "population": 244
+    }
+  ]
+}

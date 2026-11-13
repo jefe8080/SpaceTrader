@@ -12,17 +12,26 @@ import {siteError} from '../server/colonies.js';
 import {Game} from '../server/game.js';
 import {rng} from '../server/worldgen.js';
 import {evaluateProgression} from './progression-report.js';
+import {tradePreview} from '../server/economic-view.js';
 
 const events=[];
 // --seed N runs another world; its snapshots and report stay apart from the seed-42 reference.
 const seedIndex=process.argv.indexOf('--seed'),SEED=seedIndex<0?42:Number(process.argv[seedIndex+1]);
-const SNAP=SEED===42?'data/prd5/progression-':`data/prd5/seed${SEED}/progression-`;
+const ADAPTIVE=process.argv.includes('--adaptive'),FLEET=process.argv.includes('--fleet-supply');
+const SNAP=ADAPTIVE?`data/prd26/seed${SEED}-${FLEET?'fleet':'serial'}/progression-`:SEED===42?'data/prd5/progression-':`data/prd5/seed${SEED}/progression-`;
 const outIndex=process.argv.indexOf('--out'),OUT=outIndex<0?(SEED===42?'docs/qa/prd5-u17/progression.json':`data/prd5/seed${SEED}/progression.json`):process.argv[outIndex+1];
 fs.mkdirSync(SNAP.slice(0,SNAP.lastIndexOf('/')),{recursive:true});
 function progress({game,player:p,home:e,ship}){
   if(!fs.existsSync(SNAP+'h06.db')){game.save();game.store.db.prepare('VACUUM INTO ?').run(SNAP+'h06.db');}
   const h=e.market.homeworld,started=game.time;let current=ship,earned=0,quests=0,depth=0,funding=false,exports=0;
   const making=new Set();
+  const exportCooldown=new Map();
+  function replacementCost(g,n,seen=new Set()){
+    if(seen.has(g))return Infinity;const recipe=Object.values(RECIPES).find(r=>r.out[g]);
+    if(recipe)return Object.entries(recipe.in).reduce((sum,[input,qty])=>sum+replacementCost(input,qty*Math.ceil(n/recipe.out[g]),new Set([...seen,g])),0);
+    const sources=[...game.world.entities.values()].filter(x=>x!==e&&!x.market?.homeworld&&x.market?.goods[g]?.role==='produce'&&x.market.goods[g].stock>=n);
+    return Math.min(Infinity,...sources.map(x=>{const slot={...x.market.goods[g]};let cost=0;for(let i=0;i<Math.ceil(n);i++){cost+=buyPrice(g,slot);slot.stock--;}return cost;}));
+  }
   const dependsOnMaking=(g,seen=new Set())=>{if(making.has(g))return true;if(seen.has(g))return false;seen.add(g);const recipe=Object.values(RECIPES).find(r=>r.out[g]);return Object.keys(recipe?.in||{}).some(input=>dependsOnMaking(input,seen));};
   const log=(action,extra={})=>{const row={seconds:game.time,action,credits:Math.round(p.credits),...extra};events.push(row);console.error(JSON.stringify(row));if(/^H\d\d$/.test(action)){game.save();const snapshot=`${SNAP}${action}.db`;if(!fs.existsSync(snapshot))game.store.db.prepare('VACUUM INTO ?').run(snapshot);}};
   const cmd=(name,args={})=>{if(!process.argv.includes('--quick'))game.tick(2);const error=runCommand(game,p,{cmd:name,target:e.id,...args});if(error)throw new Error(`${name}: ${error}`);};
@@ -50,18 +59,26 @@ function progress({game,player:p,home:e,ship}){
     while(p.credits<amount){
       if(!funding){
         const products=['finegold','electronics','plates','ingots','fuel'];let sale;
+        const candidates=[];
         for(const good of products){
+          if(ADAPTIVE&&(exportCooldown.get(good)||0)>game.time)continue;
           if(dependsOnMaking(good))continue;
           const recipe=Object.entries(RECIPES).find(([,r])=>r.out[good])?.[0];
           if(!h.facilities[recipe]&&!h.structures.some(b=>b.recipe===recipe))continue;
           const buyers=[...game.world.entities.values()].filter(x=>x!==e&&!x.market?.homeworld&&x.market?.goods[good]&&['consume','trade'].includes(x.market.goods[good].role)&&x.market.goods[good].cap-x.market.goods[good].stock>=20&&(x.market.economy?.cash||0)>sellPrice(good,x.market.goods[good])*20);
           buyers.sort((a,b)=>sellPrice(good,b.market.goods[good])/(Math.hypot(b.x-e.x,b.y-e.y)+10000)-sellPrice(good,a.market.goods[good])/(Math.hypot(a.x-e.x,a.y-e.y)+10000));
-          if(buyers[0]){sale={good,buyer:buyers[0]};break;}
+          if(buyers[0]){
+            if(!ADAPTIVE){sale={good,buyer:buyers[0]};break;}
+            const projected=Object.assign(Object.create(Object.getPrototypeOf(game)),game,{ships:new Map(game.ships)}),s=structuredClone(current);s.cargo={[good]:20};projected.ships.set(s.id,s);
+            const q=tradePreview(projected,p,{ship:s.id,target:buyers[0].id,good,amount:20,dir:'sell'}),cost=replacementCost(good,20),margin=(q.total||0)-cost;
+            if(q.n===20&&margin>100)candidates.push({good,buyer:buyers[0],estimatedInputCost:cost,estimatedRevenue:q.total,score:margin/(Math.hypot(buyers[0].x-e.x,buyers[0].y-e.y)/shipStats(current).speed*2+60)});
+          }
         }
+        if(ADAPTIVE)sale=candidates.sort((a,b)=>b.score-a.score)[0];
         if(sale){
           funding=true;
           try{
-            const before=p.credits;make(sale.good,stock(sale.good)+20);go(e);transfer(e,sale.good,20,'buy');
+            const before=p.credits,ledgerBefore=Object.fromEntries(['Wareneinkauf','Warenverkauf','Ziviler Absatz','Steuern','Investition'].map(k=>[k,(p.profileStats?.moneyTotals?.[k]??(p.profileStats?.ledger||[]).filter(r=>r.category===k).reduce((n,r)=>n+r.amount,0))]));make(sale.good,stock(sale.good)+20);go(e);transfer(e,sale.good,20,'buy');
             const visited=new Set();
             while(current.cargo[sale.good]>0&&visited.size<8){
               const buyers=[...game.world.entities.values()].filter(x=>x!==e&&!visited.has(x.id)&&!x.market?.homeworld&&x.market?.goods[sale.good]&&x.market.goods[sale.good].stock<x.market.goods[sale.good].cap&&(x.market.economy?.cash||0)>sellPrice(sale.good,x.market.goods[sale.good]));
@@ -69,7 +86,10 @@ function progress({game,player:p,home:e,ship}){
               go(buyers[0]);visited.add(buyers[0].id);game.trade(current,buyers[0],sale.good,current.cargo[sale.good],'sell',0,{manual:true});tick(1);
             }
             go(e);if(current.cargo[sale.good])transfer(e,sale.good,current.cargo[sale.good],'sell');
-            exports++;log('Export',{good:sale.good,net:Math.round(p.credits-before),exports});
+            const net=p.credits-before;
+            if(ADAPTIVE&&net<=0)exportCooldown.set(sale.good,game.time+3600);
+            const moneyCategories=Object.fromEntries(Object.keys(ledgerBefore).map(k=>[k,Math.round((p.profileStats?.moneyTotals?.[k]??(p.profileStats?.ledger||[]).filter(r=>r.category===k).reduce((n,r)=>n+r.amount,0))-ledgerBefore[k])]));
+            exports++;log('Export',{good:sale.good,net:Math.round(net),exports,moneyCategories,...(ADAPTIVE?{estimatedInputCost:sale.estimatedInputCost,estimatedRevenue:sale.estimatedRevenue}:{})});
           }
           finally{funding=false;}
           continue;
@@ -169,6 +189,10 @@ function progress({game,player:p,home:e,ship}){
   function deliverQuest(id){for(const [g,total] of Object.entries(QUEST_DELIVERIES[id]||{})){const n=total-(h.questDeliveries?.[id]?.[g]||0);if(n<=0)continue;make(g,n);go(e);cmd('homeQuestDeliver',{quest:id,good:g,amount:n});}}
   function supplies(){make('water',160);make('food',80);}
   try{
+    if(FLEET){
+      const helper=game.shipsOf(p.id).find(s=>s.id!==ship.id&&!s.relicSpeed),source=g=>[...game.world.entities.values()].find(x=>x.system===e.system&&x.market?.goods[g]?.role==='produce');
+      if(helper&&source('ice')&&source('grain')){cmd('routeSave',{name:'QA Parallelversorgung',stops:['ice','grain'].flatMap(g=>[{targetId:e.id,actions:[{op:'waitUntil',good:g,cond:'stock<=',value:g==='ice'?120:80,timeout:86400}]},{targetId:source(g).id,actions:[{op:'buy',good:g,amount:30}]},{targetId:e.id,actions:[{op:'sell',good:g,amount:0}]}]),assign:[helper.id]});log('Parallelversorgung',{ship:helper.id});}
+    }
     go(e);pause();if(p.relic.location.kind!=='ship'){active('workshop');tick();cmd('relicWork',{ship:current.id,kind:'install'});until(()=>!p.relic.operation,'Antriebseinbau');pause();}
     if(!p.homeQuest.completed.H07){
     construction('school');const school=building('school');make('water',60);make('food',30);active(school.id);tick();cmd('homeTrain',{qualification:'skilled'});until(()=>!h.projects.some(j=>j.kind==='training'),'erste Ausbildung');
@@ -178,7 +202,7 @@ function progress({game,player:p,home:e,ship}){
     if(!p.homeQuest.completed.H08){
     deliverQuest('H08');go(e);pause();
     const donated=game.shipsOf(p.id).find(s=>s.id!==current.id);if(!donated)throw new Error('Kein realer Expeditionsspatz');
-    current=donated;go(e);for(const [g,n] of Object.entries(current.cargo))transfer(e,g,n,'sell');
+    if(FLEET)cmd('stop',{ships:[donated.id]});current=donated;go(e);for(const [g,n] of Object.entries(current.cargo))transfer(e,g,n,'sell');
     current=ship;cmd('manualShip',{ship:ship.id});cmd('homeOrbital',{large:false,ship:donated.id,confirmed:true});until(()=>h.orbital.small,'kleiner Ring');quest('H08');
     }
     if(!p.homeQuest.completed.H09){construction('researchWorkshop');deliverQuest('H09');go(game.world.entities.get(p.homeQuest.sites.H09));cmd('homeArchiveVisit',{target:current.dockedAt,ship:current.id});quest('H09');}

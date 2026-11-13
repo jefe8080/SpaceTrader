@@ -113,8 +113,9 @@ export function renderPlanetUi() {
   if(viewed){setHtml(summary,planetSummary(viewed));summary.title=viewed.name;}
   document.body.classList.toggle('landed',!!viewed);
   const fleet=$('fleet');
-  if(viewed)fleet.style.top=`${Math.ceil($('topbar').getBoundingClientRect().bottom)+12}px`;
-  else fleet.style.removeProperty('top');
+  const headerBottom=Math.ceil($('topbar').getBoundingClientRect().bottom);
+  document.documentElement.style.setProperty('--hud-bottom',headerBottom+'px');
+  fleet.style.top=`${headerBottom+12}px`;$('details').style.top=`${headerBottom+12}px`;
   // Keep recipe stocks live even while an adjacent form retains keyboard focus.
   if(viewed)for(const label of panel.querySelectorAll('[data-production-recipe]')){
     const id=label.dataset.productionRecipe;if(RECIPES[id])label.outerHTML=recipeWithStock(viewed.market,RECIPES[id],id);

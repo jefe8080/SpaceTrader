@@ -1,0 +1,281 @@
+{
+  "seed": 131127,
+  "decisionSeconds": 30,
+  "decisions": 47,
+  "stages": [
+    {
+      "id": "H00",
+      "seconds": 91,
+      "credits": 5000,
+      "ships": 1
+    },
+    {
+      "id": "H01",
+      "seconds": 166,
+      "credits": 5500,
+      "ships": 1
+    },
+    {
+      "id": "H02",
+      "seconds": 810,
+      "credits": 5927,
+      "ships": 1
+    },
+    {
+      "id": "H04",
+      "seconds": 1053,
+      "credits": 6000,
+      "ships": 1
+    },
+    {
+      "id": "H03",
+      "seconds": 1352,
+      "credits": 6214,
+      "ships": 1
+    },
+    {
+      "id": "H05",
+      "seconds": 1982,
+      "credits": 6901,
+      "ships": 2
+    },
+    {
+      "id": "H06",
+      "seconds": 3311,
+      "credits": 9348,
+      "ships": 2
+    }
+  ],
+  "serverSeconds": 3311,
+  "credits": 9348,
+  "produced": {
+    "water": 60,
+    "food": 20,
+    "fuel": 22,
+    "ingots": 40
+  },
+  "stock": {
+    "ore": 4,
+    "tourists": 41,
+    "workers": 52,
+    "water": 99.77,
+    "food": 45.17,
+    "shipfuel": 40,
+    "fuel": 2,
+    "ingots": 92,
+    "plates": 40,
+    "electronics": 12,
+    "machinery": 4
+  },
+  "grants": [
+    {
+      "id": "home_p1:repairs",
+      "source": "start_exception",
+      "recipient": "p1",
+      "goods": {
+        "ingots": 80,
+        "plates": 40,
+        "electronics": 12,
+        "machinery": 4
+      }
+    },
+    {
+      "id": "home_p1:start-ship",
+      "source": "start_exception",
+      "recipient": "p1",
+      "ship": "s1",
+      "fuel": 6
+    },
+    {
+      "id": "home_p1:supplies",
+      "source": "start_exception",
+      "recipient": "p1",
+      "goods": {
+        "water": 80,
+        "food": 40,
+        "shipfuel": 40
+      }
+    },
+    {
+      "id": "p1:relic:H04",
+      "source": "quest_salvage",
+      "recipient": "p1",
+      "relic": "p1:relic"
+    },
+    {
+      "id": "home_p1:second-ship",
+      "source": "quest_H05",
+      "recipient": "p1",
+      "ship": "s54",
+      "fuel": 6
+    }
+  ],
+  "relic": {
+    "id": "p1:relic",
+    "speed": 4,
+    "location": {
+      "kind": "world",
+      "id": "home_p1"
+    },
+    "operation": null
+  },
+  "population": 101,
+  "civilianMoney": {
+    "taxRate": 0.2,
+    "gross": 196.55440740740093,
+    "taxes": 39.31088148148144,
+    "consumptionPayments": 898.436715563223,
+    "incomePerHour": 228.93333333333334
+  },
+  "publicMarkets": 120,
+  "publicManufacturedStock": {
+    "finegold": 45.7611291363427,
+    "cutdiamonds": 39.840582648983094,
+    "enricheduranium": 45.33741497767276,
+    "stableantimatter": 67.42780989859506,
+    "refinedexocrystals": 43.092875110124524,
+    "refinednebulagas": 58.541264300546494,
+    "food": 458.7278354301918,
+    "shipfuel": 4278.656730083196,
+    "ingots": 316.2011548408909,
+    "plastics": 670.0638608672874,
+    "glass": 380.4838627514978,
+    "chemicals": 751.3482689277891,
+    "plates": 160.69485766428042,
+    "alloys": 545.1139909957575,
+    "medicine": 643.4557568762243,
+    "clothing": 562.7210320485917,
+    "batteries": 289.99226054044163,
+    "electronics": 527.8442259734177,
+    "hullparts": 107.7550912433475,
+    "powercells": 292.01921746164675,
+    "machinery": 105.21280629132843,
+    "engines": 116.94510779287585,
+    "shipparts": 138.63262023090545,
+    "consumer": 334.2417607863954,
+    "aicores": 184.89969745630378,
+    "habitats": 97.6374842383529
+  },
+  "advanced": {
+    "completed": false,
+    "seconds": 3313,
+    "earned": 0,
+    "quests": 0,
+    "error": "routeSave: Text muss 1 bis 32 Zeichen lang sein.",
+    "allocations": [
+      {
+        "id": "control",
+        "state": "active",
+        "power": 3,
+        "workers": {
+          "basic": 2,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "dock",
+        "state": "active",
+        "power": 2,
+        "workers": {
+          "basic": 2
+        }
+      },
+      {
+        "id": "foodplant",
+        "state": "paused",
+        "reason": "Zutaten fehlen",
+        "power": 0,
+        "workers": {
+          "basic": 0,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "fueldepot",
+        "state": "paused",
+        "reason": "Zutaten fehlen",
+        "power": 0,
+        "workers": {
+          "basic": 0,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "waterworks",
+        "state": "paused",
+        "reason": "Zutaten fehlen",
+        "power": 0,
+        "workers": {
+          "basic": 0,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "refinery",
+        "state": "paused",
+        "reason": "Zutaten fehlen",
+        "power": 0,
+        "workers": {
+          "basic": 0,
+          "skilled": 0,
+          "specialist": 0
+        }
+      },
+      {
+        "id": "smelter",
+        "state": "active",
+        "power": 1,
+        "workers": {
+          "basic": 4
+        }
+      }
+    ],
+    "stock": {
+      "ore": 4,
+      "water": 99.7519046593777,
+      "food": 45.15942979382931,
+      "shipfuel": 40,
+      "fuel": 2,
+      "ingots": 92,
+      "plates": 40,
+      "electronics": 12,
+      "machinery": 4
+    },
+    "events": [
+      {
+        "seconds": 3313,
+        "action": "FEHLER",
+        "credits": 9348,
+        "message": "routeSave: Text muss 1 bis 32 Zeichen lang sein."
+      }
+    ]
+  },
+  "corridors": {
+    "H05": {
+      "seconds": 1982,
+      "min": 1800,
+      "max": 3600,
+      "within": true,
+      "documentedDeviation": null,
+      "accepted": true
+    },
+    "H08": {
+      "min": 14400,
+      "max": 28800,
+      "within": false,
+      "documentedDeviation": null,
+      "accepted": false
+    },
+    "H13": {
+      "min": 72000,
+      "max": 108000,
+      "within": false,
+      "documentedDeviation": null,
+      "accepted": false
+    }
+  }
+}

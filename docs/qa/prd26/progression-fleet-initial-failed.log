@@ -1,0 +1,99 @@
+{"seconds":3313,"action":"FEHLER","credits":9348,"message":"routeSave: Text muss 1 bis 32 Zeichen lang sein."}
+{
+  "completed": false,
+  "seconds": 3313,
+  "earned": 0,
+  "quests": 0,
+  "error": "routeSave: Text muss 1 bis 32 Zeichen lang sein.",
+  "allocations": [
+    {
+      "id": "control",
+      "state": "active",
+      "power": 3,
+      "workers": {
+        "basic": 2,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "dock",
+      "state": "active",
+      "power": 2,
+      "workers": {
+        "basic": 2
+      }
+    },
+    {
+      "id": "foodplant",
+      "state": "paused",
+      "reason": "Zutaten fehlen",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "fueldepot",
+      "state": "paused",
+      "reason": "Zutaten fehlen",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "waterworks",
+      "state": "paused",
+      "reason": "Zutaten fehlen",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "refinery",
+      "state": "paused",
+      "reason": "Zutaten fehlen",
+      "power": 0,
+      "workers": {
+        "basic": 0,
+        "skilled": 0,
+        "specialist": 0
+      }
+    },
+    {
+      "id": "smelter",
+      "state": "active",
+      "power": 1,
+      "workers": {
+        "basic": 4
+      }
+    }
+  ],
+  "stock": {
+    "ore": 4,
+    "water": 99.7519046593777,
+    "food": 45.15942979382931,
+    "shipfuel": 40,
+    "fuel": 2,
+    "ingots": 92,
+    "plates": 40,
+    "electronics": 12,
+    "machinery": 4
+  },
+  "events": [
+    {
+      "seconds": 3313,
+      "action": "FEHLER",
+      "credits": 9348,
+      "message": "routeSave: Text muss 1 bis 32 Zeichen lang sein."
+    }
+  ]
+}

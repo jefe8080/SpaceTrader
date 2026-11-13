@@ -1,0 +1,15 @@
+✔ Nachfrageprüfung am Verwaltungsplaneten erhält dynamische Fraktionsversorgung (261.8158ms)
+✔ Verwaltungsmarkt migriert Bestände einmalig, erhält Grundversorgung und übersteht Neustarts (5238.371ms)
+✔ Manueller und Routenhandel nutzen denselben Pool/Puffer und blockieren andere Waren (167.9437ms)
+✔ Feindliche Versorgung erfordert ausdrückliche Abgabe; Beute bleibt nutzbar und Pool gedeckelt (137.7783ms)
+✔ Fraktionsquest wandelt Sonderwaren in Pool um; voller Versorgungspuffer erhält Quest und Ladung (176.0486ms)
+✔ Trade preview matches a real moving-price batch without changing live state (66.627ms)
+✔ Ledger groups interleaved civil payments and keeps free transfers separate from profit (0.3938ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6361.0171

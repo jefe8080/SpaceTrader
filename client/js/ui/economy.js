@@ -1,5 +1,6 @@
 import {GOODS} from '/shared/goods.js';
-import {state,esc,fmt,myShips} from '../state.js';
+import {state,esc,myShips} from '../state.js';
+const fmt=n=>Number(n).toLocaleString('de-DE',{maximumFractionDigits:2});
 import {socket} from '../net.js';
 import {$,registerModal,openModal,closeModal,setHtml} from './dom.js';
 import {bus} from './bus.js';

@@ -97,6 +97,7 @@ function shipDetails(s) {
   if (s.task) return h + npcTaskHtml(s);
   if (!own) return h + `<div class="muted">${def.desc}</div>` + foreignWarSection(s);
   h += `<div class="status-line">${shipSymbol(s)} ${s.transit ? 'Im Wurmloch …' : statusText(s)}</div>`;
+  if(s.battle)h+=`<button class="small primary" data-war="view" data-battle="${s.battle}">Zur laufenden Schlacht</button>`;
   if (s.offer !== null && s.offer !== undefined) {
     h += `<div class="warnbox">🤝 Im Konsortium für ${fmt(s.offer)} Cr angeboten, gesperrt.
       <button class="small" data-act="cShipDelete" data-ship="${s.id}">Angebot zurückziehen</button></div>`;

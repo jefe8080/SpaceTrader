@@ -1,0 +1,26 @@
+[
+  {
+    "variant": "ordinary",
+    "seconds": 280,
+    "manualIceDelivered": 50,
+    "helperIceDelivered": 0,
+    "fuelUsed": 0.056656729005396755,
+    "manualPurchaseCost": 191.19703232892675
+  },
+  {
+    "variant": "relic",
+    "seconds": 70,
+    "manualIceDelivered": 50,
+    "helperIceDelivered": 0,
+    "fuelUsed": 0,
+    "manualPurchaseCost": 193.44447940695704
+  },
+  {
+    "variant": "relic-and-helper",
+    "seconds": 70,
+    "manualIceDelivered": 50,
+    "helperIceDelivered": 30,
+    "fuelUsed": 0,
+    "manualPurchaseCost": 196.6613173964995
+  }
+]
