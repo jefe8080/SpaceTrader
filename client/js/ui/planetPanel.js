@@ -231,7 +231,9 @@ panel.addEventListener('click', (ev) => {
     case 'homeSupplyRoute':{
       const source=[...state.entities.values()].filter(x=>x.system===e.system&&x.id!==e.id&&x.market?.goods.ice?.role==='produce').sort((a,b)=>Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y))[0];
       if(!source){toast('Noch keine Eisquelle bekannt. Erkunde die Eiswelt im Heimatsystem.');return;}
-      bus.openRouteEditor(null,{stops:[{targetId:source.id,actions:[{op:'buy',good:'ice',amount:30,limit:0}]},{targetId:e.id,actions:[{op:'sell',good:'ice',amount:0,limit:0}]}],assign:ship?[ship.id]:[]});return;
+      const helper=d.helper==='true'?myShips().find(s=>s.id!==state.manualShip&&!s.relicSpeed&&!s.battle&&!s.captive&&!s.queue?.length):ship;
+      if(d.helper==='true'&&!helper){toast('Kein freies Zweitschiff vorhanden. Bestehende Aufträge bleiben erhalten; wähle ein Schiff selbst im Editor.');}
+      bus.openRouteEditor(null,{stops:[{targetId:source.id,actions:[{op:'buy',good:'ice',amount:30,limit:0}]},{targetId:e.id,actions:[{op:'sell',good:'ice',amount:0,limit:0}]}],assign:helper?[helper.id]:[]});return;
     }
     case 'homeRoutes':bus.openRouteEditor(null);return;
     case 'homeOpen':openHomeBuilding(d.key);return;

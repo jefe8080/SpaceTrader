@@ -22,6 +22,7 @@ import {homeQuestConditions} from '/shared/home-quest-progress.js';
 import {toast} from './dom.js';
 import {warehouseTransfer} from '/shared/warehouse-transfer.js';
 import {impactText} from './productionPlanning.js';
+import {visibleQuestBranches,questWorkplaces} from '/shared/quest-guidance.js';
 const productionNotices=new Set();
 function productionMilestone(){
   const h=state.entities.get(state.homeworld)?.market?.homeworld;
@@ -83,6 +84,10 @@ export function homePanel(entity, item, ship) {
     const overview='';
     if(entity.id!==state.homeworld)return civicPanel(home)+planetNamePanel(entity)+'<h3>Laufende Quests</h3>'+activeSideQuests(state).map(q=>'<p>'+questText(q)+'</p>').join('')+Object.entries(HOME_QUESTS).filter(([id])=>state.homeQuest?.active?.[id]&&!completed(id)).map(([id,q])=>'<p><b>'+id+' · '+esc(q.title)+'</b><br>'+esc(q.goal)+'</p>').join('')+'<button class="small" data-pp="homeSite" data-id="'+state.homeworld+'">Zur Hauptheimat zeigen</button>'+historyPanel()+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+jump('home:control','Weltennetz verwalten');
     let html = overview+(activeSideQuests(state).length?'<h3>Laufende Nebenquests</h3>'+activeSideQuests(state).map(q=>'<p>'+questText(q)+'</p>').join(''):'')+`<div class="muted">Hauptquests laufen unabhängig von normalen Quests. Mehrere freigeschaltete Zweige können gleichzeitig fortschreiten.</div>`;
+    html+='<details data-disclosure="quest-branches"><summary>Dein Fortschrittsbaum</summary><ul>'+visibleQuestBranches(state.homeQuest).map(q=>`<li>${q.done?'✓':q.active?'○':'◇'} ${q.id} · ${esc(q.title)}${q.requires.length?' · nach '+q.requires.join(' + '):' · Einstieg'}</li>`).join('')+'</ul><p>Nur erreichte und unmittelbar freigeschaltete Zweige sind sichtbar. Nummern geben keine Pflichtreihenfolge vor.</p></details>';
+    if(completed('H05'))html+='<details data-disclosure="second-ship"><summary>Zwei Schiffe sinnvoll einsetzen</summary><p>Ein freies gewöhnliches Schiff kann Eis liefern, während du mit dem anderen erkundest oder handelst. Prüfe die vorgeschlagene Route und Schiffszuweisung vor dem Speichern; laufende Aufträge werden nicht ersetzt.</p><button class="small" data-pp="homeSupplyRoute" data-helper="true">Versorgung mit freiem Zweitschiff vorbereiten</button></details>';
+    const reactions=[home.structures?.some(b=>b.kind==='school'&&b.status==='ready')?'Tarek: „Unsere Leute können jetzt selbst Fachkräfte ausbilden. Das macht den nächsten Ausbau möglich.“':null,home.orbital?.small?'Mira: „Am Ring entsteht wieder ein eigener Schiffbau. Aus dem alten Hafen wird ein Netz.“':null,state.homeQuest?.firstColony?'Mira: „Eine zweite Heimat. Jetzt entscheiden die Verbindungen zwischen unseren Welten über ihren Erfolg.“':null].filter(Boolean);
+    if(reactions.length)html+='<details data-disclosure="settlement-voices"><summary>Stimmen aus der Siedlung</summary>'+reactions.map(t=>'<p>'+esc(t)+'</p>').join('')+'</details>';
     for (const [id, quest] of Object.entries(HOME_QUESTS)) {
       if(completed(id)||!state.homeQuest?.active?.[id])continue;
       const unlocked = true;
@@ -91,6 +96,7 @@ export function homePanel(entity, item, ship) {
       ${homeQuestConditions(id,state.homeQuest,home).map(c=>`<p>${c.have>=c.need?'✓':'○'} ${esc(c.label)}: ${c.have} / ${c.need}</p>`).join('')}
       ${completed(id) ? '' : `<button class="small primary" data-pp="homeQuest" data-quest="${id}" ${state.homeQuest.ready?.[id]?'':'disabled'}>${state.homeQuest.ready?.[id]?'Auftrag erfüllt – Belohnung abholen':'Voraussetzungen noch offen'}</button>`}</div>`;
       if(id==='H03')html+='<button class="small" data-pp="homeSupplyRoute">Erste Eisversorgung einrichten</button><p>Die Vorlage kauft Eis, entlädt es kostenlos zu Hause und wiederholt die Fahrt. Wähle im Editor ein Schiff und speichere. Lieferung, nicht nur Speichern, erfüllt das Ziel.</p>';
+      html+='<div class="quest-workplaces">'+questWorkplaces(id,home).map(([label,key])=>jump(key,label)).join('')+'</div>';
       if(id==='H02'){
         html+='<p>Kaufe Eis und Getreide, fliege zurück und entlade sie im Zentrallager. Die reparierten Anlagen produzieren daraus automatisch.</p>';
         for(const good of ['ice','grain']){const source=[...state.entities.values()].find(e=>e.system===entity.system&&e.market?.goods[good]?.role==='produce');if(source)html+=`<button class="small" data-pp="homeSite" data-id="${source.id}">${GOODS[good].name} kaufen: ${esc(source.name)}</button>`;}
@@ -110,6 +116,7 @@ export function homePanel(entity, item, ship) {
     for(const [module,find] of Object.entries(STUDY_FINDS))if(completed(find.quest)&&!state.homeQuest.finds?.[module])html+=`<p>${find.name}: ${state.homeQuest.finds?.[module]?'einmalige Vorlage geborgen':'Studienvorlage verfügbar'}</p><button class="small" data-pp="homeSite" data-id="${state.homeQuest.sites?.[module]||''}">Forschungsfund zeigen</button>`;
     if(completed('H06'))html+=`<p>Volle Grundversorgung: ${Math.floor(home.fullSupplySeconds||0)} / 1.800 s · Selbst ausgebildete Fachkräfte: ${home.trained?.skilled||0}</p>`;
     if(completed('H07'))html+=jump('home:orbital','Zum Orbitalring');
+    html+='<details data-disclosure="while-working"><summary>Während Anlagen und Bauprojekte arbeiten</summary><p>Freiwillig: eine bekannte Rohstoffquelle erkunden, einen vorhandenen Nebenauftrag auswählen oder die Zutaten für dein nächstes Ziel planen. Du darfst ebenso den Aufbau beobachten; es entsteht keine zusätzliche Pflicht oder Frist.</p>'+jump('home:control','Versorgung prüfen')+jump('home:dock','Nächste Lieferung vorbereiten')+'</details>';
     if(completed('H02'))html+=jump('home:control','Welten und Expeditionen verwalten');
     if(completed('H02')){
       const surplus=Math.max(0,Math.floor(availableHomeStock(entity.market,'water')-home.population*.4));

@@ -1,0 +1,9 @@
+import {HOME_QUESTS} from './homeworld.js';
+/** Only completed, active or immediately unlocked nodes; no remote story spoilers. */
+export function visibleQuestBranches(quest){return Object.entries(HOME_QUESTS).filter(([id,q])=>quest?.completed?.[id]||quest?.active?.[id]||(q.requires||[]).length&&(q.requires||[]).every(r=>quest?.completed?.[r])).map(([id,q])=>({id,title:q.title,requires:q.requires||[],done:!!quest?.completed?.[id],active:!!quest?.active?.[id]}));}
+export function questWorkplaces(id,home){
+ const freePlot=Array.from({length:home.plots||8},(_,i)=>i).find(i=>!home.structures?.some(b=>b.plot===i));
+ const structure=kind=>{const b=home.structures?.find(b=>b.kind===kind||b.recipe===kind||b.upgrades?.includes(kind));return b?'home:structure:'+b.id:freePlot==null?'home:overview':'home:plot_'+freePlot;};
+ const map={H01:[['Landeplatz reparieren','home:dock']],H02:[['Wasserwerk','home:waterworks'],['Nahrungsanlage','home:foodplant'],['Zutaten einlagern','home:dock']],H03:[['Leitstelle','home:control'],['Treibstoffanlage','home:fueldepot']],H04:[['Fund übergeben','home:workshop']],H06:[['Raffinerie','home:refinery'],['Schmelzwerk','home:smelter']],H07:[['Schule bauen / Ausbildung',structure('school')],['Platten herstellen',structure('rollingmill')],['Kabel herstellen',structure('cableworks')]],H08:[['Orbitalring','home:orbital']],H09:[['Forschungswerkstatt',structure('researchWorkshop')]],H10:[['Veredelung planen',freePlot==null?'home:overview':'home:plot_'+freePlot]],H11:[['Wohnraum',structure('housing')],['Versorgung','home:overview']],H12:[['Forschungszentrum',structure('researchWorkshop')]],H13:[['Weltennetz','home:control']],H15:[['Großer Ring','home:orbital']],H16:[['Leitstellennetz','home:control']]};
+ return map[id]||[['Material und Lieferung','home:dock']];
+}
