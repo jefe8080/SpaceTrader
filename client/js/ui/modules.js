@@ -30,17 +30,22 @@ export function handleModuleAction(data){
   return true;
 }
 
-export function moduleCraftPanel(entity){
+export function moduleCraftPanel(entity,building){
   const home=entity.market.homeworld,known=new Set([...(state.moduleBlueprints||[]),...(home.moduleBlueprints||[])]);
   let html='<h3>Modulfertigung und Studium</h3><p class="muted">Ein Auftrag je freier geeigneter Anlage. Fehlende Energie oder Kräfte pausieren; gebundene Zutaten werden nicht nochmals abgebucht.</p>';
   for(const [id,recipe] of Object.entries(MODULE_RECIPES)){
+    const studyFacility=recipe.facility==='moduleBench'?'researchWorkshop':recipe.facility;
+    const supports=kind=>!building||building.kind===kind||building.upgrades?.includes(kind);
+    const craft=supports(recipe.facility),study=supports(studyFacility);
+    if(!craft&&!study)continue;
     const exemplars=(entity.market.moduleInventory?.[id]||0)+myShips().filter(s=>s.dockedAt===entity.id).reduce((sum,s)=>sum+(s.moduleCargo?.[id]||0),0);
     html+=`<div class="quest-offer"><b>${MODULES[id].name}</b><p>${Object.entries(recipe.goods).map(([g,n])=>n+' '+GOODS[g].name).join(', ')} · ${recipe.seconds} s</p>
       <div class="muted">${recipe.facility==='moduleBench'?'Einfache Modulwerkbank':recipe.facility==='researchWorkshop'?'Forschungswerkstatt':'Forschungszentrum'} · Bauplan ${known.has(id)?'bekannt':'unbekannt'}</div>`;
-    if(known.has(id))html+=`<button class="small" data-pp="homeModuleCraft" data-module="${id}">Ein Exemplar fertigen</button>`;
-    else html+=`<button class="small" data-pp="homeModuleCraft" data-module="${id}" data-study="true" ${exemplars?'':'disabled'}>Exemplar studieren und verbrauchen · ${Math.min(120,recipe.seconds)} s</button>`;
+    if(known.has(id)&&craft)html+=`<button class="small" data-pp="homeModuleCraft" data-module="${id}" data-facility="${building?.id||''}">Ein Exemplar hier fertigen</button>`;
+    else if(!known.has(id)&&study)html+=`<button class="small" data-pp="homeModuleCraft" data-module="${id}" data-facility="${building?.id||''}" data-study="true" ${exemplars?'':'disabled'}>Exemplar hier studieren und verbrauchen · ${Math.min(120,recipe.seconds)} s</button>`;
+    else html+='<p>Studium in der passenden Forschungsanlage; Fertigung am oben genannten Standort.</p>';
     html+='</div>';
   }
-  for(const project of home.projects?.filter(p=>['module','study'].includes(p.kind))||[])html+=`<p>${project.kind==='study'?'Studium':'Fertigung'} ${esc(MODULES[project.module].name)}: ${Math.ceil(project.remaining)} s ${project.paused?'· pausiert':''}</p>`;
+  for(const project of home.projects?.filter(p=>['module','study'].includes(p.kind)&&(!building||p.facility===building.id))||[])html+=`<p>${project.kind==='study'?'Studium':'Fertigung'} ${esc(MODULES[project.module].name)}: ${Math.ceil(project.remaining)} s ${project.paused?'· pausiert: Energie oder Personal fehlt':''}</p>`;
   return html;
 }

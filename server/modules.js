@@ -89,19 +89,19 @@ export function knownModuleBlueprints(game,player){
   return [...all];
 }
 
-function facilityFor(home,module,study){
+function facilityFor(home,module,study,facilityId){
   const wanted=study?(MODULE_RECIPES[module].facility==='moduleBench'?'researchWorkshop':MODULE_RECIPES[module].facility):MODULE_RECIPES[module].facility;
-  return home.structures.find(s=>s.status==='ready'&&s.enabled!==false&&(s.kind===wanted||s.upgrades?.includes(wanted))&&!home.projects.some(p=>['module','study'].includes(p.kind)&&p.facility===s.id));
+  return home.structures.find(s=>(!facilityId||s.id===facilityId)&&s.status==='ready'&&s.enabled!==false&&(s.kind===wanted||s.upgrades?.includes(wanted))&&!home.projects.some(p=>['module','study'].includes(p.kind)&&p.facility===s.id));
 }
 
-export function startModuleProject(game,player,entity,module,study=false){
+export function startModuleProject(game,player,entity,module,study=false,facilityId){
   const error=homeAccess(game,player,entity);if(error)return error;
   const home=entity.market.homeworld,recipe=MODULE_RECIPES[module];initializeHomeOperations(home);
   const known=knownModuleBlueprints(game,player).includes(module);
   if(study&&known)return 'Dieser Bauplan ist bereits bekannt.';
   if(!study&&!known)return 'Zuerst ein vorhandenes Exemplar studieren oder den Grundbauplan freischalten.';
   if(study&&[...game.world.entities.values()].some(e=>e.market?.homeworld?.owner===player.id&&e.market.homeworld.projects?.some(p=>p.kind==='study'&&p.module===module)))return 'Dieses Modul wird bereits studiert.';
-  const facility=facilityFor(home,module,study);if(!facility)return 'Keine freie geeignete Modulwerkbank oder Forschungsanlage.';
+  const facility=facilityFor(home,module,study,facilityId);if(!facility)return 'Keine freie geeignete Modulwerkbank oder Forschungsanlage.';
   if(study){
     entity.market.moduleInventory||={};
     const carrier=game.shipsOf(player.id).find(s=>s.dockedAt===entity.id&&count(s.moduleCargo,module)>0);

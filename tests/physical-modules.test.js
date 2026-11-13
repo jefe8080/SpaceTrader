@@ -21,6 +21,20 @@ const command=(f,cmd,args={})=>runCommand(f.game,f.player,{cmd,target:f.entity.i
 const advance=(f,dt)=>{f.game.time+=dt;tickHomeworld(f.game,f.entity,dt);};
 const close=f=>f.game.store.close();
 
+test('Fertigung belegt die ausgewählte geeignete Anlage und weicht bei Belegung nicht aus',()=>{
+  const f=fixture();
+  try{
+    f.home.structures.push({id:'bench2',kind:'moduleBench',status:'ready',enabled:true,plot:1});
+    assert.equal(command(f,'homeModuleCraft',{module:'cabin',facility:'bench2'}),undefined);
+    assert.equal(f.home.projects[0].facility,'bench2');
+    const stock=f.entity.market.goods.plates.stock;
+    assert.match(command(f,'homeModuleCraft',{module:'cabin',facility:'bench2'}),/Keine freie/);
+    assert.equal(f.entity.market.goods.plates.stock,stock);
+    assert.equal(command(f,'homeModuleCraft',{module:'cabin',facility:'bench'}),undefined);
+    assert.match(command(f,'homeModuleCraft',{module:'cabin',facility:'foreign'}),/Keine freie/);
+  }finally{close(f);}
+});
+
 test('Grundmodulfertigung bindet tatsächliche Zutaten und 30 Lagerplätze, ein Auftrag je Werkbank',()=>{
   const f=fixture(),before=f.entity.market.goods.plates.stock;
   assert.equal(command(f,'homeModuleCraft',{module:'cabin'}),undefined);assert.equal(f.entity.market.goods.plates.stock,before-8);assert.equal(f.home.moduleOutputReserved,30);

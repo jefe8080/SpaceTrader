@@ -16,7 +16,7 @@ export default {
     run({game,player},{ship,module,destination}){return removePhysicalModule(game,player,ship,module,destination);},
   },
   homeModuleCraft:{
-    args:{target:V.entity(),module:V.key(MODULES),study:V.bool()},
-    run({game,player},{target,module,study}){return startModuleProject(game,player,target,module,study);},
+    args:{target:V.entity(),module:V.key(MODULES),study:V.bool(),facility:V.opt(V.str(40,1))},
+    run({game,player},{target,module,study,facility}){return startModuleProject(game,player,target,module,study,facility);},
   },
 };

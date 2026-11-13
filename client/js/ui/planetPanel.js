@@ -43,6 +43,7 @@ bus.openHomeBuilding=openHomeBuilding;
 addEventListener('resize', renderPlanetUi);
 
 const shipsHere = (id) => myShips().filter((s) => s.dockedAt === id);
+const chosenShip=id=>shipsHere(id).find(s=>s.id===state.homeDockShip)||shipsHere(id).find(s=>s.id===state.manualShip)||shipsHere(id)[0];
 const onBoard = (id, g) => shipsHere(id).reduce((a, s) => a + (s.cargo?.[g] || 0), 0);
 const cons = () => (state.cons && !state.cons.none ? state.cons : null);
 
@@ -141,7 +142,7 @@ export function renderPlanetUi() {
   // Gebäude kann nach Änderungen (Abriss, Bau) neu nummeriert sein
   const it = current;
   current = it;
-  const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
+  const ship = chosenShip(e.id);
   let body = '';
   if (e.type === 'ruins') body = homePanel(e, it, ship);
   else if (it.kind === 'questhouse') body = questBoardSection(e, ship, true)+propertySection(e);
@@ -208,7 +209,7 @@ panel.addEventListener('click', (ev) => {
   if(handleModuleAction(d))return;
   const e = state.entities.get(state.landed);
   if (!e) return;
-  const ship = shipsHere(e.id).find((s) => s.queue?.[0]?.t !== 'route') || shipsHere(e.id)[0];
+  const ship = chosenShip(e.id);
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
     case 'homeRoutes':bus.openRouteEditor(null);return;
@@ -237,7 +238,7 @@ panel.addEventListener('click', (ev) => {
       const recipe=document.getElementById('homeRefiningRecipe')?.value;
       if(recipe)confirmAction(`Zu ${RECIPES[recipe].name} wechseln? Laufender Zyklusfortschritt wird zurückgesetzt; keine Materialerstattung.`,()=>cmd('homeRecipeChange',{target:e.id,id:d.id,recipe}));return;
     }
-    case 'homeModuleCraft':cmd('homeModuleCraft',{target:e.id,module:d.module,study:d.study==='true'});return;
+    case 'homeModuleCraft':cmd('homeModuleCraft',{target:e.id,module:d.module,study:d.study==='true',facility:d.facility});return;
     case 'homeTax':cmd('homeTax',{target:e.id,percent:Number(document.getElementById('homeTaxPercent')?.value)});return;
     case 'homeControlUpgrade': cmd('homeControlUpgrade',{target:e.id,module:d.module});return;
     case 'homeBuild': cmd('homeBuild', { target:e.id, kind:d.kind, recipe:d.kind==='plant'?document.getElementById('homeRecipe')?.value:undefined, parent:d.parent, plot:current?.plotIndex }); return;
@@ -301,6 +302,14 @@ panel.addEventListener('input',event=>{
 panel.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.target.dataset.storageRule){event.target.dispatchEvent(new Event('change',{bubbles:true}));event.target.blur();}});
 panel.addEventListener('change',event=>{
   const el=event.target;
+  if(el.id==='homeDockShip'){state.homeDockShip=el.value;el.blur();renderPlanetUi();return;}
+  if(el.id==='logKind'){
+    const production=el.value==='production',sales=el.value==='sales';
+    document.getElementById('logRecipe').closest('label').hidden=!production;
+    document.getElementById('logGood').closest('label').hidden=production;
+    document.getElementById('logAmount').closest('label').firstChild.textContent=production?'Produktionsmenge ':sales?'Verbleibender Absatzbestand ':'Zielbestand ';
+    document.getElementById('logLimit').closest('label').firstChild.textContent=sales?'Mindestverkaufspreis (0 = frei) ':'Höchsteinkaufspreis (0 = frei) ';
+  }
   if(el.dataset.storageRule){
     if(!el.checkValidity())return;
     cmd(el.dataset.storageRule==='limit'?'homeLimit':'homeReserve',{target:state.landed,good:el.dataset.good,amount:Number(el.value)});

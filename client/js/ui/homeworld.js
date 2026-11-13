@@ -89,7 +89,7 @@ export function homePanel(entity, item, ship) {
     html+=civicPanel(home)+planetNamePanel(entity)+historyPanel();
     return html;
   }
-  if (item.homeStructure) return structurePanel(entity,item.homeStructure);
+  if (item.homeStructure) return structurePanel(entity,item.homeStructure,ship);
   if(item.homeOrbital)return orbitalPanel(entity);
   if (item.kind === 'plot') return `<div class="muted">Freier Bauplatz ${item.plotIndex + 1}. Aktuell ${home.plots} von maximal ${HOMEWORLD.start.maxPlots} Plätzen erschlossen.</div>`+homeBuildPanel(entity);
   const facility = item.homeFacility, building = home.facilities[facility];
@@ -100,22 +100,7 @@ export function homePanel(entity, item, ship) {
   if (facility === 'workshop' && building.status === 'ruined' && !state.homeQuest?.completed?.H04) html += '<p>Der Reliktfund führt zur Wiederherstellung dieser Werkstatt.</p>';
   else if (building.status === 'ruined') html += `<p>${cost.credits} Cr · ${Object.entries(cost.goods).map(([g, n]) => n + ' ' + GOODS[g].name).join(', ')} · ${cost.seconds} s</p>
     <button class="primary" data-pp="homeRepair" data-facility="${facility}">Reparieren</button>`;
-  if (facility === 'workshop') {
-    const salvage = state.homeQuest?.salvage;
-    if (salvage?.phase === 'sealed') html += `<button class="primary" data-pp="relicDeliver" ${ship?.id===salvage.ship?'':'disabled'} data-ship="${salvage.ship}">Versiegelten Fund übergeben · Werkstatt 60 s</button>`;
-    if (state.relic) {
-      const relic = state.relic, location = relic.location;
-      const where = location.kind === 'ship' ? state.ships.get(location.id)?.name || location.id : state.entities.get(location.id)?.name || location.id;
-      html += `<p>Einzigartiger Antrieb ×${relic.speed} · ${esc(where)} · ${location.kind === 'ship' ? 'eingebaut' : 'eingelagert'}</p>`;
-      if (relic.operation) html += `<p>Werkstattarbeit: ${Math.max(0, Math.ceil(relic.operation.until-state.time))} s verbleibend.</p>`;
-      else {
-        const docked = myShips().filter(s=>s.dockedAt===entity.id);
-        html += `<select id="homeRelicShip" aria-label="Schiff für Reliktarbeit">${docked.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select>
-          <button class="small" data-pp="relicWork" data-kind="install" ${location.kind==='world'&&location.id===entity.id&&docked.length ? '' : 'disabled'}>Einbauen · 15 s</button>
-          <button class="small" data-pp="relicWork" data-kind="remove" ${location.kind==='ship'&&docked.some(s=>s.id===location.id) ? '' : 'disabled'}>Ausbauen · 15 s</button>`;
-      }
-    }
-  }
+  if (facility === 'workshop') html+=workshopPanel(entity,ship,building.status==='ready');
   if(facility==='control'&&building.status==='ready'){
     const pending=home.projects?.find(p=>p.kind==='control');
     if(pending)html+=`<p>Leitstellenausbau läuft · ${Math.max(0,Math.ceil(pending.until-state.time))} s · Material und Bauteam gebunden</p>`;
@@ -134,7 +119,7 @@ export function homePanel(entity, item, ship) {
   }
   if (RECIPES[facility]) {
     const recipe = RECIPES[facility];
-    html += `<p>${recipeWithStock(entity.market,recipe,facility)}</p><div class="muted">${building.restored?'Normalbetrieb: 100 %':'Reparierter Grundbetrieb: 10 %'} Geschwindigkeit. ${esc(building.blocked || '')}</div>`;
+    html += productionPanel(entity,building,facility,building.restored?1:.1);
     if(building.status==='ready'){
       html+=operationPanel(entity,facility,building);
       if(!building.restored)html+=`<p>Normalanlage: 4 Energie, 6 einfache Kräfte · ${costLabel(HOMEWORLD.industry.restore)}</p><button class="small" data-pp="homeRestore" data-facility="${facility}" ${building.upgrading?'disabled':''}>Zur Normalanlage ausbauen</button>`;
@@ -142,16 +127,35 @@ export function homePanel(entity, item, ship) {
   }
   if (facility === 'dock' && building.status === 'ready') {
     const goods = Object.entries(entity.market.goods).filter(([g]) => ['normal','hazard'].includes(GOODS[g].cls));
-    html += `<p>${ship?'Schiff: '+esc(ship.name):'Kein eigenes Schiff angedockt.'} · gemeinsames Planetenlager</p>`+storageBatchPanel(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market home-storage"><tr><th>Ware / Bestand</th><th>Lagerregeln</th></tr>';
+    html += `<label>Schiff für Transfers <select id="homeDockShip">${myShips().filter(s=>s.dockedAt===entity.id).map(s=>`<option value="${s.id}" ${s.id===ship?.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label><p>${ship?'Schiff: '+esc(ship.name):'Kein eigenes Schiff angedockt.'} · gemeinsames Planetenlager</p>`+storageBatchPanel(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market home-storage"><tr><th>Ware / Bestand</th><th>Lagerregeln</th></tr>';
     for (const [good, slot] of goods) html += `<tr><td><b>${GOODS[good].name}</b><p>${fmt(slot.stock)} im Lager<br>${fmt(ship?.cargo?.[good] || 0)} an Bord</p>
-      <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${ship && slot.stock >= 1 ? '' : 'disabled'}>Laden</button>
-      <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Einlagern</button></td><td>${storageControls(entity,good)}</td></tr>`;
+      <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${ship && slot.stock >= 1 ? '' : 'disabled'}>Ins Schiff laden</button>
+      <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Ins Heimatlager entladen</button></td><td>${storageControls(entity,good)}</td></tr>`;
     html += '</table>';
     html+='<details id="storage-modules"><summary>Modulfracht</summary>'+moduleStockPanel(entity,ship,'pp',false)+jump('home:workshop','Schiff ausrüsten')+'</details><details id="storage-population"><summary>Personenreisen</summary>'+populationPanel(entity,{prices:false})+'</details>'+homePrices(entity,home);
     html+=`<details><summary>Lokaler Handel</summary><p>${entity.market.mode==='open'?'Andere Spieler und NPCs dürfen unreservierte Waren handeln.':'Nur du kannst auf das Lager zugreifen.'}</p><button class="small" data-pp="homeTradeMode" data-mode="${entity.market.mode==='open'?'private':'open'}">Handel ${entity.market.mode==='open'?'auf privat stellen':'öffnen'}</button></details>`;
     html += `<p class="muted">Zwei Stunden Grundbedarf: ${Math.ceil(home.population*.4)} Wasser und ${Math.ceil(home.population*.2)} Nahrung. Reserven sind Teil des Lagerbestands, kein zusätzliches Lager.</p>`;
   }
   return html;
+}
+
+function workshopPanel(entity,ship,ready=true){
+  let html='';
+    const salvage = state.homeQuest?.salvage;
+    if (salvage?.phase === 'sealed') html += `<button class="primary" data-pp="relicDeliver" ${ship?.id===salvage.ship?'':'disabled'} data-ship="${salvage.ship}">Versiegelten Fund übergeben · Werkstatt 60 s</button>`;
+    if (state.relic) {
+      const relic = state.relic, location = relic.location;
+      const where = location.kind === 'ship' ? state.ships.get(location.id)?.name || location.id : state.entities.get(location.id)?.name || location.id;
+      html += `<p>Einzigartiger Antrieb ×${relic.speed} · ${esc(where)} · ${location.kind === 'ship' ? 'eingebaut' : 'eingelagert'}</p>`;
+      if (relic.operation) html += `<p>Werkstattarbeit: ${Math.max(0, Math.ceil(relic.operation.until-state.time))} s verbleibend.</p>`;
+      else {
+        const docked = myShips().filter(s=>s.dockedAt===entity.id);
+        html += `<select id="homeRelicShip" aria-label="Schiff für Reliktarbeit">${docked.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select>
+          <button class="small" data-pp="relicWork" data-kind="install" ${location.kind==='world'&&location.id===entity.id&&docked.length ? '' : 'disabled'}>Einbauen · 15 s</button>
+          <button class="small" data-pp="relicWork" data-kind="remove" ${location.kind==='ship'&&docked.some(s=>s.id===location.id) ? '' : 'disabled'}>Ausbauen · 15 s</button>`;
+      }
+    }
+    return html+(ready?'<h3>Schiff ausrüsten</h3><p>Schutzmodule benötigen weiterhin eine Werft.</p>'+moduleStockPanel(entity,ship,'pp'):'');
 }
 
 function historyPanel(){return '<details><summary>Archiv – erlebte Geschichten</summary>'+Object.entries(HOME_STORY).filter(([id])=>state.homeQuest?.scenesSeen?.[id]||completed(id)).map(([id,scene])=>`<button class="small" data-pp="homeReplay" data-scene="${id}">${id} · ${esc(scene.title)} ansehen</button><p><b>${esc(scene.speaker)}</b>: ${esc(scene.text)}</p>`).join('') + (state.homeQuest?.journal || []).map((entry) => `<p><b>${esc(entry.speaker || entry.id)}</b> · ${esc(entry.text)}</p>`).join('') + '</details>';}
@@ -246,19 +250,28 @@ function operationPanel(entity,id,building){
     <button class="small" data-pp="homeOperation" data-id="${id}" data-enabled="${building.enabled===false}">${building.enabled===false?'Betrieb fortsetzen':'Betrieb pausieren'}</button>
     <button class="small" data-pp="homePriority" data-id="${id}">Priorität ${building.priority??50} ändern</button>`;
 }
+function productionPanel(entity,building,recipeId,speed){
+  const recipe=RECIPES[recipeId],home=entity.market.homeworld;
+  const assignment=home.allocations?.find(a=>a.id===(building.id||recipeId));
+  const running=assignment?.state==='active';
+  return `<p>${recipeWithStock(entity.market,recipe,recipeId)}</p><p>${running?'Produziert':'Steht: '+esc(assignment?.reason||'Anlage nicht fertig')} · Zyklus ${recipe.time/speed} s bei ${speed*100} % Betrieb. ${running?'Nächster Ertrag in '+Math.ceil(Math.max(0,recipe.time-(building.progress||0))/speed)+' s.':''}</p><p>${Object.entries(recipe.out).map(([g,n])=>`${GOODS[g].name}: ${running?fmt(n*speed*3600/recipe.time):0}/h`).join(', ')}</p>`+Object.entries(recipe.in).map(([g,n])=>`<p>${GOODS[g].name}: ${fmt(availableHomeStock(entity.market,g))} verfügbar · ${Math.floor(availableHomeStock(entity.market,g)/n*recipe.time/speed/60)} min Zutatenvorrat</p>`).join('')+jump('home:control','Versorgung organisieren')+jump('home:dock','Lager öffnen');
+}
 
-function structurePanel(entity,id){
+function structurePanel(entity,id,ship){
   const home=entity.market.homeworld,building=home.structures.find(s=>s.id===id);if(!building)return '';
   const spec=homeStructureSpec(building);
   let html=(building.kind==='housing'?housingPanel(entity,building):'')+`<p>${building.status==='building'?`Bau läuft · ${Math.max(0,Math.ceil(building.readyAt-state.time))} s · Material und zwei einfache Kräfte gebunden`:'Betriebsbereite Anlage'}</p>
     <p>${spec.power} Energie · ${spec.workers.basic||0} einfach / ${spec.workers.skilled||0} Fach / ${spec.workers.specialist||0} Spezial</p>`;
+  if(building.kind==='workshop'&&building.status==='ready')html+=workshopPanel(entity,ship);
+  if(spec.generation){const active=home.allocations?.some(a=>a.id===id&&a.state==='active');html+='<p>Stromerzeugung: '+(active?spec.generation:0)+' / '+spec.generation+' · Planet: '+(home.energy?.used||0)+' benutzt / '+(home.energy?.generation||0)+' verfügbar.</p>'+Object.entries(spec.fuelPerHour||{}).map(([g,n])=>'<p>'+GOODS[g].name+': '+n+'/h · '+Math.floor(availableHomeStock(entity.market,g)/n*60)+' min Vorrat</p>').join('');}
+  if(building.kind==='spaceport')html+='<p>Im Betrieb: +2 gleichzeitig bedienbare Schiffe und +500 Warenumschlag je Serverminute am gemeinsamen Lager.</p>';
   if (['silo','safeStorage'].includes(building.kind)) {
     const level=storageLevel(building), cost=storageUpgradeCost(building.kind,level+1);
     html+=`<p>Stufe ${level} / 5 · Kapazität ${spec.storage||spec.hazardStorage}</p>`;
     if(building.upgrading) html+='<p>Ausbau läuft; bisherige Kapazität bleibt nutzbar.</p>';
     else if(cost&&building.status==='ready') html+=`<p>${costLabel(cost)}</p><button class="small" data-pp="homeStorageUpgrade" data-id="${id}">Auf Stufe ${level+1} ausbauen</button>`;
   }
-  if(building.recipe)html+=`<p>${recipeWithStock(entity.market,RECIPES[building.recipe],building.recipe)} · ${RECIPES[building.recipe].time} s je vollständigem Zyklus</p>`;
+  if(building.recipe)html+=productionPanel(entity,building,building.recipe,1);
   if(building.status==='ready')html+=operationPanel(entity,id,building);
   if(building.kind==='plant'&&building.progress>0)html+=`<button class="small" data-pp="homeAbortCycle" data-id="${id}">Laufenden Produktionszyklus abbrechen</button>`;
   if(building.status==='ready'&&REFINEMENT_RECIPES.includes(building.recipe)){
@@ -266,32 +279,39 @@ function structurePanel(entity,id){
     html+=`<button class="small" data-pp="homeRecipeChange" data-id="${id}">Rezeptwechsel bestätigen</button>`;
   }
   if(building.kind==='school'&&building.status==='ready'){
+    html+=`<p>Qualifikationen planetenweit: ${home.workers.basic} einfach / ${home.workers.skilled} Fach / ${home.workers.specialist} Spezial.</p>`+(home.projects||[]).filter(p=>p.kind==='training').map(p=>`<p>Ausbildung: ${p.count} Personen · ${Math.ceil(p.remaining)} s ${p.paused?'· pausiert: Versorgung oder Schulbetrieb fehlt':''}</p>`).join('');
     html+='<p>Ausbildung reserviert zehn tatsächlich vorhandene freie Einwohner. Fehlende Versorgung oder Schulbetrieb pausieren den Fortschritt.</p><button class="small" data-pp="homeTrain" data-qualification="skilled">10 Fachkräfte ausbilden · 120 s</button>';
     if(building.upgrades?.includes('academy'))html+='<button class="small" data-pp="homeTrain" data-qualification="specialist">10 Spezialisten ausbilden · 180 s</button>';
     else html+=`<p>Akademie: ${costLabel(HOME_BUILDINGS.academy)}</p><button class="small" data-pp="homeBuild" data-kind="academy" data-parent="${id}">Akademieausbau</button>`;
   }
   if(building.kind==='researchWorkshop'&&!building.upgrades?.includes('researchCenter'))html+=`<p>Forschungszentrum: ${costLabel(HOME_BUILDINGS.researchCenter)}</p><button class="small" data-pp="homeBuild" data-kind="researchCenter" data-parent="${id}">Forschungszentrum ausbauen</button>`;
-  if(['moduleBench','researchWorkshop'].includes(building.kind)&&building.status==='ready')html+=moduleCraftPanel(entity);
+  if(['moduleBench','researchWorkshop'].includes(building.kind)&&building.status==='ready')html+=moduleCraftPanel(entity,building);
+  html+='<details><summary>Entfernen und Folgen</summary>';
   for(const upgrade of [...(building.upgrades||[]),null]) {
     const preview=demolitionPreview(entity.market,id,upgrade);
     const impact=preview.error||Object.entries(preview.losses).filter(([,n])=>n).map(([k,n])=>`−${n} ${({storage:'Lagerplatz',hazardStorage:'Gefahrstoffplatz',housing:'Wohnraum',power:'Strom'})[k]}`).join(', ')||'Bauplatz wird frei';
     html+=`<p>${esc(impact)} · keine Erstattung</p><button class="small" data-pp="homeDemolish" data-id="${id}" data-upgrade="${upgrade||''}" ${preview.error?'disabled':''}>${upgrade?HOME_BUILDINGS[upgrade].name+' entfernen':'Gebäude abreißen'}</button>`;
   }
-  return html;
+  return html+'</details>';
 }
 
 function homeBuildPanel(entity){
   const home=entity.market.homeworld;
   let html='<p>Baue auf diesem Platz. Zutaten liegen im gemeinsamen Lager; zusätzliche Anlagen benötigen freie Energie und Arbeitskräfte.</p><h3>Industrie bauen</h3><select id="homeRecipe" aria-label="Industrierezept">';
-  for(const [id,recipe] of Object.entries(RECIPES)){
+  let recipeGroup=null;
+  for(const [id,recipe] of Object.entries(RECIPES).sort((a,b)=>industryGroup(a[0]).localeCompare(industryGroup(b[0])))){
+    if(recipeGroup!==industryGroup(id)){if(recipeGroup)html+='</optgroup>';recipeGroup=industryGroup(id);html+='<optgroup label="Industriegruppe '+recipeGroup+'">';}
     const group=industrySpec(id);
     html+=`<option value="${id}" ${completed(group.quest)?'':'disabled'}>${recipe.name} · Gruppe ${industryGroup(id)} · ${costLabel(group)} · ${group.power} Energie · ${group.workers.basic}/${group.workers.skilled}/${group.workers.specialist} Personal</option>`;
   }
-  html+=`</select><p id="homeRecipePreview">${recipeText(Object.values(RECIPES)[0])} · ${Object.values(RECIPES)[0].time} s je Zyklus</p><button class="primary" data-pp="homeBuild" data-kind="plant">Industrieanlage bauen</button><h3>Infrastruktur</h3>`;
-  for(const [kind,spec] of Object.entries(HOME_BUILDINGS)){
+  html+=`</optgroup></select><p id="homeRecipePreview">${recipeText(Object.values(RECIPES)[0])} · ${Object.values(RECIPES)[0].time} s je Zyklus</p><button class="primary" data-pp="homeBuild" data-kind="plant">Industrieanlage bauen</button><h3>Infrastruktur</h3>`;
+  const purpose=kind=>['solar','gasGenerator','reactor'].includes(kind)?'Energie':['silo','safeStorage','spaceport'].includes(kind)?'Lager und Transport':['housing','school'].includes(kind)?'Bevölkerung':['moduleBench','researchWorkshop','workshop'].includes(kind)?'Werkstätten und Forschung':'Flächenplanung';
+  let category=null;
+  for(const [kind,spec] of Object.entries(HOME_BUILDINGS).sort((a,b)=>purpose(a[0]).localeCompare(purpose(b[0]))||Number(completed(b[1].quest))-Number(completed(a[1].quest)))){
     if(spec.parent)continue;
+    if(category!==purpose(kind)){category=purpose(kind);html+='<h4>'+category+'</h4>';}
     const cost=kind==='land'?{...spec,credits:Math.round(spec.credits*1.4**(home.expansions||0))}:spec;
-    html+=`<div class="quest-offer"><b>${spec.name}</b><p>${costLabel(cost)}</p><div class="muted">${spec.generation?`+${spec.generation} Energie`:spec.power+' Energie'} · ${spec.workers.basic||0}/${spec.workers.skilled||0}/${spec.workers.specialist||0} Personal · ${kind==='land'?'+4 Bauplätze':'1 Bauplatz'}</div>
+    html+=`<div class="quest-offer"><b>${spec.name}</b><p>${costLabel(cost)}</p><div class="muted">${spec.generation?`+${spec.generation} Energie`:spec.power+' Energie'} · ${spec.workers.basic||0}/${spec.workers.skilled||0}/${spec.workers.specialist||0} Personal · ${kind==='land'?'+4 Bauplätze · planetenweites Projekt':'1 Bauplatz'}${spec.housing?' · +'+spec.housing+' Wohnraum':''}${spec.storage?' · +'+spec.storage+' Lager':''}${spec.hazardStorage?' · +'+spec.hazardStorage+' Gefahrgutlager':''}</div>
       <button class="small" data-pp="homeBuild" data-kind="${kind}" ${completed(spec.quest)?'':'disabled'}>${completed(spec.quest)?'Bauen':'Freischaltung '+spec.quest}</button></div>`;
   }
   return html;
