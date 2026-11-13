@@ -150,7 +150,19 @@ function progress({game,player:p,home:e,ship}){
       if(!entry){raw(g,n);return;}
       const [recipe,r]=entry,id=factory(recipe),margin=['water','food'].includes(g)?n*.25+10:['clothing','medicine','consumer'].includes(g)?n*.1+2:0,cycles=Math.ceil((n-stock(g)+margin)/r.out[g]);
       ingredients(Object.fromEntries(Object.entries(r.in).map(([input,qty])=>[input,qty*cycles])));
-      go(e);pause();active(id);until(()=>stock(g)>=n,'Produktion '+g);active(id,false);tick();
+      // Residents keep consuming while ingredients are being transported and
+      // while production runs. A fixed initial margin is not a stock guarantee.
+      const deadline=game.time+14400;
+      while(stock(g)<n){
+        go(e);pause();active(id);
+        until(()=>stock(g)>=n||Object.entries(r.in).some(([input,qty])=>stock(input)<qty),'Produktion '+g);
+        if(stock(g)>=n)break;
+        if(game.time>=deadline)throw new Error('Zeitlimit Nachversorgung '+g);
+        active(id,false);
+        const remaining=Math.ceil((n-stock(g)+margin)/r.out[g]);
+        ingredients(Object.fromEntries(Object.entries(r.in).map(([input,qty])=>[input,qty*remaining])));
+      }
+      active(id,false);tick();
     }finally{depth--;making.delete(g);}
   }
   function quest(id){go(e);cmd('homeQuestComplete',{quest:id});log(id,{population:h.population});}

@@ -9,6 +9,9 @@ export function revealQuestTarget(game, player, entity) {
   if (entity.sector) game.discover(player, 'sector', entity.sector);
   if (entity.system) game.discover(player, 'system', entity.system);
   game.revealAround(player, entity.x, entity.y, 0);
+  // A newly created target can occupy an already revealed fog cell. In that
+  // case revealAround sends nothing, although the client has never seen it.
+  game.emit('reveal', player, { entities: [entity] });
 }
 
 export function syncHomeQuests(game, player) {
