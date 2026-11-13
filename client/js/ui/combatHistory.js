@@ -22,6 +22,8 @@ function detail(r) {
     html+=ships.map(s=>`<li><b>${esc(s.name)}</b> (${esc(s.typeName||s.type)}) · ${esc(s.ownerName||s.owner)} · Fraktion: ${esc(s.factionName||'Keine')} · ${esc(OUTCOMES[s.outcome]||'Nicht erfasst')}</li>`).join('')+'</ul>';
   }
   html+=`<div class="kv"><span>Eigene Verluste</span><span>${list(r.lost)}</span><span>Gefangene Schiffe</span><span>${list(r.prisoners)}</span><span>Erbeutete Schiffe</span><span>${list(r.captured)}</span><span>Eigene Rückzüge</span><span>${list(r.retreated)}</span><span>Eigene Beute</span><span>${loot(r.loot)}</span></div>`;
+  const economics=(r.ships||[]).filter(s=>s.owner===state.me?.id&&s.economics).map(s=>s.economics);
+  if(economics.length)html+=`<h4>Wirtschaftliche Folgen</h4><p>Katalogmäßiger Ersatzwert verlorener/übernommener Rümpfe: ${fmt(economics.reduce((n,e)=>n+e.replacement,0))} Cr. Reparaturschätzung am Gefechtsende: ${fmt(economics.reduce((n,e)=>n+(e.repairEstimate||0),0))} Cr; Munitionsauffüllung: ${fmt(economics.reduce((n,e)=>n+(e.ammoEstimate||0),0))} Cr; möglicher Freikauf: ${fmt(economics.reduce((n,e)=>n+e.ransomEstimate,0))} Cr.</p><p>Schätzungen sind keine bezahlten Ausgaben und können Vorschäden enthalten. Tatsächliche erfasste Geldbewegungen stehen im Geschäftsbuch. Fracht-/Beutewerte und Ausfallzeit sind kein garantierter Erlös.</p>`;
   return html;
 }
 

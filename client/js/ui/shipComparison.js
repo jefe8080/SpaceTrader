@@ -1,7 +1,8 @@
 import {blueprint,maxHull,WEAPONS,ARMOR} from '/shared/combat.js';
 import {shipComparison} from '/shared/ship-comparison.js';
+import {combatRole} from '/shared/combat-guidance.js';
 import {esc,fmt} from '../state.js';
-export function shipRatings(type){const r=shipComparison(type).ratings;return '<p class="ship-ratings">'+Object.entries({speed:'Tempo',defense:'Verteidigung',cargo:'Frachtraum',attack:'Angriff'}).map(([k,label])=>`<span title="Flottenweiter Vergleich, 1 bis 5">${label}: <b>${r[k]}/5</b></span>`).join(' · ')+'</p>';}
+export function shipRatings(type){const r=shipComparison(type).ratings,c=combatRole(type);return '<p class="ship-ratings">'+Object.entries({speed:'Tempo',defense:'Verteidigung',cargo:'Frachtraum',attack:'Angriff'}).map(([k,label])=>`<span title="Grobe Orientierung, keine Siegprognose">${label}: <b>${r[k]}/5</b></span>`).join(' · ')+`</p><p>${esc(c.role)}. ${c.ammo?'Volle katalogmäßige Munitionsladung: '+fmt(c.ammo)+' Cr.':''}</p><details><summary>Waffenrollen und Grenzen</summary>${c.strengths.map(t=>'<p>'+esc(t)+'</p>').join('')}<p>Treffer, Feuerwinkel, Munition und Zielzusammensetzung entscheiden. Sterne sind keine Siegprognose.</p></details>`;}
 export function shipCombatInfo(type){
  const bp=blueprint(type),c=shipComparison(type),sides=['Bug','Heck','Backbord','Steuerbord'],shieldNames={bow:'Bug',stern:'Heck',port:'Backbord',starboard:'Steuerbord',omni:'Rundumschild'};
  const weapons=new Map();for(const m of bp.weapons)weapons.set(m.w,(weapons.get(m.w)||0)+1);

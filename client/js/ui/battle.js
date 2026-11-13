@@ -14,6 +14,8 @@ const SIDE_COLOR = { A: '#ef5350', B: '#42a5f5' };
 
 let el = null, canvas = null, ctx = null, panel = null;
 let view = null, prev = null, recvAt = 0, battleId = null;
+let training=false;
+const combatCmd=(name,args)=>training?socket.emit('trainingCmd',{cmd:name,...args}):cmd(name,args);
 const sel = new Set();
 let focus = null, drag = null, cam = { x: 0, y: 0, k: 1, fit: true };
 let panelHeld = false; // während eines Klicks in der Seitenleiste nicht neu aufbauen
@@ -46,6 +48,7 @@ function ensureDom() {
 }
 
 export function openBattle(id) {
+  training=false;
   ensureDom();
   battleId = id; view = null; prev = null; sel.clear(); focus = null; cam.fit = true; fxList.length = 0;
   el.hidden = false;
@@ -57,17 +60,28 @@ export function closeBattle() {
   el.hidden = true;
   battleId = null;
   socket.emit('battleView', { id: null });
+  if(training){socket.emit('trainingClose');training=false;}
 }
 
+document.getElementById('btnBattleTraining').onclick=()=>{
+ ensureDom();training=true;view=null;prev=null;sel.clear();focus=null;cam.fit=true;fxList.length=0;el.hidden=false;
+ socket.emit('trainingStart',{},v=>{if(!training)return;battleId=v.id;receiveBattle(v);requestAnimationFrame(frame);});
+};
+socket.on('trainingBattle',v=>{if(training&&v.id===battleId)receiveBattle(v);});
+
 socket.on('battle', (v) => {
+  if(training)return;
   if (!el || v.id !== battleId) return;
   if (v.ended) { view = { ...(view || {}), ended: true }; renderPanel(); return; }
+  receiveBattle(v);
+});
+function receiveBattle(v){
   prev = view; view = v; recvAt = performance.now();
   for (const f of v.fx) fxList.push({ ...f, at: performance.now() });
   while (fxList.length > 200) fxList.shift();
   for (const id of [...sel]) if (!v.units.some((u) => u.id === id && u.own)) sel.delete(id);
   renderPanel();
-});
+}
 
 // ---------- Koordinaten ----------
 function fit() {
@@ -162,7 +176,7 @@ function onWheel(e) {
   const [nx, ny] = toWorld(e.clientX, e.clientY);
   cam.x += wx - nx; cam.y += wy - ny;
 }
-const order = (o) => cmd('battleOrder', { battle: battleId, ships: [...sel], order: o });
+const order = (o) => combatCmd('battleOrder', { battle: battleId, ships: [...sel], order: o });
 
 function onPanel(ev) {
   panelHeld = false;
@@ -170,23 +184,24 @@ function onPanel(ev) {
   if (!b) return;
   const d = b.dataset;
   switch (d.bv) {
+    case 'restart': socket.emit('trainingStart',{},v=>{battleId=v.id;sel.clear();focus=null;receiveBattle(v);});break;
     case 'sel': sel.clear(); sel.add(d.id); break;
     case 'all': for (const u of view.units) if (u.own && ['fight', 'retreating'].includes(u.state)) sel.add(u.id); break;
     case 'focus': focus = d.id; break;
     case 'order': order(JSON.parse(d.o)); break;
     case 'sys': order({ t: 'attack', target: d.target, sys: d.sys }); break;
     case 'hull': order({ t: 'attack', target: d.target }); break;
-    case 'dc': for (const id of sel) cmd('battleTactic', { ship: id, dcPrio: d.sys }); break;
+    case 'dc': for (const id of sel) combatCmd('battleTactic', { ship: id, dcPrio: d.sys }); break;
     case 'fit': cam.fit = true; break;
   }
   renderPanel();
 }
 function onPanelChange(ev) {
   const t = ev.target;
-  if (t.dataset.bvStance) for (const id of sel) cmd('battleTactic', { ship: id, stance: t.value });
-  if (t.dataset.bvHull) for (const id of sel) cmd('battleTactic', { ship: id, hull: Number(t.value) });
-  if (t.dataset.bvWeapons) for (const id of sel) cmd('battleTactic', { ship: id, weaponsOut: t.checked });
-  if (t.dataset.bvLosses) for (const id of sel) cmd('battleTactic', { ship: id, losses: Number(t.value) });
+  if (t.dataset.bvStance) for (const id of sel) combatCmd('battleTactic', { ship: id, stance: t.value });
+  if (t.dataset.bvHull) for (const id of sel) combatCmd('battleTactic', { ship: id, hull: Number(t.value) });
+  if (t.dataset.bvWeapons) for (const id of sel) combatCmd('battleTactic', { ship: id, weaponsOut: t.checked });
+  if (t.dataset.bvLosses) for (const id of sel) combatCmd('battleTactic', { ship: id, losses: Number(t.value) });
 }
 
 // ---------- Seitenleiste ----------
@@ -199,6 +214,7 @@ function renderPanel() {
   el.querySelector('#bvSides').textContent = ` · ${view.sides.A.join(', ') || '?'} ⚔ ${view.sides.B.join(', ') || '?'}`;
   el.querySelector('#bvTime').textContent = `${Math.floor(view.t / 60)}:${String(Math.floor(view.t % 60)).padStart(2, '0')}`;
   let h = view.ended ? '<div class="warnbox">Die Schlacht ist beendet.</div>' : '';
+  if(training)h+='<div class="infobox"><b>Verlustfreie Übung</b><p>Wähle dein Schiff, probiere Halten und KI. Fokussiere einen Gegner für Rumpf-/Systemangriff. Schildseiten und Rückzug verändern den Ausgang. Kein Geld, Schiff oder Erfolg deines Spielstands wird verändert.</p><button data-bv="restart">Übung neu starten</button></div>';
   if (!view.side) h += `<div class="infobox">👁 Zuschauer: sichtbare Kampfhandlungen ohne verdeckte Systeme, Befehle oder Rückzugsregeln. Keine Steuerung.</div>`;
   if (view.raid) h += `<div class="infobox">Raid: ${view.raid.phase === 'loot' ? `Plünderung läuft (${view.raid.left ?? '?'} s)` : 'Verteidiger besiegen'}</div>`;
   const own = view.units.filter((u) => u.own);

@@ -4,6 +4,9 @@ import { cmd } from '../net.js';
 import { state } from '../state.js';
 import { canMine } from '../util.js';
 import { sfx } from '../audio.js';
+import {knownConflictRisk} from '/shared/combat-guidance.js';
+const acceptedRisks=new Set();
+function acceptRisk(ships,target){const risk=knownConflictRisk(target,ships,state.war?.factions,state.entities);if(!risk||acceptedRisks.has(risk.key))return true;if(!confirm(risk.text+' Auftrag trotzdem erteilen?'))return false;acceptedRisks.add(risk.key);return true;}
 
 /**
  * Befehl "dorthin" an Schiffe: Asteroidenfeld + Bergbau -> abbauen, Objekt -> anfliegen, Punkt -> fliegen.
@@ -12,6 +15,7 @@ import { sfx } from '../audio.js';
 export function orderShips(ships, target, append = false) {
   ships = ships.filter(Boolean);
   if (!ships.length) return;
+  if(!acceptRisk(ships,target))return;
   sfx('order');
   if (!target.id) {
     // In einer Plasmawolke: Schiffe mit Gaskollektor sammeln, die anderen fliegen hin
@@ -30,6 +34,7 @@ export function orderShips(ships, target, append = false) {
 
 /** Anfliegen und kaufen in die Queue einreihen */
 export function orderBuy(ships, target, good, amount, append = true) {
+  if(!acceptRisk(ships,target))return;
   cmd('order', { ships: ships.map((s) => s.id), order: { t: 'dock', target: target.id, actions: [{ op: 'buy', good, amount }] }, append });
 }
 

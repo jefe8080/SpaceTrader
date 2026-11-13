@@ -1,5 +1,6 @@
 import { GOODS, BELT_TYPES, canBuyFrom, canSellTo } from '/shared/config.js';
 import {routePreflight,deliveryHealth} from '/shared/route-preflight.js';
+import {knownConflictRisk} from '/shared/combat-guidance.js';
 import { state, esc, fmtK, fleetOrder, selectedShips } from '../state.js';
 import { socket, cmd } from '../net.js';
 import { typeName, playerPrice, dist, shipSymbol, hasWarn, actionText, canMine } from '../util.js';
@@ -182,6 +183,7 @@ card.addEventListener('click', (ev) => {
     case 'save': {
       const check=routePreflight(ed,[...new Set([...ed.assign,...(ed.id?shipsOnRoute(ed.id).filter(s=>!ed.unassign.has(s.id)).map(s=>s.id):[])])].map(id=>state.ships.get(id)).filter(Boolean),state.entities,state.credits);
       if(check.errors.length){toast(check.errors.join(' '));return;}
+      for(const stop of ed.stops){const target=state.entities.get(stop.targetId),risk=target&&knownConflictRisk(target,[...ed.assign].map(id=>state.ships.get(id)).filter(Boolean),state.war?.factions,state.entities);if(risk)check.warnings.push(risk.text);}
       if(check.warnings.length&&!confirm('Vorprüfung: '+check.warnings.join(' ')+' Trotzdem speichern?'))return;
       cmd('routeSave', { id: ed.id, name: ed.name.trim() || 'Route', stops: ed.stops, minBalance: ed.minBalance || 0, onlyWithTargetSpace: ed.onlyWithTargetSpace, assign: [...ed.assign], unassign: [...ed.unassign] });
       closeModal('routeEditor');

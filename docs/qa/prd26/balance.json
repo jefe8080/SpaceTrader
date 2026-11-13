@@ -1,0 +1,1042 @@
+[
+  {
+    "name": "Fregatten/Zerstörer",
+    "swap": false,
+    "stance": "defensive",
+    "costA": 2400000,
+    "costB": 2400000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 177
+      },
+      {
+        "seed": 2,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 175
+      },
+      {
+        "seed": 3,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 179
+      },
+      {
+        "seed": 4,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 187
+      },
+      {
+        "seed": 5,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 172
+      },
+      {
+        "seed": 6,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 182
+      },
+      {
+        "seed": 7,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 170
+      },
+      {
+        "seed": 8,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 182
+      }
+    ]
+  },
+  {
+    "name": "Fregatten/Zerstörer",
+    "swap": false,
+    "stance": "offensive",
+    "costA": 2400000,
+    "costB": 2400000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 90
+      },
+      {
+        "seed": 2,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 88
+      },
+      {
+        "seed": 3,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 88
+      },
+      {
+        "seed": 4,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 89
+      },
+      {
+        "seed": 5,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 89
+      },
+      {
+        "seed": 6,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 90
+      },
+      {
+        "seed": 7,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 89
+      },
+      {
+        "seed": 8,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 89
+      }
+    ]
+  },
+  {
+    "name": "Fregatten/Zerstörer",
+    "swap": true,
+    "stance": "defensive",
+    "costA": 2400000,
+    "costB": 2400000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 184
+      },
+      {
+        "seed": 2,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 184
+      },
+      {
+        "seed": 3,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 174
+      },
+      {
+        "seed": 4,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 177
+      },
+      {
+        "seed": 5,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 172
+      },
+      {
+        "seed": 6,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 179
+      },
+      {
+        "seed": 7,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 174
+      },
+      {
+        "seed": 8,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 189
+      }
+    ]
+  },
+  {
+    "name": "Fregatten/Zerstörer",
+    "swap": true,
+    "stance": "offensive",
+    "costA": 2400000,
+    "costB": 2400000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 90
+      },
+      {
+        "seed": 2,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 88
+      },
+      {
+        "seed": 3,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 89
+      },
+      {
+        "seed": 4,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 90
+      },
+      {
+        "seed": 5,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 89
+      },
+      {
+        "seed": 6,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 90
+      },
+      {
+        "seed": 7,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 90
+      },
+      {
+        "seed": 8,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 90
+      }
+    ]
+  },
+  {
+    "name": "Bomber/Zerstörer",
+    "swap": false,
+    "stance": "defensive",
+    "costA": 2400000,
+    "costB": 2400000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      },
+      {
+        "seed": 2,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      },
+      {
+        "seed": 3,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 22
+      },
+      {
+        "seed": 4,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      },
+      {
+        "seed": 5,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      },
+      {
+        "seed": 6,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      },
+      {
+        "seed": 7,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 22
+      },
+      {
+        "seed": 8,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      }
+    ]
+  },
+  {
+    "name": "Bomber/Zerstörer",
+    "swap": false,
+    "stance": "offensive",
+    "costA": 2400000,
+    "costB": 2400000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 2,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 3,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 4,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 5,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 6,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 7,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 21
+      },
+      {
+        "seed": 8,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      }
+    ]
+  },
+  {
+    "name": "Bomber/Zerstörer",
+    "swap": true,
+    "stance": "defensive",
+    "costA": 2400000,
+    "costB": 2400000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      },
+      {
+        "seed": 2,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      },
+      {
+        "seed": 3,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 19
+      },
+      {
+        "seed": 4,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      },
+      {
+        "seed": 5,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      },
+      {
+        "seed": 6,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      },
+      {
+        "seed": 7,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 22
+      },
+      {
+        "seed": 8,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      }
+    ]
+  },
+  {
+    "name": "Bomber/Zerstörer",
+    "swap": true,
+    "stance": "offensive",
+    "costA": 2400000,
+    "costB": 2400000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 2,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 3,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 4,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 5,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 6,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 7,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      },
+      {
+        "seed": 8,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      }
+    ]
+  },
+  {
+    "name": "Ion/zwei Kreuzer",
+    "swap": false,
+    "stance": "defensive",
+    "costA": 14000000,
+    "costB": 14000000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 138
+      },
+      {
+        "seed": 2,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 132
+      },
+      {
+        "seed": 3,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 112
+      },
+      {
+        "seed": 4,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 126
+      },
+      {
+        "seed": 5,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 128
+      },
+      {
+        "seed": 6,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 140
+      },
+      {
+        "seed": 7,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 120
+      },
+      {
+        "seed": 8,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 125
+      }
+    ]
+  },
+  {
+    "name": "Ion/zwei Kreuzer",
+    "swap": false,
+    "stance": "offensive",
+    "costA": 14000000,
+    "costB": 14000000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 99
+      },
+      {
+        "seed": 2,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 98
+      },
+      {
+        "seed": 3,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 98
+      },
+      {
+        "seed": 4,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 97
+      },
+      {
+        "seed": 5,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 98
+      },
+      {
+        "seed": 6,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 99
+      },
+      {
+        "seed": 7,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 98
+      },
+      {
+        "seed": 8,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 98
+      }
+    ]
+  },
+  {
+    "name": "Ion/zwei Kreuzer",
+    "swap": true,
+    "stance": "defensive",
+    "costA": 14000000,
+    "costB": 14000000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 122
+      },
+      {
+        "seed": 2,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 132
+      },
+      {
+        "seed": 3,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 124
+      },
+      {
+        "seed": 4,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 125
+      },
+      {
+        "seed": 5,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 120
+      },
+      {
+        "seed": 6,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 121
+      },
+      {
+        "seed": 7,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 126
+      },
+      {
+        "seed": 8,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 124
+      }
+    ]
+  },
+  {
+    "name": "Ion/zwei Kreuzer",
+    "swap": true,
+    "stance": "offensive",
+    "costA": 14000000,
+    "costB": 14000000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 98
+      },
+      {
+        "seed": 2,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 96
+      },
+      {
+        "seed": 3,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 97
+      },
+      {
+        "seed": 4,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 96
+      },
+      {
+        "seed": 5,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 97
+      },
+      {
+        "seed": 6,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 98
+      },
+      {
+        "seed": 7,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 96
+      },
+      {
+        "seed": 8,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 97
+      }
+    ]
+  },
+  {
+    "name": "Bomber/Eskorte",
+    "swap": false,
+    "stance": "defensive",
+    "costA": 2800000,
+    "costB": 2840000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 19
+      },
+      {
+        "seed": 2,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 77
+      },
+      {
+        "seed": 3,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 65
+      },
+      {
+        "seed": 4,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 42
+      },
+      {
+        "seed": 5,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 60
+      },
+      {
+        "seed": 6,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 50
+      },
+      {
+        "seed": 7,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 63
+      },
+      {
+        "seed": 8,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 21
+      }
+    ]
+  },
+  {
+    "name": "Bomber/Eskorte",
+    "swap": false,
+    "stance": "offensive",
+    "costA": 2800000,
+    "costB": 2840000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 12
+      },
+      {
+        "seed": 2,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 16
+      },
+      {
+        "seed": 3,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 15
+      },
+      {
+        "seed": 4,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 18
+      },
+      {
+        "seed": 5,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 24
+      },
+      {
+        "seed": 6,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 20
+      },
+      {
+        "seed": 7,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 24
+      },
+      {
+        "seed": 8,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 13
+      }
+    ]
+  },
+  {
+    "name": "Bomber/Eskorte",
+    "swap": true,
+    "stance": "defensive",
+    "costA": 2840000,
+    "costB": 2800000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 69
+      },
+      {
+        "seed": 2,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 41
+      },
+      {
+        "seed": 3,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 79
+      },
+      {
+        "seed": 4,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 45
+      },
+      {
+        "seed": 5,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 20
+      },
+      {
+        "seed": 6,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 46
+      },
+      {
+        "seed": 7,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 62
+      },
+      {
+        "seed": 8,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 61
+      }
+    ]
+  },
+  {
+    "name": "Bomber/Eskorte",
+    "swap": true,
+    "stance": "offensive",
+    "costA": 2840000,
+    "costB": 2800000,
+    "runs": [
+      {
+        "seed": 1,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 13
+      },
+      {
+        "seed": 2,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 27
+      },
+      {
+        "seed": 3,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 23
+      },
+      {
+        "seed": 4,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 28
+      },
+      {
+        "seed": 5,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 34
+      },
+      {
+        "seed": 6,
+        "winner": "A",
+        "why": null,
+        "open": false,
+        "seconds": 29
+      },
+      {
+        "seed": 7,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 21
+      },
+      {
+        "seed": 8,
+        "winner": "B",
+        "why": null,
+        "open": false,
+        "seconds": 25
+      }
+    ]
+  }
+]

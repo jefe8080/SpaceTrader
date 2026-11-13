@@ -1,4 +1,4 @@
-import { navalClass } from '../../shared/combat.js';
+import { navalClass,repairQuote } from '../../shared/combat.js';
 import { SHIP_TYPES, FACTIONS } from '../../shared/config.js';
 import { ownerName, factionOfOwner, diplo } from './diplomacy.js';
 
@@ -24,7 +24,9 @@ export function battleSnapshot(game, b, winner, loserSide, immobile) {
     if (u.state === 'destroyed' || u.state === 'retreated') outcome = u.state;
     else if (u.side === loserSide && u.state === 'surrendered') outcome = 'captive';
     else if (u.side === loserSide && winner && ship && immobile(game,b,u) && SHIP_TYPES[ship.type] && navalWar(ship.type)) outcome = 'captured';
-    return { ...identity, side:u.side, outcome };
+    const price=SHIP_TYPES[u.type]?.price||0,q=ship?repairQuote(ship,price):null;
+    const economics={replacement:['destroyed','captured'].includes(outcome)?price:0,repairEstimate:q?.cost??null,ammoEstimate:q?.ammo??null,ransomEstimate:outcome==='captive'?price*.25:0};
+    return { ...identity, side:u.side, outcome,economics };
   });
   const planet = b.planet ? game.world.entities.get(b.planet) : null;
   const sector = game.world.sectors?.get?.(b.sector);

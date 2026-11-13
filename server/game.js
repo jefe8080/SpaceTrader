@@ -726,7 +726,7 @@ export class Game {
     const sellerBefore=seller&&seller.id!==player.id?syncInventoryBasis(this,seller,good).quantity:null;
     const result=this.tradeHandled(ship,e,good,amount,dir,limit,{...opts,profileAccounting:true});
     if(result.n)recordEconomic(this,player,result.total?(dir==='buy'?'Wareneinkauf':'Warenverkauf'):'Eigenlagertransfer',result.total?(dir==='buy'?-result.total:result.total):0,{ship:ship.id,place:e.id,good,units:result.n,direction:dir});
-    if(result.n&&dir==='sell'&&opts.route)recordDelivery(opts.route,this.time,good,result.n,e.id);
+    if(result.n&&dir==='sell'&&opts.route){const route=typeof opts.route==='string'?this.routes.get(opts.route):opts.route;if(route)recordDelivery(route,this.time,good,result.n,e.id);}
     recordGoodsTrade(this,player,good,dir,result,before);
     if(sellerBefore!=null)recordGoodsTrade(this,seller,good,dir==='buy'?'sell':'buy',result,sellerBefore);
     return result;

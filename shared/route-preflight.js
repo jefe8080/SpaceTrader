@@ -25,7 +25,7 @@ export function deliveryHealth(records=[],time,started=0,good){
  return {last:all.length?Math.max(...all.map(r=>r.time)):null,units:recent.reduce((n,r)=>n+r.units,0),perHour:recent.reduce((n,r)=>n+r.units,0)*3600/seconds};
 }
 export function recordDelivery(holder,time,good,units,target){
- if(!(units>0))return;holder.deliveries||=[];const last=holder.deliveries.at(-1);
+ if(!holder||typeof holder!=='object'||!(units>0))return;holder.deliveries||=[];const last=holder.deliveries.at(-1);
  if(last&&last.good===good&&last.target===target&&Math.floor(last.time/60)===Math.floor(time/60)){last.units+=units;last.time=time;}
  else holder.deliveries.push({time,good,units,target});
  if(holder.deliveries.length>1000)holder.deliveries.splice(0,holder.deliveries.length-1000);
