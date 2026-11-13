@@ -69,6 +69,8 @@ function buildMarket(kind, type, r, scale = 1, { slow = 1, traders = true } = {}
   } else if (def.extract) {
     const g = def.extract[Math.floor(r() * def.extract.length)];
     produce(g, def.rate, STORAGE.EXTRACT);
+    // Purchase-only surcharge: keep raw bases and all derived refined values intact.
+    goods[g].buyFactor = 1.2;
     consume('food', STATION_FOOD, STORAGE.STATION_FOOD);
     m = { strategy: 'extractor', goods, eff: 1, supply: null };
   } else if (def.buys) {

@@ -26,8 +26,8 @@ test('Weltgenerierung hält die PRD-24-Referenzwelten stabil', () => {
     for (let q = -2; q <= 2; q++) for (let r = -2; r <= 2; r++) h.update(JSON.stringify(canon(generateSector(seed, q, r))));
     return h.digest('hex');
   };
-  assert.equal(digest(42), '2f3a39f78d6b9b797bde291b7b6746af4ec48962c7575dc3b3a63dbd9bd2cc2e');
-  assert.equal(digest(7), '0e5492d777769e112bed9396135e78d754a6876eb15d61430eaf5d9973e5eeb5');
+  assert.equal(digest(42), '95e5c910ca68ac25447e5763bb6137935268c64371bd009e6197b134a99eb299');
+  assert.equal(digest(7), 'dcf2977a3383725314f01c501df3fe0ddbb16126a8fcdae98b91f0352ce9bf08');
   assert.deepEqual([1, 4, 6, 9, 11, 14].map(romanNumeral), ['I', 'IV', 'VI', 'IX', 'XI', 'XIV']);
 });
 

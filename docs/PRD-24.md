@@ -96,7 +96,7 @@ damit eine höhere Rohstoffbasis nicht indirekt auch Veredelungserlöse erhöht.
    durch Regressionstests absichern.
 4. [x] Aggressionsgebiet und Rate anpassen; Ausnahmen und Nachbarsektoren testen.
 5. [x] Asteroidenverteilung und Garantie umsetzen; Förderstationen erhalten.
-6. [ ] Bestätigte Preisanpassung umsetzen und Margen vorher/nachher prüfen.
+6. [x] Bestätigte Preisanpassung umsetzen und Margen vorher/nachher prüfen.
 7. [ ] Gesamte Regression prüfen, relevante Spielbeschreibungen aktualisieren
    und Abnahme dokumentieren.
 
@@ -145,3 +145,25 @@ Prüfung: 245 Sektoren (5 Seeds), Determinismus, Garantie, Überlappungen,
 normale Systeme und fraktionsfreie Förderstationen; Weltregression (11/11).
 Die alten Weltprüfsummen wurden wegen der absichtlichen Generierungsänderung
 auf neue Referenzwelten aktualisiert.
+
+Umsetzung Schritt 6: Kaufaufschlag als `buyFactor: 1.2` ausschließlich am
+Rohstoffangebot der Förderstationen. `buyPrice` und Client-Serialisierung
+berücksichtigen ihn; Mittel-/Verkaufspreise, Warenbasis und Rezepte unverändert.
+Prüfung: sechs Ketten bei vier Füllständen und drei Standortmodifikatoren,
+unveränderte Rezept-/Preisreferenz, Clientpreis und tatsächliche Abbuchung
+(2/2 Preistests; 10/10 Weltregression).
+
+### Margenvergleich je Rezeptdurchlauf
+
+Rechenbeispiel: alle Slots zu 70 % gefüllt, Standortfaktor 1, Zutaten werden
+gekauft, veredelte Ware verkauft; ohne Flugkosten und weitere Gebühren.
+Gleiche Slots, Rezepte und Verkaufserlöse vor/nach dem Kaufaufschlag.
+
+| Rohstoff | Kaufpreis vorher | Kaufpreis nachher | Marge vorher | Marge nachher |
+|---|---:|---:|---:|---:|
+| Rohgold | 303.66 | 364.39 | 183.39 | 61.93 |
+| Rohdiamanten | 469.95 | 563.94 | 410.60 | 222.62 |
+| Uranerz | 375.96 | 451.15 | 277.89 | 127.51 |
+| Unstabile Antimaterie | 1373.69 | 1648.43 | 682.86 | 408.12 |
+| Exotische Rohkristalle | 636.24 | 763.48 | 527.33 | 272.83 |
+| Rohes Nebelgas | 224.13 | 268.95 | 252.11 | 117.63 |

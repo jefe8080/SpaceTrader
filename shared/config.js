@@ -91,7 +91,7 @@ export const canSellTo = (slot) => slot.role === 'consume' || slot.role === 'tra
 /** Mittelpreis eines Marktplatzes (Slot) */
 export const slotPrice = (good, s) => unitPrice(good, s.stock, s.cap, s.mod || 1);
 /** Preis, den der Spieler pro Einheit zahlt */
-export const buyPrice = (good, s) => slotPrice(good, s) * (1 + PRICE.SPREAD);
+export const buyPrice = (good, s) => slotPrice(good, s) * (1 + PRICE.SPREAD) * (s.buyFactor ?? 1);
 /** Preis, den der Spieler pro Einheit erhält */
 export const sellPrice = (good, s) => slotPrice(good, s) * (1 - PRICE.SPREAD);
 

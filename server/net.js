@@ -333,7 +333,7 @@ export function serializeEntity(e) {
 /** Struktur des Marktes (Rollen, Kapazitäten) plus aktueller Zustand */
 export function serializeMarket(m) {
   const goods = {};
-  for (const [g, s] of Object.entries(m.goods)) goods[g] = { role: s.role, rate: s.rate, cap: s.cap, stock: r1(s.stock), mod: s.mod || 1 };
+  for (const [g, s] of Object.entries(m.goods)) goods[g] = { role: s.role, rate: s.rate, cap: s.cap, stock: r1(s.stock), mod: s.mod || 1, ...(s.buyFactor !== undefined ? { buyFactor: s.buyFactor } : {}) };
   return { strategy: m.strategy, recipe: m.recipe, goods, ...extraOf(m) };
 }
 
