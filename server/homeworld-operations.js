@@ -202,10 +202,10 @@ export function restoreBasicPlant(game,player,entity,facility) {
   notify(game,entity);
 }
 
-export function trainHome(game,player,entity,to) {
+export function trainHome(game,player,entity,to,schoolId) {
   const error=homeAccess(game,player,entity);if(error)return error;
   const home=entity.market.homeworld;initializeHomeOperations(home);
-  const schools=home.structures.filter(s=>s.kind==='school'&&ready(s)&&s.enabled!==false&&(to!=='specialist'||s.upgrades?.includes('academy')));
+  const schools=home.structures.filter(s=>(!schoolId||s.id===schoolId)&&s.kind==='school'&&ready(s)&&s.enabled!==false&&(to!=='specialist'||s.upgrades?.includes('academy')));
   const available=schools.filter(s=>!home.projects.some(p=>p.kind==='training'&&p.school===s.id));
   if(!available.length)return 'Keine freie geeignete Schule oder Akademie.';
   const spec=HOMEWORLD.population.training[to],from=to==='skilled'?'basic':'skilled',reserved=trainingReserved(home);

@@ -30,7 +30,7 @@ Die vorhandene Spieltiefe bleibt erhalten. Informationen und Entscheidungen erha
 - [x] U4 – Spezialanlagen: Produktion, Energie, Lagerkapazität, Raumhafen, Wohnraum, Ausbildung, Forschung/Fertigung/Ausrüstung samt Berechtigungen und Diagnose.
 - [x] U5 – Einstieg und Quests: Funkkontakt, kurze Einführung, Fortschrittsbedingungen, Abschlussmeldung und geführte echte H03-Lieferung.
 - [x] U6 – Lesbarkeit und Motivation: Schiff/Handelsplanung, Filter, Beschriftungen, Produktionsmeilenstein, reversible Überschussentscheidung und vorhandene freiwillige Ziele.
-- [ ] U7 – Abnahme: automatisierte fachliche Prüfungen, manueller Einstieg durch erste automatische Lieferung, fortgeschrittene Welt prüfen, Hauptwelt kontrolliert zurücksetzen und frisch starten.
+- [x] U7 – Abnahme: automatisierte fachliche Prüfungen, manueller Einstieg durch erste automatische Lieferung, fortgeschrittene Welt prüfen, Hauptwelt kontrolliert zurücksetzen und frisch starten.
 
 Jeder abgeschlossene Schritt erhält passende Prüfungen, dokumentiertes Ergebnis und einen eigenen Commit mit aktualisiertem Fortschritt. Fehlgeschlagene/nicht ausführbare Prüfungen werden ausdrücklich berichtet. Reine Umordnung braucht keine Tests, die bloß HTML spiegeln; Zustands-/Berechtigungs-/Queständerungen benötigen fachliche Regressionstests.
 
@@ -43,6 +43,8 @@ Jeder abgeschlossene Schritt erhält passende Prüfungen, dokumentiertes Ergebni
 5. Nur bestätigte Hauptwelt zurückgesetzt; frischer Start funktioniert. Bericht und Nachweise im Repository; Arbeitsfortschritt nachvollziehbar committet.
 
 ## Prüfprotokoll
+
+**Abgeschlossen:** Umsetzung und Abnahme einschließlich bestätigtem Hauptweltreset erfolgt. [Abnahmebericht und Nachweise](qa/prd25/README.md). Kein Push vorgenommen. Die separat beschriebene späte Finanzierung im Langzeitplaner bleibt ein Folgeprüfpunkt; kein erfolgreicher H13-Nachweis behauptet.
 
 U1: Wrackziel lag in bereits enthüllter Zelle und wurde deshalb nicht erneut übertragen; gezielte Reveal-Nachricht ergänzt. Regressionstest plus Heimat-/Relikttests: 13/13 bestanden. Gesamtsuite vor weiteren Serveränderungen: erfolgreich (0 Fehler). Wasserstillstand war eine Annahme des Simulationsplaners: Zivilverbrauch erschöpfte einmalig berechnete Zutaten. Nachbeschaffung bei Zutatenmangel ergänzt, keine Spielraten geändert. Wiederaufnahme am H10-Checkpoint erreicht H11 und passiert die frühere Fehlerstelle; weiterer Lauf läuft noch. Hauptwelt unverändert.
 

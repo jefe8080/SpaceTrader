@@ -250,7 +250,7 @@ export function marketTable(e, ship) {
   });
   let h = emptyToggle+`<table class="market"><tr><th>Ware</th><th>Lager</th><th>Preis</th><th></th></tr>${rows.join('')}</table>`;
   if(!e.owner&&e.market.economy)h=`<p class="muted">Marktkasse: ${fmt(e.market.economy.cash)} Cr · begrenzte Nachfrage ${fmt(e.market.economy.rate)} Cr/h. Angebote garantieren keinen Ankauf.</p>`+h;
-  h+=moduleStockPanel(e,ship);
+  h+=moduleStockPanel(e,ship,'act',!e.market.homeworld);
   if (mine && canTrade) {
     // Waren an Bord, die das Lager noch nicht führt, können nicht eingelagert werden
   }

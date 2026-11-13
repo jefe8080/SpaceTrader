@@ -212,6 +212,7 @@ panel.addEventListener('click', (ev) => {
   const ship = chosenShip(e.id);
   if (d.act === 'questAccept') { cmd('questAccept', { ship: d.ship, target: d.ent, quest: d.quest }); return; }
   switch (d.pp) {
+    case 'homeAllGoods':state.showAllHomeGoods=!state.showAllHomeGoods;renderPlanetUi();return;
     case 'homeSurplus':{
       state.surplusChoice=d.choice;
       if(d.choice==='keep'){toast('Reserve geplant. Du kannst dich jederzeit anders entscheiden.','success');renderPlanetUi();return;}
@@ -265,7 +266,7 @@ panel.addEventListener('click', (ev) => {
     }
     case 'homeStorageUpgrade': cmd('homeStorageUpgrade', { target:e.id, id:d.id }); return;
     case 'homeRestore': cmd('homeRestore', { target:e.id, facility:d.facility }); return;
-    case 'homeTrain': cmd('homeTrain', { target:e.id, qualification:d.qualification }); return;
+    case 'homeTrain': cmd('homeTrain', { target:e.id, qualification:d.qualification,school:current?.homeStructure }); return;
     case 'homeBatchLimits': {const field=document.getElementById('homeBatchNumber');if(field.reportValidity())cmd('homeLimit',{target:e.id,all:true,amount:Number(field.value)});return;}
     case 'homeOperation': {
       const building=e.market.homeworld.facilities[d.id]||e.market.homeworld.structures.find(s=>s.id===d.id);

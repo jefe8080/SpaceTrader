@@ -64,8 +64,8 @@ export default {
     run({ game, player }, { target, facility }) { return restoreBasicPlant(game, player, target, facility); },
   },
   homeTrain: {
-    args: { target: V.entity(), qualification: V.oneOf('skilled', 'specialist') },
-    run({ game, player }, { target, qualification }) { return trainHome(game, player, target, qualification); },
+    args: { target: V.entity(), qualification: V.oneOf('skilled', 'specialist'),school:V.opt(V.str(40,1)) },
+    run({ game, player }, { target, qualification,school }) { return trainHome(game, player, target, qualification,school); },
   },
   homeLimit: {
     args: {target:V.entity(), good:V.opt(V.key(GOODS)), amount:V.int(0,1e9), all:V.opt(V.bool(),false)},

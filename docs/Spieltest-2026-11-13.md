@@ -1,6 +1,7 @@
 # Spieltest und Gebäudeordnung – 13. November 2026
 
-Status: Diskussionsgrundlage, keine freigegebene Umsetzung und kein PRD.
+Status: Ursprünglicher Prüfbericht mit stabilen Vorschlagsnummern; bestätigte Umsetzung und Abnahme sind im nachfolgenden PRD dokumentiert.
+Fortschreibung: Die anschließenden Grilling-Entscheidungen Q1–Q25 sind bestätigt und in [PRD 25](PRD-25.md) umgesetzt; dieser Bericht erhält die ursprünglichen Beobachtungen und Vorschlagsnummern als Nachweis. Abnahme unter [QA PRD 25](qa/prd25/README.md).
 Erweitert um vollständige Sichtung der Ruinenwelt-Gebäudetypen und Vorschläge 23–34. Die bisherigen Nummern 1–22 bleiben stabil. Sämtliche Zuordnungen sind Vorschläge für das anschließende Grilling.
 Getesteter Ausgangsstand: `871350f`, Branch `master`.
 

@@ -24,6 +24,17 @@ function advance(f,seconds){f.game.time+=seconds;tickHomeworld(f.game,f.entity,s
 function add(f,kind,id,extra={}){const building={id,kind,status:'ready',enabled:true,priority:50,plot:f.home.structures?.length||0,...extra};f.home.structures||=[];f.home.structures.push(building);return building;}
 function empty(f){for(const slot of Object.values(f.entity.market.goods))slot.stock=0;}
 
+test('Ausbildung reserviert die gewählte Schule und weicht bei Belegung nicht aus',()=>{
+  const f=fixture();
+  try{
+    add(f,'school','school-a');add(f,'school','school-b');
+    assert.equal(command(f,'homeTrain',{qualification:'skilled',school:'school-b'}),undefined);
+    assert.equal(f.home.projects.find(p=>p.kind==='training').school,'school-b');
+    assert.match(command(f,'homeTrain',{qualification:'skilled',school:'school-b'}),/Keine freie/);
+    assert.equal(f.home.projects.filter(p=>p.kind==='training').length,1);
+  }finally{f.game.close();}
+});
+
 test('Bau bindet Material, Geld, gewählten Platz und Team; unabhängige Projekte laufen parallel',()=>{
   const f=fixture(),credits=f.player.credits,ingots=f.entity.market.goods.ingots.stock;
   assert.equal(command(f,'homeBuild',{kind:'solar',plot:3}),undefined);

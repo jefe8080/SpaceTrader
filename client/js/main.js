@@ -48,6 +48,7 @@ socket.on('welcome', (d) => {
   }
   const first = !state.me;
   state.me = d.you;
+  state.progressNoticeKey=d.onboardingKey;
   resetGuide();
   state.guideRead = d.guideRead || [];
   Object.assign(state, { profile: null, homeworld: null, homeQuest: null, relic: null, manualShip: null, homeDialogReplay: false, quest: null,quests:[],questMinedUsed:{} });

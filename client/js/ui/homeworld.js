@@ -25,7 +25,7 @@ function productionMilestone(){
   const h=state.entities.get(state.homeworld)?.market?.homeworld;
   if(!state.me||!h)return;
   for(const good of ['water','food']){
-    const key='st-first-production:'+state.me.id+':'+good;
+    const key='st-first-production:'+(state.progressNoticeKey||state.me.id)+':'+good;
     if(!(h.produced?.[good]>0)||productionNotices.has(key))continue;
     productionNotices.add(key);
     try{if(localStorage.getItem(key))continue;localStorage.setItem(key,'1');}catch{}
@@ -69,7 +69,7 @@ export function renderHomeDialog() {
   dialog.hidden=false;
 }
 
-const names = { dock: 'Landeplatz und Zentrallager', control: 'Leitstelle', workshop: 'Antriebswerkstatt' };
+const names = { dock: 'Landeplatz und Zentrallager', control: 'Leitstelle', workshop: 'Antriebswerkstatt',foodplant:'Nahrungsanlage',fueldepot:'Treibstoffanlage' };
 const completed = (id) => !!state.homeQuest?.completed[id];
 export function homePanel(entity, item, ship) {
   const home = entity.market.homeworld;
@@ -79,7 +79,7 @@ export function homePanel(entity, item, ship) {
     const mode=entity.market.mode==='open'?'open':'private';
     const trade=`<h3>Handel</h3><p>Handelsmodus: <b>${mode==='open'?'offen':'privat'}</b></p><p>${mode==='open'?'Andere Spieler und NPCs können unreservierte Waren handeln.':'Nur du kannst auf das Lager zugreifen.'} Reservierte Waren bleiben geschützt.</p><button class="small" data-pp="homeTradeMode" data-mode="${mode==='open'?'private':'open'}">Handel ${mode==='open'?'auf privat stellen':'öffnen'}</button>`;
     const overview='';
-    if(entity.id!==state.homeworld)return overview+'<h3>Laufende Quests</h3>'+activeSideQuests(state).map(q=>'<p>'+questText(q)+'</p>').join('')+Object.entries(HOME_QUESTS).filter(([id])=>state.homeQuest?.active?.[id]&&!completed(id)).map(([id,q])=>'<p><b>'+id+' · '+esc(q.title)+'</b><br>'+esc(q.goal)+'</p>').join('')+'<button class="small" data-pp="homeSite" data-id="'+state.homeworld+'">Zur Hauptheimat zeigen</button>'+historyPanel()+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+worldsPanel()+warpPanel(entity);
+    if(entity.id!==state.homeworld)return civicPanel(home)+planetNamePanel(entity)+'<h3>Laufende Quests</h3>'+activeSideQuests(state).map(q=>'<p>'+questText(q)+'</p>').join('')+Object.entries(HOME_QUESTS).filter(([id])=>state.homeQuest?.active?.[id]&&!completed(id)).map(([id,q])=>'<p><b>'+id+' · '+esc(q.title)+'</b><br>'+esc(q.goal)+'</p>').join('')+'<button class="small" data-pp="homeSite" data-id="'+state.homeworld+'">Zur Hauptheimat zeigen</button>'+historyPanel()+`<p>Gründung: ${home.founding?.immigrants?.reduce((n,b)=>n+b.n,0)||0} eigene Auswanderer · Expeditionsschiff ${esc(home.founding?.infrastructureShip?.name||'')}</p>`+jump('home:control','Weltennetz verwalten');
     let html = overview+(activeSideQuests(state).length?'<h3>Laufende Nebenquests</h3>'+activeSideQuests(state).map(q=>'<p>'+questText(q)+'</p>').join(''):'')+`<div class="muted">Hauptquests laufen unabhängig von normalen Quests. Mehrere freigeschaltete Zweige können gleichzeitig fortschreiten.</div>`;
     for (const [id, quest] of Object.entries(HOME_QUESTS)) {
       if(completed(id)||!state.homeQuest?.active?.[id])continue;
@@ -106,8 +106,9 @@ export function homePanel(entity, item, ship) {
       }
     }
     for(const [module,find] of Object.entries(STUDY_FINDS))if(completed(find.quest)&&!state.homeQuest.finds?.[module])html+=`<p>${find.name}: ${state.homeQuest.finds?.[module]?'einmalige Vorlage geborgen':'Studienvorlage verfügbar'}</p><button class="small" data-pp="homeSite" data-id="${state.homeQuest.sites?.[module]||''}">Forschungsfund zeigen</button>`;
-    html+=`<p>Volle Grundversorgung: ${Math.floor(home.fullSupplySeconds||0)} / 1.800 s · Selbst ausgebildete Fachkräfte: ${home.trained?.skilled||0}</p>`;
-    html+=jump('home:orbital','Zum Orbitalring')+jump('home:control','Welten und Expeditionen verwalten');
+    if(completed('H06'))html+=`<p>Volle Grundversorgung: ${Math.floor(home.fullSupplySeconds||0)} / 1.800 s · Selbst ausgebildete Fachkräfte: ${home.trained?.skilled||0}</p>`;
+    if(completed('H07'))html+=jump('home:orbital','Zum Orbitalring');
+    if(completed('H02'))html+=jump('home:control','Welten und Expeditionen verwalten');
     if(completed('H02')){
       const surplus=Math.max(0,Math.floor(availableHomeStock(entity.market,'water')-home.population*.4));
       html+=`<details><summary>Deine Entscheidung: Überschuss nutzen</summary><p>${surplus} Wasser über dem rechnerischen Zwei-Stunden-Grundbedarf. Behalten stützt weitere Produktion und Versorgung; Verkaufen kann den nächsten Ausbau finanzieren. Beachte auch den Wasserbedarf deiner Fabriken. Es wird nichts automatisch verkauft.</p><button class="small" data-pp="homeSurplus" data-choice="keep">Für den Aufbau behalten</button><button class="small" data-pp="homeSurplus" data-choice="sell">Verkaufsmöglichkeit ansehen</button><p>${state.surplusChoice==='keep'?'Du planst eine Reserve. Die Entscheidung bindet keine Waren.':state.surplusChoice==='sell'?'Du prüfst einen Verkauf. Du bestimmst Menge und Preis am Markt.':''}</p></details>`;
@@ -153,11 +154,12 @@ export function homePanel(entity, item, ship) {
     }
   }
   if (facility === 'dock' && building.status === 'ready') {
-    const goods = Object.entries(entity.market.goods).filter(([g]) => ['normal','hazard'].includes(GOODS[g].cls));
+    const goods = Object.entries(entity.market.goods).filter(([g,slot]) => ['normal','hazard'].includes(GOODS[g].cls)&&(state.showAllHomeGoods||slot.stock>0||ship?.cargo?.[g]||['ice','grain'].includes(g)));
     html += `<label>Schiff für Transfers <select id="homeDockShip">${myShips().filter(s=>s.dockedAt===entity.id).map(s=>`<option value="${s.id}" ${s.id===ship?.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label><p>${ship?'Schiff: '+esc(ship.name):'Kein eigenes Schiff angedockt.'} · gemeinsames Planetenlager</p>`+storageBatchPanel(entity)+'<p>Eigene Transfers sind kostenlos. Geschützte Reserven bleiben im Lager.</p><table class="market home-storage"><tr><th>Ware / Bestand</th><th>Lagerregeln</th></tr>';
+    html=html.replace('<table class="market home-storage">',`<button class="small" data-pp="homeAllGoods">${state.showAllHomeGoods?'Nur Bestände und Fracht zeigen':'Alle Waren einblenden'}</button><table class="market home-storage">`);
     for (const [good, slot] of goods) html += `<tr><td><b>${GOODS[good].name}</b><p>${fmt(slot.stock)} im Lager<br>${fmt(ship?.cargo?.[good] || 0)} an Bord</p>
       <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="buy" ${ship && slot.stock >= 1 ? '' : 'disabled'}>Ins Schiff laden</button>
-      <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Ins Heimatlager entladen</button></td><td>${storageControls(entity,good)}</td></tr>`;
+      <button class="small" data-pp="homeTransfer" data-good="${good}" data-dir="sell" ${ship?.cargo?.[good] ? '' : 'disabled'}>Ins Heimatlager entladen</button></td><td><details><summary>${GOODS[good].name}: Lagerregeln</summary>${storageControls(entity,good)}</details></td></tr>`;
     html += '</table>';
     html+='<details id="storage-modules"><summary>Modulfracht</summary>'+moduleStockPanel(entity,ship,'pp',false)+jump('home:workshop','Schiff ausrüsten')+'</details><details id="storage-population"><summary>Personenreisen</summary>'+populationPanel(entity,{prices:false})+'</details>'+homePrices(entity,home);
     html+=`<details><summary>Lokaler Handel</summary><p>${entity.market.mode==='open'?'Andere Spieler und NPCs dürfen unreservierte Waren handeln.':'Nur du kannst auf das Lager zugreifen.'}</p><button class="small" data-pp="homeTradeMode" data-mode="${entity.market.mode==='open'?'private':'open'}">Handel ${entity.market.mode==='open'?'auf privat stellen':'öffnen'}</button></details>`;
@@ -306,7 +308,7 @@ function structurePanel(entity,id,ship){
     html+=`<button class="small" data-pp="homeRecipeChange" data-id="${id}">Rezeptwechsel bestätigen</button>`;
   }
   if(building.kind==='school'&&building.status==='ready'){
-    html+=`<p>Qualifikationen planetenweit: ${home.workers.basic} einfach / ${home.workers.skilled} Fach / ${home.workers.specialist} Spezial.</p>`+(home.projects||[]).filter(p=>p.kind==='training').map(p=>`<p>Ausbildung: ${p.count} Personen · ${Math.ceil(p.remaining)} s ${p.paused?'· pausiert: Versorgung oder Schulbetrieb fehlt':''}</p>`).join('');
+    html+=`<p>Qualifikationen planetenweit: ${home.workers.basic} einfach / ${home.workers.skilled} Fach / ${home.workers.specialist} Spezial.</p>`+(home.projects||[]).filter(p=>p.kind==='training'&&p.school===id).map(p=>`<p>Ausbildung: ${p.count} Personen · ${Math.ceil(p.remaining)} s ${p.paused?'· pausiert: Versorgung oder Schulbetrieb fehlt':''}</p>`).join('');
     html+='<p>Ausbildung reserviert zehn tatsächlich vorhandene freie Einwohner. Fehlende Versorgung oder Schulbetrieb pausieren den Fortschritt.</p><button class="small" data-pp="homeTrain" data-qualification="skilled">10 Fachkräfte ausbilden · 120 s</button>';
     if(building.upgrades?.includes('academy'))html+='<button class="small" data-pp="homeTrain" data-qualification="specialist">10 Spezialisten ausbilden · 180 s</button>';
     else html+=`<p>Akademie: ${costLabel(HOME_BUILDINGS.academy)}</p><button class="small" data-pp="homeBuild" data-kind="academy" data-parent="${id}">Akademieausbau</button>`;
