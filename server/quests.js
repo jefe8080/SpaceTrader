@@ -1,5 +1,6 @@
 import { questTurnInBlock, questFactionXp, fsecOfEntity, receiveGoods, bufferOf } from './war/factions.js';
 import { FACTION_WAR } from '../shared/warfare.js';
+import {recordEconomic} from './economic-view.js';
 import { factionHostileTo } from './war/diplomacy.js';
 import { revealQuestTarget } from './quest-activation.js';
 import { WORLD, GOODS, BELT_TYPES, QUEST, QUEST_TYPES, REP, RANKS, factionRank, questReward, flightMinutes, canBuyFrom, shipStats,
@@ -359,6 +360,7 @@ function completeQuest(game, player,q) {
   if(q.adminSector)questFactionXp(game,q,q.reward.xp);
   removeSideQuest(player,q);
   player.credits += q.reward.cr;
+  recordEconomic(game,player,'Questbelohnung',q.reward.cr);
   player.questsDone = (player.questsDone || 0) + 1;
   game.addXp(player, q.reward.xp);
   const giver = game.world.entities.get(q.giver);

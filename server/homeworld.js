@@ -1,4 +1,5 @@
 import { GOODS,PLANET_TYPES,propertyBasePrice } from '../shared/config.js';
+import {recordEconomic} from './economic-view.js';
 import { HOMEWORLD, HOME_QUESTS, availableHomeStock } from '../shared/homeworld.js';
 import { hexAt, hexKey } from '../shared/hex.js';
 import { rng, hashN, createPlanet, planetRadius, applyLocationMods, romanNumeral } from './worldgen.js';
@@ -232,7 +233,7 @@ export function completeHomeQuest(game, player, entity, id) {
   const quest = HOME_QUESTS[id], home = entity.market.homeworld;
   player.homeQuest.completed[id] = { at: game.time };
   player.homeQuest.journal.push({ id, at: game.time, text: HOME_STORY[id].completion });
-  player.credits += quest.credits; game.addXp(player, quest.xp);
+  player.credits += quest.credits; recordEconomic(game,player,'Questbelohnung',quest.credits,{place:entity.id}); game.addXp(player, quest.xp);
   if (id === 'H01') {
     for (const [good, n] of Object.entries(home.bootstrap)) entity.market.goods[good].stock += n;
     home.bootstrap = {};

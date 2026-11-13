@@ -33,6 +33,7 @@ import { homeStorageFree, availableHomeStock } from '../shared/homeworld.js';
 import { coveredPath, pointCovered } from './coverage.js';
 import {dispatchRealSupply,finishRealSupply,receiveMarketCash,spendMarketCash,downstreamDemand} from './real-economy.js';
 import { initWar, loadWar, saveWar, tickWarBefore, tickWarAfter } from './war/index.js';
+import {recordEconomic} from './economic-view.js';
 import { migrateWar } from './war/migrate.js';
 import { stackSpeed, removeFromStacks } from './war/stacks.js';
 import { recordActivity, tradeAdminSupply } from './war/factions.js';
@@ -351,6 +352,7 @@ export class Game {
   // ---------- Statistik ----------
   recordShip(ship, field, n, route = null) {
     if (!n || ship.owner === NPC_OWNER) return;
+    if(['fuel','upg'].includes(field))recordEconomic(this,this.players.get(ship.owner),field==='fuel'?'Treibstoff':'Ausrüstung',-n,{ship:ship.id,place:ship.dockedAt});
     ship.tot ||= {};
     ship.tot[field] = (ship.tot[field] || 0) + n;
     if (!this.shipStats.has(ship.id)) this.shipStats.set(ship.id, []);
@@ -722,6 +724,7 @@ export class Game {
     const seller=this.players.get(this.ownership.get(e.id)?.player);
     const sellerBefore=seller&&seller.id!==player.id?syncInventoryBasis(this,seller,good).quantity:null;
     const result=this.tradeHandled(ship,e,good,amount,dir,limit,{...opts,profileAccounting:true});
+    if(result.n)recordEconomic(this,player,result.total?(dir==='buy'?'Wareneinkauf':'Warenverkauf'):'Eigenlagertransfer',result.total?(dir==='buy'?-result.total:result.total):0,{ship:ship.id,place:e.id,good,units:result.n,direction:dir});
     recordGoodsTrade(this,player,good,dir,result,before);
     if(sellerBefore!=null)recordGoodsTrade(this,seller,good,dir==='buy'?'sell':'buy',result,sellerBefore);
     return result;

@@ -1,4 +1,5 @@
 import {migrateCivilAccounts} from './civil-accounting.js';
+import {recordEconomic} from './economic-view.js';
 import {recordInventoryTrade} from './pilot-profile.js';
 import {recordLocalSale} from '../shared/local-sales.js';
 import {CIVIL_GOODS,localDemandPerHour} from '../shared/local-demand.js';
@@ -121,6 +122,7 @@ export function consumeCivilGood(game,entity,good,rate,dt){
     const payment=amount*price;
     if(payment>0){
       h.civil.consumptionPayments=(h.civil.consumptionPayments||0)+payment;owner.credits+=payment;
+      recordEconomic(game,game.players.get(prop.player),'Ziviler Absatz',payment,{place:entity.id,good,units:amount});
       propBook(game,prop,'inc',payment);recordInventoryTrade(game,game.players.get(prop.player),good,'sell',amount,payment);
       recordLocalSale(m,game.time,good,amount,payment);
     }
@@ -139,6 +141,7 @@ export function tickCivilMoney(game,entity,dt){
   const civil=home.civil,income=HOMEWORLD.money.incomePerHour*home.population*(home.supplyFactor??.25)*(home.employmentFactor??.5);
   const gross=income*dt/3600,tax=gross*civil.taxRate;
   if(owner)owner.credits+=tax;civil.gross+=gross;civil.taxes+=tax;
+  if(tax>0)recordEconomic(game,game.players.get(prop?.player),'Steuern',tax,{place:entity.id});
   if(prop)propBook(game,prop,'inc',tax);
   civil.incomePerHour=income;
 }

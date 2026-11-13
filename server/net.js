@@ -1,4 +1,5 @@
 import { combatStats } from './war/history.js';
+import {economicView,tradePreview} from './economic-view.js';
 import {homeQuestReady} from './homeworld.js';
 import {HOME_QUESTS} from '../shared/homeworld.js';
 import {interceptRange} from './war/support.js';
@@ -139,6 +140,8 @@ export class Net {
       if (!session || typeof reply !== 'function') return;
       reply({ player:session.player.id, reports:diplo(session.player).reports || [] });
     });
+    socket.on('economicView',(_msg,reply)=>{if(session&&typeof reply==='function')reply(economicView(this.game,session.player));});
+    socket.on('tradePreview',(msg,reply)=>{if(session&&typeof reply==='function'){try{reply(tradePreview(this.game,session.player,msg||{}));}catch{reply({error:'Vorschau für diesen Markt derzeit nicht verfügbar.'});}}});
 
     socket.on('stats', (msg) => {
       if (!session) return;

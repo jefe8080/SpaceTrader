@@ -1,4 +1,5 @@
 import {blueprint} from '../shared/combat.js';
+import {recordEconomic} from './economic-view.js';
 import {unlockBuildingRecipes} from './building-recipes.js';
 import { GOODS, RECIPES,REFINEMENT_RECIPES } from '../shared/goods.js';
 import { HOMEWORLD, HOME_BUILDINGS, INDUSTRY_GROUPS, CONTROL_MODULES, controlUpgradeCost, industryGroup, industrySpec, homeStorageUsage, availableHomeStock, homeGoodCapacity, homeGoodLimit, demolitionPreview, homeStructureSpec, storageLevel, storageUpgradeCost } from '../shared/homeworld.js';
@@ -44,6 +45,7 @@ export function chargeHome(game, player, entity, cost) {
     if(available<n)return `Es fehlen ${Math.ceil(n-available)} ${GOODS[good].name} außerhalb geschützter Reserven.`;
   }
   player.credits-=cost.credits;
+  if(cost.credits)recordEconomic(game,player,'Investition',-cost.credits,{place:entity.id});
   for(const [good,n] of Object.entries(cost.goods)){
     let remaining=n,stored=Math.min(remaining,availableHomeStock(market,good));
     market.goods[good].stock-=stored;remaining-=stored;

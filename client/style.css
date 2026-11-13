@@ -494,6 +494,10 @@ details[open]>summary { color:var(--accent2); }
 .supply-label { color:var(--muted); font-size:10px; white-space:nowrap; }
 .supply-stat > span:last-child { font-size:12px; font-weight:600; white-space:nowrap; }
 .supply-details > summary { cursor:pointer; font-size:12px; padding:6px; }
+.planning-card { width:min(1000px,94vw); max-height:90dvh; overflow:auto; }
+.planning-fields { display:flex; flex-wrap:wrap; gap:12px; margin:12px 0; }
+.planning-fields label { display:flex; flex-direction:column; gap:4px; flex:1 1 150px; }
+.planning-fields select { max-width:100%; }
 .supply-detail-content { position:fixed; top:52px; right:16px; z-index:90; display:flex; flex-wrap:wrap; gap:16px; max-width:calc(100vw - 64px); padding:16px; background:#101e2b; border:1px solid #b69a64; border-radius:8px; box-shadow:0 8px 28px #000b; }
 @media(max-width:1250px) { #topbar { flex-wrap:wrap; } .topbar-status { flex-basis:100%; scrollbar-width:thin; } .main-nav { flex-wrap:wrap; } }
 body.landed #topbar { gap:8px; }
