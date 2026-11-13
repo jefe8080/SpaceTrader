@@ -7,7 +7,8 @@ import { $, setHtml, toast,confirmAction } from './dom.js';
 import { questBoardSection } from './quests.js';
 import { scene, canLand, accessTo, resetPlanetside, selectBuilding, hidePlanetside, getPlanetView } from '../planetside.js';
 import { sfx } from '../audio.js';
-import { demolitionPreview } from '/shared/homeworld.js';
+import { demolitionPreview,industrySpec } from '/shared/homeworld.js';
+import {impactText} from './productionPlanning.js';
 import { homePanel, setStorageBatchDraft } from './homeworld.js';
 import {handleModuleAction} from './modules.js';
 import { bus } from './bus.js';
@@ -336,6 +337,6 @@ panel.addEventListener('change',event=>{
   }
   if(event.target.id==='homeRecipe'){
     const recipe=RECIPES[event.target.value],preview=document.getElementById('homeRecipePreview');
-    if(recipe&&preview)preview.innerHTML=recipeText(recipe)+` · ${recipe.time} s je Zyklus`;
+    if(recipe&&preview)preview.innerHTML=recipeText(recipe)+` · ${recipe.time} s je Zyklus<p>${impactText(state.entities.get(state.landed).market.homeworld,industrySpec(event.target.value))}</p>`;
   }
 });

@@ -25,7 +25,7 @@ Wirtschaft/Wiederaufbau bleiben Kern. Routine wird automatisierbar; Ziele, Inves
 
 - [x] U1 – Verlässliche Zustände, frühe Beschaffung, Lageraktionen und Kopfzeile (N01/N09/N10/N21/N43). Implementiert; Browsergesamtabnahme in U10.
 - [x] U2 – Wirtschaftsdiagnose, Geschäftsbuch, Mengen-/Absatzvorschau und Marktverlauf (N07/N11/N12). Bekannte Marktverläufe über bestehende Marktansicht; Browsergesamtabnahme folgt.
-- [ ] U3 – Produktions-/Bau-/Forschungsplanung, Engpassordnung, Erweiterung vorhandener Reservierung und Vorlagen (N14–N20).
+- [x] U3 – Produktions-/Bau-/Forschungsplanung, Engpassordnung, Erweiterung vorhandener Reservierung und Vorlagen (N14–N18/N20). Alternative Betriebsweisen separat U9.
 - [ ] U4 – Questführung, Zweitschiffhilfe, Fortschrittsbaum, Tätigkeiten und Reaktionen (N02–N06).
 - [ ] U5 – Routenprüfung, Zweckwahl, Lieferleistung und Reliktgegenprobe (N22–N25).
 - [ ] U6 – Bevölkerung, Tourismus, Kolonievergleich, Gebühren und Fernziele (N35–N38/N40).
@@ -54,3 +54,5 @@ Ausgangsbefund: 411/411 Tests im Spieltest bestanden. Vier Einstiegssimulationen
 U1: Gemeinsame Aktivitätspriorität für Kampf/Gefangenschaft/Reparatur; Filter schließt diese aus. Eigenlagertransfers zeigen reale Maximalmengen unter Berücksichtigung bestehender Reservierung, Laderaum und gemeinsamer Lagergrenzen. Manuelle Zutatenquelle direkt aus der Anlage, Automatisierung erst bei fertiger Leitstelle. Kompakte Versorgungszeile mit erreichbaren Qualifikationsdetails. 14/14 Fachtests bestanden; Syntax-/Diffprüfung bestanden. Browserabnahme folgt gesammelt.
 
 U2: Geschäftsbuch in vorhandenen persönlichen Profildaten (begrenzte Minutengruppen) für Handel, kostenlose Eigentumstransfers, Bauinvestitionen, Ausrüstung/Treibstoff, Questgeld, Steuern und zivile Verkäufe. Kein Anspruch auf rückwirkend vollständige Kontorekonstruktion. Filter nach Zeitraum/Schiff/Ort. Handelsvorschau führt tatsächliche mengenabhängige Handelslogik auf abgetrennter Kopie aus; bestehende Kostenbasis bleibt maßgeblich, unbekannte Herstell-/Reisekosten bleiben offen. Bekannte Marktstatistik direkt erreichbar. 21/21 Wirtschafts-/Heimat-/Questtests bestanden, einschließlich Vorschaugleichheit und unverändertem Originalzustand. Browserabnahme folgt.
+
+U3: Rekursiver Materialplan mit einmaligem Verbrauch gemeinsamer freier Bestände, bekannten/freigeschalteten Ketten, fehlenden Anlagen, getrennten Baukosten und serieller Zeituntergrenze. Bauvorschau mit Personal-/Energiefolgen; Forschungsnutzen/Fertigung/Einbau getrennt erklärt. Grundversorgungsstillstände vor optionaler Industrie. Bestehende `home.reservations` um `goal:`-Einträge erweitert, vorhandene `production:`-/`logistics:`-Bindungen erhalten. Explizite Freigabe vor Verwendung; keine künstlichen Zusatzlager. Freiwillige lokale Betriebsvorlage ändert nur passende vorhandene Anlagen nach Bestätigung, keine Budgets/Schiffe/Reservierungen. 23/23 Produktions-/Reservierungs-/Logistik-/Modultests bestanden.

@@ -3,6 +3,7 @@ import {state,esc,fmt,myShips} from '../state.js';
 import {socket} from '../net.js';
 import {$,registerModal,openModal,closeModal,setHtml} from './dom.js';
 import {bus} from './bus.js';
+import {productionPlanningPanel,planningClick} from './productionPlanning.js';
 const overlay=document.createElement('div');overlay.id='economyModal';overlay.className='overlay';overlay.hidden=true;
 overlay.innerHTML='<section class="card planning-card" role="dialog" aria-modal="true" aria-labelledby="economyTitle"><div class="panel-head"><h2 id="economyTitle">Wirtschaft und Planung</h2><button data-close>Schließen</button></div><div id="economyBody"></div></section>';document.body.append(overlay);
 let data=null;
@@ -13,6 +14,7 @@ function render(){
  if(!data){setHtml($('economyBody'),'<p role="status">Wirtschaftsdaten werden geladen …</p>');load();return;}
  const places=[...state.entities.values()].filter(e=>e.market);
  setHtml($('economyBody'),`<p>${esc(data.notice)}</p><details open data-disclosure="trade-quote"><summary>Mengenbezogene Handelsvorschau</summary><p>Die Vorschau nutzt das ausgewählte Schiff mit seiner aktuellen Ladung. Du kannst einen bekannten Markt prüfen, bevor du ihn anfliegst.</p><div class="planning-fields"><label>Schiff<select id="quoteShip">${opts(myShips().map(s=>[s.id,s.name]))}</select></label><label>Markt<select id="quoteTarget">${opts(places.map(e=>[e.id,e.name]))}</select></label><label>Ware<select id="quoteGood">${opts(Object.entries(GOODS).filter(([,d])=>d.cls!=='passenger').map(([g,d])=>[g,d.name]))}</select></label><label>Richtung<select id="quoteDir"><option value="sell">Verkaufen / Einlagern</option><option value="buy">Kaufen / Entnehmen</option></select></label><label>Menge<input id="quoteAmount" type="number" min="1" max="10000" value="20"></label></div><button data-quote>Vorschau berechnen</button><button data-market>Markt und Verlauf öffnen</button><div id="quoteResult" role="status"></div></details><h3>Geschäftsbuch</h3><div class="planning-fields"><label>Zeitraum<select id="ledgerTime"><option value="3600">Letzte Spielstunde</option><option value="86400">Letzte 24 Spielstunden</option><option value="0">Gesamte erfasste Historie</option></select></label><label>Schiff<select id="ledgerShip"><option value="">Alle</option>${opts(myShips().map(s=>[s.id,s.name]))}</select></label><label>Standort<select id="ledgerPlace"><option value="">Alle</option>${opts(places.map(e=>[e.id,e.name]))}</select></label></div><button data-refresh>Aktualisieren</button><div id="ledgerRows"></div>`);
+ if(!$('planWorld'))$('economyBody').insertAdjacentHTML('afterbegin',productionPlanningPanel());
  ledger();
 }
 function ledger(){
@@ -23,6 +25,7 @@ function ledger(){
 }
 overlay.addEventListener('change',e=>{if(e.target.id.startsWith('ledger'))ledger();});
 overlay.addEventListener('click',e=>{
+ planningClick(e,overlay);
  if(e.target.closest('[data-close]')){closeModal('economyModal');return;}
  if(e.target.closest('[data-refresh]')){load();return;}
  if(e.target.closest('[data-market]')){const target=$('quoteTarget').value;closeModal('economyModal');bus.select({kind:'entity',id:target});return;}

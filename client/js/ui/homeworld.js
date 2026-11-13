@@ -21,6 +21,7 @@ import {activeSideQuests} from '/shared/side-quests.js';
 import {homeQuestConditions} from '/shared/home-quest-progress.js';
 import {toast} from './dom.js';
 import {warehouseTransfer} from '/shared/warehouse-transfer.js';
+import {impactText} from './productionPlanning.js';
 const productionNotices=new Set();
 function productionMilestone(){
   const h=state.entities.get(state.homeworld)?.market?.homeworld;
@@ -259,7 +260,8 @@ function logisticsPanel(entity){
 function homeBalance(entity,{civil}={}){
   if(civil)return `<details><summary>Bürger und Steuern</summary><p>Einkommen ${fmt(civil.incomePerHour||0)} Cr/h · bisher ${fmt(civil.taxes)} Cr Steuern und ${fmt(civil.consumptionPayments)} Cr bezahlter Konsum.</p><label>Steuer 0–40 % <input id="homeTaxPercent" type="number" min="0" max="40" value="${Math.round(civil.taxRate*100)}"></label><button class="small" data-pp="homeTax">Steuersatz setzen</button></details>`;
   const home=entity.market.homeworld,used=homeStorageUsage(entity.market),work=home.workforce;
-  let html=(home.allocations||[]).filter(a=>a.state!=='active'&&a.reason&&a.reason!=='Pausiert').map(a=>`<p class="neg">${esc(names[a.id]||RECIPES[a.id]?.name||home.structures?.find(s=>s.id===a.id)?.kind||a.id)}: ${esc(a.reason)} ${jump(home.facilities[a.id]?'home:'+a.id:'home:structure:'+a.id,'Anlage öffnen')}</p>`).join('');
+  const urgency=a=>['waterworks','foodplant'].includes(a.id)?3:a.id==='fueldepot'?2:1;
+  let html=(home.allocations||[]).filter(a=>a.state!=='active'&&a.reason&&a.reason!=='Pausiert').slice().sort((a,b)=>urgency(b)-urgency(a)).map(a=>`<p class="neg">${urgency(a)===3?'Grundversorgung · ':''}${esc(names[a.id]||RECIPES[a.id]?.name||home.structures?.find(s=>s.id===a.id)?.kind||a.id)}: ${esc(a.reason)} ${jump(home.facilities[a.id]?'home:'+a.id:'home:structure:'+a.id,'Anlage öffnen')}</p>`).join('');
   html+=`<div class="kv"><span>Einwohner / Wohnraum</span><span>${home.population} / ${home.housing}</span><span>Energie benutzt / verfügbar</span><span>${home.energy?.used||0} / ${home.energy?.generation??home.power??0}</span>
     <span>Normales Lager</span><span>${fmt(used.normal)} / ${home.storage}</span><span>Gefahrgutlager</span><span>${fmt(used.hazard)} / ${home.hazardStorage}</span>
     <span>Unzugeordnet: einfach / Fach / Spezial</span><span>${work?`${work.free.basic} / ${work.free.skilled} / ${work.free.specialist}`:'48 / 12 / 0'} · höchstens ${work?.freeSlots??Math.floor(home.population*.6)} weitere Arbeitsplätze</span>
@@ -344,7 +346,7 @@ function homeBuildPanel(entity){
     if(spec.parent)continue;
     if(category!==purpose(kind)){category=purpose(kind);html+='<h4>'+category+'</h4>';}
     const cost=kind==='land'?{...spec,credits:Math.round(spec.credits*1.4**(home.expansions||0))}:spec;
-    html+=`<div class="quest-offer"><b>${spec.name}</b><p>${costLabel(cost)}</p><div class="muted">${spec.generation?`+${spec.generation} Energie`:spec.power+' Energie'} · ${spec.workers.basic||0}/${spec.workers.skilled||0}/${spec.workers.specialist||0} Personal · ${kind==='land'?'+4 Bauplätze · planetenweites Projekt':'1 Bauplatz'}${spec.housing?' · +'+spec.housing+' Wohnraum':''}${spec.storage?' · +'+spec.storage+' Lager':''}${spec.hazardStorage?' · +'+spec.hazardStorage+' Gefahrgutlager':''}</div>
+    html+=`<div class="quest-offer"><b>${spec.name}</b><p>${costLabel(cost)}</p><p>${impactText(home,spec)}</p><div class="muted">${spec.generation?`+${spec.generation} Energie`:spec.power+' Energie'} · ${spec.workers.basic||0}/${spec.workers.skilled||0}/${spec.workers.specialist||0} Personal · ${kind==='land'?'+4 Bauplätze · planetenweites Projekt':'1 Bauplatz'}${spec.housing?' · +'+spec.housing+' Wohnraum':''}${spec.storage?' · +'+spec.storage+' Lager':''}${spec.hazardStorage?' · +'+spec.hazardStorage+' Gefahrgutlager':''}</div>
       <button class="small" data-pp="homeBuild" data-kind="${kind}" ${completed(spec.quest)?'':'disabled'}>${completed(spec.quest)?'Bauen':'Freischaltung '+spec.quest}</button></div>`;
   }
   return html;

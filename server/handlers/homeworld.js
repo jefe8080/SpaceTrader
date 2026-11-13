@@ -1,4 +1,5 @@
 import { renamePlanet } from '../planet-name.js';
+import {setGoalReservation} from '../goal-reservations.js';
 import { acknowledgeHomeStory } from '../quest-activation.js';
 import { HOME_QUESTS, HOME_BUILDINGS, CONTROL_MODULES } from '../../shared/homeworld.js';
 import { GOODS, RECIPES } from '../../shared/goods.js';
@@ -13,6 +14,7 @@ import {SHIP_TYPES} from '../../shared/config.js';
 import { homeBuild, restoreBasicPlant, trainHome, setHomeReserve, setHomeOperation, upgradeControl, homeAccess,changeRefinement,upgradeStorage,demolishHome,setHomeLimit,abortHomeCycle } from '../homeworld-operations.js';
 
 export default {
+  homeGoalReserve:{args:{target:V.entity(),label:V.str(40,1),good:V.key(GOODS),amount:V.int(0,1e6)},run({game,player},{target,label,good,amount}){return setGoalReservation(game,player,target,label,good,amount);}},
   homeRename:{args:{target:V.entity(),name:v=>v},run({game,player},{target,name}){return renamePlanet(game,player,target,name);}},
   homeQuestDeliver:{args:{target:V.entity(),quest:V.key(HOME_QUESTS),good:V.key(GOODS),amount:V.int(1,1e6)},run({game,player},{target,quest,good,amount}){return deliverHomeQuest(game,player,target,quest,good,amount);}},
   homeArchiveVisit:{args:{target:V.entity(),ship:V.ownShip()},run({game,player},{target,ship}){return visitHomeSite(game,player,ship,target);}},
